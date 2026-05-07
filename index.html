@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- SEO: Title & Description -->
   <title>ChromaBit | Minecraft Server — play.chromabit.us</title>
   <meta name="description"
     content="ChromaBit is a competitive Minecraft server with weekly $100 balance top payouts and monthly cash prize build contests. Join now at play.chromabit.us.">
@@ -15,7 +14,6 @@
   <meta name="author" content="ChromaBit">
   <link rel="canonical" href="https://chromabit.us/">
 
-  <!-- Open Graph (Discord/Twitter link previews) -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://chromabit.us/">
   <meta property="og:title" content="ChromaBit Minecraft Server">
@@ -26,25 +24,25 @@
   <meta name="twitter:title" content="ChromaBit Minecraft Server">
   <meta name="twitter:description" content="Weekly $100 balance top. Monthly build contests. Join at play.chromabit.us">
 
-  <!-- Structured data for Google -->
   <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "ChromaBit Minecraft Server",
-  "url": "https://chromabit.us",
-  "description": "ChromaBit is a Minecraft server featuring weekly $100 balance top prizes and monthly cash build contests.",
-  "potentialAction": {
-    "@type": "Action",
-    "name": "Join Server",
-    "target": "https://store.chromabit.us"
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ChromaBit Minecraft Server",
+    "url": "https://chromabit.us",
+    "description": "ChromaBit is a Minecraft server featuring weekly $100 balance top prizes and monthly cash build contests.",
+    "potentialAction": {
+      "@type": "Action",
+      "name": "Join Server",
+      "target": "https://store.chromabit.us"
+    }
   }
-}
-</script>
+  </script>
 
   <link
     href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Barlow:wght@400;500&display=swap"
     rel="stylesheet">
+
   <style>
     *,
     *::before,
@@ -55,19 +53,30 @@
     }
 
     :root {
-      --orange: #e8510a;
-      --orange-bright: #ff6b1a;
-      --orange-dim: #b03d06;
-      --gold: #f0a830;
-      --gold-dim: #c07a10;
-      --bg: #0e0807;
-      --bg2: #160c08;
-      --bg3: #1c1008;
-      --text: #f0e0d0;
-      --muted: #9a6e58;
-      --border: rgba(232, 81, 10, 0.22);
-      --border-gold: rgba(240, 168, 48, 0.22);
-      --glow: rgba(232, 81, 10, 0.1);
+      /* Vanilla Realms palette */
+      --purple-bright: #f0a0d8;
+      /* hot pink highlight */
+      --purple-mid: #c49ed4;
+      /* medium lavender */
+      --purple-deep: #7a4f8a;
+      /* deep purple */
+      --purple-dark: #4a2060;
+      /* dark plum */
+      --purple-darkest: #3a1a50;
+      /* near-black purple */
+      --lilac-light: #e8d0f0;
+      /* pale lilac */
+
+      --bg: #120a1a;
+      /* very dark purple-black */
+      --bg2: #1c1028;
+      --bg3: #251535;
+      --text: #f0e8f8;
+      --muted: #9a7aaa;
+
+      --border: rgba(196, 158, 212, 0.25);
+      --border-pink: rgba(240, 160, 216, 0.28);
+      --glow: rgba(196, 158, 212, 0.1);
     }
 
     html {
@@ -87,8 +96,8 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(232, 81, 10, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(232, 81, 10, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(196, 158, 212, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(196, 158, 212, 0.04) 1px, transparent 1px);
       background-size: 32px 32px;
       pointer-events: none;
       z-index: 0;
@@ -98,7 +107,7 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.75) 100%);
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
       pointer-events: none;
       z-index: 0;
     }
@@ -131,9 +140,9 @@
     .logo-wrap::after {
       content: '';
       position: absolute;
-      inset: -28px;
+      inset: -52px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(232, 81, 10, 0.2) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(196, 158, 212, 0.14) 0%, rgba(196, 158, 212, 0.04) 55%, transparent 100%);
       animation: pulse 3.5s ease-in-out infinite;
       z-index: -1;
     }
@@ -143,21 +152,19 @@
       0%,
       100% {
         transform: scale(1);
-        opacity: 0.9;
+        opacity: 0.5;
       }
 
       50% {
-        transform: scale(1.15);
-        opacity: 0.35;
+        transform: scale(1.2);
+        opacity: 0.15;
       }
     }
 
     .logo {
-      width: 110px;
-      height: 110px;
       image-rendering: pixelated;
       border-radius: 8px;
-      filter: drop-shadow(0 0 22px rgba(232, 81, 10, 0.6)) drop-shadow(0 0 50px rgba(232, 81, 10, 0.2));
+      filter: drop-shadow(0 0 22px rgba(240, 160, 216, 0.55)) drop-shadow(0 0 50px rgba(196, 158, 212, 0.2));
       animation: float 4s ease-in-out infinite;
     }
 
@@ -179,12 +186,12 @@
       font-weight: 700;
       letter-spacing: 0.04em;
       line-height: 0.9;
-      color: #fff;
-      text-shadow: 0 0 40px rgba(232, 81, 10, 0.45), 0 2px 0 rgba(0, 0, 0, 0.8);
+      color: var(--lilac-light);
+      text-shadow: 0 0 40px rgba(240, 160, 216, 0.4), 0 2px 0 rgba(0, 0, 0, 0.8);
     }
 
     .hero-title .accent {
-      color: var(--orange-bright);
+      color: var(--purple-bright);
       display: block;
     }
 
@@ -229,11 +236,28 @@
       }
     }
 
-    /* ─── IP BLOCK ─── */
-    .ip-block {
+    /* ─── SHARED CARD BASE ─── */
+    .card {
       background: var(--bg2);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple-mid), transparent);
+      opacity: 0.7;
+    }
+
+    /* ─── IP BLOCK ─── */
+    .ip-block {
       padding: 1.6rem 2.2rem;
       display: flex;
       flex-direction: column;
@@ -241,20 +265,7 @@
       gap: 0.65rem;
       width: 100%;
       max-width: 480px;
-      position: relative;
-      overflow: hidden;
       margin-bottom: 1.5rem;
-    }
-
-    .ip-block::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--orange), transparent);
-      opacity: 0.6;
     }
 
     .ip-label {
@@ -277,10 +288,10 @@
       align-items: center;
       gap: 6px;
       padding: 5px 16px;
-      background: rgba(232, 81, 10, 0.1);
+      background: rgba(196, 158, 212, 0.1);
       border: 1px solid var(--border);
       border-radius: 5px;
-      color: var(--orange-bright);
+      color: var(--purple-bright);
       font-family: 'Teko', sans-serif;
       font-size: 1rem;
       letter-spacing: 0.1em;
@@ -290,8 +301,8 @@
     }
 
     .copy-btn:hover {
-      background: rgba(232, 81, 10, 0.2);
-      border-color: var(--orange);
+      background: rgba(196, 158, 212, 0.2);
+      border-color: var(--purple-mid);
       color: #fff;
     }
 
@@ -299,6 +310,87 @@
       background: rgba(80, 200, 80, 0.1);
       border-color: rgba(80, 200, 80, 0.3);
       color: #7ecf7e;
+    }
+
+    /* ─── INFO PANEL CARD ─── */
+    .info-card {
+      width: 100%;
+      max-width: 480px;
+      padding: 1.75rem 2rem;
+    }
+
+    .info-card .card-label {
+      font-family: 'Teko', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.22em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .prize-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid rgba(196, 158, 212, 0.1);
+    }
+
+    .prize-row:last-child {
+      border-bottom: none;
+    }
+
+    .prize-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .prize-icon.pink {
+      background: rgba(240, 160, 216, 0.12);
+    }
+
+    .prize-icon.lilac {
+      background: rgba(196, 158, 212, 0.12);
+    }
+
+    .prize-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .prize-name {
+      font-family: 'Teko', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      color: var(--lilac-light);
+      line-height: 1.1;
+    }
+
+    .prize-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .prize-amount {
+      font-family: 'Teko', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .prize-amount.pink {
+      color: var(--purple-bright);
+    }
+
+    .prize-amount.lilac {
+      color: var(--purple-mid);
     }
 
     /* ─── BUTTONS ─── */
@@ -326,15 +418,16 @@
     }
 
     .btn-primary {
-      background: var(--orange);
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(232, 81, 10, 0.4);
+      background: var(--purple-deep);
+      color: var(--lilac-light);
+      box-shadow: 0 4px 20px rgba(122, 79, 138, 0.45);
     }
 
     .btn-primary:hover {
-      background: var(--orange-bright);
+      background: var(--purple-mid);
+      color: #fff;
       transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(232, 81, 10, 0.5);
+      box-shadow: 0 8px 28px rgba(196, 158, 212, 0.4);
     }
 
     .btn-secondary {
@@ -344,12 +437,12 @@
     }
 
     .btn-secondary:hover {
-      border-color: var(--orange-dim);
+      border-color: var(--purple-deep);
       background: var(--glow);
       transform: translateY(-2px);
     }
 
-    /* ─── DIVIDERS ─── */
+    /* ─── RULE ─── */
     .rule {
       width: 100%;
       max-width: 480px;
@@ -368,7 +461,7 @@
       font-family: 'Teko', sans-serif;
       font-size: 0.8rem;
       letter-spacing: 0.25em;
-      color: var(--orange);
+      color: var(--purple-bright);
       text-align: center;
       margin-bottom: 0.5rem;
     }
@@ -377,12 +470,12 @@
       font-family: 'Teko', sans-serif;
       font-size: clamp(2rem, 6vw, 3.5rem);
       font-weight: 700;
-      color: #fff;
+      color: var(--lilac-light);
       text-align: center;
       letter-spacing: 0.04em;
       line-height: 1;
       margin-bottom: 0.75rem;
-      text-shadow: 0 0 30px rgba(232, 81, 10, 0.3);
+      text-shadow: 0 0 30px rgba(240, 160, 216, 0.3);
     }
 
     .section-sub {
@@ -414,7 +507,7 @@
 
     .event-card:hover {
       transform: translateY(-4px);
-      border-color: rgba(232, 81, 10, 0.45);
+      border-color: rgba(196, 158, 212, 0.5);
     }
 
     .event-card::before {
@@ -424,26 +517,20 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--orange), transparent);
-      opacity: 0.5;
+      background: linear-gradient(90deg, transparent, var(--purple-mid), transparent);
+      opacity: 0.6;
     }
 
-    .event-card.gold {
-      border-color: var(--border-gold);
+    .event-card.pink-card {
+      border-color: var(--border-pink);
     }
 
-    .event-card.gold::before {
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    .event-card.pink-card::before {
+      background: linear-gradient(90deg, transparent, var(--purple-bright), transparent);
     }
 
-    .event-card.gold:hover {
-      border-color: rgba(240, 168, 48, 0.5);
-    }
-
-    .event-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      display: block;
+    .event-card.pink-card:hover {
+      border-color: rgba(240, 160, 216, 0.55);
     }
 
     .event-badge {
@@ -457,15 +544,15 @@
     }
 
     .badge-weekly {
-      background: rgba(232, 81, 10, 0.15);
-      border: 1px solid rgba(232, 81, 10, 0.3);
-      color: var(--orange-bright);
+      background: rgba(240, 160, 216, 0.12);
+      border: 1px solid rgba(240, 160, 216, 0.3);
+      color: var(--purple-bright);
     }
 
     .badge-monthly {
-      background: rgba(240, 168, 48, 0.12);
-      border: 1px solid rgba(240, 168, 48, 0.3);
-      color: var(--gold);
+      background: rgba(196, 158, 212, 0.12);
+      border: 1px solid rgba(196, 158, 212, 0.3);
+      color: var(--purple-mid);
     }
 
     .event-card h3 {
@@ -487,12 +574,12 @@
       margin-bottom: 0.85rem;
     }
 
-    .prize-orange {
-      color: var(--orange-bright);
+    .prize-pink {
+      color: var(--purple-bright);
     }
 
-    .prize-gold {
-      color: var(--gold);
+    .prize-lilac {
+      color: var(--purple-mid);
     }
 
     .event-card p {
@@ -520,13 +607,13 @@
 
     .event-card ul li::before {
       content: '▸';
-      color: var(--orange);
+      color: var(--purple-mid);
       flex-shrink: 0;
       margin-top: 1px;
     }
 
-    .event-card.gold ul li::before {
-      color: var(--gold);
+    .event-card.pink-card ul li::before {
+      color: var(--purple-bright);
     }
 
     /* ─── FOOTER ─── */
@@ -540,11 +627,13 @@
       opacity: 0.45;
       position: relative;
       z-index: 1;
-      border-top: 1px solid rgba(232, 81, 10, 0.08);
+      border-top: 1px solid rgba(196, 158, 212, 0.08);
     }
 
     @media (max-width: 480px) {
-      .ip-block {
+
+      .ip-block,
+      .info-card {
         padding: 1.2rem 1.4rem;
       }
 
@@ -562,8 +651,8 @@
 
 <body>
 
-  <!-- ─── HERO ─── -->
   <main>
+    <!-- ─── HERO ─── -->
     <section class="hero container" aria-label="ChromaBit Minecraft Server">
 
       <div class="logo-wrap">
@@ -579,12 +668,12 @@
         SERVER ONLINE
       </div>
 
-      <p class="hero-sub">A Minecraft server where your grind pays off — literally. Weekly cash prizes, monthly build
-        contests, and a community worth joining.</p>
+      <p class="hero-sub">A Minecraft server where your grind pays off, literally. </p>
 
       <div class="rule"></div>
 
-      <div class="ip-block">
+      <!-- IP card -->
+      <div class="card ip-block">
         <div class="ip-label">SERVER IP</div>
         <div class="ip-value" id="ip-text">play.chromabit.us</div>
         <button class="copy-btn" id="copy-btn" onclick="copyIP()">
@@ -594,6 +683,29 @@
           </svg>
           COPY IP
         </button>
+      </div>
+
+      <!-- Info / prize summary card -->
+      <div class="card info-card">
+        <div class="card-label">ACTIVE EVENTS</div>
+
+        <div class="prize-row">
+          <div class="prize-icon pink">💰</div>
+          <div class="prize-info">
+            <div class="prize-name">BALANCE TOP</div>
+            <div class="prize-desc">Weekly · resets every Sunday</div>
+          </div>
+          <div class="prize-amount pink">$100 USD</div>
+        </div>
+
+        <div class="prize-row">
+          <div class="prize-icon lilac">🏗️</div>
+          <div class="prize-info">
+            <div class="prize-name">BUILD CONTEST</div>
+            <div class="prize-desc">Monthly · community vote decides</div>
+          </div>
+          <div class="prize-amount lilac">CASH PRIZE</div>
+        </div>
       </div>
 
       <div class="cta-group">
@@ -625,18 +737,15 @@
       <div class="container">
         <p class="section-eyebrow">COMPETE &amp; WIN</p>
         <h2 class="section-title">REAL PRIZES.<br>EVERY WEEK.</h2>
-        <p class="section-sub">ChromaBit puts cash on the line — not just bragging rights. Grind the economy or show off
-          your builds to take home real money.</p>
 
         <div class="events-grid">
 
-          <!-- Balance Top -->
-          <article class="event-card" aria-label="Weekly Balance Top event">
+          <article class="event-card pink-card" aria-label="Weekly Balance Top event">
             <span class="event-badge badge-weekly">WEEKLY</span>
             <h3>Balance Top</h3>
-            <div class="event-prize prize-orange">$100 USD</div>
-            <p>The richest player on the server at the end of each week walks away with a real $100 payout. Grind the
-              economy, dominate the market, and claim your spot at the top.</p>
+            <div class="event-prize prize-pink">$100 USD</div>
+            <p>The richest player on the server at the end of each week walks away with a real <strong>$100 USD
+                payout</strong>. Grind the economy, dominate the market, and claim your spot at the top.</p>
             <ul>
               <li>Leaderboard resets every Sunday at midnight</li>
               <li>Paid out via PayPal, Venmo, or store credit</li>
@@ -644,13 +753,12 @@
             </ul>
           </article>
 
-          <!-- Build Contest -->
-          <article class="event-card gold" aria-label="Monthly Cash Prize Build Contest">
+          <article class="event-card" aria-label="Monthly Cash Prize Build Contest">
             <span class="event-badge badge-monthly">MONTHLY</span>
             <h3>Build Contest</h3>
-            <div class="event-prize prize-gold">CASH PRIZE</div>
-            <p>Every month a theme is announced — then you build. Community votes on the winner. The best creation takes
-              home real cash and permanent recognition on the server.</p>
+            <div class="event-prize prize-lilac">CASH PRIZE</div>
+            <p>Every month a theme is announced. Community votes on the winner. The best creation takes
+              home <strong>real cash</strong> and permanent recognition on the server.</p>
             <ul>
               <li>New theme announced on the 1st of each month</li>
               <li>Community voting determines the winner</li>
