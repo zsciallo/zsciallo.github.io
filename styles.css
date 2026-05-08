@@ -80,9 +80,9 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
-  padding: 4rem 2rem 3rem;
+  padding: 20vh 2rem 3rem;
   gap: 1.75rem;
 }
 
@@ -146,8 +146,11 @@ body::after {
   text-shadow: 0 0 40px rgba(240, 160, 216, 0.4), 0 2px 0 rgba(0, 0, 0, 0.8);
 }
 
-.hero-title .accent {
+.accent {
   color: var(--purple-bright);
+}
+
+.hero-title .accent {
   display: block;
 }
 
@@ -445,7 +448,7 @@ body::after {
 
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 1.25rem;
   max-width: 900px;
   margin: 0 auto;
@@ -559,6 +562,40 @@ body::after {
   align-items: flex-start;
   gap: 8px;
   line-height: 1.5;
+}
+
+.event-card ul li ul {
+  flex-direction: column;
+  margin-top: 0.5rem;
+  padding-left: 0;
+}
+
+.reward-row {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.reward-row::before {
+  display: none !important;
+}
+
+.reward-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(240, 160, 216, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.event-card ul li a {
+  display: inline;
+  color: var(--purple-bright);
+  text-decoration: underline;
 }
 
 .event-card ul li::before {
