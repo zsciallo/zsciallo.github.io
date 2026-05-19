@@ -82,7 +82,7 @@ body::after {
   align-items: center;
   justify-content: flex-start;
   text-align: center;
-  padding: 20vh 2rem 3rem;
+  padding: 10vh 2rem 3rem;
   gap: 1.1rem;
 }
 
