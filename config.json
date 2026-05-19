@@ -1,4 +1,9 @@
 {
   "prize": "$100",
-  "discord": "https://discord.gg/AdmB8THf9Y"
+  "discord": "https://discord.gg/AdmB8THf9Y",
+  "serverIP": "play.chromabit.us",
+  "underConstruction": true,
+  "downMessage": "COMING 6/19/26.",
+  "downSubMessage": "Discord members get exclusive founder perks.",
+  "hideVisitStore": true
 }

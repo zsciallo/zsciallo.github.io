@@ -59,13 +59,12 @@
       <h1 class="hero-title">
         CHROMA<span class="accent">BIT</span>
       </h1>
+      <p class="hero-sub">A Minecraft server where your grind pays off, literally. </p>
 
       <div class="status-badge">
         <div class="status-dot"></div>
         SERVER ONLINE
       </div>
-
-      <p class="hero-sub">A Minecraft server where your grind pays off, literally. </p>
 
       <div class="rule"></div>
 
@@ -82,7 +81,7 @@
         </button>
       </div>
 
-      <!-- Info / prize summary card -->
+      <!-- Info / prize summary card TEMP DISABLED 
       <div class="card info-card">
         <div class="card-label">ACTIVE EVENTS</div>
 
@@ -104,9 +103,10 @@
           <div class="prize-amount lilac">CASH PRIZE</div>
         </div>
       </div>
+      -->
 
       <div class="cta-group">
-        <a href="https://store.chromabit.us" target="_blank" rel="noopener" class="btn btn-primary"
+        <a id="visit-store-btn" href="https://store.chromabit.us" target="_blank" rel="noopener" class="btn btn-primary"
           aria-label="Visit ChromaBit store">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="9" cy="21" r="1" />
@@ -139,7 +139,7 @@
 
           <article class="event-card pink-card" aria-label="Weekly Balance Top event">
             <span class="event-badge badge-weekly">WEEKLY</span>
-            <h3>Balance Top</h3>
+            <h3>Bal Top</h3>
             <div class="event-prize prize-pink">${prize} USD</div>
             <p>The richest player on the server at the end of each week walks away with a real <strong>${prize} USD
                 payout</strong>. Grind the economy, dominate the market, and claim your spot at the top.</p>
@@ -172,7 +172,7 @@
 
           <article class="event-card" aria-label="Monthly Cash Prize Build Contest">
             <span class="event-badge badge-monthly">MONTHLY</span>
-            <h3>Build Contest</h3>
+            <h3>Event Contests</h3>
             <div class="event-prize prize-lilac">CASH PRIZE</div>
             <p>Every month a theme is announced. Community votes on the winner. The best creation takes
               home <strong>real cash</strong> and permanent recognition on the server.</p>
@@ -208,6 +208,7 @@
     &copy; 2026 ChromaBit &nbsp;·&nbsp; play.chromabit.us &nbsp;·&nbsp; ALL RIGHTS RESERVED
   </footer>
 
+  <script src="config-runtime.js"></script>
   <script src="main.js"></script>
 
 </body>

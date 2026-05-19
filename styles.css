@@ -83,7 +83,7 @@ body::after {
   justify-content: flex-start;
   text-align: center;
   padding: 20vh 2rem 3rem;
-  gap: 1.75rem;
+  gap: 1.1rem;
 }
 
 .logo-wrap {
@@ -195,6 +195,37 @@ body::after {
   }
 }
 
+.status-badge.offline {
+  background: rgba(200, 160, 40, 0.08);
+  border-color: rgba(200, 160, 40, 0.2);
+  color: #d4b84a;
+}
+
+.status-badge.offline .status-dot {
+  background: #d4b84a;
+  animation: none;
+}
+
+.ping {
+  font-size: 0.75rem;
+  opacity: 0.55;
+  letter-spacing: 0.05em;
+}
+
+.launch-msg {
+  font-family: 'Teko', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  color: #d4b84a;
+  opacity: 0.8;
+}
+
+.launch-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
 /* ─── SHARED CARD BASE ─── */
 .card {
   background: var(--bg2);
@@ -224,7 +255,6 @@ body::after {
   gap: 0.65rem;
   width: 100%;
   max-width: 480px;
-  margin-bottom: 1.5rem;
 }
 
 .ip-label {
@@ -357,6 +387,13 @@ body::after {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+.cta-group .btn {
+  flex: 1;
   justify-content: center;
 }
 
@@ -512,6 +549,9 @@ body::after {
   background: rgba(196, 158, 212, 0.12);
   border: 1px solid rgba(196, 158, 212, 0.3);
   color: var(--purple-mid);
+}
+h3 {
+  font-family: 'Teko', sans-serif;
 }
 
 .event-card h3 {
