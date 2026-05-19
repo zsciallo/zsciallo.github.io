@@ -450,7 +450,6 @@ body::after {
 .events-section {
   position: relative;
   z-index: 1;
-  padding: 0 2rem 6rem;
 }
 
 .section-eyebrow {
@@ -673,6 +672,10 @@ footer {
   .btn {
     padding: 0.7rem 1.4rem;
     font-size: 1rem;
+  }
+
+  .events-grid {
+    max-width: 480px;
   }
 
   .events-section {
