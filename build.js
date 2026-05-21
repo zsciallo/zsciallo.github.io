@@ -13,7 +13,7 @@ fs.writeFileSync(
   `const SITE_CONFIG = ${JSON.stringify({
     serverIP: config.serverIP,
     underConstruction: config.underConstruction ?? false,
-    downMessage: config.downMessage ?? "",
+    launchDate: config.launchDate ?? "",
     downSubMessage: config.downSubMessage ?? "",
     hideVisitStore: config.hideVisitStore ?? false,
   })};\n`,

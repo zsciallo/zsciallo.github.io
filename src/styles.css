@@ -216,8 +216,18 @@ body::after {
   font-family: 'Teko', sans-serif;
   font-size: 0.9rem;
   letter-spacing: 0.14em;
-  color: #d4b84a;
+  color: var(--lilac-light);
   opacity: 0.8;
+  margin-top: 0.5em;
+}
+
+.countdown-timer {
+  font-family: 'Teko', sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--purple-bright);
+  margin: 0.1em 0 0.3em;
 }
 
 .launch-sub {
