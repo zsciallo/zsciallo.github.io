@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="icon" type="image/png" href="server-icon-old-2.png">
+  <link rel="icon" type="image/png" href="./server-icon-old-2.png">
   <title>ChromaBit | Minecraft Server</title>
   <meta name="description"
     content="ChromaBit is a competitive Minecraft server with weekly $100 balance top payouts and monthly cash prize build contests. Join now at play.chromabit.us.">
@@ -43,175 +43,12 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Barlow:wght@400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <script type="module" crossorigin src="./assets/index-B-YuQwOe.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Cy__ic1D.css">
 </head>
 
 <body>
-
-  <main>
-    <!-- ─── HERO ─── -->
-    <section class="hero container" aria-label="ChromaBit Minecraft Server">
-
-      <div class="logo-wrap">
-        <img class="logo" src="server-icon-old-2.png" alt="ChromaBit Minecraft Server Logo" />
-      </div>
-
-      <h1 class="hero-title">
-        CHROMA<span class="accent">BIT</span>
-      </h1>
-      <p class="hero-sub">A Minecraft server where your grind pays off, literally. </p>
-
-      <div class="status-badge">
-        <div class="status-dot"></div>
-        SERVER ONLINE
-      </div>
-
-      <div class="rule"></div>
-
-      <div class="card info-card status-card">
-      </div>
-
-      <!-- IP card -->
-      <div class="card ip-block">
-        <div class="ip-label">SERVER IP</div>
-        <div class="ip-value" id="ip-text">play.<span class="accent">chromabit</span>.us</div>
-        <button class="copy-btn" id="copy-btn" onclick="copyIP()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <rect x="9" y="9" width="13" height="13" rx="2" />
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-          </svg>
-          COPY IP
-        </button>
-      </div>
-
-      <!-- Info / prize summary card -->
-      <div class="card info-card">
-        <div class="card-label">SERVER EVENTS</div>
-
-        <div class="prize-row">
-          <div class="prize-icon pink">💰</div>
-          <div class="prize-info">
-            <div class="prize-name">BAL TOP</div>
-            <div class="prize-desc">Weekly · resets every Sunday</div>
-          </div>
-          <div class="prize-amount pink">$100 USD</div>
-        </div>
-
-        <div class="prize-row">
-          <div class="prize-icon lilac">🏗️</div>
-          <div class="prize-info">
-            <div class="prize-name">EVENT CONTESTS</div>
-            <div class="prize-desc">Monthly · community vote decides</div>
-          </div>
-          <div class="prize-amount lilac">CASH PRIZE</div>
-        </div>
-      </div>
-      <div class="cta-group">
-        <a id="visit-store-btn" href="https://chromabit.tebex.io/" target="_blank" rel="noopener" class="btn btn-primary"
-          aria-label="Visit ChromaBit store">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.66a2 2 0 001.99-1.61L23 6H6" />
-          </svg>
-          VISIT STORE
-        </a>
-        <a href="https://discord.gg/AdmB8THf9Y" target="_blank" rel="noopener" class="btn btn-secondary"
-          aria-label="Join ChromaBit Discord">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z" />
-          </svg>
-          DISCORD
-        </a>
-      </div>
-
-      <div class="rule"></div>
-
-    </section>
-
-    <!-- ─── EVENTS ─── -->
-    <section class="events-section" aria-label="ChromaBit Events and Prizes">
-      <div class="container">
-        <p class="section-eyebrow">COMPETE &amp; WIN</p>
-        <h2 class="section-title">REAL PRIZES.<br>EVERY WEEK.</h2>
-
-        <div class="events-grid">
-
-          <article class="event-card pink-card" aria-label="Weekly Balance Top event">
-            <span class="event-badge badge-weekly">WEEKLY</span>
-            <h3>Bal Top</h3>
-            <div class="event-prize prize-pink">$100 USD</div>
-            <p>The richest player on the server at the end of each week walks away with a real <strong>$100 USD
-                payout</strong>. Grind the economy, dominate the market, and claim your spot at the top.</p>
-            <ul>
-              <li>Leaderboard resets every Sunday at midnight</li>
-              <li>Paid out via PayPal</li>
-              <li>
-                <div>
-                  Top 5 players all earn rewards
-                  <ul class="reward-list">
-                    <li class="reward-row">
-                      <div class="reward-icon">🥈</div><span>2nd: $50 store credit</span>
-                    </li>
-                    <li class="reward-row">
-                      <div class="reward-icon">🥉</div><span>3rd: $25 store credit</span>
-                    </li>
-                    <li class="reward-row">
-                      <div class="reward-icon">🏅</div><span>4th: $10 store credit</span>
-                    </li>
-                    <li class="reward-row">
-                      <div class="reward-icon">⭐</div><span>5th: $5 store credit</span>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li><span>For full details, join our <a href="https://discord.gg/AdmB8THf9Y" target="_blank"
-                    rel="noopener">Discord</a>!</span></li>
-            </ul>
-          </article>
-
-          <article class="event-card" aria-label="Monthly Cash Prize Build Contest">
-            <span class="event-badge badge-monthly">MONTHLY</span>
-            <h3>Event Contests</h3>
-            <div class="event-prize prize-lilac">CASH PRIZE</div>
-            <p>Every month a theme is announced. Community votes on the winner. The best creation takes
-              home <strong>real cash</strong> and permanent recognition on the server.</p>
-            <ul>
-              <li>New theme announced on the 1st of each month</li>
-              <li>You have the full month to build and submit</li>
-              <li>Wide variety of themes, from redstone contraptions to fantasy castles</li>
-              <li>
-                <div>
-                  Community voting determines the winner
-                  <ul class="reward-list">
-                    <li class="reward-row">
-                      <div class="reward-icon">🗳️</div><span>Open vote in Discord at month end</span>
-                    </li>
-                    <li class="reward-row">
-                      <div class="reward-icon">👑</div><span>Most votes wins the prize</span>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li>Winning build showcased on the server permanently</li>
-              <li><span>For full details, join our <a href="https://discord.gg/AdmB8THf9Y" target="_blank"
-                    rel="noopener">Discord</a>!</span></li>
-            </ul>
-          </article>
-
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    &copy; 2026 ChromaBit &nbsp;·&nbsp; play.chromabit.us &nbsp;·&nbsp; ALL RIGHTS RESERVED
-  </footer>
-
-  <script src="config-runtime.js"></script>
-  <script src="main.js"></script>
-
+  <div id="app"></div>
 </body>
 
 </html>
