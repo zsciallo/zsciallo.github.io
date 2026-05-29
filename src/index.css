@@ -700,3 +700,241 @@ footer {
     padding: 0 1.25rem 4rem;
   }
 }
+
+/* ─── PAGE HERO (interior pages) ─── */
+.page-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 7vh 2rem 3rem;
+  gap: 1.1rem;
+}
+
+.logo-link {
+  display: inline-block;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.logo-link:hover {
+  opacity: 0.8;
+}
+
+.logo-sm {
+  image-rendering: pixelated;
+  border-radius: 8px;
+  filter: drop-shadow(0 0 16px rgba(240, 160, 216, 0.45));
+  height: 96px;
+  width: 96px;
+  display: block;
+}
+
+/* ─── FEATURES SECTION ─── */
+.features-section {
+  position: relative;
+  z-index: 1;
+  padding: 0 2rem 4rem;
+}
+
+.features-section .container {
+  max-width: 900px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+
+.feature-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--purple-mid), transparent);
+  opacity: 0.5;
+}
+
+.feature-card:hover {
+  border-color: rgba(196, 158, 212, 0.45);
+  transform: translateY(-3px);
+}
+
+.feature-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.9rem;
+  display: block;
+}
+
+.feature-title {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: var(--lilac-light);
+  margin-bottom: 0.5rem;
+}
+
+.feature-desc {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ─── FAQ SECTION ─── */
+.faq-section {
+  position: relative;
+  z-index: 1;
+  padding: 0 2rem 5rem;
+}
+
+.faq-section .container {
+  max-width: 900px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faq-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.faq-item[open] {
+  border-color: rgba(240, 160, 216, 0.3);
+}
+
+.faq-question {
+  list-style: none;
+  padding: 1.25rem 1.75rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  color: var(--lilac-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: color 0.15s;
+  user-select: none;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-question::marker {
+  display: none;
+}
+
+.faq-question::after {
+  content: '+';
+  font-family: 'Teko', sans-serif;
+  font-size: 1.4rem;
+  color: var(--purple-bright);
+  flex-shrink: 0;
+}
+
+.faq-item[open] .faq-question {
+  color: var(--purple-bright);
+}
+
+.faq-item[open] .faq-question::after {
+  content: '−';
+}
+
+.faq-answer {
+  padding: 0 1.75rem 1.25rem;
+  padding-top: 1rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+  line-height: 1.75;
+  border-top: 1px solid var(--border);
+}
+
+.faq-answer a {
+  color: var(--purple-bright);
+  text-decoration: underline;
+}
+
+.faq-answer strong {
+  color: var(--lilac-light);
+}
+
+.faq-section-label {
+  font-family: 'Teko', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  color: var(--purple-bright);
+  padding-top: 0.75rem;
+}
+
+/* ─── FOOTER NAV ─── */
+.footer-nav {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.footer-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-family: 'Teko', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  transition: color 0.15s;
+}
+
+.footer-nav a:hover {
+  color: var(--purple-bright);
+}
+
+@media (max-width: 480px) {
+  .features-section {
+    padding: 0 1.25rem 3rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-section {
+    padding: 0 1.25rem 4rem;
+  }
+
+  .faq-question {
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+  }
+
+  .faq-answer {
+    padding: 0 1.25rem 1rem;
+    padding-top: 0.85rem;
+  }
+}

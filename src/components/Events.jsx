@@ -1,11 +1,11 @@
 import { EventCard, RewardRow } from './EventCard';
+import { SectionHeader } from './SectionHeader';
 
 export function Events({ prize, discord }) {
   return (
     <section class="events-section" aria-label="ChromaBit Events and Prizes">
       <div class="container">
-        <p class="section-eyebrow">COMPETE &amp; WIN</p>
-        <h2 class="section-title">REAL PRIZES.<br />EVERY WEEK.</h2>
+        <SectionHeader eyebrow="COMPETE &amp; WIN" title={<>REAL PRIZES.<br />EVERY WEEK.</>} />
 
         <div class="events-grid">
           <EventCard
