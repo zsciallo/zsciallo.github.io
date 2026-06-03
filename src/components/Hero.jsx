@@ -1,16 +1,13 @@
 import { StatusBadge } from './StatusBadge';
-
-const logoSrc = '/server-icon-old-2.png';
 import { ServerStatusSection } from './ServerStatusSection';
 import { JoinCTA } from './JoinCTA';
 import { PrizeInfoCard } from './PrizeInfoCard';
+import { Logo } from './logo';
 
 export function Hero({ config, status }) {
   return (
     <section class="hero container" aria-label="ChromaBit Minecraft Server">
-      <div class="logo-wrap">
-        <img class="logo" src={logoSrc} alt="ChromaBit Minecraft Server Logo" />
-      </div>
+      <Logo />
 
       <h1 class="hero-title">
         CHROMA<span class="accent">BIT</span>

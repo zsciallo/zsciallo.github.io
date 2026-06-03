@@ -9,6 +9,7 @@ import { SectionHeader } from '../components/SectionHeader';
 import { FeatureCard } from '../components/FeatureCard';
 import { Events } from '../components/Events';
 import { Footer } from '../components/Footer';
+import { Logo } from '../components/logo';
 
 export function SmpPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
@@ -17,9 +18,8 @@ export function SmpPage() {
     <>
       <main>
         <section class="page-hero container" aria-label="ChromaBit Economy SMP Minecraft Server">
-          <a href="/" class="logo-link" aria-label="Back to ChromaBit home">
-            <img class="logo-sm" src={logoSrc} alt="ChromaBit" />
-          </a>
+
+          <Logo />
 
           <p class="section-eyebrow">CHROMABIT MINECRAFT SERVER</p>
           <h1 class="hero-title">
