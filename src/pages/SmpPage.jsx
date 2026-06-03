@@ -9,7 +9,7 @@ import { SectionHeader } from '../components/SectionHeader';
 import { FeatureCard } from '../components/FeatureCard';
 import { Events } from '../components/Events';
 import { Footer } from '../components/Footer';
-import { Logo } from '../components/logo';
+import { Logo } from '../components/Logo';
 
 export function SmpPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);

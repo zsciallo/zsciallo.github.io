@@ -2,7 +2,7 @@ import { StatusBadge } from './StatusBadge';
 import { ServerStatusSection } from './ServerStatusSection';
 import { JoinCTA } from './JoinCTA';
 import { PrizeInfoCard } from './PrizeInfoCard';
-import { Logo } from './logo';
+import { Logo } from './Logo';
 
 export function Hero({ config, status }) {
   return (
