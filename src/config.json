@@ -2,8 +2,8 @@
   "prize": "$100",
   "discord": "https://discord.gg/YxC8TdVVmC",
   "serverIP": "play.chromabit.us",
-  "underConstruction": true,
+  "underConstruction": false,
   "launchDate": "2026-06-19",
-  "downSubMessage": "Pre-launch Discord members get exclusive founder perks.",
-  "hideVisitStore": true
+  "downSubMessage": "Under maintenance",
+  "hideVisitStore": false
 }

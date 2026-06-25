@@ -34,7 +34,7 @@ export function Events({ prize, discord }) {
             <li><span>For full details, join our <a href={discord} target="_blank" rel="noopener">Discord</a>!</span></li>
           </EventCard>
 
-          <EventCard
+          {/* <EventCard
             badge="MONTHLY"
             badgeClass="badge-monthly"
             title="Event Contests"
@@ -57,7 +57,7 @@ export function Events({ prize, discord }) {
             </li>
             <li>Winning build showcased on the server permanently</li>
             <li><span>For full details, join our <a href={discord} target="_blank" rel="noopener">Discord</a>!</span></li>
-          </EventCard>
+          </EventCard>*/}
         </div>
       </div>
     </section>
