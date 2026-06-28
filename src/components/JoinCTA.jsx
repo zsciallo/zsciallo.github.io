@@ -16,9 +16,13 @@ function DiscordIcon() {
   );
 }
 
+import { useDiscordMembers } from '../hooks/useDiscordMembers';
+
 export function JoinCTA({ config, status }) {
   const isOffline = !status.loading && !status.online;
   const showStore = !config.hideVisitStore && !isOffline;
+  const members = useDiscordMembers(config.discord);
+  const memberLabel = members != null ? `${members}` : '60+';
 
   return (
     <div class="cta-group">
@@ -28,7 +32,7 @@ export function JoinCTA({ config, status }) {
         </a>
       )}
       <a href={config.discord} target="_blank" rel="noopener" class="btn btn-secondary" aria-label="Join ChromaBit Discord">
-        <DiscordIcon /> JOIN 60+ PLAYERS ON DISCORD
+        <DiscordIcon /> JOIN {memberLabel} PLAYERS ON DISCORD
       </a>
     </div>
   );
