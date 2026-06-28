@@ -28,7 +28,7 @@ export function JoinCTA({ config, status }) {
         </a>
       )}
       <a href={config.discord} target="_blank" rel="noopener" class="btn btn-secondary" aria-label="Join ChromaBit Discord">
-        <DiscordIcon /> DISCORD
+        <DiscordIcon /> JOIN 60+ PLAYERS ON DISCORD
       </a>
     </div>
   );

@@ -20,9 +20,9 @@ export function Hero({ config, status }) {
 
       <ServerStatusSection config={config} status={status} />
 
-      <PrizeInfoCard prize={config.prize} />
-
       <JoinCTA config={config} status={status} />
+
+      <PrizeInfoCard prize={config.prize} />
 
       <div class="rule" />
     </section>
