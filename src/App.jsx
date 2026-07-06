@@ -11,7 +11,7 @@ import { Logo } from './components/Logo';
 import emeraldIcon from './assets/emerald_icon.webp';
 import diamondIcon from './assets/diamond_icon.webp';
 import shieldIcon from './assets/shield_icon.webp';
-import paperIcon from './assets/paper_icon.webp';
+import spawnerIcon from './assets/spawner_icon.webp';
 
 export default function App() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
@@ -24,17 +24,19 @@ export default function App() {
           <Logo />
 
           <p class="section-eyebrow">CHROMABIT MINECRAFT SERVER</p>
-          <h1 class="hero-title">
-            CHROMA<span class="accent">BIT</span>
+          <h1 class="hero-title hero-title--inline">
+            ECONOMY <span class="accent">SMP</span>
           </h1>
-          <p class="hero-sub">A Minecraft server where your grind pays off, literally.</p>
+          <p class="hero-sub">ChromaBit is a competitive Economy SMP Minecraft server where the richest player wins $100 cash every single week.</p>
 
           <StatusBadge status={status} />
 
           <div class="rule" />
 
-          <ServerStatusSection config={config} status={status} />
-          <JoinCTA config={config} status={status} />
+          <div class="hero-connect">
+            <ServerStatusSection config={config} status={status} />
+            <JoinCTA config={config} status={status} />
+          </div>
 
           <div class="rule" />
         </section>
@@ -44,7 +46,7 @@ export default function App() {
             <SectionHeader
               eyebrow="HOW IT WORKS"
               title={<>PLAYER-DRIVEN.<br />PRIZE-BACKED.</>}
-              sub="ChromaBit is an Economy SMP built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete for real payouts."
+              sub="A server built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete for real payouts."
             />
             <div class="features-grid">
               <FeatureCard
@@ -63,9 +65,9 @@ export default function App() {
                 desc="Your builds, chests, and land are fully protected. Focus on the economy your hard work is always safe."
               />
               <FeatureCard
-                icon={<img class="feature-icon-img" src={paperIcon} alt="" />}
-                title="Community Events"
-                desc="Monthly themed build contests with community voting. Real cash prizes for winners, permanent recognition on the server."
+                icon={<img class="feature-icon-img" src={spawnerIcon} alt="" />}
+                title="Custom Spawners"
+                desc="Zero lag custom spawners that generate loot and XP. Stack them up, pipe the drops straight into hoppers, and sell everything from a simple GUI."
               />
             </div>
           </div>
