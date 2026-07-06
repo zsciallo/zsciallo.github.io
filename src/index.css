@@ -972,3 +972,81 @@ footer {
     padding-top: 0.85rem;
   }
 }
+
+/* ─── LOAD & SCROLL ANIMATIONS ─── */
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero elements fade up in sequence on page load (JS-gated to avoid a
+   flash of hidden content when scripts are unavailable). */
+html.js .page-hero>* {
+  opacity: 0;
+  animation: heroIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.js .page-hero> :nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+html.js .page-hero> :nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+html.js .page-hero> :nth-child(3) {
+  animation-delay: 0.23s;
+}
+
+html.js .page-hero> :nth-child(4) {
+  animation-delay: 0.32s;
+}
+
+html.js .page-hero> :nth-child(5) {
+  animation-delay: 0.41s;
+}
+
+html.js .page-hero> :nth-child(6) {
+  animation-delay: 0.50s;
+}
+
+html.js .page-hero> :nth-child(7) {
+  animation-delay: 0.59s;
+}
+
+html.js .page-hero> :nth-child(8) {
+  animation-delay: 0.68s;
+}
+
+/* Scroll-triggered reveal for content below the fold */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+html.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  html.js .page-hero>*,
+  html.js .reveal {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

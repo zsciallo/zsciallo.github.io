@@ -2,6 +2,7 @@ import config from '../config.json';
 
 const logoSrc = '/server-icon-old-2.png';
 import { useServerStatus } from '../hooks/useServerStatus';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import { StatusBadge } from '../components/StatusBadge';
 import { ServerStatusSection } from '../components/ServerStatusSection';
 import { JoinCTA } from '../components/JoinCTA';
@@ -13,6 +14,7 @@ import { Logo } from '../components/Logo';
 
 export function SmpPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
+  useScrollReveal();
 
   return (
     <>
@@ -48,21 +50,25 @@ export function SmpPage() {
             />
             <div class="features-grid">
               <FeatureCard
+                delay={0}
                 icon="💰"
                 title="Player Economy"
                 desc="Buy, sell, and trade in a fully player-driven market. Build shops, corner commodities, and dominate the leaderboard through smart play."
               />
               <FeatureCard
+                delay={0.1}
                 icon="🏆"
                 title="Real Cash Prizes"
                 desc={`The #1 spot on the balance leaderboard pays out $${config.prize.replace('$', '')} real USD every week via PayPal. No entry fee. No catch.`}
               />
               <FeatureCard
+                delay={0.2}
                 icon="🛡️"
                 title="Grief Prevention"
                 desc="Your builds, chests, and land are fully protected. Focus on the economy your hard work is always safe."
               />
               <FeatureCard
+                delay={0.3}
                 icon="🗳️"
                 title="Community Events"
                 desc="Monthly themed build contests with community voting. Real cash prizes for winners, permanent recognition on the server."

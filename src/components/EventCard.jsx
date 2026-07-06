@@ -9,7 +9,7 @@ export function RewardRow({ icon, label }) {
 
 export function EventCard({ badge, badgeClass, isPink, title, prize, prizeClass, ariaLabel, description, children }) {
   return (
-    <article class={`event-card${isPink ? ' pink-card' : ''}`} aria-label={ariaLabel}>
+    <article class={`event-card reveal${isPink ? ' pink-card' : ''}`} aria-label={ariaLabel}>
       <span class={`event-badge ${badgeClass}`}>{badge}</span>
       <h3>{title}</h3>
       <div class={`event-prize ${prizeClass}`}>{prize}</div>

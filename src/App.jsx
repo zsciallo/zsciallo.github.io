@@ -1,5 +1,6 @@
 import config from './config.json';
 import { useServerStatus } from './hooks/useServerStatus';
+import { useScrollReveal } from './hooks/useScrollReveal';
 import { StatusBadge } from './components/StatusBadge';
 import { ServerStatusSection } from './components/ServerStatusSection';
 import { JoinCTA } from './components/JoinCTA';
@@ -15,6 +16,7 @@ import spawnerIcon from './assets/spawner_icon.webp';
 
 export default function App() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
+  useScrollReveal();
 
   return (
     <>
@@ -50,21 +52,25 @@ export default function App() {
             />
             <div class="features-grid">
               <FeatureCard
+                delay={0}
                 icon={<img class="feature-icon-img" src={emeraldIcon} alt="" />}
                 title="Player Economy"
                 desc="Buy, sell, and trade in a fully player-driven market. Build shops, corner commodities, and dominate the leaderboard through smart play."
               />
               <FeatureCard
+                delay={0.1}
                 icon={<img class="feature-icon-img" src={diamondIcon} alt="" />}
                 title="Real Cash Prizes"
                 desc={`The #1 spot on the balance leaderboard pays out $${config.prize.replace('$', '')} real USD every week via PayPal. No entry fee. No catch.`}
               />
               <FeatureCard
+                delay={0.2}
                 icon={<img class="feature-icon-img" src={shieldIcon} alt="" />}
                 title="Grief Prevention"
                 desc="Your builds, chests, and land are fully protected. Focus on the economy your hard work is always safe."
               />
               <FeatureCard
+                delay={0.3}
                 icon={<img class="feature-icon-img" src={spawnerIcon} alt="" />}
                 title="Custom Spawners"
                 desc="Zero lag custom spawners that generate loot and XP. Stack them up, pipe the drops straight into hoppers, and sell everything from a simple GUI."

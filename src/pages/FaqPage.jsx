@@ -1,5 +1,6 @@
 import config from '../config.json';
 import { useServerStatus } from '../hooks/useServerStatus';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import { StatusBadge } from '../components/StatusBadge';
 import { ServerStatusSection } from '../components/ServerStatusSection';
 import { JoinCTA } from '../components/JoinCTA';
@@ -15,6 +16,7 @@ function formatDate(iso) {
 export function FaqPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
   const launchDate = formatDate(config.launchDate);
+  useScrollReveal();
 
   return (
     <>
