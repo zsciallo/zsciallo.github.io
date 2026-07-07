@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'preact/hooks';
 import winnerWeek1 from '../assets/winner_week1.png';
 
 function ReceiptIcon() {
@@ -5,6 +6,15 @@ function ReceiptIcon() {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M4 2v20l2-1.5L8 22l2-1.5L12 22l2-1.5L16 22l2-1.5L20 22V2l-2 1.5L16 2l-2 1.5L12 2l-2 1.5L8 2 6 3.5 4 2z" />
       <path d="M8 7h8M8 11h8M8 15h5" />
+    </svg>
+  );
+}
+
+function ZoomIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M21 21l-4.35-4.35M11 8v6M8 11h6" />
     </svg>
   );
 }
@@ -36,6 +46,18 @@ function FlameIcon() {
 
 export function PayoutLog({ prize }) {
   const amount = `${prize}.00`;
+  const [zoomed, setZoomed] = useState(false);
+
+  useEffect(() => {
+    if (!zoomed) return;
+    const onKey = (e) => e.key === 'Escape' && setZoomed(false);
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [zoomed]);
 
   return (
     <section class="payout-section" aria-label="ChromaBit weekly payout log">
@@ -61,15 +83,15 @@ export function PayoutLog({ prize }) {
               </div>
               <span class="payout-amount paid">{amount}</span>
             </div>
-            <a
+            <button
+              type="button"
               class="payout-receipt"
-              href={winnerWeek1}
-              target="_blank"
-              rel="noopener"
-              aria-label="View the PayPal payout receipt for the week of July 5, 2026"
+              onClick={() => setZoomed(true)}
+              aria-label="Enlarge the PayPal payout receipt for the week of July 5, 2026"
             >
               <img src={winnerWeek1} alt="PayPal receipt confirming the $100 payout to the week's winner" loading="lazy" />
-            </a>
+              <span class="payout-receipt-hint"><ZoomIcon /> Click to enlarge</span>
+            </button>
           </article>
 
           {/* Live week — up for grabs */}
@@ -89,6 +111,24 @@ export function PayoutLog({ prize }) {
           </article>
         </div>
       </div>
+
+      {zoomed && (
+        <div
+          class="lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="PayPal payout receipt"
+          onClick={() => setZoomed(false)}
+        >
+          <button type="button" class="lightbox-close" aria-label="Close" onClick={() => setZoomed(false)}>×</button>
+          <img
+            class="lightbox-img"
+            src={winnerWeek1}
+            alt="PayPal receipt confirming the $100 payout to the week's winner"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </section>
   );
 }
