@@ -4,6 +4,7 @@ import { useScrollReveal } from './hooks/useScrollReveal';
 import { StatusBadge } from './components/StatusBadge';
 import { ServerStatusSection } from './components/ServerStatusSection';
 import { JoinCTA } from './components/JoinCTA';
+import { PayoutLog } from './components/PayoutLog';
 import { SectionHeader } from './components/SectionHeader';
 import { FeatureCard } from './components/FeatureCard';
 import { Events } from './components/Events';
@@ -42,6 +43,8 @@ export default function App() {
 
           <div class="rule" />
         </section>
+
+        <PayoutLog prize={config.prize} />
 
         <section class="features-section" aria-label="ChromaBit features">
           <div class="container">
