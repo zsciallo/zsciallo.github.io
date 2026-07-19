@@ -414,6 +414,7 @@ body::after {
 /* ─── BUTTONS ─── */
 .cta-group {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   flex-wrap: nowrap;
   justify-content: center;
