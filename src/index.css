@@ -415,14 +415,15 @@ body::after {
 .cta-group {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   width: 100%;
   max-width: 480px;
 }
 
 .cta-group .btn {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   justify-content: center;
 }
 
