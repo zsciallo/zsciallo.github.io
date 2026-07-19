@@ -5,5 +5,5 @@
   "underConstruction": false,
   "launchDate": "2026-06-19",
   "downSubMessage": "Under maintenance",
-  "hideVisitStore": true
+  "hideVisitStore": false
 }

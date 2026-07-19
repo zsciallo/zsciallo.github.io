@@ -27,7 +27,7 @@ export function JoinCTA({ config, status }) {
   return (
     <div class="cta-group">
       {showStore && (
-        <a href="https://chromabit.tebex.io/" target="_blank" rel="noopener" class="btn btn-primary" aria-label="Visit ChromaBit store">
+        <a href="https://chromabitstore.tebex.io/" target="_blank" rel="noopener" class="btn btn-primary" aria-label="Visit ChromaBit store">
           <StoreIcon /> VISIT STORE
         </a>
       )}
