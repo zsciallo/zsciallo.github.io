@@ -8,6 +8,7 @@ const pages = [
   { module: '/src/App.jsx', export: 'default', dist: 'dist/index.html' },
   { module: '/src/pages/SmpPage.jsx', export: 'SmpPage', dist: 'dist/smp/index.html' },
   { module: '/src/pages/FaqPage.jsx', export: 'FaqPage', dist: 'dist/faq/index.html' },
+  { module: '/src/pages/StorePage.jsx', export: 'StorePage', dist: 'dist/store/index.html' },
 ];
 
 const server = await createServer({

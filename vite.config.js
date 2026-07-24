@@ -15,6 +15,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         smp: resolve(__dirname, 'smp/index.html'),
         faq: resolve(__dirname, 'faq/index.html'),
+        store: resolve(__dirname, 'store/index.html'),
       },
     },
   },
