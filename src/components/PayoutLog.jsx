@@ -94,10 +94,42 @@ export function PayoutLog({ prize }) {
             </button>
           </article>
 
+          {/* Paid week — receipt pending */}
+          <article class="payout-card reveal">
+            <div class="payout-card-head">
+              <span class="payout-week">WEEK OF JULY 12, 2026</span>
+              <span class="payout-status paid"><CheckIcon /> PAID</span>
+            </div>
+            <div class="payout-row">
+              <div class="payout-avatar"><CrownIcon /></div>
+              <div class="payout-winner">
+                <span class="payout-name">Plats</span>
+                <span class="payout-rank">#1 on /bal top</span>
+              </div>
+              <span class="payout-amount paid">{amount}</span>
+            </div>
+          </article>
+
+          {/* Paid week — receipt pending */}
+          <article class="payout-card reveal">
+            <div class="payout-card-head">
+              <span class="payout-week">WEEK OF JULY 19, 2026</span>
+              <span class="payout-status paid"><CheckIcon /> PAID</span>
+            </div>
+            <div class="payout-row">
+              <div class="payout-avatar"><CrownIcon /></div>
+              <div class="payout-winner">
+                <span class="payout-name">CrisisAct</span>
+                <span class="payout-rank">#1 on /bal top</span>
+              </div>
+              <span class="payout-amount paid">{amount}</span>
+            </div>
+          </article>
+
           {/* Live week — up for grabs */}
           <article class="payout-card live reveal">
             <div class="payout-card-head">
-              <span class="payout-week">WEEK OF JULY 12, 2026</span>
+              <span class="payout-week">WEEK OF JULY 26, 2026</span>
               <span class="payout-status live">RACE LIVE</span>
             </div>
             <div class="payout-row">
