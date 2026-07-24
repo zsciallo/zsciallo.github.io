@@ -8,6 +8,7 @@ import { PayoutLog } from './components/PayoutLog';
 import { SectionHeader } from './components/SectionHeader';
 import { FeatureCard } from './components/FeatureCard';
 import { Events } from './components/Events';
+import { ServerCarousel } from './components/ServerCarousel';
 import { Footer } from './components/Footer';
 import { Logo } from './components/Logo';
 import emeraldIcon from './assets/emerald_icon.webp';
@@ -33,6 +34,8 @@ export default function App() {
           <p class="hero-sub">ChromaBit is a competitive Economy SMP Minecraft server where the richest player wins $100 cash every single week.</p>
 
           <StatusBadge status={status} />
+
+          <ServerCarousel />
 
           <div class="rule" />
 
