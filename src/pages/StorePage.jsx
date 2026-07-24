@@ -92,16 +92,24 @@ export function StorePage() {
   return (
     <>
       <main>
-        <section class="page-hero container" aria-label="ChromaBit Store">
-          <a href="/" class="logo-link" aria-label="Back to ChromaBit home">
-            <img class="logo-sm" src="/server-icon-old-2.png" alt="ChromaBit" />
+        <section class="page-hero container" aria-label="Chromabit SMP Store">
+          <a href="/" class="logo-link" aria-label="Back to Chromabit SMP home">
+            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit SMP" />
           </a>
 
           <p class="section-eyebrow">SERVER STORE</p>
           <h1 class="hero-title hero-title--inline">
             GEAR <span class="accent">UP.</span>
           </h1>
-          <p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports ChromaBit and the weekly prize pool.</p>
+          <p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports Chromabit SMP and the weekly prize pool.</p>
+
+          <p class="store-powered">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            SECURE CHECKOUT POWERED BY <a href="https://www.tebex.io/" target="_blank" rel="noopener">TEBEX</a>
+          </p>
 
           <div class="rule" />
         </section>

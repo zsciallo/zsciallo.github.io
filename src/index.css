@@ -1279,6 +1279,25 @@ footer {
   max-width: 900px;
 }
 
+.store-powered {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Teko', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.store-powered a {
+  color: var(--purple-bright);
+  text-decoration: none;
+}
+
+.store-powered a:hover {
+  text-decoration: underline;
+}
+
 .store-tabs {
   display: flex;
   flex-wrap: wrap;
