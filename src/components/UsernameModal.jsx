@@ -6,6 +6,7 @@ import { useState } from 'preact/hooks';
  */
 export function UsernameModal({ initial, error, busy, onConfirm, onClose }) {
   const [value, setValue] = useState(initial || '');
+  const [closing, setClosing] = useState(false);
   const valid = /^[A-Za-z0-9_]{3,16}$/.test(value.trim());
 
   function submit(e) {
@@ -13,8 +14,14 @@ export function UsernameModal({ initial, error, busy, onConfirm, onClose }) {
     if (valid && !busy) onConfirm(value.trim());
   }
 
+  function close() {
+    if (busy || closing) return;
+    setClosing(true);
+    setTimeout(onClose, 200);
+  }
+
   return (
-    <div class="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}>
+    <div class={`modal-overlay${closing ? ' closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
       <form class="modal-card card" onSubmit={submit}>
         <p class="modal-title">MINECRAFT USERNAME</p>
         <p class="modal-sub">Your items are delivered in-game, so we need to know who to send them to.</p>
@@ -31,7 +38,7 @@ export function UsernameModal({ initial, error, busy, onConfirm, onClose }) {
         />
         {error && <p class="modal-error">{error}</p>}
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onClick={onClose} disabled={busy}>CANCEL</button>
+          <button type="button" class="btn btn-secondary" onClick={close} disabled={busy}>CANCEL</button>
           <button type="submit" class="btn btn-primary" disabled={!valid || busy}>
             {busy ? 'REDIRECTING…' : 'CONTINUE'}
           </button>

@@ -6,6 +6,7 @@ import { useTebexBasket } from '../hooks/useTebexBasket';
 import { SectionHeader } from '../components/SectionHeader';
 import { PackageCard } from '../components/PackageCard';
 import { UsernameModal } from '../components/UsernameModal';
+import { PackageModal } from '../components/PackageModal';
 import { CartFab, CartDrawer } from '../components/CartDrawer';
 import { Footer } from '../components/Footer';
 
@@ -22,6 +23,7 @@ export function StorePage() {
   const [busyPkgId, setBusyPkgId] = useState(null);
   const [cartBusy, setCartBusy] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [viewPkg, setViewPkg] = useState(null);
   const [checkoutError, setCheckoutError] = useState(null);
   const [purchaseComplete, setPurchaseComplete] = useState(false);
 
@@ -45,6 +47,7 @@ export function StorePage() {
         return;
       }
       setPending(null);
+      setViewPkg(null);
       setCartOpen(true);
       setBusyPkgId(null);
     } catch (err) {
@@ -171,6 +174,7 @@ export function StorePage() {
                       key={pkg.id}
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
+                      onView={setViewPkg}
                       onBuy={(p) => handleAction(p, 'buy')}
                       onAddToCart={(p) => handleAction(p, 'cart')}
                     />
@@ -192,6 +196,16 @@ export function StorePage() {
         onRemove={handleRemove}
         onClose={() => setCartOpen(false)}
       />
+
+      {viewPkg && !pending && (
+        <PackageModal
+          pkg={viewPkg}
+          busy={busyPkgId === viewPkg.id}
+          onBuy={(p) => handleAction(p, 'buy')}
+          onAddToCart={(p) => handleAction(p, 'cart')}
+          onClose={() => setViewPkg(null)}
+        />
+      )}
 
       {pending && (
         <UsernameModal
