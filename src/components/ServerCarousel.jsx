@@ -1,12 +1,18 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 
 // Every image dropped into src/assets/serverImages is picked up
-// automatically at build time, sorted by filename.
+// automatically at build time, sorted by filename. Captions come from any
+// .json file in the same directory mapping filename -> description.
+const descriptions = Object.assign(
+  {},
+  ...Object.values(import.meta.glob('../assets/serverImages/*.json', { eager: true, import: 'default' }))
+);
+
 const images = Object.entries(
   import.meta.glob('../assets/serverImages/*.{png,jpg,jpeg,webp,gif}', { eager: true, import: 'default' })
 )
   .sort(([a], [b]) => a.localeCompare(b))
-  .map(([, src]) => src);
+  .map(([path, src]) => ({ src, desc: descriptions[path.split('/').pop()] || '' }));
 
 function ZoomIcon() {
   return (
@@ -65,7 +71,7 @@ export function ServerCarousel() {
       }}
     >
       <div class="carousel-track" style={{ transform: `translateX(-${index * 100}%)` }}>
-        {images.map((src, i) => (
+        {images.map(({ src, desc }, i) => (
           <button
             key={src}
             type="button"
@@ -83,9 +89,10 @@ export function ServerCarousel() {
             <img
               class="carousel-slide"
               src={src}
-              alt={`Chromabit SMP screenshot ${i + 1}`}
+              alt={desc || `Chromabit SMP screenshot ${i + 1}`}
               loading={i === 0 ? 'eager' : 'lazy'}
             />
+            {desc && <span class="carousel-caption">{desc}</span>}
           </button>
         ))}
       </div>
@@ -118,11 +125,14 @@ export function ServerCarousel() {
           onClick={(e) => { if (e.target === e.currentTarget) setZoomed(false); }}
         >
           <button type="button" class="lightbox-close" aria-label="Close" onClick={() => setZoomed(false)}>×</button>
-          <img
-            class="lightbox-img"
-            src={images[index]}
-            alt={`Chromabit SMP screenshot ${index + 1}`}
-          />
+          <figure class="lightbox-figure">
+            <img
+              class="lightbox-img"
+              src={images[index].src}
+              alt={images[index].desc || `Chromabit SMP screenshot ${index + 1}`}
+            />
+            {images[index].desc && <span class="lightbox-caption">{images[index].desc}</span>}
+          </figure>
         </dialog>
       )}
     </div>

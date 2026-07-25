@@ -977,6 +977,48 @@ dialog.lightbox::backdrop {
   cursor: default;
 }
 
+.lightbox-figure {
+  position: relative;
+  display: flex;
+  margin: 0;
+  max-width: 100%;
+  max-height: 90vh;
+}
+
+.lightbox-caption {
+  position: absolute;
+  bottom: 1.1rem;
+  left: 1.1rem;
+  max-width: 70%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 18px 4px 14px;
+  border-radius: 999px;
+  background: var(--frost), rgba(12, 7, 24, 0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-pink);
+  color: #ffb3ec;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  text-align: left;
+  text-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  pointer-events: none;
+}
+
+.lightbox-caption::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: var(--grad-cta);
+  box-shadow: 0 0 8px rgba(255, 125, 225, 0.6);
+}
+
 .lightbox-close {
   position: absolute;
   top: 18px;
@@ -2087,6 +2129,7 @@ footer {
 }
 
 .carousel-slide-btn {
+  position: relative;
   width: 100%;
   flex-shrink: 0;
   padding: 0;
@@ -2094,6 +2137,40 @@ footer {
   background: none;
   display: block;
   cursor: zoom-in;
+}
+
+.carousel-caption {
+  position: absolute;
+  bottom: 0.9rem;
+  left: 0.9rem;
+  max-width: 60%;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 15px 3px 12px;
+  border-radius: 999px;
+  background: var(--frost), rgba(12, 7, 24, 0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-pink);
+  color: #ffb3ec;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  text-align: left;
+  text-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  pointer-events: none;
+}
+
+.carousel-caption::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: var(--grad-cta);
+  box-shadow: 0 0 8px rgba(255, 125, 225, 0.6);
 }
 
 .carousel-slide {
