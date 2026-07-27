@@ -1,8 +1,8 @@
 // Ordered-dither background (replaces the old CSS grid overlay).
-// A reverse vignette — dark in the center, purple-to-pink stipple toward
-// the edges — quantized per-cell against an 8x8 Bayer matrix and stretched
-// to fill the viewport with crisp pixels. The vignette boundary slowly
-// undulates, and the whole field leans gently toward the mouse.
+// An ocean of purple stipple rising from the bottom of the viewport —
+// quantized per-cell against an 8x8 Bayer matrix and stretched to fill
+// the screen with crisp pixels. Swells travel across the waterline and
+// a slow tide bobs the whole surface up and down.
 
 const SCALE = 5; // screen px per dither cell
 const FPS = 12;
@@ -26,14 +26,13 @@ function start() {
   document.body.prepend(canvas);
   const ctx = canvas.getContext('2d');
 
-  let w, h, img;
+  let w, h, img, atten;
 
-  // Mouse position (viewport fractions), eased so the field drifts after
-  // the cursor instead of snapping.
-  let mx = 0.5;
-  let my = 0.5;
-  let tx = 0.5;
-  let ty = 0.5;
+  // Content lives in a centered 900px column; dim the stipple inside it so
+  // the motion doesn't fight the copy, ramping back up toward the edges.
+  const COLUMN_HALF = 470; // px from center where the fade starts
+  const FADE = 220; // px over which opacity returns to full
+  const DIM = 0.35; // opacity multiplier behind the content
 
   const resize = () => {
     w = Math.ceil(window.innerWidth / SCALE);
@@ -41,47 +40,47 @@ function start() {
     canvas.width = w;
     canvas.height = h;
     img = ctx.createImageData(w, h);
+
+    atten = new Float32Array(w);
+    const mid = window.innerWidth / 2;
+    for (let x = 0; x < w; x++) {
+      const dpx = Math.abs((x + 0.5) * SCALE - mid);
+      const k = Math.min(1, Math.max(0, (dpx - COLUMN_HALF) / FADE));
+      atten[x] = DIM + (1 - DIM) * k * k * (3 - 2 * k); // smoothstep
+    }
   };
 
   function draw(t) {
     const d = img.data;
     const aspect = w / h;
-    const corner = Math.hypot(0.5 * aspect, 0.5);
 
-    // Vignette center leans slightly toward the cursor.
-    const cx = 0.5 + (mx - 0.5) * 0.12;
-    const cy = 0.5 + (my - 0.5) * 0.12;
+    // Slow tide: the whole waterline drifts up and down.
+    const tide = 0.04 * Math.sin(t * 0.17);
 
     let i = 0;
     for (let y = 0; y < h; y++) {
-      const dy = y / h - cy;
+      const v = y / h;
       for (let x = 0; x < w; x++, i += 4) {
-        const dx = (x / w - cx) * aspect;
-        const dist = Math.hypot(dx, dy) / corner;
-        const ang = Math.atan2(dy, dx);
+        // Height-relative x so wave size is consistent at any aspect ratio.
+        const u = (x / w) * aspect;
 
-        // Slowly drifting ripples along the vignette boundary.
-        const r0 =
-          0.3 + 0.05 * Math.sin(ang * 3 + t * 0.5) + 0.03 * Math.sin(ang * 5 - t * 0.33 + 1.4);
+        // Two swells traveling in opposite directions across the waterline.
+        const crest =
+          0.35 +
+          tide +
+          0.07 * Math.sin(u * 4 - t * 0.9) +
+          0.045 * Math.sin(u * 7 + t * 0.6 + 1.7);
 
-        const e = Math.max(0, (dist - r0) / 0.7);
+        const e = Math.max(0, (v - crest) / 0.55);
         const f = e * e * 0.55;
 
         if (f > BAYER[(x & 7) + ((y & 7) << 3)]) {
           const m = Math.min(1, f * 2.2);
-          // deep purple #9a4dff -> purple #c77dff -> pink #ff7de1 by brightness
-          if (m < 0.5) {
-            const k = m * 2;
-            d[i] = 154 + 45 * k;
-            d[i + 1] = 77 + 48 * k;
-            d[i + 2] = 255;
-          } else {
-            const k = m * 2 - 1;
-            d[i] = 199 + 56 * k;
-            d[i + 1] = 125;
-            d[i + 2] = 255 - 30 * k;
-          }
-          d[i + 3] = 30 + 44 * m;
+          // single electric purple #c14dff, fading in by depth
+          d[i] = 193;
+          d[i + 1] = 77;
+          d[i + 2] = 255;
+          d[i + 3] = (48 + 52 * m) * atten[x];
         } else {
           d[i + 3] = 0;
         }
@@ -96,19 +95,11 @@ function start() {
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  window.addEventListener('mousemove', (e) => {
-    tx = e.clientX / window.innerWidth;
-    ty = e.clientY / window.innerHeight;
-  });
-
   let lastTick = -1;
   const frame = (now) => {
     const tick = Math.floor(now / (1000 / FPS));
     if (tick !== lastTick) {
       lastTick = tick;
-      // Ease toward the cursor.
-      mx += (tx - mx) * 0.08;
-      my += (ty - my) * 0.08;
       draw(tick / FPS);
     }
     requestAnimationFrame(frame);
