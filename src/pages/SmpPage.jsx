@@ -28,7 +28,7 @@ export function SmpPage() {
             ECONOMY<span class="accent">SMP</span>
           </h1>
           <p class="hero-sub">
-            ChromaBit is a competitive Economy SMP Minecraft server where the richest player wins real cash every single week.
+            ChromaBit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.
           </p>
 
           <StatusBadge status={status} />
@@ -45,8 +45,8 @@ export function SmpPage() {
           <div class="container">
             <SectionHeader
               eyebrow="HOW IT WORKS"
-              title={<>PLAYER-DRIVEN.<br />PRIZE-BACKED.</>}
-              sub="ChromaBit is an Economy SMP built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete for real payouts."
+              title={<>PLAYER-DRIVEN.<br />EVENT-BACKED.</>}
+              sub="ChromaBit is an Economy SMP built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete in events for store credit."
             />
             <div class="features-grid">
               <FeatureCard
@@ -58,8 +58,8 @@ export function SmpPage() {
               <FeatureCard
                 delay={0.1}
                 icon="🏆"
-                title="Real Cash Prizes"
-                desc={`The #1 spot on the balance leaderboard pays out $${config.prize.replace('$', '')} real USD every week via PayPal. No entry fee. No catch.`}
+                title="Store Credit Prizes"
+                desc={`Win a server event and take home ${config.prize} to spend on ranks, keys, and more. The top 5 all earn credit. No entry fee. No catch.`}
               />
               <FeatureCard
                 delay={0.2}
@@ -71,7 +71,7 @@ export function SmpPage() {
                 delay={0.3}
                 icon="🗳️"
                 title="Community Events"
-                desc="Monthly themed build contests with community voting. Real cash prizes for winners, permanent recognition on the server."
+                desc="Themed contests with community voting. Store credit for the top finishers, permanent recognition on the server."
               />
             </div>
           </div>

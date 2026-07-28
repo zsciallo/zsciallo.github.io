@@ -45,7 +45,7 @@ export function FaqPage() {
             <p class="faq-section-label">GAMEPLAY</p>
 
               <FaqItem question="What type of server is ChromaBit?">
-                ChromaBit is a spawner-based Economy SMP. Mob spawners are a core part of the economy they generate sellable drops that you use to build wealth, run shops, and climb the balance leaderboard to compete for real cash prizes.
+                ChromaBit is a spawner-based Economy SMP. Mob spawners are a core part of the economy they generate sellable drops that you use to build wealth, run shops, and climb the balance leaderboard.
               </FaqItem>
 
               <FaqItem question="How does the rank system work?">
@@ -60,22 +60,22 @@ export function FaqPage() {
 
               <p class="faq-section-label">PRIZES</p>
 
-              <FaqItem question="How does the weekly Bal Top event work?">
-                Winners are determined at the end of each week. Whoever holds the highest in-game balance at that moment wins <strong>{config.prize} USD</strong> paid directly via PayPal. The top 5 players also earn store credit rewards. No entry fee required, just play.
+              <FaqItem question="How do server events work?">
+                Events are announced in our <a href={config.discord} target="_blank" rel="noopener">Discord</a> along with the rules and the closing date. The winner takes home <strong>{config.prize}</strong>, and the top 5 all earn credit: 100, 50, 25, 10, and 5. No entry fee required, just play.
               </FaqItem>
 
-              <FaqItem question="How do I receive my prize winnings?">
-                Cash prizes are paid out via PayPal. Winners will need to submit a ticket in the #prize-claims channel. Make sure you have a PayPal account and have joined our <a href={config.discord} target="_blank" rel="noopener">Discord</a>.
+              <FaqItem question="How do I receive my prize?">
+                Prizes are paid out as store credit. Winners will need to submit a ticket in the #prize-claims channel, and the credit is applied to your account so you can spend it on ranks, crate keys, or anything else in the <a href="/store/">store</a>.
               </FaqItem>
 
               <p class="faq-section-label">GENERAL</p>
 
               <FaqItem question="What is ChromaBit?">
-                ChromaBit is a competitive Economy SMP Minecraft server. Players build wealth through a player-driven economy, compete on the balance leaderboard, and win real cash prizes every week.
+                ChromaBit is a competitive Economy SMP Minecraft server. Players build wealth through a player-driven economy, compete on the balance leaderboard, and win store credit in server events.
               </FaqItem>
 
               <FaqItem question="What is an Economy SMP Minecraft server?">
-                An Economy SMP is a Survival Multiplayer server built around a player-driven economic system. Players earn in-game currency by farming, trading, and running shops, then compete for top spots on leaderboards. On ChromaBit, the top spot pays out real money.
+                An Economy SMP is a Survival Multiplayer server built around a player-driven economic system. Players earn in-game currency by farming, trading, and running shops, then compete for top spots on leaderboards. On ChromaBit, server events pay out store credit to the top finishers.
               </FaqItem>
 
               <FaqItem question="What is the server IP address?">

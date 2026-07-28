@@ -104,7 +104,7 @@ export function StorePage() {
           <h1 class="hero-title hero-title--inline">
             GEAR <span class="accent">UP.</span>
           </h1>
-          <p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports Chromabit SMP and the weekly prize pool.</p>
+          <p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports Chromabit SMP.</p>
 
           <p class="store-powered">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

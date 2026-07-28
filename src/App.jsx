@@ -4,7 +4,6 @@ import { useScrollReveal } from './hooks/useScrollReveal';
 import { StatusBadge } from './components/StatusBadge';
 import { ServerStatusSection } from './components/ServerStatusSection';
 import { JoinCTA } from './components/JoinCTA';
-import { PayoutLog } from './components/PayoutLog';
 import { SectionHeader } from './components/SectionHeader';
 import { FeatureCard } from './components/FeatureCard';
 import { Events } from './components/Events';
@@ -31,7 +30,7 @@ export default function App() {
           <h1 class="hero-title hero-title--inline">
             ECONOMY <span class="accent">SMP</span>
           </h1>
-          <p class="hero-sub">ChromaBit is a competitive Economy SMP Minecraft server where the richest player wins $100 cash every single week.</p>
+          <p class="hero-sub">ChromaBit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.</p>
 
           <StatusBadge status={status} />
 
@@ -47,14 +46,12 @@ export default function App() {
           <div class="rule" />
         </section>
 
-        <PayoutLog prize={config.prize} />
-
         <section class="features-section" aria-label="ChromaBit features">
           <div class="container">
             <SectionHeader
               eyebrow="HOW IT WORKS"
-              title={<>PLAYER-DRIVEN.<br />PRIZE-BACKED.</>}
-              sub="A server built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete for real payouts."
+              title={<>PLAYER-DRIVEN.<br />EVENT-BACKED.</>}
+              sub="A server built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete in events for store credit."
             />
             <div class="features-grid">
               <FeatureCard
@@ -66,8 +63,8 @@ export default function App() {
               <FeatureCard
                 delay={0.1}
                 icon={<img class="feature-icon-img" src={diamondIcon} alt="" />}
-                title="Real Cash Prizes"
-                desc={`The #1 spot on the balance leaderboard pays out $${config.prize.replace('$', '')} real USD every week via PayPal. No entry fee. No catch.`}
+                title="Store Credit Prizes"
+                desc={`Win a server event and take home ${config.prize} to spend on ranks, keys, and more. The top 5 all earn credit. No entry fee. No catch.`}
               />
               <FeatureCard
                 delay={0.2}
