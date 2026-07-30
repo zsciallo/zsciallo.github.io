@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { CartIcon } from './CartDrawer';
+import { QuantityStepper } from './QuantityStepper';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -8,7 +9,9 @@ function formatPrice(amount, currency) {
 /** Full popout view of a package: image, price, and complete description. */
 export function PackageModal({ pkg, busy, onBuy, onAddToCart, onClose }) {
   const onSale = pkg.discount > 0;
+  const allowQuantity = !pkg.disable_quantity;
   const [closing, setClosing] = useState(false);
+  const [qty, setQty] = useState(1);
 
   function close() {
     if (busy || closing) return;
@@ -38,20 +41,28 @@ export function PackageModal({ pkg, busy, onBuy, onAddToCart, onClose }) {
             <div class="pkg-desc pkg-modal-desc" dangerouslySetInnerHTML={{ __html: pkg.description }} />
           )}
 
+          {allowQuantity && (
+            <div class="pkg-qty pkg-modal-qty">
+              <span class="pkg-qty-label">QTY</span>
+              <QuantityStepper value={qty} onChange={setQty} disabled={busy} label={`${pkg.name} quantity`} />
+              {qty > 1 && <span class="pkg-qty-sub">{formatPrice(pkg.total_price * qty, pkg.currency)}</span>}
+            </div>
+          )}
+
           <div class="pkg-actions">
             <button
               class="btn btn-primary pkg-buy"
               disabled={busy}
-              onClick={() => onBuy(pkg)}
-              aria-label={`Buy ${pkg.name}`}
+              onClick={() => onBuy(pkg, qty)}
+              aria-label={`Buy ${qty} × ${pkg.name}`}
             >
               {busy ? 'ADDING…' : 'BUY'}
             </button>
             <button
               class="pkg-cart-btn"
               disabled={busy}
-              onClick={() => onAddToCart(pkg)}
-              aria-label={`Add ${pkg.name} to cart`}
+              onClick={() => onAddToCart(pkg, qty)}
+              aria-label={`Add ${qty} × ${pkg.name} to cart`}
               title="Add to cart"
             >
               <CartIcon />

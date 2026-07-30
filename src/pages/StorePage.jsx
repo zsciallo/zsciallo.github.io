@@ -37,11 +37,11 @@ export function StorePage() {
     }
   }, []);
 
-  async function runAction(pkg, mode, name) {
+  async function runAction(pkg, mode, name, quantity) {
     setBusyPkgId(pkg.id);
     setCheckoutError(null);
     try {
-      const basket = await cart.addItem(pkg, name);
+      const basket = await cart.addItem(pkg, name, quantity);
       if (mode === 'buy') {
         window.location.href = basket.links.checkout;
         return;
@@ -56,12 +56,12 @@ export function StorePage() {
     }
   }
 
-  function handleAction(pkg, mode) {
+  function handleAction(pkg, mode, quantity = 1) {
     setCheckoutError(null);
     if (username) {
-      runAction(pkg, mode, username);
+      runAction(pkg, mode, username, quantity);
     } else {
-      setPending({ pkg, mode });
+      setPending({ pkg, mode, quantity });
     }
   }
 
@@ -71,7 +71,7 @@ export function StorePage() {
     localStorage.setItem(USERNAME_KEY, name);
     setUsername(name);
     if (pending?.pkg) {
-      runAction(pending.pkg, pending.mode, name);
+      runAction(pending.pkg, pending.mode, name, pending.quantity);
     } else {
       setPending(null);
     }
@@ -88,6 +88,16 @@ export function StorePage() {
       await cart.removeItem(packageId);
     } catch {
       // Leave the item in place; the next interaction will retry.
+    }
+    setCartBusy(false);
+  }
+
+  async function handleSetQuantity(packageId, quantity) {
+    setCartBusy(true);
+    try {
+      await cart.setQuantity(packageId, quantity);
+    } catch {
+      // Keep the last known quantity; the next interaction will retry.
     }
     setCartBusy(false);
   }
@@ -175,8 +185,8 @@ export function StorePage() {
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
                       onView={setViewPkg}
-                      onBuy={(p) => handleAction(p, 'buy')}
-                      onAddToCart={(p) => handleAction(p, 'cart')}
+                      onBuy={(p, qty) => handleAction(p, 'buy', qty)}
+                      onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
                     />
                   ))}
                 </div>
@@ -192,7 +202,9 @@ export function StorePage() {
         open={cartOpen}
         basket={cart.basket}
         items={cart.items}
+        packagesById={store.packagesById}
         busy={cartBusy}
+        onSetQuantity={handleSetQuantity}
         onRemove={handleRemove}
         onClose={() => setCartOpen(false)}
       />
@@ -201,8 +213,8 @@ export function StorePage() {
         <PackageModal
           pkg={viewPkg}
           busy={busyPkgId === viewPkg.id}
-          onBuy={(p) => handleAction(p, 'buy')}
-          onAddToCart={(p) => handleAction(p, 'cart')}
+          onBuy={(p, qty) => handleAction(p, 'buy', qty)}
+          onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
           onClose={() => setViewPkg(null)}
         />
       )}

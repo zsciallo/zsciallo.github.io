@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
-import { createBasket, getBasket, addToBasket, removeFromBasket } from '../lib/tebex';
+import { createBasket, getBasket, addToBasket, removeFromBasket, setBasketQuantity } from '../lib/tebex';
 
 const BASKET_KEY = 'chromabit_basket';
 
@@ -24,15 +24,22 @@ export function useTebexBasket(token) {
   }, [token]);
 
   /** Add a package, creating the basket first if needed. Returns the updated basket. */
-  async function addItem(pkg, username) {
+  async function addItem(pkg, username, quantity = 1) {
     let current = basket;
     if (!current) {
       current = await createBasket(token, username);
       localStorage.setItem(BASKET_KEY, current.ident);
     }
-    const updated = await addToBasket(current.ident, pkg.id);
+    const updated = await addToBasket(current.ident, pkg.id, quantity);
     setBasket(updated);
     return updated;
+  }
+
+  /** Set the exact quantity of a package already in the basket. */
+  async function setQuantity(packageId, quantity) {
+    if (!basket) return;
+    const updated = await setBasketQuantity(basket.ident, packageId, quantity);
+    setBasket(updated);
   }
 
   /** Remove a package from the basket. */
@@ -51,5 +58,5 @@ export function useTebexBasket(token) {
   const items = basket?.packages || [];
   const count = items.reduce((n, p) => n + (p.in_basket?.quantity || 0), 0);
 
-  return { basket, items, count, addItem, removeItem, clearBasket };
+  return { basket, items, count, addItem, setQuantity, removeItem, clearBasket };
 }

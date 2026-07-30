@@ -18,6 +18,14 @@ function post(url, payload) {
   });
 }
 
+function put(url, payload) {
+  return request(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
 /** Fetch all categories with their packages included. */
 export async function fetchCategories(token) {
   const body = await request(`${API}/accounts/${token}/categories?includePackages=1`);
@@ -45,9 +53,22 @@ export async function getBasket(token, ident) {
   return body.data;
 }
 
-/** Add a package to a basket. Returns the updated basket. */
+/**
+ * Add a package to a basket. Quantity is added to whatever is already in the
+ * basket, so adding 2 of a package that's already there leaves 3. Returns the
+ * updated basket.
+ */
 export async function addToBasket(ident, packageId, quantity = 1) {
   const body = await post(`${API}/baskets/${ident}/packages`, { package_id: packageId, quantity });
+  return body.data;
+}
+
+/**
+ * Set the absolute quantity of a package already in the basket (0 removes it).
+ * Returns the updated basket.
+ */
+export async function setBasketQuantity(ident, packageId, quantity) {
+  const body = await put(`${API}/baskets/${ident}/packages/${packageId}`, { quantity });
   return body.data;
 }
 

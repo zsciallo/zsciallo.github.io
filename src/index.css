@@ -1399,6 +1399,96 @@ footer {
   align-items: stretch;
 }
 
+/* ─── QUANTITY STEPPER ─── */
+.qty-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(12, 7, 24, 0.4);
+}
+
+.qty-btn {
+  width: 30px;
+  background: transparent;
+  border: none;
+  color: var(--accent-2);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: var(--glow);
+  color: var(--text);
+}
+
+.qty-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.qty-input {
+  width: 38px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Teko', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 0.35rem 0;
+}
+
+.qty-input:focus {
+  outline: none;
+  background: var(--glow);
+}
+
+.qty-input:disabled {
+  opacity: 0.55;
+}
+
+.qty-stepper--sm .qty-btn {
+  width: 24px;
+  font-size: 0.9rem;
+}
+
+.qty-stepper--sm .qty-input {
+  width: 30px;
+  font-size: 0.95rem;
+  padding: 0.2rem 0;
+}
+
+.pkg-qty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.pkg-qty-label,
+.pkg-qty-sub {
+  font-family: 'Teko', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.pkg-qty-sub {
+  color: var(--accent-2);
+}
+
+.pkg-modal-qty {
+  justify-content: flex-start;
+  margin-top: 0.9rem;
+}
+
 .pkg-buy {
   justify-content: center;
   flex: 1;
@@ -1678,6 +1768,25 @@ footer {
   font-size: 0.8rem;
   color: var(--muted);
   margin-top: 2px;
+}
+
+.cart-item-info .qty-stepper {
+  margin-top: 0.35rem;
+}
+
+.cart-item-end {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.cart-item-line {
+  font-family: 'Teko', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--accent-2);
+  white-space: nowrap;
 }
 
 .cart-item-remove {

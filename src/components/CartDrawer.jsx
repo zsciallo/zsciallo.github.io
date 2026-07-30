@@ -1,3 +1,5 @@
+import { QuantityStepper } from './QuantityStepper';
+
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
@@ -23,7 +25,7 @@ export function CartFab({ count, onClick }) {
 }
 
 /** Slide-in side cart listing everything in the user's basket. */
-export function CartDrawer({ open, basket, items, busy, onRemove, onClose }) {
+export function CartDrawer({ open, basket, items, packagesById = {}, busy, onSetQuantity, onRemove, onClose }) {
   const currency = basket?.currency || 'USD';
 
   return (
@@ -41,25 +43,44 @@ export function CartDrawer({ open, basket, items, busy, onRemove, onClose }) {
           <p class="cart-empty">Your cart is empty.</p>
         ) : (
           <div class="cart-items">
-            {items.map((item) => (
-              <div class="cart-item" key={item.id}>
-                {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
-                <div class="cart-item-info">
-                  <p class="cart-item-name">{item.name}</p>
-                  <p class="cart-item-meta">
-                    {item.in_basket.quantity} × {formatPrice(item.in_basket.price, currency)}
-                  </p>
+            {items.map((item) => {
+              const qty = item.in_basket.quantity;
+              // Basket entries don't carry the catalog flags, so look them up.
+              const allowQuantity = !packagesById[item.id]?.disable_quantity;
+
+              return (
+                <div class="cart-item" key={item.id}>
+                  {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
+                  <div class="cart-item-info">
+                    <p class="cart-item-name">{item.name}</p>
+                    {allowQuantity ? (
+                      <QuantityStepper
+                        value={qty}
+                        onChange={(next) => onSetQuantity(item.id, next)}
+                        disabled={busy}
+                        size="sm"
+                        label={`${item.name} quantity`}
+                      />
+                    ) : (
+                      <p class="cart-item-meta">
+                        {qty} × {formatPrice(item.in_basket.price, currency)}
+                      </p>
+                    )}
+                  </div>
+                  <div class="cart-item-end">
+                    <p class="cart-item-line">{formatPrice(item.in_basket.price * qty, currency)}</p>
+                    <button
+                      class="cart-item-remove"
+                      onClick={() => onRemove(item.id)}
+                      disabled={busy}
+                      aria-label={`Remove ${item.name} from cart`}
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
-                <button
-                  class="cart-item-remove"
-                  onClick={() => onRemove(item.id)}
-                  disabled={busy}
-                  aria-label={`Remove ${item.name} from cart`}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
