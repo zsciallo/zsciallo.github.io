@@ -12,6 +12,11 @@ import { Footer } from '../components/Footer';
 
 const USERNAME_KEY = 'chromabit_username';
 
+// Tebex 404s basket creation when it can't resolve the name against Mojang
+// (Java) or Xbox (Bedrock, dot-prefixed via Geyser). Usually a stale saved
+// name, so send the buyer back to the modal instead of a dead-end banner.
+const BAD_USERNAME = /invalid username/i;
+
 export function StorePage() {
   const store = useTebexStore(config.tebexToken);
   const cart = useTebexBasket(config.tebexToken);
@@ -51,7 +56,14 @@ export function StorePage() {
       setCartOpen(true);
       setBusyPkgId(null);
     } catch (err) {
-      setCheckoutError(err.message);
+      if (BAD_USERNAME.test(err.message)) {
+        setCheckoutError(
+          `We couldn't find "${name}" in-game. Bedrock players must include the leading dot (e.g. .Toast).`,
+        );
+        setPending({ pkg, mode, quantity });
+      } else {
+        setCheckoutError(err.message);
+      }
       setBusyPkgId(null);
     }
   }

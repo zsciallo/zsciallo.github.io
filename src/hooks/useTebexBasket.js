@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { createBasket, getBasket, addToBasket, removeFromBasket, setBasketQuantity } from '../lib/tebex';
 
 const BASKET_KEY = 'chromabit_basket';
@@ -10,6 +10,14 @@ const BASKET_KEY = 'chromabit_basket';
  */
 export function useTebexBasket(token) {
   const [basket, setBasket] = useState(null);
+  // Mirrors `basket` so callers that clear and immediately re-add within one
+  // event handler (changing username) don't act on the pre-clear state.
+  const basketRef = useRef(null);
+
+  function store(value) {
+    basketRef.current = value;
+    setBasket(value);
+  }
 
   useEffect(() => {
     if (!token) return;
@@ -17,7 +25,7 @@ export function useTebexBasket(token) {
     if (!ident) return;
     getBasket(token, ident)
       .then((b) => {
-        if (b && !b.complete) setBasket(b);
+        if (b && !b.complete) store(b);
         else localStorage.removeItem(BASKET_KEY);
       })
       .catch(() => localStorage.removeItem(BASKET_KEY));
@@ -25,13 +33,14 @@ export function useTebexBasket(token) {
 
   /** Add a package, creating the basket first if needed. Returns the updated basket. */
   async function addItem(pkg, username, quantity = 1) {
-    let current = basket;
+    let current = basketRef.current;
     if (!current) {
       current = await createBasket(token, username);
       localStorage.setItem(BASKET_KEY, current.ident);
+      basketRef.current = current;
     }
     const updated = await addToBasket(current.ident, pkg.id, quantity);
-    setBasket(updated);
+    store(updated);
     return updated;
   }
 
@@ -39,20 +48,20 @@ export function useTebexBasket(token) {
   async function setQuantity(packageId, quantity) {
     if (!basket) return;
     const updated = await setBasketQuantity(basket.ident, packageId, quantity);
-    setBasket(updated);
+    store(updated);
   }
 
   /** Remove a package from the basket. */
   async function removeItem(packageId) {
     if (!basket) return;
     const updated = await removeFromBasket(basket.ident, packageId);
-    setBasket(updated);
+    store(updated);
   }
 
-  /** Forget the basket (e.g. after a completed checkout). */
+  /** Forget the basket (e.g. after a completed checkout, or a username change). */
   function clearBasket() {
     localStorage.removeItem(BASKET_KEY);
-    setBasket(null);
+    store(null);
   }
 
   const items = basket?.packages || [];
