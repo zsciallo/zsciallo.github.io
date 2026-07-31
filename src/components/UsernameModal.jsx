@@ -7,7 +7,8 @@ import { useState } from 'preact/hooks';
 export function UsernameModal({ initial, error, busy, onConfirm, onClose }) {
   const [value, setValue] = useState(initial || '');
   const [closing, setClosing] = useState(false);
-  const valid = /^[A-Za-z0-9_]{3,16}$/.test(value.trim());
+  // Bedrock players come through Geyser with a "." prefixed to their gamertag.
+  const valid = /^\.?[A-Za-z0-9_]{3,16}$/.test(value.trim());
 
   function submit(e) {
     e.preventDefault();
@@ -24,14 +25,14 @@ export function UsernameModal({ initial, error, busy, onConfirm, onClose }) {
     <div class={`modal-overlay${closing ? ' closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
       <form class="modal-card card" onSubmit={submit}>
         <p class="modal-title">MINECRAFT USERNAME</p>
-        <p class="modal-sub">Your items are delivered in-game, so we need to know who to send them to.</p>
+        <p class="modal-sub">Your items are delivered in-game, so we need to know who to send them to. Bedrock players: include a leading dot in your name.</p>
         <input
           class="modal-input"
           type="text"
           value={value}
           onInput={(e) => setValue(e.target.value)}
-          placeholder="e.g. Steve"
-          maxLength={16}
+          placeholder="e.g. Steve or .Steve"
+          maxLength={17}
           autocomplete="off"
           spellcheck={false}
           autoFocus
