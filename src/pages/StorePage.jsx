@@ -46,7 +46,19 @@ export function StorePage() {
     setBusyPkgId(pkg.id);
     setCheckoutError(null);
     try {
-      const basket = await cart.addItem(pkg, name, quantity);
+      let basket;
+      try {
+        basket = await cart.addItem(pkg, name, quantity);
+      } catch (err) {
+        // Bedrock players routinely type their bare gamertag, forgetting the
+        // dot Geyser prefixes it with. Retry the dotted form before giving up —
+        // the name only fails at basket creation, so nothing has been added yet.
+        if (!BAD_USERNAME.test(err.message) || name.startsWith('.')) throw err;
+        const dotted = `.${name}`;
+        basket = await cart.addItem(pkg, dotted, quantity);
+        localStorage.setItem(USERNAME_KEY, dotted);
+        setUsername(dotted);
+      }
       if (mode === 'buy') {
         window.location.href = basket.links.checkout;
         return;
