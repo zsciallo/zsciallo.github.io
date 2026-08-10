@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { capture } from '../lib/funnel';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
 import { SectionHeader } from '../components/SectionHeader';
@@ -33,10 +34,18 @@ export function StorePage() {
   const [purchaseComplete, setPurchaseComplete] = useState(false);
 
   useEffect(() => {
-    setUsername(localStorage.getItem(USERNAME_KEY) || '');
+    const saved = localStorage.getItem(USERNAME_KEY) || '';
+    setUsername(saved);
+    // Funnel entry point. `returning` separates first-time browsers from
+    // players who have already bought once and know the flow.
+    capture('store_viewed', { returning: Boolean(saved) });
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === 'complete') {
       setPurchaseComplete(true);
+      // Client-side and best-effort: buyers who close the tab on Tebex's
+      // confirmation page never get here. Tebex remains the source of truth
+      // for revenue; this only gives the funnel its final step.
+      capture('purchase_completed');
       cart.clearBasket();
       history.replaceState(null, '', window.location.pathname);
     }
@@ -58,7 +67,18 @@ export function StorePage() {
         basket = await cart.addItem(pkg, dotted, quantity);
         localStorage.setItem(USERNAME_KEY, dotted);
         setUsername(dotted);
+        // Recovered silently for the buyer, but still a stumble worth counting:
+        // a high rate here argues for prompting Bedrock players up front.
+        capture('username_dot_recovered', { package: pkg.name });
       }
+      capture(mode === 'buy' ? 'checkout_started' : 'add_to_cart', {
+        package: pkg.name,
+        package_id: pkg.id,
+        quantity,
+        // Everything past this point happens on Tebex's domain, so the drop
+        // between checkout_started and purchase_completed is the payment step.
+        value: basket.total_price,
+      });
       if (mode === 'buy') {
         window.location.href = basket.links.checkout;
         return;
@@ -68,6 +88,14 @@ export function StorePage() {
       setCartOpen(true);
       setBusyPkgId(null);
     } catch (err) {
+      // The clearest "why they didn't buy" signal on the whole site — these
+      // are buyers who tried and were stopped.
+      capture('checkout_failed', {
+        reason: BAD_USERNAME.test(err.message) ? 'invalid_username' : 'other',
+        message: err.message,
+        package: pkg.name,
+        mode,
+      });
       if (BAD_USERNAME.test(err.message)) {
         setCheckoutError(
           `We couldn't find "${name}" in-game. Bedrock players must include the leading dot (e.g. .Toast).`,
@@ -85,6 +113,9 @@ export function StorePage() {
     if (username) {
       runAction(pkg, mode, username, quantity);
     } else {
+      // Buyers who reach the prompt but never fire add_to_cart / checkout_started
+      // abandoned at the username gate — the one step unique to this store.
+      capture('username_prompted', { package: pkg.name, mode });
       setPending({ pkg, mode, quantity });
     }
   }
@@ -99,6 +130,11 @@ export function StorePage() {
     } else {
       setPending(null);
     }
+  }
+
+  function handleView(pkg) {
+    capture('package_viewed', { package: pkg.name, package_id: pkg.id, price: pkg.total_price });
+    setViewPkg(pkg);
   }
 
   function changeUsername() {
@@ -208,7 +244,7 @@ export function StorePage() {
                       key={pkg.id}
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
-                      onView={setViewPkg}
+                      onView={handleView}
                       onBuy={(p, qty) => handleAction(p, 'buy', qty)}
                       onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
                     />
@@ -249,7 +285,13 @@ export function StorePage() {
           error={checkoutError}
           busy={pending.pkg != null && busyPkgId === pending.pkg.id}
           onConfirm={handleConfirmUsername}
-          onClose={() => { setPending(null); setCheckoutError(null); }}
+          onClose={() => {
+            // Closed the username gate without completing it — an explicit
+            // abandon, as opposed to simply going idle on the page.
+            if (pending.pkg) capture('username_prompt_dismissed', { package: pending.pkg.name });
+            setPending(null);
+            setCheckoutError(null);
+          }}
         />
       )}
     </>

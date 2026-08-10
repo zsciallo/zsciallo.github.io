@@ -6,5 +6,7 @@
   "launchDate": "2026-06-19",
   "downSubMessage": "Under maintenance",
   "hideVisitStore": false,
-  "tebexToken": "13t0r-a99444be06fcd80be9bc3361d1d07f80d8666f6b"
+  "tebexToken": "13t0r-a99444be06fcd80be9bc3361d1d07f80d8666f6b",
+  "posthogKey": "phc_z2uQBm2CGv6esry9jK6u6fxXcpcGoaY9GZgj4QraF8Je",
+  "posthogHost": "https://us.i.posthog.com"
 }
