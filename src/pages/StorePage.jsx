@@ -2,16 +2,8 @@ import { useState, useEffect } from 'preact/hooks';
 import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { capture } from '../lib/funnel';
-import {
-  loadUnavailable,
-  markUnavailable,
-  unmarkUnavailable,
-  applyProbe,
-  shouldProbe,
-  invalidateProbe,
-} from '../lib/unavailable';
-import { probeOwnership, NOT_PURCHASABLE } from '../lib/probeOwnership';
-import { limitCount } from '../lib/packageLimit';
+import { loadUnavailable, markUnavailable, unmarkUnavailable, clearUnavailable } from '../lib/unavailable';
+import { inferOwnedPackages } from '../lib/inferOwned';
 import { normalizeName, displayName, platformOf } from '../lib/minecraftName';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
@@ -30,6 +22,10 @@ const PLATFORM_KEY = 'chromabit_platform';
 // (Java) or Xbox (Bedrock, dot-prefixed via Geyser). Usually a stale saved
 // name, so send the buyer back to the modal instead of a dead-end banner.
 const BAD_USERNAME = /invalid username/i;
+
+// Tebex's refusal for a package the player can't buy — in practice, one they
+// already own. The `.` covers both the straight and curly apostrophe.
+const NOT_PURCHASABLE = /isn.?t purchasable|not purchasable/i;
 
 // Distinct from NOT_PURCHASABLE: the package is fine, but this basket already
 // holds the maximum allowed quantity.
@@ -73,8 +69,8 @@ export function StorePage() {
       // confirmation page never get here. Tebex remains the source of truth
       // for revenue; this only gives the funnel its final step.
       capture('purchase_completed');
-      // What they own just changed, so the cached probe is stale by definition.
-      invalidateProbe(saved);
+      // What they own just changed, so anything learned before is stale.
+      clearUnavailable(saved);
       cart.clearBasket();
       history.replaceState(null, '', window.location.pathname);
     }
@@ -85,35 +81,6 @@ export function StorePage() {
   useEffect(() => {
     if (username) cart.ensureBasket(username);
   }, [username]);
-
-  /*
-   * Ownership probe. The cached result is already on screen (loaded on mount),
-   * so this only runs when that cache is stale and never blocks rendering.
-   *
-   * Only capped packages are probed — nothing without a `user_limit` can be
-   * exhausted — which is 4 of the 8 packages rather than all of them.
-   */
-  useEffect(() => {
-    if (!username || !store.categories.length || !shouldProbe(username)) return;
-    let cancelled = false;
-
-    const capped = Object.values(store.packagesById)
-      .filter((p) => limitCount(p.user_limit) > 0)
-      .map((p) => p.id);
-    if (!capped.length) return;
-
-    probeOwnership(config.tebexToken, username, capped)
-      .then((owned) => {
-        if (cancelled) return;
-        setUnavailable(applyProbe(username, capped, owned));
-        if (owned.length) capture('packages_owned', { count: owned.length });
-      })
-      .catch(() => {
-        // Bad username, rate limit, offline — keep showing the cached view.
-      });
-
-    return () => { cancelled = true; };
-  }, [username, store.packagesById]);
 
   async function runAction(pkg, mode, name, quantity) {
     setBusyPkgId(pkg.id);
@@ -228,6 +195,11 @@ export function StorePage() {
   // grey themselves out instead of failing at checkout.
   const cartQtyById = {};
   cart.items.forEach((i) => { cartQtyById[i.id] = i.in_basket?.quantity || 0; });
+
+  // Two sources, deliberately combined: upgrade credits in the priced catalog
+  // reveal the rank ladder for free, and rejected adds cover the standalone
+  // capped packages that no discount can betray.
+  const ownedIds = new Set([...unavailable, ...inferOwnedPackages(store.categories)]);
 
   async function handleApplyCoupon(code) {
     await cart.addCoupon(code);
@@ -356,7 +328,7 @@ export function StorePage() {
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
                       cartQty={cartQtyById[pkg.id] || 0}
-                      owned={unavailable.includes(pkg.id)}
+                      owned={ownedIds.has(pkg.id)}
                       onView={handleView}
                       onBuy={(p, qty) => handleAction(p, 'buy', qty)}
                       onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
@@ -398,7 +370,7 @@ export function StorePage() {
           pkg={viewPkg}
           busy={busyPkgId === viewPkg.id}
           cartQty={cartQtyById[viewPkg.id] || 0}
-          owned={unavailable.includes(viewPkg.id)}
+          owned={ownedIds.has(viewPkg.id)}
           onBuy={(p, qty) => handleAction(p, 'buy', qty)}
           onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
           onClose={() => setViewPkg(null)}
