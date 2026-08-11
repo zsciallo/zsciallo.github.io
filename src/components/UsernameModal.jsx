@@ -28,9 +28,23 @@ export function UsernameModal({ initial, initialPlatform = 'java', error, busy, 
     setTimeout(onClose, 200);
   }
 
+  // Deliberately no click-to-dismiss on the overlay. Selecting text in the field
+  // and releasing the mouse past the edge of the card fires a click on the
+  // overlay, which threw away whatever had been typed. Closing is via the X or
+  // CANCEL only.
   return (
-    <div class={`modal-overlay${closing ? ' closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
+    <div class={`modal-overlay${closing ? ' closing' : ''}`}>
       <form class="modal-card card" onSubmit={submit}>
+        <button
+          type="button"
+          class="modal-close"
+          onClick={close}
+          disabled={busy}
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
         <p class="modal-title">WHERE DO YOU PLAY?</p>
 
         <div class="platform-toggle" role="radiogroup" aria-label="Minecraft edition">

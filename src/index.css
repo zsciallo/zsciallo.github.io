@@ -1920,6 +1920,7 @@ footer {
 }
 
 .modal-card {
+  position: relative;
   width: 100%;
   max-width: 400px;
   margin: auto 0;
@@ -1929,6 +1930,38 @@ footer {
   flex-direction: column;
   gap: 0.75rem;
   text-align: center;
+}
+
+/* Circular dismiss, matching .pkg-modal-close. The only way out of the
+   username modal besides CANCEL, since the overlay no longer swallows clicks. */
+.modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  background: rgba(12, 7, 24, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.modal-close:hover:not(:disabled) {
+  color: var(--accent-2);
+  border-color: var(--accent);
+}
+
+.modal-close:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .modal-title {
