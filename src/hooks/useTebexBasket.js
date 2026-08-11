@@ -7,6 +7,8 @@ import {
   setBasketQuantity,
   applyCoupon,
   removeCoupon,
+  applyGiftCard,
+  removeGiftCard,
 } from '../lib/tebex';
 
 const BASKET_KEY = 'chromabit_basket';
@@ -119,12 +121,46 @@ export function useTebexBasket(token) {
     store(await getBasket(token, current.ident));
   }
 
+  /**
+   * Redeem a gift card. Deliberately missing the one-at-a-time guard `addCoupon`
+   * has: cards are stored value, so a buyer with two half-used ones should be
+   * able to put both towards the same order.
+   */
+  async function addGiftCard(cardNumber) {
+    const current = basketRef.current;
+    if (!current) throw new Error('Add something to your cart first.');
+    if (current.giftcards?.some((g) => sameCard(g.card_number, cardNumber))) {
+      throw new Error('That gift card is already applied.');
+    }
+    await applyGiftCard(token, current.ident, cardNumber);
+    store(await getBasket(token, current.ident));
+  }
+
+  /** Take a gift card back off the basket and re-fetch for the restored total. */
+  async function dropGiftCard(cardNumber) {
+    const current = basketRef.current;
+    if (!current) return;
+    await removeGiftCard(token, current.ident, cardNumber);
+    store(await getBasket(token, current.ident));
+  }
+
   const items = basket?.packages || [];
   const count = items.reduce((n, p) => n + (p.in_basket?.quantity || 0), 0);
   const coupons = basket?.coupons || [];
+  const giftcards = basket?.giftcards || [];
 
   return {
-    basket, items, count, coupons,
-    ensureBasket, addItem, setQuantity, removeItem, clearBasket, addCoupon, dropCoupon,
+    basket, items, count, coupons, giftcards,
+    ensureBasket, addItem, setQuantity, removeItem, clearBasket,
+    addCoupon, dropCoupon, addGiftCard, dropGiftCard,
   };
+}
+
+/**
+ * Compare two card numbers ignoring the separators a buyer may have typed —
+ * Tebex accepts `1234-5678-…` and `12345678…` as the same card, so the
+ * duplicate check has to as well.
+ */
+function sameCard(a, b) {
+  return String(a || '').replace(/\D/g, '') === String(b || '').replace(/\D/g, '');
 }

@@ -211,6 +211,18 @@ export function StorePage() {
     capture('coupon_removed', { code });
   }
 
+  // Card numbers are stored value — never send one to the funnel. The event is
+  // only here to show gift cards are being redeemed at all.
+  async function handleApplyGiftCard(number) {
+    await cart.addGiftCard(number);
+    capture('giftcard_applied');
+  }
+
+  async function handleRemoveGiftCard(number) {
+    await cart.dropGiftCard(number);
+    capture('giftcard_removed');
+  }
+
   async function handleRemove(packageId) {
     setCartBusy(true);
     try {
@@ -350,10 +362,13 @@ export function StorePage() {
         packagesById={store.packagesById}
         busy={cartBusy}
         coupons={cart.coupons}
+        giftcards={cart.giftcards}
         onSetQuantity={handleSetQuantity}
         onRemove={handleRemove}
         onApplyCoupon={handleApplyCoupon}
         onRemoveCoupon={handleRemoveCoupon}
+        onApplyGiftCard={handleApplyGiftCard}
+        onRemoveGiftCard={handleRemoveGiftCard}
         onClose={() => setCartOpen(false)}
       />
 

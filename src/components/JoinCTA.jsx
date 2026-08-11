@@ -18,9 +18,12 @@ function DiscordIcon() {
 
 import { useDiscordMembers } from '../hooks/useDiscordMembers';
 
-export function JoinCTA({ config, status }) {
-  const isOffline = !status.loading && !status.online;
-  const showStore = !config.hideVisitStore && !isOffline;
+export function JoinCTA({ config }) {
+  // Deliberately not tied to server status any more. Purchases deliver whenever
+  // the player next logs in, so a server that's down — or a status API that
+  // can't be reached — is no reason to hide the store. `hideVisitStore` is the
+  // one lever that takes the button away.
+  const showStore = !config.hideVisitStore;
   const members = useDiscordMembers(config.discord);
   const memberLabel = members != null ? `${members}` : '60+';
 

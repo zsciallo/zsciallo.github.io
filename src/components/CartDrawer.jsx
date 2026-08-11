@@ -8,6 +8,24 @@ function formatPrice(amount, currency) {
 }
 
 /**
+ * Decide which of the two redemption endpoints a typed code belongs to.
+ *
+ * Gift card numbers are long digit strings (dashes and spaces optional), while
+ * promo codes are words like WELCOME20 — so anything that isn't purely numeric
+ * can only be a coupon. Short numbers stay coupons because a promo code of
+ * "2026" is plausible and a four-digit gift card isn't.
+ */
+function looksLikeGiftCard(value) {
+  return /^[\d\s-]+$/.test(value) && value.replace(/\D/g, '').length >= 8;
+}
+
+/** Show only the tail of a card number, the way a receipt would. */
+function maskCard(number) {
+  const digits = String(number || '').replace(/\D/g, '');
+  return digits ? `•••• ${digits.slice(-4)}` : 'APPLIED';
+}
+
+/**
  * Undiscounted subtotal, taken from the catalog rather than the basket.
  *
  * Applying a coupon rewrites the basket's own `base_price` to the *discounted*
@@ -51,10 +69,13 @@ export function CartDrawer({
   packagesById = {},
   busy,
   coupons = [],
+  giftcards = [],
   onSetQuantity,
   onRemove,
   onApplyCoupon,
   onRemoveCoupon,
+  onApplyGiftCard,
+  onRemoveGiftCard,
   onClose,
 }) {
   const currency = basket?.currency || 'USD';
@@ -68,19 +89,38 @@ export function CartDrawer({
   const saved = subtotal - total > 0.005 ? subtotal - total : 0;
   const hasWelcome = coupons.some((c) => c.code?.toUpperCase() === WELCOME_CODE);
 
-  async function submitCoupon(e) {
+  /**
+   * One box for both kinds of code. The shape of what was typed picks the
+   * endpoint, and a rejected gift card is retried as a coupon — the guess is
+   * only a guess, and an all-numeric promo code shouldn't be turned away.
+   */
+  async function submitCode(e) {
     e.preventDefault();
-    const value = code.trim();
+    // Card numbers get pasted with the spacing they're printed in; neither
+    // endpoint wants that, and no code of either kind contains a space.
+    const value = code.trim().replace(/\s+/g, '');
     if (!value || couponBusy) return;
     setCouponBusy(true);
     setCouponError(null);
+    const asGiftCard = looksLikeGiftCard(value);
     try {
-      await onApplyCoupon(value);
+      await (asGiftCard ? onApplyGiftCard(value) : onApplyCoupon(value));
       setCode('');
     } catch (err) {
+      let applied = false;
+      if (asGiftCard) {
+        try {
+          await onApplyCoupon(value);
+          setCode('');
+          applied = true;
+        } catch {
+          // Not a coupon either — report the gift card failure below, since
+          // that's what the buyer was most likely holding.
+        }
+      }
       // Tebex's messages are already buyer-readable ("The selected coupon code
       // is invalid."), so surface them rather than inventing our own.
-      setCouponError(err.message);
+      if (!applied) setCouponError(err.message);
     }
     setCouponBusy(false);
   }
@@ -90,6 +130,17 @@ export function CartDrawer({
     setCouponError(null);
     try {
       await onRemoveCoupon(value);
+    } catch (err) {
+      setCouponError(err.message);
+    }
+    setCouponBusy(false);
+  }
+
+  async function dropGiftCard(number) {
+    setCouponBusy(true);
+    setCouponError(null);
+    try {
+      await onRemoveGiftCard(number);
     } catch (err) {
       setCouponError(err.message);
     }
@@ -154,31 +205,29 @@ export function CartDrawer({
 
         {items.length > 0 && (
           <div class="cart-foot">
-            {/* One code at a time: promo codes here are single-use-per-player,
-                so stacking them isn't allowed. The input only comes back once
-                the active code is removed. */}
-            {coupons.length === 0 && (
-              <form class="cart-coupon" onSubmit={submitCoupon}>
-                <input
-                  class="cart-coupon-input"
-                  type="text"
-                  value={code}
-                  onInput={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="PROMO CODE"
-                  aria-label="Promo code"
-                  autocomplete="off"
-                  spellcheck={false}
-                  disabled={couponBusy || busy}
-                />
-                <button
-                  type="submit"
-                  class="cart-coupon-apply"
-                  disabled={!code.trim() || couponBusy || busy}
-                >
-                  {couponBusy ? '…' : 'APPLY'}
-                </button>
-              </form>
-            )}
+            {/* Stays open even with a coupon applied — a gift card can still go
+                on top of one. A second *coupon* is refused by the hook, since
+                promo codes here are single-use-per-player and don't stack. */}
+            <form class="cart-coupon" onSubmit={submitCode}>
+              <input
+                class="cart-coupon-input"
+                type="text"
+                value={code}
+                onInput={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="PROMO OR GIFT CARD"
+                aria-label="Promo code or gift card number"
+                autocomplete="off"
+                spellcheck={false}
+                disabled={couponBusy || busy}
+              />
+              <button
+                type="submit"
+                class="cart-coupon-apply"
+                disabled={!code.trim() || couponBusy || busy}
+              >
+                {couponBusy ? '…' : 'APPLY'}
+              </button>
+            </form>
 
             {coupons.length === 0 && !hasWelcome && !code && (
               <button
@@ -207,8 +256,25 @@ export function CartDrawer({
               </p>
             ))}
 
+            {giftcards.map((g, i) => (
+              <p class="cart-coupon-active" key={g.card_number || i}>
+                <span>GIFT CARD {maskCard(g.card_number)}</span>
+                <button
+                  type="button"
+                  onClick={() => dropGiftCard(g.card_number)}
+                  disabled={couponBusy || busy}
+                  aria-label={`Remove gift card ending ${String(g.card_number).replace(/\D/g, '').slice(-4)}`}
+                >
+                  ✕
+                </button>
+              </p>
+            ))}
+
             {coupons.length > 0 && (
-              <p class="cart-coupon-note">Remove this code to use a different one — only one applies per order.</p>
+              <p class="cart-coupon-note">
+                Remove this code to use a different one — only one promo code applies per order.
+                Gift cards can still be added.
+              </p>
             )}
 
             {saved > 0 && (
@@ -218,7 +284,10 @@ export function CartDrawer({
                   <span>{formatPrice(subtotal, currency)}</span>
                 </p>
                 <p class="cart-line cart-line--save">
-                  <span>DISCOUNT</span>
+                  {/* Both a coupon and a redeemed card land in `total_price`,
+                      and nothing in the basket separates them — so name
+                      whichever is in play rather than calling it all discount. */}
+                  <span>{giftcards.length > 0 ? (coupons.length > 0 ? 'DISCOUNT + GIFT CARD' : 'GIFT CARD') : 'DISCOUNT'}</span>
                   <span>−{formatPrice(saved, currency)}</span>
                 </p>
               </>

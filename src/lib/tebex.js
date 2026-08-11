@@ -85,9 +85,9 @@ export async function removeFromBasket(ident, packageId) {
   return body.data;
 }
 
-// Coupons sit under the token-scoped path, unlike the package endpoints above
-// which take a bare basket ident. Using the wrong base returns a 404 HTML page
-// rather than a JSON error, so keep these two shapes distinct.
+// Coupons and gift cards sit under the token-scoped path, unlike the package
+// endpoints above which take a bare basket ident. Using the wrong base returns
+// a 404 HTML page rather than a JSON error, so keep these two shapes distinct.
 
 /**
  * Apply a coupon code. Unlike the package calls this responds with only
@@ -101,4 +101,18 @@ export async function applyCoupon(token, ident, code) {
 /** Remove a previously applied coupon. Also requires a re-fetch afterwards. */
 export async function removeCoupon(token, ident, code) {
   await post(`${API}/accounts/${token}/baskets/${ident}/coupons/remove`, { coupon_code: code });
+}
+
+/**
+ * Redeem a gift card against the basket. Same bare-flag response as the coupon
+ * calls, so the caller re-fetches. Unlike coupons these stack — a basket can
+ * carry several cards, and Tebex draws on them in turn at checkout.
+ */
+export async function applyGiftCard(token, ident, cardNumber) {
+  await post(`${API}/accounts/${token}/baskets/${ident}/giftcards`, { card_number: cardNumber });
+}
+
+/** Take a gift card back off the basket. Also requires a re-fetch afterwards. */
+export async function removeGiftCard(token, ident, cardNumber) {
+  await post(`${API}/accounts/${token}/baskets/${ident}/giftcards/remove`, { card_number: cardNumber });
 }

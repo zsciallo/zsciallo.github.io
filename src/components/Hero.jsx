@@ -20,7 +20,7 @@ export function Hero({ config, status }) {
 
       <ServerStatusSection config={config} status={status} />
 
-      <JoinCTA config={config} status={status} />
+      <JoinCTA config={config} />
 
       <PrizeInfoCard prize={config.prize} />
 

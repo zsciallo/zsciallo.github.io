@@ -36,7 +36,7 @@ export function SmpPage() {
           <div class="rule" />
 
           <ServerStatusSection config={config} status={status} />
-          <JoinCTA config={config} status={status} />
+          <JoinCTA config={config} />
 
           <div class="rule" />
         </section>

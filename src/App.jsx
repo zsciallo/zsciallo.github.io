@@ -40,7 +40,7 @@ export default function App() {
 
           <div class="hero-connect">
             <ServerStatusSection config={config} status={status} />
-            <JoinCTA config={config} status={status} />
+            <JoinCTA config={config} />
           </div>
 
           <div class="rule" />
