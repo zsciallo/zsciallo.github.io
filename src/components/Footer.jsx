@@ -9,6 +9,7 @@ export function Footer() {
         <a href="/faq/">FAQ</a>
         <a href="/store/">STORE</a>
         <a href={config.discord} target="_blank" rel="noopener">DISCORD</a>
+        <a href="/privacy/">PRIVACY</a>
       </nav>
       &copy; 2026 ChromaBit LLC &nbsp;·&nbsp; play.chromabit.us
     </footer>

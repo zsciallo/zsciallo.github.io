@@ -22,14 +22,10 @@ export function initAnalytics() {
         // cost more per event and buy nothing. Funnels work fine without them.
         person_profiles: 'identified_only',
         capture_pageview: true,
-        // Session replay is the only thing that shows *why* a buyer bailed
-        // rather than just where.
-        disable_session_recording: false,
-        session_recording: {
-          // Default, set explicitly: the username field is a text input and
-          // its contents must not leave the browser.
-          maskAllInputs: true,
-        },
+        // Deliberately off. Minecraft skews heavily under-13, and screen
+        // recording a child-directed site is the highest-risk thing this SDK
+        // can do. The funnel events carry the diagnostics instead.
+        disable_session_recording: true,
       });
       posthog = ph;
       for (const [event, props] of queue) ph.capture(event, props);

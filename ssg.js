@@ -9,6 +9,7 @@ const pages = [
   { module: '/src/pages/SmpPage.jsx', export: 'SmpPage', dist: 'dist/smp/index.html' },
   { module: '/src/pages/FaqPage.jsx', export: 'FaqPage', dist: 'dist/faq/index.html' },
   { module: '/src/pages/StorePage.jsx', export: 'StorePage', dist: 'dist/store/index.html' },
+  { module: '/src/pages/PrivacyPage.jsx', export: 'PrivacyPage', dist: 'dist/privacy/index.html' },
 ];
 
 const server = await createServer({

@@ -2228,3 +2228,60 @@ html.js .reveal.is-visible {
     transform: none;
   }
 }
+
+/* Long-form legal prose (privacy policy). Narrower measure than the marketing
+   sections — this is text people actually read top to bottom. */
+.legal-section {
+  position: relative;
+  z-index: 1;
+  padding: 0 2rem 5rem;
+}
+
+.legal-section .container {
+  max-width: 760px;
+}
+
+.legal {
+  margin-top: 2.5rem;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.legal h2 {
+  font-family: 'Teko', sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  margin: 2.5rem 0 0.75rem;
+}
+
+.legal h2:first-child {
+  margin-top: 0;
+}
+
+.legal p {
+  margin-bottom: 1rem;
+}
+
+.legal ul {
+  margin: 0 0 1rem 1.25rem;
+}
+
+.legal li {
+  margin-bottom: 0.5rem;
+}
+
+.legal li::marker {
+  color: var(--accent);
+}
+
+.legal strong {
+  color: var(--text);
+}
+
+.legal a {
+  color: var(--accent-2);
+  text-decoration: underline;
+}
