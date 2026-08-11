@@ -1,7 +1,26 @@
+import { useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
+
+export const WELCOME_CODE = 'WELCOME20';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
+}
+
+/**
+ * Undiscounted subtotal, taken from the catalog rather than the basket.
+ *
+ * Applying a coupon rewrites the basket's own `base_price` to the *discounted*
+ * figure and Tebex exposes no "price before discount" field, so the only way to
+ * show what the buyer saved is to re-add it up from catalog prices. Falls back
+ * to the basket's line price for anything missing from the catalog, which just
+ * makes that line contribute zero savings rather than breaking the total.
+ */
+function fullSubtotal(items, packagesById) {
+  return items.reduce((sum, item) => {
+    const unit = packagesById[item.id]?.total_price ?? item.in_basket.price;
+    return sum + unit * item.in_basket.quantity;
+  }, 0);
 }
 
 export function CartIcon({ size = 16 }) {
@@ -25,8 +44,57 @@ export function CartFab({ count, onClick }) {
 }
 
 /** Slide-in side cart listing everything in the user's basket. */
-export function CartDrawer({ open, basket, items, packagesById = {}, busy, onSetQuantity, onRemove, onClose }) {
+export function CartDrawer({
+  open,
+  basket,
+  items,
+  packagesById = {},
+  busy,
+  coupons = [],
+  onSetQuantity,
+  onRemove,
+  onApplyCoupon,
+  onRemoveCoupon,
+  onClose,
+}) {
   const currency = basket?.currency || 'USD';
+  const [code, setCode] = useState('');
+  const [couponError, setCouponError] = useState(null);
+  const [couponBusy, setCouponBusy] = useState(false);
+
+  const subtotal = fullSubtotal(items, packagesById);
+  const total = basket?.total_price ?? 0;
+  // Sub-cent drift from Tebex's own rounding shouldn't render as "you saved $0.00".
+  const saved = subtotal - total > 0.005 ? subtotal - total : 0;
+  const hasWelcome = coupons.some((c) => c.code?.toUpperCase() === WELCOME_CODE);
+
+  async function submitCoupon(e) {
+    e.preventDefault();
+    const value = code.trim();
+    if (!value || couponBusy) return;
+    setCouponBusy(true);
+    setCouponError(null);
+    try {
+      await onApplyCoupon(value);
+      setCode('');
+    } catch (err) {
+      // Tebex's messages are already buyer-readable ("The selected coupon code
+      // is invalid."), so surface them rather than inventing our own.
+      setCouponError(err.message);
+    }
+    setCouponBusy(false);
+  }
+
+  async function dropCoupon(value) {
+    setCouponBusy(true);
+    setCouponError(null);
+    try {
+      await onRemoveCoupon(value);
+    } catch (err) {
+      setCouponError(err.message);
+    }
+    setCouponBusy(false);
+  }
 
   return (
     <>
@@ -86,9 +154,79 @@ export function CartDrawer({ open, basket, items, packagesById = {}, busy, onSet
 
         {items.length > 0 && (
           <div class="cart-foot">
+            {/* One code at a time: promo codes here are single-use-per-player,
+                so stacking them isn't allowed. The input only comes back once
+                the active code is removed. */}
+            {coupons.length === 0 && (
+              <form class="cart-coupon" onSubmit={submitCoupon}>
+                <input
+                  class="cart-coupon-input"
+                  type="text"
+                  value={code}
+                  onInput={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="PROMO CODE"
+                  aria-label="Promo code"
+                  autocomplete="off"
+                  spellcheck={false}
+                  disabled={couponBusy || busy}
+                />
+                <button
+                  type="submit"
+                  class="cart-coupon-apply"
+                  disabled={!code.trim() || couponBusy || busy}
+                >
+                  {couponBusy ? '…' : 'APPLY'}
+                </button>
+              </form>
+            )}
+
+            {coupons.length === 0 && !hasWelcome && !code && (
+              <button
+                type="button"
+                class="cart-coupon-hint"
+                onClick={() => setCode(WELCOME_CODE)}
+                disabled={couponBusy || busy}
+              >
+                First order? Tap to use <strong>{WELCOME_CODE}</strong> for 20% off
+              </button>
+            )}
+
+            {couponError && <p class="cart-coupon-error">{couponError}</p>}
+
+            {coupons.map((c) => (
+              <p class="cart-coupon-active" key={c.code}>
+                <span>{c.code} APPLIED</span>
+                <button
+                  type="button"
+                  onClick={() => dropCoupon(c.code)}
+                  disabled={couponBusy || busy}
+                  aria-label={`Remove promo code ${c.code}`}
+                >
+                  ✕
+                </button>
+              </p>
+            ))}
+
+            {coupons.length > 0 && (
+              <p class="cart-coupon-note">Remove this code to use a different one — only one applies per order.</p>
+            )}
+
+            {saved > 0 && (
+              <>
+                <p class="cart-line">
+                  <span>SUBTOTAL</span>
+                  <span>{formatPrice(subtotal, currency)}</span>
+                </p>
+                <p class="cart-line cart-line--save">
+                  <span>DISCOUNT</span>
+                  <span>−{formatPrice(saved, currency)}</span>
+                </p>
+              </>
+            )}
+
             <p class="cart-total">
               <span>TOTAL</span>
-              <span>{formatPrice(basket.total_price, currency)}</span>
+              <span>{formatPrice(total, currency)}</span>
             </p>
             <a class="btn btn-primary cart-checkout" href={basket.links?.checkout}>
               CHECKOUT

@@ -2229,6 +2229,292 @@ html.js .reveal.is-visible {
   }
 }
 
+/* --- Store: login control, promo, limits, cart discounts ---------------- */
+
+.store-login {
+  font-family: 'Teko', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  color: var(--bg);
+  background: var(--grad-cta);
+  border: 0;
+  border-radius: 4px;
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.store-login:hover {
+  filter: brightness(1.12);
+}
+
+.platform-toggle {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+
+.platform-opt {
+  flex: 1;
+  font-family: 'Teko', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.platform-opt:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.platform-opt.active {
+  color: var(--text);
+  border-color: var(--accent);
+  background: var(--glow);
+}
+
+.platform-opt:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.modal-preview {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding-top: 0.6rem;
+}
+
+.modal-preview strong {
+  color: var(--positive);
+}
+
+.store-user-platform {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  border: 1px solid var(--border-pink);
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.store-user-hint {
+  margin-left: 0.6rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.store-promo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin: 0 auto 1.5rem;
+  max-width: 640px;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-pink);
+  border-radius: 6px;
+  background: var(--frost);
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.store-promo strong {
+  color: var(--text);
+}
+
+.store-promo-tag {
+  font-family: 'Teko', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.pkg-limit {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--accent-2);
+  margin-top: 0.35rem;
+}
+
+.cart-coupon {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.cart-coupon-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.cart-coupon-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.cart-coupon-apply {
+  font-family: 'Teko', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 0.9rem;
+  cursor: pointer;
+}
+
+.cart-coupon-apply:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.cart-coupon-hint {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.cart-coupon-hint strong {
+  color: var(--accent);
+}
+
+.cart-coupon-error {
+  color: var(--accent-2);
+  font-size: 0.76rem;
+  padding-bottom: 0.5rem;
+}
+
+.cart-coupon-active {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--positive);
+  padding-bottom: 0.5rem;
+}
+
+.cart-coupon-active button {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.cart-coupon-note {
+  color: var(--muted);
+  font-size: 0.72rem;
+  padding-bottom: 0.5rem;
+}
+
+.pkg-limit--hit {
+  color: var(--muted);
+}
+
+/* Rank upgrade credit — the player already paid for a lower tier. */
+.pkg-upgrade {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--positive);
+  margin-top: 0.3rem;
+}
+
+/* Limited package already in the basket — a second one would be rejected at
+   checkout, so the actions read as unavailable rather than merely busy. */
+.pkg-buy:disabled,
+.pkg-cart-btn:disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+.cart-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding-bottom: 0.35rem;
+}
+
+.cart-line--save {
+  color: var(--positive);
+}
+
+.purchase-modal {
+  text-align: center;
+}
+
+.purchase-check {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--bg);
+  background: var(--positive);
+}
+
+.purchase-ip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  margin: 1.25rem 0 0.5rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.purchase-ip:hover {
+  border-color: var(--accent);
+}
+
+.purchase-ip .ip-value {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.purchase-ip-copy {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
 /* Long-form legal prose (privacy policy). Narrower measure than the marketing
    sections — this is text people actually read top to bottom. */
 .legal-section {

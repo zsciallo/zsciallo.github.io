@@ -26,9 +26,16 @@ function put(url, payload) {
   });
 }
 
-/** Fetch all categories with their packages included. */
-export async function fetchCategories(token) {
-  const body = await request(`${API}/accounts/${token}/categories?includePackages=1`);
+/**
+ * Fetch all categories with their packages included.
+ *
+ * Pass a `basketIdent` to get pricing for the player that basket belongs to.
+ * Upgrade discounts — where owning VIP+ knocks its price off MVP — only appear
+ * on a basket-scoped request; the anonymous catalog always quotes full price.
+ */
+export async function fetchCategories(token, basketIdent) {
+  const scope = basketIdent ? `&basketIdent=${encodeURIComponent(basketIdent)}` : '';
+  const body = await request(`${API}/accounts/${token}/categories?includePackages=1${scope}`);
   return body.data || [];
 }
 
@@ -76,4 +83,22 @@ export async function setBasketQuantity(ident, packageId, quantity) {
 export async function removeFromBasket(ident, packageId) {
   const body = await post(`${API}/baskets/${ident}/packages/remove`, { package_id: packageId });
   return body.data;
+}
+
+// Coupons sit under the token-scoped path, unlike the package endpoints above
+// which take a bare basket ident. Using the wrong base returns a 404 HTML page
+// rather than a JSON error, so keep these two shapes distinct.
+
+/**
+ * Apply a coupon code. Unlike the package calls this responds with only
+ * `{ success, message }`, so the caller has to re-fetch the basket to see the
+ * new pricing.
+ */
+export async function applyCoupon(token, ident, code) {
+  await post(`${API}/accounts/${token}/baskets/${ident}/coupons`, { coupon_code: code });
+}
+
+/** Remove a previously applied coupon. Also requires a re-fetch afterwards. */
+export async function removeCoupon(token, ident, code) {
+  await post(`${API}/accounts/${token}/baskets/${ident}/coupons/remove`, { coupon_code: code });
 }

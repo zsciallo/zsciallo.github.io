@@ -2,29 +2,49 @@ import { useState, useEffect } from 'preact/hooks';
 import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { capture } from '../lib/funnel';
+import {
+  loadUnavailable,
+  markUnavailable,
+  unmarkUnavailable,
+  applyProbe,
+  shouldProbe,
+  invalidateProbe,
+} from '../lib/unavailable';
+import { probeOwnership, NOT_PURCHASABLE } from '../lib/probeOwnership';
+import { limitCount } from '../lib/packageLimit';
+import { normalizeName, displayName, platformOf } from '../lib/minecraftName';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
 import { SectionHeader } from '../components/SectionHeader';
 import { PackageCard } from '../components/PackageCard';
 import { UsernameModal } from '../components/UsernameModal';
 import { PackageModal } from '../components/PackageModal';
-import { CartFab, CartDrawer } from '../components/CartDrawer';
+import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
+import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
 
 const USERNAME_KEY = 'chromabit_username';
+const PLATFORM_KEY = 'chromabit_platform';
 
 // Tebex 404s basket creation when it can't resolve the name against Mojang
 // (Java) or Xbox (Bedrock, dot-prefixed via Geyser). Usually a stale saved
 // name, so send the buyer back to the modal instead of a dead-end banner.
 const BAD_USERNAME = /invalid username/i;
 
+// Distinct from NOT_PURCHASABLE: the package is fine, but this basket already
+// holds the maximum allowed quantity.
+const OVER_QUANTITY = /quantity cannot be greater than/i;
+
 export function StorePage() {
-  const store = useTebexStore(config.tebexToken);
   const cart = useTebexBasket(config.tebexToken);
+  // Scoping the catalog to the basket is what surfaces rank upgrade discounts;
+  // without an ident every player is quoted the full price.
+  const store = useTebexStore(config.tebexToken, cart.basket?.ident);
   const [activeCat, setActiveCat] = useState(null); // null = all categories
   useScrollReveal([store.categories, activeCat]);
 
   const [username, setUsername] = useState('');
+  const [platform, setPlatform] = useState('java');
   const [pending, setPending] = useState(null); // { pkg, mode: 'buy' | 'cart' }
   const [busyPkgId, setBusyPkgId] = useState(null);
   const [cartBusy, setCartBusy] = useState(false);
@@ -32,10 +52,17 @@ export function StorePage() {
   const [viewPkg, setViewPkg] = useState(null);
   const [checkoutError, setCheckoutError] = useState(null);
   const [purchaseComplete, setPurchaseComplete] = useState(false);
+  // Package ids Tebex has refused for the current player, inferred from failed
+  // basket adds and remembered across visits.
+  const [unavailable, setUnavailable] = useState([]);
 
   useEffect(() => {
     const saved = localStorage.getItem(USERNAME_KEY) || '';
     setUsername(saved);
+    // Buyers saved before the platform toggle existed have no stored edition,
+    // so read it back off the dot Geyser left on the name.
+    setPlatform(localStorage.getItem(PLATFORM_KEY) || platformOf(saved));
+    setUnavailable(loadUnavailable(saved));
     // Funnel entry point. `returning` separates first-time browsers from
     // players who have already bought once and know the flow.
     capture('store_viewed', { returning: Boolean(saved) });
@@ -46,31 +73,62 @@ export function StorePage() {
       // confirmation page never get here. Tebex remains the source of truth
       // for revenue; this only gives the funnel its final step.
       capture('purchase_completed');
+      // What they own just changed, so the cached probe is stale by definition.
+      invalidateProbe(saved);
       cart.clearBasket();
       history.replaceState(null, '', window.location.pathname);
     }
   }, []);
 
+  // A basket is what ties catalog pricing to a player, so make sure one exists
+  // as soon as we know who they are.
+  useEffect(() => {
+    if (username) cart.ensureBasket(username);
+  }, [username]);
+
+  /*
+   * Ownership probe. The cached result is already on screen (loaded on mount),
+   * so this only runs when that cache is stale and never blocks rendering.
+   *
+   * Only capped packages are probed — nothing without a `user_limit` can be
+   * exhausted — which is 4 of the 8 packages rather than all of them.
+   */
+  useEffect(() => {
+    if (!username || !store.categories.length || !shouldProbe(username)) return;
+    let cancelled = false;
+
+    const capped = Object.values(store.packagesById)
+      .filter((p) => limitCount(p.user_limit) > 0)
+      .map((p) => p.id);
+    if (!capped.length) return;
+
+    probeOwnership(config.tebexToken, username, capped)
+      .then((owned) => {
+        if (cancelled) return;
+        setUnavailable(applyProbe(username, capped, owned));
+        if (owned.length) capture('packages_owned', { count: owned.length });
+      })
+      .catch(() => {
+        // Bad username, rate limit, offline — keep showing the cached view.
+      });
+
+    return () => { cancelled = true; };
+  }, [username, store.packagesById]);
+
   async function runAction(pkg, mode, name, quantity) {
     setBusyPkgId(pkg.id);
     setCheckoutError(null);
     try {
-      let basket;
-      try {
-        basket = await cart.addItem(pkg, name, quantity);
-      } catch (err) {
-        // Bedrock players routinely type their bare gamertag, forgetting the
-        // dot Geyser prefixes it with. Retry the dotted form before giving up —
-        // the name only fails at basket creation, so nothing has been added yet.
-        if (!BAD_USERNAME.test(err.message) || name.startsWith('.')) throw err;
-        const dotted = `.${name}`;
-        basket = await cart.addItem(pkg, dotted, quantity);
-        localStorage.setItem(USERNAME_KEY, dotted);
-        setUsername(dotted);
-        // Recovered silently for the buyer, but still a stumble worth counting:
-        // a high rate here argues for prompting Bedrock players up front.
-        capture('username_dot_recovered', { package: pkg.name });
-      }
+      // No auto-retry with a dot prefix here any more. That silently moved a
+      // purchase into the Bedrock namespace, and since plenty of gamertags also
+      // exist as Java usernames, the undotted name often resolved to a
+      // different real player instead of failing. The platform is asked for up
+      // front now, so the name we were given is the name we send.
+      const basket = await cart.addItem(pkg, name, quantity);
+      // Succeeded, so any remembered refusal is stale — Battle Pass limits
+      // expire, and a rank may have been refunded.
+      if (unavailable.includes(pkg.id)) setUnavailable(unmarkUnavailable(name, pkg.id));
+
       capture(mode === 'buy' ? 'checkout_started' : 'add_to_cart', {
         package: pkg.name,
         package_id: pkg.id,
@@ -88,19 +146,34 @@ export function StorePage() {
       setCartOpen(true);
       setBusyPkgId(null);
     } catch (err) {
+      const owned = NOT_PURCHASABLE.test(err.message);
+      const overQty = OVER_QUANTITY.test(err.message);
+
       // The clearest "why they didn't buy" signal on the whole site — these
       // are buyers who tried and were stopped.
       capture('checkout_failed', {
-        reason: BAD_USERNAME.test(err.message) ? 'invalid_username' : 'other',
+        reason: BAD_USERNAME.test(err.message)
+          ? 'invalid_username'
+          : owned ? 'not_purchasable' : overQty ? 'over_quantity' : 'other',
         message: err.message,
         package: pkg.name,
         mode,
       });
+
       if (BAD_USERNAME.test(err.message)) {
         setCheckoutError(
-          `We couldn't find "${name}" in-game. Bedrock players must include the leading dot (e.g. .Toast).`,
+          platform === 'bedrock'
+            ? `We couldn't find the Xbox gamertag "${name.replace(/^\./, '')}". Check the spelling, or switch to Java if that's where you play.`
+            : `We couldn't find the Java username "${name}". Check the spelling, or switch to Bedrock if that's where you play.`,
         );
         setPending({ pkg, mode, quantity });
+      } else if (owned) {
+        // Remember the refusal so the card greys out from here on, rather than
+        // letting them hit the same wall on every visit.
+        setUnavailable(markUnavailable(name, pkg.id));
+        setCheckoutError(`You already have ${pkg.name} — it's limited to one per player.`);
+      } else if (overQty) {
+        setCheckoutError(`${pkg.name} is limited to one per player, and it's already in your cart.`);
       } else {
         setCheckoutError(err.message);
       }
@@ -120,11 +193,17 @@ export function StorePage() {
     }
   }
 
-  function handleConfirmUsername(name) {
+  function handleConfirmUsername(raw, chosenPlatform) {
+    // What Tebex sees: Bedrock gamertags get the Geyser dot and lose spaces.
+    const name = normalizeName(raw, chosenPlatform);
     // A basket is tied to its username, so drop it if the name changed.
     if (name !== username) cart.clearBasket();
     localStorage.setItem(USERNAME_KEY, name);
+    localStorage.setItem(PLATFORM_KEY, chosenPlatform);
     setUsername(name);
+    setPlatform(chosenPlatform);
+    // Refusals belong to the player, not the browser — swap in this account's.
+    setUnavailable(loadUnavailable(name));
     if (pending?.pkg) {
       runAction(pending.pkg, pending.mode, name, pending.quantity);
     } else {
@@ -137,9 +216,27 @@ export function StorePage() {
     setViewPkg(pkg);
   }
 
-  function changeUsername() {
+  // Serves both the logged-out LOG IN button and the "change" link, since both
+  // just open the username modal with nothing queued behind it.
+  function openLogin() {
     setCheckoutError(null);
+    capture('login_opened', { had_username: Boolean(username) });
     setPending({ pkg: null, mode: 'change' });
+  }
+
+  // Quantity of each package already in the basket, so limited packages can
+  // grey themselves out instead of failing at checkout.
+  const cartQtyById = {};
+  cart.items.forEach((i) => { cartQtyById[i.id] = i.in_basket?.quantity || 0; });
+
+  async function handleApplyCoupon(code) {
+    await cart.addCoupon(code);
+    capture('coupon_applied', { code });
+  }
+
+  async function handleRemoveCoupon(code) {
+    await cart.dropCoupon(code);
+    capture('coupon_removed', { code });
   }
 
   async function handleRemove(packageId) {
@@ -189,17 +286,31 @@ export function StorePage() {
 
         <section class="store-section" aria-label="Store packages">
           <div class="container">
-            {purchaseComplete && (
-              <div class="store-banner success">
-                <strong>Thanks for your purchase!</strong> Your items will be delivered in-game within a few minutes. Make sure you're online on <strong>{config.serverIP}</strong>.
-              </div>
-            )}
+            {/* Always rendered, so there's a visible account control before the
+                buyer ever reaches a Buy button — not just a modal that ambushes
+                them at checkout. */}
+            <p class="store-user">
+              {username ? (
+                <>
+                  Buying as <strong>{username}</strong>
+                  <span class="store-user-platform">{platform === 'bedrock' ? 'BEDROCK' : 'JAVA'}</span>
+                  <button class="store-user-change" onClick={openLogin}>change</button>
+                </>
+              ) : (
+                <>
+                  <button class="store-login" onClick={openLogin}>LOG IN</button>
+                  <span class="store-user-hint">Set your Minecraft username to buy</span>
+                </>
+              )}
+            </p>
 
-            {username && (
-              <p class="store-user">
-                Buying as <strong>{username}</strong>
-                <button class="store-user-change" onClick={changeUsername}>change</button>
-              </p>
+            {!username && (
+              <div class="store-promo">
+                <span class="store-promo-tag">NEW HERE?</span>
+                <span>
+                  Use code <strong>{WELCOME_CODE}</strong> at checkout for <strong>20% off</strong> your first order.
+                </span>
+              </div>
             )}
 
             {checkoutError && !pending && (
@@ -244,6 +355,8 @@ export function StorePage() {
                       key={pkg.id}
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
+                      cartQty={cartQtyById[pkg.id] || 0}
+                      owned={unavailable.includes(pkg.id)}
                       onView={handleView}
                       onBuy={(p, qty) => handleAction(p, 'buy', qty)}
                       onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
@@ -264,15 +377,28 @@ export function StorePage() {
         items={cart.items}
         packagesById={store.packagesById}
         busy={cartBusy}
+        coupons={cart.coupons}
         onSetQuantity={handleSetQuantity}
         onRemove={handleRemove}
+        onApplyCoupon={handleApplyCoupon}
+        onRemoveCoupon={handleRemoveCoupon}
         onClose={() => setCartOpen(false)}
       />
+
+      {purchaseComplete && (
+        <PurchaseModal
+          serverIP={config.serverIP}
+          username={username}
+          onClose={() => setPurchaseComplete(false)}
+        />
+      )}
 
       {viewPkg && !pending && (
         <PackageModal
           pkg={viewPkg}
           busy={busyPkgId === viewPkg.id}
+          cartQty={cartQtyById[viewPkg.id] || 0}
+          owned={unavailable.includes(viewPkg.id)}
           onBuy={(p, qty) => handleAction(p, 'buy', qty)}
           onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
           onClose={() => setViewPkg(null)}
@@ -281,7 +407,8 @@ export function StorePage() {
 
       {pending && (
         <UsernameModal
-          initial={username}
+          initial={displayName(username, platform)}
+          initialPlatform={platform}
           error={checkoutError}
           busy={pending.pkg != null && busyPkgId === pending.pkg.id}
           onConfirm={handleConfirmUsername}
