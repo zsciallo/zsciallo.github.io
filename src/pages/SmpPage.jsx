@@ -19,7 +19,7 @@ export function SmpPage() {
   return (
     <>
       <main>
-        <section class="page-hero container" aria-label="ChromaBit Economy SMP Minecraft Server">
+        <section class="page-hero container" aria-label="Chromabit Economy SMP Minecraft Server">
 
           <Logo />
 
@@ -28,7 +28,7 @@ export function SmpPage() {
             ECONOMY<span class="accent">SMP</span>
           </h1>
           <p class="hero-sub">
-            ChromaBit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.
+            Chromabit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.
           </p>
 
           <StatusBadge status={status} />
@@ -46,7 +46,7 @@ export function SmpPage() {
             <SectionHeader
               eyebrow="HOW IT WORKS"
               title={<>PLAYER-DRIVEN.<br />EVENT-BACKED.</>}
-              sub="ChromaBit is an Economy SMP built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete in events for store credit."
+              sub="Chromabit is an Economy SMP built around competitive, player-driven gameplay. Grind the markets, build your wealth, and compete in events for store credit."
             />
             <div class="features-grid">
               <FeatureCard

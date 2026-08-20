@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node ssg.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "market": "python tools/build_market_data.py && python tools/fetch_icons.py"
   },
   "dependencies": {
     "posthog-js": "^1.415.1",

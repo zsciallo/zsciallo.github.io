@@ -14,16 +14,16 @@ export function PrivacyPage() {
   return (
     <>
       <main>
-        <section class="page-hero container" aria-label="ChromaBit privacy policy">
-          <a href="/" class="logo-link" aria-label="Back to ChromaBit home">
-            <img class="logo-sm" src="/server-icon-old-2.png" alt="ChromaBit" />
+        <section class="page-hero container" aria-label="Chromabit privacy policy">
+          <a href="/" class="logo-link" aria-label="Back to Chromabit home">
+            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit" />
           </a>
 
           <p class="section-eyebrow">LEGAL</p>
           <h1 class="hero-title hero-title--inline">
             PRIVACY <span class="accent">POLICY</span>
           </h1>
-          <p class="hero-sub">How ChromaBit handles your data on this website.</p>
+          <p class="hero-sub">How Chromabit handles your data on this website.</p>
 
           <div class="rule" />
         </section>
@@ -35,7 +35,7 @@ export function PrivacyPage() {
             <div class="legal">
               <p>
                 This policy covers the website at <strong>chromabit.us</strong>, operated by
-                ChromaBit LLC ("we", "us"). It explains what we collect when you visit, why,
+                Chromabit LLC ("we", "us"). It explains what we collect when you visit, why,
                 and how to make us stop. It does not cover what happens in-game on
                 {' '}<strong>{config.serverIP}</strong>, or on Discord.
               </p>
@@ -154,7 +154,7 @@ export function PrivacyPage() {
               <h2>Contact</h2>
               <p>
                 Questions about this policy, or a data request? Reach us in the
-                {' '}<a href={config.discord} target="_blank" rel="noopener">ChromaBit Discord</a>
+                {' '}<a href={config.discord} target="_blank" rel="noopener">Chromabit Discord</a>
                 {' '}and open a ticket.
               </p>
             </div>

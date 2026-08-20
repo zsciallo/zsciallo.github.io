@@ -42,7 +42,7 @@ export function PurchaseModal({ serverIP, username, onClose }) {
 
         <p class="modal-title" id="purchase-title">PURCHASE COMPLETE</p>
         <p class="modal-sub">
-          Thanks for supporting ChromaBit{username ? <>, <strong>{username}</strong></> : ''}! Your items
+          Thanks for supporting Chromabit{username ? <>, <strong>{username}</strong></> : ''}! Your items
           are delivered in-game within a few minutes — you need to be online to receive them.
         </p>
 

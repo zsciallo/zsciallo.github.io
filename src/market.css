@@ -1,0 +1,908 @@
+/* ─── AUCTION MARKET ───
+   Scoped to /auctions/. Loaded after index.css, which supplies the palette
+   tokens and the page chrome (hero, footer, buttons) this page reuses. */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The market table needs more room than the site's 900px reading column. */
+.market-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.market-head {
+  position: relative;
+  z-index: 1;
+  border-bottom: 1px solid var(--border);
+  background: rgba(12, 7, 24, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin-bottom: 1.5rem;
+}
+
+.market-head-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.market-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.market-brand img {
+  image-rendering: pixelated;
+  border-radius: 6px;
+}
+
+.market-titles {
+  flex: 1 1 auto;
+  border-left: 1px solid var(--border);
+  padding-left: 1.25rem;
+}
+
+.market-eyebrow {
+  text-align: left;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  margin-bottom: 0.05rem;
+}
+
+.market-h1 {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.market-h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.beta-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  color: var(--accent-2);
+  background: var(--border-pink);
+  border: 1px solid rgba(255, 125, 225, 0.35);
+  border-radius: 4px;
+  padding: 0.24rem 0.4rem 0.2rem;
+  transform: translateY(-1px);
+}
+
+.market-h1 .accent {
+  background: var(--grad-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.market-meta {
+  flex: 0 1 auto;
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.market-meta b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.market-section {
+  padding: 0 0 5rem;
+}
+
+/* ─── controls ─── */
+
+.market-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.market-search {
+  flex: 1 1 260px;
+}
+
+.market-search input,
+.market-sort select {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.92rem;
+  color: var(--text);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.market-search input::placeholder {
+  color: var(--muted);
+}
+
+.market-search input:focus,
+.market-sort select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+.market-sort select {
+  cursor: pointer;
+  min-width: 170px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2.2rem;
+}
+
+.market-sort select option {
+  background: var(--bg2);
+}
+
+.market-toggle {
+  padding: 0.7rem 1.1rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.market-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent-deep);
+}
+
+.market-toggle.active {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.market-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+/* ─── item table ─── */
+
+.market-table {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg2);
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: minmax(0, 3.2fr) 0.9fr 0.9fr 0.7fr 0.9fr 0.7fr 96px;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.market-row:first-child {
+  border-top: none;
+}
+
+.market-row:hover {
+  background: var(--bg3);
+}
+
+.market-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.market-row--head {
+  cursor: default;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.market-row--head:hover {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.market-row .num {
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.market-row .num em {
+  font-style: normal;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.market-when {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+}
+
+.market-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.item-icon {
+  flex: none;
+  image-rendering: pixelated;
+  border-radius: 5px;
+}
+
+.item-icon--glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.market-item-text {
+  min-width: 0;
+}
+
+.market-name {
+  display: block;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.market-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.market-ench {
+  color: var(--accent);
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.market-tag {
+  flex: none;
+  padding: 0.05rem 0.36rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  background: var(--border-pink);
+  border-radius: 3px;
+}
+
+.change.up {
+  color: var(--positive);
+}
+
+.change.down {
+  color: #ff8a8a;
+}
+
+.spark-col {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.spark {
+  display: block;
+  overflow: visible;
+}
+
+.spark--empty {
+  width: 84px;
+  height: 26px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.market-more {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.market-more:hover {
+  color: var(--text);
+  border-color: var(--accent-deep);
+}
+
+.market-status {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.market-status--error {
+  color: #ff8a8a;
+}
+
+.market-status-hint {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.market-status-hint code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--bg3);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  margin: 0 0.15rem;
+}
+
+/* ─── detail ─── */
+
+.detail-back {
+  margin-bottom: 1.1rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.55rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.detail-back:hover {
+  color: var(--text);
+  border-color: var(--accent-deep);
+}
+
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.detail-name {
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+}
+
+.detail-sub {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.detail-key {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+.detail-ench,
+.detail-contents ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin-bottom: 1rem;
+}
+
+.detail-ench li,
+.detail-contents li {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.detail-ench li b {
+  color: var(--accent);
+}
+
+.detail-contents li b {
+  color: var(--positive);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.detail-contents h4,
+.detail-lore h4,
+.mini-table h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.mini-table h4 em {
+  font-style: normal;
+  opacity: 0.55;
+}
+
+/* ─── stat tiles ─── */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin-bottom: 1.25rem;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stat {
+  padding: 0.8rem 0.95rem;
+  background: var(--bg2);
+}
+
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.stat-value {
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.22rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.stat-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.8;
+  margin-top: 0.15rem;
+}
+
+/* ─── charts ─── */
+
+.chart-card {
+  padding: 1rem 1.1rem 0.75rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.chart-title {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.range-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg3);
+  border-radius: 7px;
+}
+
+.range-tab {
+  padding: 0.28rem 0.7rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.range-tab:hover {
+  color: var(--text);
+}
+
+.range-tab.active {
+  color: var(--text);
+  background: var(--accent-deep);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin: 0.55rem 0 0.35rem;
+}
+
+.legend-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.legend-key i {
+  width: 11px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.legend-key--wash i {
+  height: 9px;
+  opacity: 0.28;
+}
+
+.chart-body {
+  position: relative;
+  min-height: 320px;
+}
+
+.chart-svg {
+  display: block;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-axis {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-tick {
+  fill: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tick--y {
+  text-anchor: end;
+}
+
+.chart-tick--x {
+  text-anchor: middle;
+}
+
+.chart-axis-label {
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-anchor: start;
+  opacity: 0.65;
+}
+
+.chart-crosshair line {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.45;
+}
+
+.chart-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.chart-tip {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  min-width: 172px;
+  padding: 0.55rem 0.7rem;
+  background: rgba(12, 7, 24, 0.96);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.chart-tip-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.chart-tip dl div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.9rem;
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.chart-tip dt {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+}
+
+.chart-tip dt i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.chart-tip dd {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* ─── listings & sales ─── */
+
+.detail-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.mini-table {
+  padding: 0.9rem 1rem 0.6rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.mini-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.mini-table th {
+  padding: 0.3rem 0.4rem 0.45rem;
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.mini-table td {
+  padding: 0.38rem 0.4rem;
+  border-bottom: 1px solid rgba(42, 30, 68, 0.5);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.mini-table tr:last-child td {
+  border-bottom: none;
+}
+
+.mini-table .num {
+  text-align: right;
+}
+
+.mini-table .mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.mini-table .seller {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.mini-more {
+  padding: 0.55rem 0.4rem 0.2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.mini-empty {
+  padding: 1.2rem 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.detail-lore {
+  margin-top: 1.25rem;
+}
+
+.detail-lore p {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* ─── narrow screens ───
+   The table drops its middle columns rather than scrolling sideways: floor,
+   trend and the sparkline are what the list is read for. */
+
+@media (max-width: 860px) {
+  .market-row {
+    grid-template-columns: minmax(0, 2.4fr) 1fr 0.8fr 84px;
+  }
+
+  .market-row > :nth-child(3),
+  .market-row > :nth-child(5),
+  .market-row > :nth-child(6) {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .market-head-inner {
+    gap: 0.5rem 1rem;
+  }
+
+  .market-titles {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .market-meta {
+    flex: 1 0 100%;
+    text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  /* Floor and the trailing-week move are what a phone reader is here for; the
+     sparkline needs more pixels than the width can spare. Header labels stay
+     in step with the columns that survive. */
+  .market-row {
+    grid-template-columns: minmax(0, 1fr) auto 4.2rem;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .market-row > :nth-child(7) {
+    display: none;
+  }
+
+  .market-row .num {
+    font-size: 0.78rem;
+  }
+
+  .market-container {
+    padding: 0 0.75rem;
+  }
+
+  .chart-card {
+    padding: 0.85rem 0.6rem 0.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-row,
+  .market-toggle,
+  .range-tab,
+  .detail-back,
+  .market-more {
+    transition: none;
+  }
+}

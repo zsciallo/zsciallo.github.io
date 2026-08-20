@@ -30,11 +30,11 @@ export function JoinCTA({ config }) {
   return (
     <div class="cta-group">
       {showStore && (
-        <a href="/store/" class="btn btn-primary" aria-label="Visit ChromaBit store">
+        <a href="/store/" class="btn btn-primary" aria-label="Visit Chromabit store">
           <StoreIcon /> VISIT STORE
         </a>
       )}
-      <a href={config.discord} target="_blank" rel="noopener" class="btn btn-secondary" aria-label="Join ChromaBit Discord">
+      <a href={config.discord} target="_blank" rel="noopener" class="btn btn-secondary" aria-label="Join Chromabit Discord">
         <DiscordIcon /> JOIN {memberLabel} PLAYERS ON DISCORD
       </a>
     </div>

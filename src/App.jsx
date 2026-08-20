@@ -22,7 +22,7 @@ export default function App() {
   return (
     <>
       <main>
-        <section class="page-hero container" aria-label="ChromaBit Minecraft Server">
+        <section class="page-hero container" aria-label="Chromabit Minecraft Server">
 
           <Logo />
 
@@ -30,7 +30,7 @@ export default function App() {
           <h1 class="hero-title hero-title--inline">
             ECONOMY <span class="accent">SMP</span>
           </h1>
-          <p class="hero-sub">ChromaBit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.</p>
+          <p class="hero-sub">Chromabit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.</p>
 
           <StatusBadge status={status} />
 
@@ -46,7 +46,7 @@ export default function App() {
           <div class="rule" />
         </section>
 
-        <section class="features-section" aria-label="ChromaBit features">
+        <section class="features-section" aria-label="Chromabit features">
           <div class="container">
             <SectionHeader
               eyebrow="HOW IT WORKS"

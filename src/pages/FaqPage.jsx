@@ -21,12 +21,12 @@ export function FaqPage() {
   return (
     <>
       <main>
-        <section class="page-hero container" aria-label="ChromaBit FAQ">
+        <section class="page-hero container" aria-label="Chromabit FAQ">
           <p class="section-eyebrow">HELP CENTER</p>
           <h1 class="hero-title">
             HAVE<span class="accent">QUESTIONS?</span>
           </h1>
-          <p class="hero-sub">Everything you need to know about ChromaBit Economy SMP.</p>
+          <p class="hero-sub">Everything you need to know about Chromabit Economy SMP.</p>
 
           <StatusBadge status={status} />
 
@@ -44,8 +44,8 @@ export function FaqPage() {
             <div class="faq-list">
             <p class="faq-section-label">GAMEPLAY</p>
 
-              <FaqItem question="What type of server is ChromaBit?">
-                ChromaBit is a spawner-based Economy SMP. Mob spawners are a core part of the economy they generate sellable drops that you use to build wealth, run shops, and climb the balance leaderboard.
+              <FaqItem question="What type of server is Chromabit?">
+                Chromabit is a spawner-based Economy SMP. Mob spawners are a core part of the economy they generate sellable drops that you use to build wealth, run shops, and climb the balance leaderboard.
               </FaqItem>
 
               <FaqItem question="How does the rank system work?">
@@ -70,23 +70,23 @@ export function FaqPage() {
 
               <p class="faq-section-label">GENERAL</p>
 
-              <FaqItem question="What is ChromaBit?">
-                ChromaBit is a competitive Economy SMP Minecraft server. Players build wealth through a player-driven economy, compete on the balance leaderboard, and win store credit in server events.
+              <FaqItem question="What is Chromabit?">
+                Chromabit is a competitive Economy SMP Minecraft server. Players build wealth through a player-driven economy, compete on the balance leaderboard, and win store credit in server events.
               </FaqItem>
 
               <FaqItem question="What is an Economy SMP Minecraft server?">
-                An Economy SMP is a Survival Multiplayer server built around a player-driven economic system. Players earn in-game currency by farming, trading, and running shops, then compete for top spots on leaderboards. On ChromaBit, server events pay out store credit to the top finishers.
+                An Economy SMP is a Survival Multiplayer server built around a player-driven economic system. Players earn in-game currency by farming, trading, and running shops, then compete for top spots on leaderboards. On Chromabit, server events pay out store credit to the top finishers.
               </FaqItem>
 
               <FaqItem question="What is the server IP address?">
                 The server IP is <strong>play.chromabit.us</strong>.
               </FaqItem>
 
-              <FaqItem question="Is ChromaBit Java or Bedrock Edition?">
-                ChromaBit runs on Java Edition. Join our <a href={config.discord} target="_blank" rel="noopener">Discord</a> for the latest info on supported versions and any cross-play options.
+              <FaqItem question="Is Chromabit Java or Bedrock Edition?">
+                Chromabit runs on Java Edition. Join our <a href={config.discord} target="_blank" rel="noopener">Discord</a> for the latest info on supported versions and any cross-play options.
               </FaqItem>
 
-              <FaqItem question="Does ChromaBit have grief protection?">
+              <FaqItem question="Does Chromabit have grief protection?">
                 Yes. Your builds, land, and storage are fully protected by grief prevention. You can focus on competing in the economy without worrying about other players destroying your work.
               </FaqItem>
             </div>
