@@ -1,8 +1,14 @@
 import { createServer } from 'vite';
 import render from 'preact-render-to-string';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { h } from 'preact';
+
+// The auctions page fetches these at runtime, so a build with them missing
+// succeeds and then shows an empty market on the deployed site. The Pages
+// runner cannot regenerate them - it has no access to auctions.db - so fail
+// here rather than publishing a page with no data in it.
+const required = ['dist/market/index.json', 'dist/market/meta.json'];
 
 const pages = [
   { module: '/src/App.jsx', export: 'default', dist: 'dist/index.html' },
@@ -29,3 +35,10 @@ for (const { module, export: exportName, dist } of pages) {
 }
 
 await server.close();
+
+const missing = required.filter((file) => !existsSync(resolve(file)));
+if (missing.length) {
+  console.error(`\n[ssg] missing market data: ${missing.join(', ')}`);
+  console.error('[ssg] run `npm run market` and commit public/market/ before deploying.\n');
+  process.exit(1);
+}
