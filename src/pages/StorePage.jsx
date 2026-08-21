@@ -17,6 +17,7 @@ import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
+import { NavBar } from '../components/NavBar';
 
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
@@ -291,6 +292,7 @@ export function StorePage() {
 
   return (
     <>
+      <NavBar current="store" />
       <main>
         <section class="page-hero container" aria-label="Chromabit SMP Store">
           <a href="/" class="logo-link" aria-label="Back to Chromabit SMP home">
@@ -328,7 +330,7 @@ export function StorePage() {
                 </>
               ) : (
                 <>
-                  <button class="store-login" onClick={openLogin}>LOG IN</button>
+                  <button class="btn btn-secondary btn-sm store-login" onClick={openLogin}>LOG IN</button>
                   <span class="store-user-hint">Set your Minecraft username to buy</span>
                 </>
               )}
@@ -337,8 +339,9 @@ export function StorePage() {
             {!username && (
               <div class="store-promo">
                 <span class="store-promo-tag">NEW HERE?</span>
-                <span>
-                  Use code <strong>{WELCOME_CODE}</strong> at checkout for <strong>20% off</strong> your first order.
+                <span class="store-promo-text">
+                  Use code <code class="store-promo-code">{WELCOME_CODE}</code> at checkout for{' '}
+                  <strong>20% off</strong> your first order.
                 </span>
               </div>
             )}
@@ -359,7 +362,8 @@ export function StorePage() {
             {store.categories.length > 1 && (
               <nav class="store-tabs" aria-label="Package categories">
                 <button
-                  class={`store-tab${activeCat == null ? ' active' : ''}`}
+                  class={`btn btn-sm store-tab ${activeCat == null ? 'btn-primary' : 'btn-secondary'}`}
+                  aria-pressed={activeCat == null}
                   onClick={() => setActiveCat(null)}
                 >
                   ALL
@@ -367,7 +371,8 @@ export function StorePage() {
                 {store.categories.map((c) => (
                   <button
                     key={c.id}
-                    class={`store-tab${activeCat === c.id ? ' active' : ''}`}
+                    class={`btn btn-sm store-tab ${activeCat === c.id ? 'btn-primary' : 'btn-secondary'}`}
+                    aria-pressed={activeCat === c.id}
                     onClick={() => setActiveCat(c.id)}
                   >
                     {c.name.toUpperCase()}

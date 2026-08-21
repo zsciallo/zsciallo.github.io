@@ -7,6 +7,7 @@ import { JoinCTA } from '../components/JoinCTA';
 import { SectionHeader } from '../components/SectionHeader';
 import { FaqItem } from '../components/FaqItem';
 import { Footer } from '../components/Footer';
+import { NavBar } from '../components/NavBar';
 
 function formatDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);
@@ -20,6 +21,7 @@ export function FaqPage() {
 
   return (
     <>
+      <NavBar />
       <main>
         <section class="page-hero container" aria-label="Chromabit FAQ">
           <p class="section-eyebrow">HELP CENTER</p>

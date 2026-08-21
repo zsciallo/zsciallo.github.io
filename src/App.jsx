@@ -9,6 +9,7 @@ import { FeatureCard } from './components/FeatureCard';
 import { Events } from './components/Events';
 import { ServerCarousel } from './components/ServerCarousel';
 import { Footer } from './components/Footer';
+import { NavBar } from './components/NavBar';
 import { Logo } from './components/Logo';
 import emeraldIcon from './assets/emerald_icon.webp';
 import diamondIcon from './assets/diamond_icon.webp';
@@ -21,6 +22,7 @@ export default function App() {
 
   return (
     <>
+      <NavBar current="home" />
       <main>
         <section class="page-hero container" aria-label="Chromabit Minecraft Server">
 

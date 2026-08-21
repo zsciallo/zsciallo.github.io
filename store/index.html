@@ -4,7 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>document.documentElement.classList.add('js')</script>
+  <script>
+    // The nav bar is the first text painted — hero content is still faded out
+    // at that point — so a webfont swapping in under it reads as a flicker on
+    // every navigation. Reveal it once Teko has actually loaded, or after
+    // 1.5s if the font never arrives.
+    (function () {
+      var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
+      el.classList.add('js');
+      if (!document.fonts || !document.fonts.load) return ready();
+      // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
+      // no Teko face to wait on, and the request would resolve instantly.
+      addEventListener('DOMContentLoaded', function () {
+        document.fonts.load('400 1rem Teko').then(ready, ready);
+      });
+      setTimeout(ready, 1500);
+    })();
+  </script>
 
   <link rel="icon" type="image/png" href="/server-icon-old-2.png">
   <title>Store | Chromabit SMP</title>

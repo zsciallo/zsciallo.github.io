@@ -33,10 +33,14 @@
   --grad-cta: linear-gradient(100deg, #9a4dff 0%, #c77dff 45%, #ff7de1 100%);
   --grad-text: linear-gradient(135deg, #c77dff, #ff7de1);
   --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+
+  /* Height of the sticky site nav; anchors and the cart FAB clear it. */
+  --nav-h: 56px;
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-h);
 }
 
 body {
@@ -489,6 +493,14 @@ body::after {
   transform: translateY(-2px);
 }
 
+/* Compact .btn for chrome-level controls — filter tabs, the log-in control —
+   so they read as the same button family as Buy, one size down. */
+.btn-sm {
+  padding: 0.45rem 1.2rem;
+  font-size: 1rem;
+  gap: 6px;
+}
+
 /* ─── RULE ─── */
 .rule {
   width: 100%;
@@ -709,7 +721,8 @@ h3 {
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  /* Above the sticky nav (70): it blacks out the whole page. */
+  z-index: 75;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1152,30 +1165,12 @@ footer {
   margin: 0.5rem 0 1rem;
 }
 
-.store-tab {
-  padding: 0.45rem 1.3rem;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 7px;
+.store-tab.btn-secondary {
   color: var(--muted);
-  font-family: 'Teko', sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.store-tab:hover {
-  border-color: var(--accent);
+.store-tab.btn-secondary:hover {
   color: var(--text);
-  background: var(--glow);
-}
-
-.store-tab.active {
-  background: var(--grad-cta);
-  border-color: transparent;
-  color: var(--bg);
-  box-shadow: 0 4px 20px rgba(199, 125, 255, 0.35);
 }
 
 .store-category {
@@ -1714,7 +1709,8 @@ footer {
 /* ─── CART ─── */
 .cart-fab {
   position: fixed;
-  top: 1.25rem;
+  /* Clears the sticky nav rather than sitting on top of it. */
+  top: calc(var(--nav-h) + 1rem);
   right: 1.25rem;
   z-index: 60;
   width: 48px;
@@ -2392,20 +2388,7 @@ html.js .reveal.is-visible {
 /* --- Store: login control, promo, limits, cart discounts ---------------- */
 
 .store-login {
-  font-family: 'Teko', sans-serif;
-  font-size: 0.82rem;
-  letter-spacing: 0.16em;
-  color: var(--bg);
-  background: var(--grad-cta);
-  border: 0;
-  border-radius: 4px;
-  padding: 0.3rem 0.9rem;
-  cursor: pointer;
-  transition: filter 0.2s;
-}
-
-.store-login:hover {
-  filter: brightness(1.12);
+  vertical-align: middle;
 }
 
 .platform-toggle {
@@ -2472,20 +2455,24 @@ html.js .reveal.is-visible {
   font-size: 0.82rem;
 }
 
+/* Sized to its text rather than a fixed 640px box, so it reads as a single
+   offer chip instead of an empty-looking banner. */
 .store-promo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.7rem;
   flex-wrap: wrap;
-  margin: 0 auto 1.5rem;
-  max-width: 640px;
-  padding: 0.7rem 1rem;
-  border: 1px solid var(--border-pink);
-  border-radius: 6px;
-  background: var(--frost);
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 1.75rem;
+  padding: 0.45rem 1.1rem 0.45rem 0.5rem;
+  border: 1px solid rgba(199, 125, 255, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(154, 77, 255, 0.16), rgba(255, 125, 225, 0.1));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 28px rgba(199, 125, 255, 0.12);
   color: var(--muted);
-  font-size: 0.88rem;
-  text-align: left;
+  font-size: 0.9rem;
 }
 
 .store-promo strong {
@@ -2494,10 +2481,37 @@ html.js .reveal.is-visible {
 
 .store-promo-tag {
   font-family: 'Teko', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   letter-spacing: 0.18em;
-  color: var(--accent);
+  color: var(--bg);
+  background: var(--grad-cta);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
   white-space: nowrap;
+}
+
+.store-promo-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent-2);
+  background: rgba(255, 125, 225, 0.08);
+  border: 1px dashed var(--border-pink);
+  border-radius: 5px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+}
+
+/* Once it wraps it is a block, not a pill — square it off so the corners
+   don't bow around two lines of text. */
+@media (max-width: 560px) {
+  .store-promo {
+    flex-direction: column;
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    text-align: center;
+  }
 }
 
 .pkg-limit {
@@ -2730,4 +2744,246 @@ html.js .reveal.is-visible {
 .legal a {
   color: var(--accent-2);
   text-decoration: underline;
+}
+/* ─── SITE NAV ─── */
+.site-nav {
+  position: sticky;
+  top: 0;
+  /* Above the cart FAB (60) so the open mobile panel covers it, below the
+     lightbox (75), cart scrim (80), drawer (90) and modals (100) — those are
+     meant to cover the page. */
+  z-index: 70;
+  background: rgba(12, 7, 24, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(199, 125, 255, 0.12);
+}
+
+/* Held until Teko is loaded (the inline script in each page head sets
+   .fonts-ready, with a 1.5s escape hatch). The bar itself stays painted, so
+   only its contents fade in — otherwise the swap from the fallback face
+   flickers across the nav on every navigation. */
+html.js .site-nav-inner {
+  opacity: 0;
+}
+
+html.js.fonts-ready .site-nav-inner {
+  opacity: 1;
+  transition: opacity 0.16s ease;
+}
+
+.site-nav-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  height: var(--nav-h);
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--accent);
+  font-family: 'Teko', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(199, 125, 255, 0.35);
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.site-nav-brand:hover {
+  color: var(--accent-2);
+  text-shadow: 0 0 20px rgba(255, 125, 225, 0.45);
+}
+
+.site-nav-brand img {
+  image-rendering: pixelated;
+  border-radius: 6px;
+  filter: drop-shadow(0 0 10px rgba(255, 125, 225, 0.35));
+}
+
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  list-style: none;
+}
+
+.site-nav-links a {
+  position: relative;
+  display: block;
+  padding: 0.35rem 0;
+  color: var(--muted);
+  text-decoration: none;
+  font-family: 'Teko', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.16em;
+  transition: color 0.15s;
+}
+
+.site-nav-links a:hover {
+  color: var(--text);
+}
+
+.site-nav-links a.active {
+  color: var(--text);
+}
+
+.site-nav-links a.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad-cta);
+}
+
+/* Hamburger: mobile only, and only where JS can open the panel it controls. */
+/* Shares the .btn-secondary shell — 2px border, same radius and hover — so it
+   belongs to the same button family as the rest of the site. */
+.nav-toggle {
+  display: none;
+  width: 42px;
+  height: 38px;
+  padding: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.nav-toggle:hover,
+.nav-toggle.open {
+  border-color: var(--accent-deep);
+  background: var(--glow);
+}
+
+.nav-toggle-bar {
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(199, 125, 255, 0.45);
+  transition: transform 0.22s ease, opacity 0.18s ease, background 0.2s;
+}
+
+.nav-toggle:hover .nav-toggle-bar,
+.nav-toggle.open .nav-toggle-bar {
+  background: var(--accent-2);
+}
+
+.nav-toggle.open .nav-toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle.open .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.open .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 700px) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .site-nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 1.25rem;
+    /* Opaque, not frosted like the bar: anything fixed underneath it (the
+       store's cart button) would otherwise ghost through. */
+    background: var(--bg);
+    border-bottom: 1px solid rgba(199, 125, 255, 0.12);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+    display: none;
+  }
+
+  .site-nav-links.open {
+    display: flex;
+    animation: navPanelIn 0.2s ease-out both;
+  }
+
+  .site-nav-links li + li {
+    border-top: 1px solid var(--border);
+  }
+
+  .site-nav-links a {
+    padding: 0.95rem 0.25rem;
+    font-size: 1.15rem;
+  }
+
+  .site-nav-links a.active::after {
+    right: auto;
+    width: 26px;
+    bottom: 0.65rem;
+  }
+}
+
+@keyframes navPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Without JS the toggle can't open anything, so show the links inline. */
+html:not(.js) .nav-toggle {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  html:not(.js) .site-nav-links {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    gap: 1.1rem;
+    padding: 0;
+    background: none;
+    border-bottom: 0;
+  }
+
+  html:not(.js) .site-nav-links li + li {
+    border-top: 0;
+  }
+
+  html:not(.js) .site-nav-links a {
+    padding: 0.35rem 0;
+    font-size: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-links.open {
+    animation: none;
+  }
+
+  .nav-toggle-bar {
+    transition: none;
+  }
 }

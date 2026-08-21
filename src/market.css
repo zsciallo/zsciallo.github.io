@@ -41,25 +41,8 @@
   padding-bottom: 0.85rem;
 }
 
-.market-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: 'Teko', sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-}
-
-.market-brand img {
-  image-rendering: pixelated;
-  border-radius: 6px;
-}
-
 .market-titles {
   flex: 1 1 auto;
-  border-left: 1px solid var(--border);
-  padding-left: 1.25rem;
 }
 
 .market-eyebrow {
@@ -857,11 +840,6 @@
 @media (max-width: 700px) {
   .market-head-inner {
     gap: 0.5rem 1rem;
-  }
-
-  .market-titles {
-    border-left: none;
-    padding-left: 0;
   }
 
   .market-meta {

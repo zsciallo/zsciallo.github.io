@@ -10,6 +10,7 @@ import { SectionHeader } from '../components/SectionHeader';
 import { FeatureCard } from '../components/FeatureCard';
 import { Events } from '../components/Events';
 import { Footer } from '../components/Footer';
+import { NavBar } from '../components/NavBar';
 import { Logo } from '../components/Logo';
 
 export function SmpPage() {
@@ -18,6 +19,7 @@ export function SmpPage() {
 
   return (
     <>
+      <NavBar />
       <main>
         <section class="page-hero container" aria-label="Chromabit Economy SMP Minecraft Server">
 

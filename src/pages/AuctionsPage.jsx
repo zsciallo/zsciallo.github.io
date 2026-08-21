@@ -4,6 +4,7 @@ import { useMarketIndex, useMarketItem } from '../hooks/useMarket';
 import { MarketList } from '../components/market/MarketList';
 import { ItemDetail } from '../components/market/ItemDetail';
 import { Footer } from '../components/Footer';
+import { NavBar } from '../components/NavBar';
 
 const PAGE_SIZE = 40;
 
@@ -57,16 +58,13 @@ export function AuctionsPage() {
 
   return (
     <>
+      <NavBar current="auctions" />
       <main>
         {/* A slim masthead rather than the site's full hero: this page is read
             for the table, and a screen-height title between the reader and the
             data costs a scroll on every visit. */}
         <header class="market-head">
           <div class="market-container market-head-inner">
-            <a class="logo-link market-brand" href="/">
-              <img src="/server-icon-old-2.png" alt="" width="34" height="34" />
-              <span>Chromabit</span>
-            </a>
             <div class="market-titles">
               <p class="section-eyebrow market-eyebrow">MARKET DATA</p>
               <h1 class="market-h1">

@@ -2,6 +2,7 @@ import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { SectionHeader } from '../components/SectionHeader';
 import { Footer } from '../components/Footer';
+import { NavBar } from '../components/NavBar';
 
 // Bump whenever the substance of the policy changes — not for typo fixes.
 const LAST_UPDATED = 'August 10, 2026';
@@ -13,6 +14,7 @@ export function PrivacyPage() {
 
   return (
     <>
+      <NavBar />
       <main>
         <section class="page-hero container" aria-label="Chromabit privacy policy">
           <a href="/" class="logo-link" aria-label="Back to Chromabit home">
