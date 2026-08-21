@@ -60,6 +60,18 @@ jobs:
           mkdir -p .data ~/.ssh
           chmod 700 ~/.ssh
 
+          # A secret set by piping on Windows carries a trailing CRLF, which
+          # OpenSSH rejects with "remote username contains invalid characters".
+          # Strip it so how the secret was set stops mattering.
+          SFTP_HOST=$(printf %s "${SFTP_HOST:-}" | tr -d '\r\n')
+          SFTP_USER=$(printf %s "${SFTP_USER:-}" | tr -d '\r\n')
+          SFTP_PASS=$(printf %s "${SFTP_PASS:-}" | tr -d '\r\n')
+          SFTP_PORT=$(printf %s "${SFTP_PORT:-}" | tr -d '\r\n')
+          SFTP_PATH=$(printf %s "${SFTP_PATH:-}" | tr -d '\r\n')
+          SFTP_HOST=${SFTP_HOST#sftp://}
+          SFTP_HOST=${SFTP_HOST#ssh://}
+          echo "lengths after trim - host=${#SFTP_HOST} user=${#SFTP_USER} pass=${#SFTP_PASS} port=${SFTP_PORT:-2022}"
+
           # Pin the host key when one is supplied. Without it every run is
           # trust-on-first-use, which is tolerable for a public auction dump
           # but not something to lean on if this credential is reused anywhere.
