@@ -28,6 +28,7 @@ import shutil
 import sqlite3
 import statistics
 import sys
+import time
 from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -335,6 +336,7 @@ def main():
     ap.add_argument("--out", default=os.path.join(here, "public", "market"))
     args = ap.parse_args()
 
+    fetched_at = int(time.time() * 1000)
     conn = sqlite3.connect(f"file:{args.db.replace(os.sep, '/')}?mode=ro", uri=True)
     conn.execute("PRAGMA query_only=1")
     rows = conn.execute(
@@ -351,6 +353,10 @@ def main():
     windows = defaultdict(list)
     active = defaultdict(list)
     sellers = defaultdict(lambda: {"active": 0, "sold": 0, "keys": set()})
+    # The newest event in the table, used as the reference point for every
+    # relative window below. Deliberately not wall-clock: windows should be
+    # measured against the data, not against when the script happened to run.
+    # Freshness of the pull itself is fetched_at, reported separately.
     now = 0
     failures = 0
 
@@ -484,11 +490,13 @@ def main():
     index.sort(key=lambda s: (-s["salesAll"], s["key"]))
     write(args.out, "index.json", {
         "generatedAt": now,
+        "fetchedAt": fetched_at,
         "itemCount": len(index),
         "items": index,
     })
     write(args.out, "meta.json", {
         "generatedAt": now,
+        "fetchedAt": fetched_at,
         "source": "stand-in - auctions.db read directly",
         "schemaVersion": 1,
         "itemCount": len(index),

@@ -23,7 +23,10 @@ export function AuctionsPage() {
   const [openKey, setOpenKey] = useState(readKey);
 
   const detail = useMarketItem(openKey);
-  const now = meta?.generatedAt ?? Date.now();
+  // Relative times are measured against when the data was pulled, not against
+  // the newest row in it - otherwise a sale that closed just before the pull
+  // reads as 'just now' hours later.
+  const now = meta?.fetchedAt ?? Date.now();
 
   useEffect(() => {
     const onPop = () => setOpenKey(readKey());
@@ -76,7 +79,8 @@ export function AuctionsPage() {
                 <b>{count(meta.itemCount)}</b> items ·
                 <b> {count(meta.salesRecorded)}</b> sales ·
                 <b> {count(meta.activeListings)}</b> listed ·
-                updated {ago(meta.generatedAt)}
+                updated {ago(meta.fetchedAt ?? meta.generatedAt)} ·
+                last trade {ago(meta.generatedAt)}
               </p>
             )}
           </div>
