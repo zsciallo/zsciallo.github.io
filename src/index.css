@@ -1495,6 +1495,10 @@ footer {
 .type-modal {
   position: relative;
   width: min(440px, 100%);
+  /* Shrink to the content. The overlay is a stretch-aligned flex row, so
+     without this the card runs the full height of the viewport. */
+  height: fit-content;
+  margin: auto 0;
   padding: 1.6rem 1.4rem 1.2rem;
   text-align: center;
 }
@@ -1968,7 +1972,8 @@ footer {
 }
 
 .modal-overlay .modal-card,
-.modal-overlay .pkg-modal {
+.modal-overlay .pkg-modal,
+.modal-overlay .type-modal {
   /* Swoosh in with an elastic overshoot */
   animation: modalIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
@@ -1978,7 +1983,8 @@ footer {
 }
 
 .modal-overlay.closing .modal-card,
-.modal-overlay.closing .pkg-modal {
+.modal-overlay.closing .pkg-modal,
+.modal-overlay.closing .type-modal {
   animation: modalOut 0.2s cubic-bezier(0.55, 0, 0.55, 0.2) both;
 }
 
@@ -2031,9 +2037,11 @@ footer {
   .modal-overlay,
   .modal-overlay .modal-card,
   .modal-overlay .pkg-modal,
+  .modal-overlay .type-modal,
   .modal-overlay.closing,
   .modal-overlay.closing .modal-card,
-  .modal-overlay.closing .pkg-modal {
+  .modal-overlay.closing .pkg-modal,
+  .modal-overlay.closing .type-modal {
     animation: none;
   }
 }
