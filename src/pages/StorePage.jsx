@@ -5,12 +5,15 @@ import { capture } from '../lib/funnel';
 import { loadUnavailable, markUnavailable, unmarkUnavailable, clearUnavailable } from '../lib/unavailable';
 import { inferOwnedPackages } from '../lib/inferOwned';
 import { normalizeName, displayName, platformOf } from '../lib/minecraftName';
+import { resolveType } from '../lib/packageType';
+import { purchaseOptions, pairedSubscriptionIds, pairMembers } from '../lib/purchaseOptions';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
 import { SectionHeader } from '../components/SectionHeader';
 import { PackageCard } from '../components/PackageCard';
 import { UsernameModal } from '../components/UsernameModal';
 import { PackageModal } from '../components/PackageModal';
+import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
@@ -41,11 +44,13 @@ export function StorePage() {
 
   const [username, setUsername] = useState('');
   const [platform, setPlatform] = useState('java');
-  const [pending, setPending] = useState(null); // { pkg, mode: 'buy' | 'cart' }
+  const [pending, setPending] = useState(null); // { pkg, mode: 'buy' | 'cart', quantity, type }
   const [busyPkgId, setBusyPkgId] = useState(null);
   const [cartBusy, setCartBusy] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [viewPkg, setViewPkg] = useState(null);
+  // Raised when a package can be bought more than one way — { pkg, mode, quantity, options }.
+  const [choice, setChoice] = useState(null);
   const [checkoutError, setCheckoutError] = useState(null);
   const [purchaseComplete, setPurchaseComplete] = useState(false);
   // Package ids Tebex has refused for the current player, inferred from failed
@@ -82,7 +87,7 @@ export function StorePage() {
     if (username) cart.ensureBasket(username);
   }, [username]);
 
-  async function runAction(pkg, mode, name, quantity) {
+  async function runAction(pkg, mode, name, quantity, type) {
     setBusyPkgId(pkg.id);
     setCheckoutError(null);
     try {
@@ -91,7 +96,7 @@ export function StorePage() {
       // exist as Java usernames, the undotted name often resolved to a
       // different real player instead of failing. The platform is asked for up
       // front now, so the name we were given is the name we send.
-      const basket = await cart.addItem(pkg, name, quantity);
+      const basket = await cart.addItem(pkg, name, quantity, type);
       // Succeeded, so any remembered refusal is stale — Battle Pass limits
       // expire, and a rank may have been refunded.
       if (unavailable.includes(pkg.id)) setUnavailable(unmarkUnavailable(name, pkg.id));
@@ -100,6 +105,9 @@ export function StorePage() {
         package: pkg.name,
         package_id: pkg.id,
         quantity,
+        // Which way a dual-type package actually sells is worth knowing, and
+        // it's only visible here — nothing downstream reports it back.
+        purchase_type: resolveType(pkg, type),
         // Everything past this point happens on Tebex's domain, so the drop
         // between checkout_started and purchase_completed is the payment step.
         value: basket.total_price,
@@ -133,7 +141,7 @@ export function StorePage() {
             ? `We couldn't find the Xbox gamertag "${name.replace(/^\./, '')}". Check the spelling, or switch to Java if that's where you play.`
             : `We couldn't find the Java username "${name}". Check the spelling, or switch to Bedrock if that's where you play.`,
         );
-        setPending({ pkg, mode, quantity });
+        setPending({ pkg, mode, quantity, type });
       } else if (owned) {
         // Remember the refusal so the card greys out from here on, rather than
         // letting them hit the same wall on every visit.
@@ -148,15 +156,25 @@ export function StorePage() {
     }
   }
 
-  function handleAction(pkg, mode, quantity = 1) {
+  function handleAction(pkg, mode, quantity = 1, type) {
     setCheckoutError(null);
+    // Ask one-time-or-subscribe before anything else. Tebex refuses the add
+    // without an answer, and the answer can change which package is bought.
+    if (type === undefined) {
+      const options = purchaseOptions(pkg, store.packagesById, config.subscriptionPairs);
+      if (options.length > 1) {
+        capture('purchase_type_prompted', { package: pkg.name, package_id: pkg.id, mode });
+        setChoice({ pkg, mode, quantity, options });
+        return;
+      }
+    }
     if (username) {
-      runAction(pkg, mode, username, quantity);
+      runAction(pkg, mode, username, quantity, type);
     } else {
       // Buyers who reach the prompt but never fire add_to_cart / checkout_started
       // abandoned at the username gate — the one step unique to this store.
       capture('username_prompted', { package: pkg.name, mode });
-      setPending({ pkg, mode, quantity });
+      setPending({ pkg, mode, quantity, type });
     }
   }
 
@@ -172,10 +190,27 @@ export function StorePage() {
     // Refusals belong to the player, not the browser — swap in this account's.
     setUnavailable(loadUnavailable(name));
     if (pending?.pkg) {
-      runAction(pending.pkg, pending.mode, name, pending.quantity);
+      runAction(pending.pkg, pending.mode, name, pending.quantity, pending.type);
     } else {
       setPending(null);
     }
+  }
+
+  /**
+   * Buyer picked one-time or subscribe. The chosen option carries its own
+   * package, since subscribe-and-save is a separate, cheaper package rather
+   * than a second price on this one.
+   */
+  function handleChooseType(option) {
+    const { mode, quantity } = choice;
+    capture('purchase_type_chosen', {
+      package: choice.pkg.name,
+      purchase_type: option.type,
+      saved_percent: option.save || 0,
+      mode,
+    });
+    setChoice(null);
+    handleAction(option.pkg, mode, quantity, option.type);
   }
 
   function handleView(pkg) {
@@ -200,6 +235,17 @@ export function StorePage() {
   // reveal the rank ladder for free, and rejected adds cover the standalone
   // capped packages that no discount can betray.
   const ownedIds = new Set([...unavailable, ...inferOwnedPackages(store.categories)]);
+
+  // The cheaper subscription half of a pair is reached through its partner's
+  // popup, so it must not also sit in the grid as a package of its own.
+  const pairedIds = pairedSubscriptionIds(config.subscriptionPairs);
+
+  // A pair is one product to the buyer, so either half in the cart — or refused
+  // for this player — has to block the other. Otherwise subscribing leaves the
+  // card on BUY and the same pass can be bought twice.
+  const pairOf = (pkg) => pairMembers(pkg, config.subscriptionPairs);
+  const cartQtyOf = (pkg) => pairOf(pkg).reduce((n, id) => n + (cartQtyById[id] || 0), 0);
+  const ownedOf = (pkg) => pairOf(pkg).some((id) => ownedIds.has(id));
 
   async function handleApplyCoupon(code) {
     await cart.addCoupon(code);
@@ -330,20 +376,23 @@ export function StorePage() {
               </nav>
             )}
 
-            {store.categories.filter((c) => activeCat == null || c.id === activeCat).map((category) => (
+            {store.categories
+              .filter((c) => activeCat == null || c.id === activeCat)
+              .filter((c) => c.packages.some((p) => !pairedIds.has(p.id)))
+              .map((category) => (
               <div class="store-category" key={category.id}>
                 <SectionHeader title={category.name.toUpperCase()} />
                 <div class="store-grid">
-                  {category.packages.map((pkg) => (
+                  {category.packages.filter((pkg) => !pairedIds.has(pkg.id)).map((pkg) => (
                     <PackageCard
                       key={pkg.id}
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
-                      cartQty={cartQtyById[pkg.id] || 0}
-                      owned={ownedIds.has(pkg.id)}
+                      cartQty={cartQtyOf(pkg)}
+                      owned={ownedOf(pkg)}
                       onView={handleView}
-                      onBuy={(p, qty) => handleAction(p, 'buy', qty)}
-                      onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
+                      onBuy={(p, qty, type) => handleAction(p, 'buy', qty, type)}
+                      onAddToCart={(p, qty, type) => handleAction(p, 'cart', qty, type)}
                     />
                   ))}
                 </div>
@@ -360,6 +409,7 @@ export function StorePage() {
         basket={cart.basket}
         items={cart.items}
         packagesById={store.packagesById}
+        recurringIds={cart.recurringIds}
         busy={cartBusy}
         coupons={cart.coupons}
         giftcards={cart.giftcards}
@@ -380,15 +430,26 @@ export function StorePage() {
         />
       )}
 
-      {viewPkg && !pending && (
+      {viewPkg && !pending && !choice && (
         <PackageModal
           pkg={viewPkg}
           busy={busyPkgId === viewPkg.id}
-          cartQty={cartQtyById[viewPkg.id] || 0}
-          owned={ownedIds.has(viewPkg.id)}
-          onBuy={(p, qty) => handleAction(p, 'buy', qty)}
-          onAddToCart={(p, qty) => handleAction(p, 'cart', qty)}
+          cartQty={cartQtyOf(viewPkg)}
+          owned={ownedOf(viewPkg)}
+          onBuy={(p, qty, type) => handleAction(p, 'buy', qty, type)}
+          onAddToCart={(p, qty, type) => handleAction(p, 'cart', qty, type)}
           onClose={() => setViewPkg(null)}
+        />
+      )}
+
+      {choice && (
+        <PurchaseTypeModal
+          pkg={choice.pkg}
+          options={choice.options}
+          quantity={choice.quantity}
+          mode={choice.mode}
+          onChoose={handleChooseType}
+          onClose={() => setChoice(null)}
         />
       )}
 

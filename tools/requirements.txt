@@ -1,0 +1,5 @@
+# Only build_market_data.py needs anything outside the standard library: a pure
+# Python reader for the Java serialization stream that Bukkit writes item_data
+# in. snbt.py parses the component payloads it yields, so no Minecraft server
+# or Bukkit jar is involved anywhere in this pipeline.
+javaobj-py3==0.6.1

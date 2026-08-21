@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
+import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
 
 export const WELCOME_CODE = 'WELCOME20';
 
@@ -67,6 +68,7 @@ export function CartDrawer({
   basket,
   items,
   packagesById = {},
+  recurringIds = [],
   busy,
   coupons = [],
   giftcards = [],
@@ -166,12 +168,24 @@ export function CartDrawer({
               const qty = item.in_basket.quantity;
               // Basket entries don't carry the catalog flags, so look them up.
               const allowQuantity = !packagesById[item.id]?.disable_quantity;
+              // Nor do they say whether the line was added as a subscription.
+              // A subscription-only package is self-evident from the catalog;
+              // a dual-type one is only knowable from what we sent, hence the
+              // remembered ids as well.
+              const catalogPkg = packagesById[item.id];
+              const recurring = recurringIds.includes(item.id) || catalogPkg?.type === SUBSCRIPTION;
+              const every = recurring ? renewalLabel(catalogPkg) : null;
 
               return (
                 <div class="cart-item" key={item.id}>
                   {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
                   <div class="cart-item-info">
                     <p class="cart-item-name">{item.name}</p>
+                    {recurring && (
+                      <p class="cart-item-sub">
+                        {every ? `SUBSCRIPTION — RENEWS ${every.toUpperCase()}` : 'SUBSCRIPTION — RENEWS AUTOMATICALLY'}
+                      </p>
+                    )}
                     {allowQuantity ? (
                       <QuantityStepper
                         value={qty}

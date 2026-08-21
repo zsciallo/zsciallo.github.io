@@ -1489,6 +1489,125 @@ footer {
   margin-top: 0.9rem;
 }
 
+/* ─── ONE-TIME / SUBSCRIBE POPUP ───
+   Raised by the buy button for packages Tebex sells both ways; the choice is
+   required on the add-to-basket call, but doesn't belong on every card. */
+.type-modal {
+  position: relative;
+  width: min(440px, 100%);
+  padding: 1.6rem 1.4rem 1.2rem;
+  text-align: center;
+}
+
+.type-modal-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--accent-2);
+}
+
+.type-modal-title {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin: 0.2rem 0 1.1rem;
+}
+
+.type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.type-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 0.95rem;
+  text-align: left;
+  background: rgba(12, 7, 24, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+
+.type-option:hover,
+.type-option:focus-visible {
+  border-color: var(--accent);
+  background: var(--glow);
+  transform: translateY(-1px);
+}
+
+.type-option-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.type-option-name {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+}
+
+/* Only rendered when the subscribe package is genuinely cheaper. */
+.type-option-save {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #12071f;
+}
+
+.type-option-price {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--accent-2);
+}
+
+.type-option-per {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.type-option-desc {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.type-option-go {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-top: 0.15rem;
+}
+
+.type-modal-note {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin-top: 0.9rem;
+}
+
+.cart-item-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.09em;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
 .pkg-buy {
   justify-content: center;
   flex: 1;

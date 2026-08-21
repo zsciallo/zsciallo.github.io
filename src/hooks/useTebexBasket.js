@@ -10,8 +10,14 @@ import {
   applyGiftCard,
   removeGiftCard,
 } from '../lib/tebex';
+import { resolveType, isRecurring } from '../lib/packageType';
 
 const BASKET_KEY = 'chromabit_basket';
+// Which packages in the saved basket were added as subscriptions. Tebex accepts
+// the choice on the way in but never reports it back on the basket, so it is
+// only knowable by remembering what we sent — and the cart has to be able to
+// tell the buyer that a line renews.
+const TYPES_KEY = 'chromabit_basket_types';
 
 /**
  * Manages a persistent Tebex basket (the cart). The basket ident is kept in
@@ -20,6 +26,8 @@ const BASKET_KEY = 'chromabit_basket';
  */
 export function useTebexBasket(token) {
   const [basket, setBasket] = useState(null);
+  // Package ids in the current basket that were added as subscriptions.
+  const [recurringIds, setRecurringIds] = useState([]);
   // Mirrors `basket` so callers that clear and immediately re-add within one
   // event handler (changing username) don't act on the pre-clear state.
   const basketRef = useRef(null);
@@ -35,11 +43,26 @@ export function useTebexBasket(token) {
     if (!ident) return;
     getBasket(token, ident)
       .then((b) => {
-        if (b && !b.complete) store(b);
-        else localStorage.removeItem(BASKET_KEY);
+        if (b && !b.complete) {
+          store(b);
+          setRecurringIds(loadRecurring(ident));
+        } else {
+          forgetBasket();
+        }
       })
-      .catch(() => localStorage.removeItem(BASKET_KEY));
+      .catch(() => forgetBasket());
   }, [token]);
+
+  /** Record that `packageId` was added as a subscription (or no longer is). */
+  function rememberRecurring(ident, packageId, recurring) {
+    setRecurringIds((prev) => {
+      const next = recurring
+        ? [...new Set([...prev, packageId])]
+        : prev.filter((id) => id !== packageId);
+      saveRecurring(ident, next);
+      return next;
+    });
+  }
 
   /**
    * Get the current basket, creating an empty one for `username` if needed.
@@ -63,16 +86,25 @@ export function useTebexBasket(token) {
     }
   }
 
-  /** Add a package, creating the basket first if needed. Returns the updated basket. */
-  async function addItem(pkg, username, quantity = 1) {
+  /**
+   * Add a package, creating the basket first if needed. Returns the updated
+   * basket.
+   *
+   * `type` is the buyer's single/subscription choice, and only means anything
+   * for packages sold both ways — `resolveType` pins everything else to what
+   * the package actually is, so a stale choice can't ride along.
+   */
+  async function addItem(pkg, username, quantity = 1, type) {
     let current = basketRef.current;
     if (!current) {
       current = await createBasket(token, username);
       localStorage.setItem(BASKET_KEY, current.ident);
       basketRef.current = current;
     }
-    const updated = await addToBasket(current.ident, pkg.id, quantity);
+    const resolved = resolveType(pkg, type);
+    const updated = await addToBasket(current.ident, pkg.id, quantity, resolved);
     store(updated);
+    rememberRecurring(current.ident, pkg.id, isRecurring(resolved));
     return updated;
   }
 
@@ -88,12 +120,14 @@ export function useTebexBasket(token) {
     if (!basket) return;
     const updated = await removeFromBasket(basket.ident, packageId);
     store(updated);
+    rememberRecurring(basket.ident, packageId, false);
   }
 
   /** Forget the basket (e.g. after a completed checkout, or a username change). */
   function clearBasket() {
-    localStorage.removeItem(BASKET_KEY);
+    forgetBasket();
     store(null);
+    setRecurringIds([]);
   }
 
   /**
@@ -150,10 +184,38 @@ export function useTebexBasket(token) {
   const giftcards = basket?.giftcards || [];
 
   return {
-    basket, items, count, coupons, giftcards,
+    basket, items, count, coupons, giftcards, recurringIds,
     ensureBasket, addItem, setQuantity, removeItem, clearBasket,
     addCoupon, dropCoupon, addGiftCard, dropGiftCard,
   };
+}
+
+/** Drop the saved basket and the subscription choices that belonged to it. */
+function forgetBasket() {
+  localStorage.removeItem(BASKET_KEY);
+  localStorage.removeItem(TYPES_KEY);
+}
+
+/**
+ * Read back the subscription choices for `ident`. Stamped with the basket they
+ * belong to, so a leftover record from a previous cart can't mislabel a line in
+ * this one — a wrong "renews automatically" badge is worse than none.
+ */
+function loadRecurring(ident) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TYPES_KEY));
+    return saved?.ident === ident && Array.isArray(saved.ids) ? saved.ids : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecurring(ident, ids) {
+  try {
+    localStorage.setItem(TYPES_KEY, JSON.stringify({ ident, ids }));
+  } catch {
+    // Private-mode storage failure only costs the cart badge, not the sale.
+  }
 }
 
 /**

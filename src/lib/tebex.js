@@ -64,9 +64,19 @@ export async function getBasket(token, ident) {
  * Add a package to a basket. Quantity is added to whatever is already in the
  * basket, so adding 2 of a package that's already there leaves 3. Returns the
  * updated basket.
+ *
+ * `type` is `single` or `subscription`. It is only *required* for packages the
+ * store sells either way (catalog `type: "both"`), which reject the request
+ * outright without it — but it is accepted on every package, so it's always
+ * sent rather than making the caller work out when it matters. See
+ * `lib/packageType.js` for how the value is chosen.
  */
-export async function addToBasket(ident, packageId, quantity = 1) {
-  const body = await post(`${API}/baskets/${ident}/packages`, { package_id: packageId, quantity });
+export async function addToBasket(ident, packageId, quantity = 1, type = 'single') {
+  const body = await post(`${API}/baskets/${ident}/packages`, {
+    package_id: packageId,
+    quantity,
+    type,
+  });
   return body.data;
 }
 

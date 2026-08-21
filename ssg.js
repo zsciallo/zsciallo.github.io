@@ -5,9 +5,10 @@ import { resolve } from 'path';
 import { h } from 'preact';
 
 // The auctions page fetches these at runtime, so a build with them missing
-// succeeds and then shows an empty market on the deployed site. The Pages
-// runner cannot regenerate them - it has no access to auctions.db - so fail
-// here rather than publishing a page with no data in it.
+// succeeds and then shows an empty market on the deployed site. Fail here
+// instead. In CI the deploy workflow generates them from a fresh copy of
+// auctions.db, falling back to the last deployed snapshot if the server is
+// unreachable, so reaching this point means both of those went wrong.
 const required = ['dist/market/index.json', 'dist/market/meta.json'];
 
 const pages = [
@@ -39,6 +40,6 @@ await server.close();
 const missing = required.filter((file) => !existsSync(resolve(file)));
 if (missing.length) {
   console.error(`\n[ssg] missing market data: ${missing.join(', ')}`);
-  console.error('[ssg] run `npm run market` and commit public/market/ before deploying.\n');
+  console.error('[ssg] locally: run `npm run market` first. in CI: check the fetch and fallback steps.\n');
   process.exit(1);
 }

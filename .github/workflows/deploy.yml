@@ -3,9 +3,18 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [source]
+  schedule:
+    # Hourly. GitHub's scheduler is best-effort and can drift 5-30 minutes
+    # under load, which is fine for floor prices.
+    - cron: '17 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -13,12 +22,95 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The published branch holds the last market data that deployed cleanly.
+      # It is the fallback when the game server is unreachable, so a down
+      # server means stale prices rather than a failed deploy.
+      - name: Check out last deployed data
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: main
+          path: .last-deploy
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - run: npm ci
+      - run: pip install -r tools/requirements.txt
+
+      - name: Fetch auctions.db
+        id: fetch
+        continue-on-error: true
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASS: ${{ secrets.SFTP_PASS }}
+          SFTP_PATH: ${{ secrets.SFTP_PATH }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sshpass
+          mkdir -p .data
+          printf 'get %s .data/auctions.db\nbye\n' "${SFTP_PATH:-/plugins/DonutAuctionHouse/auctions.db}" > .data/batch
+          sshpass -p "$SFTP_PASS" sftp \
+            -b .data/batch \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o ConnectTimeout=30 \
+            -P "${SFTP_PORT:-2022}" \
+            "$SFTP_USER@$SFTP_HOST"
+          ls -lh .data/auctions.db
+
+      # A live SQLite file copied over SFTP can be torn if the server happened
+      # to be mid-write. Cheap to detect, and a torn copy is worth discarding
+      # in favour of last-good data rather than publishing garbage.
+      - name: Verify the snapshot
+        id: verify
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sqlite3, sys
+          conn = sqlite3.connect("file:.data/auctions.db?mode=ro", uri=True)
+          check = conn.execute("PRAGMA quick_check").fetchone()[0]
+          if check != "ok":
+              sys.exit(f"integrity check failed: {check}")
+          rows = conn.execute("SELECT COUNT(*) FROM auctions").fetchone()[0]
+          if rows < 1:
+              sys.exit("auctions table is empty")
+          print(f"snapshot ok - {rows} rows")
+          PY
+
+      - name: Generate market data
+        id: generate
+        if: steps.fetch.outcome == 'success' && steps.verify.outcome == 'success'
+        run: |
+          set -euo pipefail
+          python tools/build_market_data.py --db .data/auctions.db
+          python tools/fetch_icons.py
+
+      - name: Fall back to last deployed data
+        if: steps.generate.outcome != 'success'
+        run: |
+          set -euo pipefail
+          if [ ! -f .last-deploy/market/index.json ]; then
+            echo "::error::No fresh snapshot and no previously deployed data to fall back on."
+            exit 1
+          fi
+          echo "::warning::Could not build fresh market data - republishing the last deployed snapshot."
+          mkdir -p public/market/items
+          cp .last-deploy/market/index.json   public/market/
+          cp .last-deploy/market/meta.json    public/market/
+          cp .last-deploy/market/sellers.json public/market/ 2>/dev/null || true
+          cp -r .last-deploy/market/items/.   public/market/items/
+
       - run: npm run build
 
       - uses: peaceiris/actions-gh-pages@v4
@@ -26,3 +118,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: dist
           publish_branch: main
+          # Market data is rewritten on every run. Keeping history would put a
+          # fresh copy of the whole dataset into the branch every hour, so the
+          # published branch is squashed to a single commit instead.
+          force_orphan: true
