@@ -11,8 +11,13 @@ export const BASE = '/market';
 // verbatim; this is the one place that difference lives.
 export const itemPath = (key) => `${BASE}/items/${key.replace(/:/g, '_').replace(/#/g, '__')}.json`;
 
+// GitHub Pages serves these with a flat max-age=600 and no revalidation, so a
+// returning browser shows prices up to ten minutes stale straight from disk
+// cache while an incognito window looks correct. 'no-cache' still caches, it
+// just revalidates against the ETag first: unchanged data costs a 304 of a few
+// hundred bytes, and the page is never showing a floor that has already moved.
 async function getJson(url) {
-  const response = await fetch(url);
+  const response = await fetch(url, { cache: 'no-cache' });
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
   return response.json();
 }
