@@ -119,7 +119,15 @@ jobs:
           else
             sudo apt-get update -qq
             sudo apt-get install -y -qq sshpass
-            sshpass -p "$SFTP_PASS" sftp -b .data/batch \
+            # -b implies BatchMode=yes, which disables password auth outright.
+            # ssh takes the first value it sees for an option, so this has to
+            # come before -b. Skipping pubkey too, so a server with a low
+            # MaxAuthTries does not spend its budget on a key we do not have.
+            sshpass -p "$SFTP_PASS" sftp \
+              -o BatchMode=no \
+              -o PreferredAuthentications=password \
+              -o PubkeyAuthentication=no \
+              -b .data/batch \
               $HOSTKEY \
               -o ConnectTimeout=30 \
               -P "${SFTP_PORT:-2022}" \
@@ -136,6 +144,7 @@ jobs:
       # in favour of last-good data rather than publishing garbage.
       - name: Verify the snapshot
         id: verify
+        if: steps.fetch.outcome == 'success'
         continue-on-error: true
         run: |
           set -euo pipefail
