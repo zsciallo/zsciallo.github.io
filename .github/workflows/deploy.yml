@@ -70,6 +70,14 @@ jobs:
           SFTP_PATH=$(printf %s "${SFTP_PATH:-}" | tr -d '\r\n')
           SFTP_HOST=${SFTP_HOST#sftp://}
           SFTP_HOST=${SFTP_HOST#ssh://}
+          # A host pasted with the port attached would otherwise reach sftp
+          # as a remote path. Split it, but never override an explicit port.
+          case $SFTP_HOST in
+            *:*)
+              SFTP_PORT=${SFTP_PORT:-${SFTP_HOST##*:}}
+              SFTP_HOST=${SFTP_HOST%%:*}
+              ;;
+          esac
           echo "lengths after trim - host=${#SFTP_HOST} user=${#SFTP_USER} pass=${#SFTP_PASS} port=${SFTP_PORT:-2022}"
 
           # Pin the host key when one is supplied. Without it every run is
