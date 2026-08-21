@@ -91,7 +91,17 @@ jobs:
             HOSTKEY="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           fi
 
-          printf 'get %s .data/auctions.db\nbye\n' "${SFTP_PATH:-/plugins/DonutAuctionHouse/auctions.db}" > .data/batch
+          # Wings chroots SFTP to the server data directory, so the panel's
+          # /home/container/... path is usually just /... over SFTP - but that
+          # varies by version. A leading dash tells sftp to keep going when a
+          # get fails, so try both and check afterwards which one landed.
+          if [ -n "${SFTP_PATH:-}" ]; then
+            printf -- '-get %s .data/auctions.db\n' "$SFTP_PATH" > .data/batch
+          else
+            printf -- '-get %s .data/auctions.db\n' /plugins/DonutAuctionHouse/auctions.db > .data/batch
+            printf -- '-get %s .data/auctions.db\n' /home/container/plugins/DonutAuctionHouse/auctions.db >> .data/batch
+          fi
+          printf 'bye\n' >> .data/batch
 
           # Key auth when SFTP_KEY is set, password otherwise. Game panels
           # (Pterodactyl and friends) generally only accept the panel password;
@@ -114,6 +124,10 @@ jobs:
               -o ConnectTimeout=30 \
               -P "${SFTP_PORT:-2022}" \
               "$SFTP_USER@$SFTP_HOST"
+          fi
+          if [ ! -s .data/auctions.db ]; then
+            echo "connected, but no auctions.db was retrieved - check SFTP_PATH"
+            exit 1
           fi
           ls -lh .data/auctions.db
 
