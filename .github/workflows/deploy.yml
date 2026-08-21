@@ -53,19 +53,48 @@ jobs:
           SFTP_USER: ${{ secrets.SFTP_USER }}
           SFTP_PASS: ${{ secrets.SFTP_PASS }}
           SFTP_PATH: ${{ secrets.SFTP_PATH }}
+          SFTP_KEY: ${{ secrets.SFTP_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq sshpass
-          mkdir -p .data
+          mkdir -p .data ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Pin the host key when one is supplied. Without it every run is
+          # trust-on-first-use, which is tolerable for a public auction dump
+          # but not something to lean on if this credential is reused anywhere.
+          if [ -n "${SSH_KNOWN_HOSTS:-}" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/known_hosts
+            HOSTKEY="-o StrictHostKeyChecking=yes"
+          else
+            HOSTKEY="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          fi
+
           printf 'get %s .data/auctions.db\nbye\n' "${SFTP_PATH:-/plugins/DonutAuctionHouse/auctions.db}" > .data/batch
-          sshpass -p "$SFTP_PASS" sftp \
-            -b .data/batch \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -o ConnectTimeout=30 \
-            -P "${SFTP_PORT:-2022}" \
-            "$SFTP_USER@$SFTP_HOST"
+
+          # Key auth when SFTP_KEY is set, password otherwise. Game panels
+          # (Pterodactyl and friends) generally only accept the panel password;
+          # a plain VPS will take a key.
+          if [ -n "${SFTP_KEY:-}" ]; then
+            printf '%s\n' "$SFTP_KEY" > ~/.ssh/id_sftp
+            chmod 600 ~/.ssh/id_sftp
+            sftp -b .data/batch \
+              -i ~/.ssh/id_sftp \
+              -o IdentitiesOnly=yes \
+              $HOSTKEY \
+              -o ConnectTimeout=30 \
+              -P "${SFTP_PORT:-2022}" \
+              "$SFTP_USER@$SFTP_HOST"
+          else
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq sshpass
+            sshpass -p "$SFTP_PASS" sftp -b .data/batch \
+              $HOSTKEY \
+              -o ConnectTimeout=30 \
+              -P "${SFTP_PORT:-2022}" \
+              "$SFTP_USER@$SFTP_HOST"
+          fi
           ls -lh .data/auctions.db
 
       # A live SQLite file copied over SFTP can be torn if the server happened
