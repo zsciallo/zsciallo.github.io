@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // The nav bar is the first text painted — hero content is still faded out
+    // at that point — so a webfont swapping in under it reads as a flicker on
+    // every navigation. Reveal it once Teko has actually loaded, or after
+    // 1.5s if the font never arrives.
+    (function () {
+      var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
+      el.classList.add('js');
+      if (!document.fonts || !document.fonts.load) return ready();
+      // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
+      // no Teko face to wait on, and the request would resolve instantly.
+      addEventListener('DOMContentLoaded', function () {
+        document.fonts.load('400 1rem Teko').then(ready, ready);
+      });
+      setTimeout(ready, 1500);
+    })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/server-icon-old-2.png">
+  <title>Auction House | Chromabit Economy SMP</title>
+  <meta name="description"
+    content="Live auction house market data for Chromabit Economy SMP. Price history, current floors, trade volume and active listings for every item traded on the server.">
+  <meta name="keywords"
+    content="Chromabit auction house, Minecraft market prices, Economy SMP prices, Minecraft item price history">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Chromabit">
+  <link rel="canonical" href="https://chromabit.us/auctions/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chromabit.us/auctions/">
+  <meta property="og:title" content="Auction House | Chromabit Economy SMP">
+  <meta property="og:description"
+    content="Price history, floors and trade volume for every item on the Chromabit auction house.">
+  <meta property="og:image" content="https://chromabit.us/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Auction House | Chromabit Economy SMP">
+  <meta name="twitter:description" content="Track item prices and market trends on Chromabit Economy SMP.">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/assets/auctions-BRaB3jCr.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/funnel-BIRsSJzY.js">
+  <link rel="stylesheet" crossorigin href="/assets/funnel-CFp8UOdX.css">
+  <link rel="stylesheet" crossorigin href="/assets/auctions-Da-L_FS8.css">
+</head>
+
+<body>
+  <div id="app"><header class="site-nav"><nav class="site-nav-inner" aria-label="Primary"><a class="site-nav-brand" href="/"><img src="/server-icon-old-2.png" alt width="30" height="30"/><span>CHROMABIT</span></a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open menu"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><ul id="site-nav-links" class="site-nav-links"><li><a href="/">HOME</a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/" class="active" aria-current="page">AUCTIONS</a></li></ul></nav></header><main><header class="market-head"><div class="market-container market-head-inner"><div class="market-titles"><p class="section-eyebrow market-eyebrow">MARKET DATA</p><h1 class="market-h1">Auction <span class="accent">House</span><span class="beta-tag">BETA</span></h1></div></div></header><section class="market-section"><div class="market-container"><div class="market-controls"><label class="market-search"><span class="sr-only">Search items</span><input type="search" placeholder="Search items, materials, enchantments…" value/></label><label class="market-sort"><span class="sr-only">Sort by</span><select><option selected value="traded">Most traded</option><option value="volume">Highest volume</option><option value="active">Most listed now</option><option value="movers">Biggest movers</option><option value="price">Highest price</option><option value="recent">Recently sold</option></select></label><button type="button" class="market-toggle" aria-pressed="false">On sale now</button></div><p class="market-status">Loading market data…</p></div></section></main><footer><nav class="footer-nav"><a href="/">HOME</a><a href="/smp/">ECONOMY SMP</a><a href="/faq/">FAQ</a><a href="/auctions/">AUCTIONS</a><a href="/store/">STORE</a><a href="https://discord.gg/WebRPAgE4e" target="_blank" rel="noopener">DISCORD</a><a href="/privacy/">PRIVACY</a></nav>© 2026 Chromabit LLC  ·  play.chromabit.us</footer></div>
+</body>
+
+</html>

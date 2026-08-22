@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // The nav bar is the first text painted — hero content is still faded out
+    // at that point — so a webfont swapping in under it reads as a flicker on
+    // every navigation. Reveal it once Teko has actually loaded, or after
+    // 1.5s if the font never arrives.
+    (function () {
+      var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
+      el.classList.add('js');
+      if (!document.fonts || !document.fonts.load) return ready();
+      // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
+      // no Teko face to wait on, and the request would resolve instantly.
+      addEventListener('DOMContentLoaded', function () {
+        document.fonts.load('400 1rem Teko').then(ready, ready);
+      });
+      setTimeout(ready, 1500);
+    })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/server-icon-old-2.png">
+  <title>Store | Chromabit SMP</title>
+  <meta name="description"
+    content="The official Chromabit SMP store. Buy ranks, crate keys, and more for the Chromabit SMP Minecraft server. Every purchase supports the server.">
+  <meta name="keywords"
+    content="Chromabit SMP store, Minecraft server store, Economy SMP ranks, crate keys, Chromabit shop">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Chromabit SMP">
+  <link rel="canonical" href="https://chromabit.us/store/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chromabit.us/store/">
+  <meta property="og:title" content="Store | Chromabit SMP">
+  <meta property="og:description"
+    content="Buy ranks, crate keys, and more. Every purchase supports Chromabit SMP.">
+  <meta property="og:image" content="https://chromabit.us/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Store | Chromabit SMP">
+  <meta name="twitter:description" content="Buy ranks, crate keys, and more. Every purchase supports Chromabit SMP.">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Barlow:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/assets/store-fBqjYje5.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/funnel-BIRsSJzY.js">
+  <link rel="modulepreload" crossorigin href="/assets/SectionHeader-1UBJy1KO.js">
+  <link rel="stylesheet" crossorigin href="/assets/funnel-CFp8UOdX.css">
+</head>
+
+<body>
+  <div id="app"><header class="site-nav"><nav class="site-nav-inner" aria-label="Primary"><a class="site-nav-brand" href="/"><img src="/server-icon-old-2.png" alt width="30" height="30"/><span>CHROMABIT</span></a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open menu"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><ul id="site-nav-links" class="site-nav-links"><li><a href="/">HOME</a></li><li><a href="/store/" class="active" aria-current="page">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li></ul></nav></header><main><section class="page-hero container" aria-label="Chromabit SMP Store"><a href="/" class="logo-link" aria-label="Back to Chromabit SMP home"><img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit SMP"/></a><p class="section-eyebrow">SERVER STORE</p><h1 class="hero-title hero-title--inline">GEAR <span class="accent">UP.</span></h1><p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports Chromabit SMP.</p><p class="store-powered"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>SECURE CHECKOUT POWERED BY <a href="https://www.tebex.io/" target="_blank" rel="noopener">TEBEX</a></p><div class="rule"></div></section><section class="store-section" aria-label="Store packages"><div class="container"><p class="store-user"><button class="btn btn-secondary btn-sm store-login">LOG IN</button><span class="store-user-hint">Set your Minecraft username to buy</span></p><div class="store-promo"><span class="store-promo-tag">NEW HERE?</span><span class="store-promo-text">Use code <code class="store-promo-code">WELCOME20</code> at checkout for <strong>20% off</strong> your first order.</span></div><p class="store-status-msg">LOADING PACKAGES…</p></div></section></main><footer><nav class="footer-nav"><a href="/">HOME</a><a href="/smp/">ECONOMY SMP</a><a href="/faq/">FAQ</a><a href="/auctions/">AUCTIONS</a><a href="/store/">STORE</a><a href="https://discord.gg/WebRPAgE4e" target="_blank" rel="noopener">DISCORD</a><a href="/privacy/">PRIVACY</a></nav>© 2026 Chromabit LLC  ·  play.chromabit.us</footer><button class="cart-fab" aria-label="Open cart (0 items)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.66a2 2 0 001.99-1.61L23 6H6"></path></svg></button><div class="cart-scrim"></div><aside class="cart-drawer" aria-label="Shopping cart" aria-hidden="true"><div class="cart-head"><p class="cart-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.66a2 2 0 001.99-1.61L23 6H6"></path></svg> YOUR CART</p><button class="cart-close" aria-label="Close cart">✕</button></div><p class="cart-empty">Your cart is empty.</p></aside></div>
+</body>
+
+</html>
