@@ -40,18 +40,44 @@ export async function fetchCategories(token, basketIdent) {
 }
 
 /**
+ * Tebex's refusal when it can't resolve a name — which means two different
+ * things it never distinguishes. A gamertag that doesn't exist and an Xbox Live
+ * lookup that timed out or got rate-limited come back with the identical 404,
+ * so this can never be read as proof the player isn't real.
+ */
+export function isNameLookupFailure(err) {
+  return /invalid username/i.test(err?.message || '');
+}
+
+/**
  * Create a basket for the given Minecraft username — Tebex needs the
  * username up front to attribute the purchase and deliver in-game.
+ *
+ * Retries once on a failed name lookup, because the transient kind is common
+ * enough that buyers were being told their own gamertag didn't exist and then
+ * getting through by retyping it unchanged. Doing it here costs a genuinely
+ * wrong name one extra round trip and saves the rest a dead end.
  */
 export async function createBasket(token, username) {
   const base = `${window.location.origin}/store/`;
-  const body = await post(`${API}/accounts/${token}/baskets`, {
+  const url = `${API}/accounts/${token}/baskets`;
+  const payload = {
     username,
     complete_url: `${base}?checkout=complete`,
     cancel_url: base,
     complete_auto_redirect: true,
-  });
-  return body.data;
+  };
+  try {
+    return (await post(url, payload)).data;
+  } catch (err) {
+    if (!isNameLookupFailure(err)) throw err;
+    await pause(700);
+    return (await post(url, payload)).data;
+  }
+}
+
+function pause(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** Fetch an existing basket by ident. */

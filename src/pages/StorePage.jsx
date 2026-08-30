@@ -9,6 +9,7 @@ import { resolveType } from '../lib/packageType';
 import { purchaseOptions, pairedSubscriptionIds, pairMembers } from '../lib/purchaseOptions';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
+import { isNameLookupFailure } from '../lib/tebex';
 import { SectionHeader } from '../components/SectionHeader';
 import { PackageCard } from '../components/PackageCard';
 import { UsernameModal } from '../components/UsernameModal';
@@ -21,11 +22,6 @@ import { NavBar } from '../components/NavBar';
 
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
-
-// Tebex 404s basket creation when it can't resolve the name against Mojang
-// (Java) or Xbox (Bedrock, dot-prefixed via Geyser). Usually a stale saved
-// name, so send the buyer back to the modal instead of a dead-end banner.
-const BAD_USERNAME = /invalid username/i;
 
 // Tebex's refusal for a package the player can't buy — in practice, one they
 // already own. The `.` covers both the straight and curly apostrophe.
@@ -53,6 +49,10 @@ export function StorePage() {
   // Raised when a package can be bought more than one way — { pkg, mode, quantity, options }.
   const [choice, setChoice] = useState(null);
   const [checkoutError, setCheckoutError] = useState(null);
+  // The action to re-run if the buyer hits TRY AGAIN — set only for failures
+  // that repeating can actually fix.
+  const [retry, setRetry] = useState(null);
+  const [retrying, setRetrying] = useState(false);
   const [purchaseComplete, setPurchaseComplete] = useState(false);
   // Package ids Tebex has refused for the current player, inferred from failed
   // basket adds and remembered across visits.
@@ -91,6 +91,7 @@ export function StorePage() {
   async function runAction(pkg, mode, name, quantity, type) {
     setBusyPkgId(pkg.id);
     setCheckoutError(null);
+    setRetry(null);
     try {
       // No auto-retry with a dot prefix here any more. That silently moved a
       // purchase into the Bedrock namespace, and since plenty of gamertags also
@@ -125,10 +126,12 @@ export function StorePage() {
       const owned = NOT_PURCHASABLE.test(err.message);
       const overQty = OVER_QUANTITY.test(err.message);
 
+      const badName = isNameLookupFailure(err);
+
       // The clearest "why they didn't buy" signal on the whole site — these
       // are buyers who tried and were stopped.
       capture('checkout_failed', {
-        reason: BAD_USERNAME.test(err.message)
+        reason: badName
           ? 'invalid_username'
           : owned ? 'not_purchasable' : overQty ? 'over_quantity' : 'other',
         message: err.message,
@@ -136,13 +139,21 @@ export function StorePage() {
         mode,
       });
 
-      if (BAD_USERNAME.test(err.message)) {
+      if (badName) {
+        // Read the edition off the name rather than the `platform` state, which
+        // is a render behind when this runs straight after a name change.
+        const bedrock = platformOf(name) === 'bedrock';
         setCheckoutError(
-          platform === 'bedrock'
-            ? `We couldn't find the Xbox gamertag "${name.replace(/^\./, '')}". Check the spelling, or switch to Java if that's where you play.`
-            : `We couldn't find the Java username "${name}". Check the spelling, or switch to Bedrock if that's where you play.`,
+          `We couldn't confirm the ${bedrock ? 'Xbox gamertag' : 'Java username'} `
+          + `"${displayName(name, bedrock ? 'bedrock' : 'java')}" with `
+          + `${bedrock ? 'Xbox Live' : 'Mojang'}. That lookup is often just slow, `
+          + `so try again — and check the spelling, or your edition, if it keeps failing.`,
         );
-        setPending({ pkg, mode, quantity, type });
+        // Deliberately not straight back to the name modal. Tebex reports a
+        // lookup that timed out and a name that doesn't exist identically, and
+        // the name is usually right — buyers were "fixing" it by retyping it
+        // unchanged, which only ever re-ran the lookup. So offer that directly.
+        setRetry({ pkg, mode, quantity, type });
       } else if (owned) {
         // Remember the refusal so the card greys out from here on, rather than
         // letting them hit the same wall on every visit.
@@ -159,6 +170,7 @@ export function StorePage() {
 
   function handleAction(pkg, mode, quantity = 1, type) {
     setCheckoutError(null);
+    setRetry(null);
     // Ask one-time-or-subscribe before anything else. Tebex refuses the add
     // without an answer, and the answer can change which package is bought.
     if (type === undefined) {
@@ -180,6 +192,7 @@ export function StorePage() {
   }
 
   function handleConfirmUsername(raw, chosenPlatform) {
+    setRetry(null);
     // What Tebex sees: Bedrock gamertags get the Geyser dot and lose spaces.
     const name = normalizeName(raw, chosenPlatform);
     // A basket is tied to its username, so drop it if the name changed.
@@ -195,6 +208,26 @@ export function StorePage() {
     } else {
       setPending(null);
     }
+  }
+
+  /**
+   * Repeat the request that failed, unchanged. The whole point: what broke was
+   * the name lookup, not anything the buyer entered.
+   */
+  async function handleRetry() {
+    const action = retry;
+    setCheckoutError(null);
+    setRetry(null);
+    capture('checkout_retried', { package: action?.pkg?.name || null });
+    // The lookup can take two round trips, so hold the button rather than
+    // leaving it looking like the click did nothing.
+    setRetrying(true);
+    if (action?.pkg) {
+      await runAction(action.pkg, action.mode, username, action.quantity, action.type);
+    } else if (username) {
+      await cart.ensureBasket(username);
+    }
+    setRetrying(false);
   }
 
   /**
@@ -223,6 +256,7 @@ export function StorePage() {
   // just open the username modal with nothing queued behind it.
   function openLogin() {
     setCheckoutError(null);
+    setRetry(null);
     capture('login_opened', { had_username: Boolean(username) });
     setPending({ pkg: null, mode: 'change' });
   }
@@ -290,6 +324,20 @@ export function StorePage() {
     setCartBusy(false);
   }
 
+  // The saved name failed its lookup before the buyer touched anything. Worth
+  // saying up front: this used to fail in silence and only resurface two clicks
+  // later as an add-to-cart error, which blamed the wrong step.
+  const nameCheckFailed = (
+    <>
+      We couldn't confirm <strong>{username}</strong> with{' '}
+      {platform === 'bedrock' ? 'Xbox Live' : 'Mojang'} just now. That's usually
+      temporary, so try again — or change the name if it's wrong.
+    </>
+  );
+  // Repeating the request fixes a failed lookup and does nothing for "you
+  // already own this", so only offer it where it can help.
+  const canRetry = Boolean(retry) || Boolean(!checkoutError && cart.basketError);
+
   return (
     <>
       <NavBar current="store" />
@@ -346,8 +394,28 @@ export function StorePage() {
               </div>
             )}
 
-            {checkoutError && !pending && (
-              <div class="store-banner error">{checkoutError}</div>
+            {(checkoutError || cart.basketError) && !pending && (
+              <div class="store-banner error">
+                <span>{checkoutError || nameCheckFailed}</span>
+                {canRetry && (
+                  <span class="store-banner-actions">
+                    <button
+                      class="btn btn-sm btn-secondary"
+                      onClick={handleRetry}
+                      disabled={retrying}
+                    >
+                      {retrying ? 'CHECKING…' : 'TRY AGAIN'}
+                    </button>
+                    <button
+                      class="btn btn-sm btn-secondary"
+                      onClick={openLogin}
+                      disabled={retrying}
+                    >
+                      CHANGE NAME
+                    </button>
+                  </span>
+                )}
+              </div>
             )}
 
             {store.loading && <p class="store-status-msg">LOADING PACKAGES…</p>}

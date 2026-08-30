@@ -31,6 +31,22 @@ export function useTebexBasket(token) {
   // Mirrors `basket` so callers that clear and immediately re-add within one
   // event handler (changing username) don't act on the pre-clear state.
   const basketRef = useRef(null);
+  // The create that's already in flight. Without this a click that lands before
+  // the page-load basket settles starts a second POST for the same name, and
+  // two concurrent Xbox Live lookups is a good way to draw a rate-limited
+  // "Invalid username" on a gamertag that's perfectly real.
+  const creating = useRef(null);
+  // Resolves once the saved basket has been looked up. A create that races the
+  // restore leaves two baskets and whichever lands last wins, which is how a
+  // cart already on disk got dropped.
+  const restored = useRef(null);
+  // Bumped by clearBasket, so a create started under the previous username
+  // can't land afterwards and reinstate it.
+  const generation = useRef(0);
+  // Why the basket couldn't be made. Kept rather than thrown: the buyer hasn't
+  // done anything yet, but this used to fail in silence and only surface two
+  // clicks later as an add-to-cart error, which blamed the wrong step.
+  const [basketError, setBasketError] = useState(null);
 
   function store(value) {
     basketRef.current = value;
@@ -40,8 +56,11 @@ export function useTebexBasket(token) {
   useEffect(() => {
     if (!token) return;
     const ident = localStorage.getItem(BASKET_KEY);
-    if (!ident) return;
-    getBasket(token, ident)
+    if (!ident) {
+      restored.current = Promise.resolve();
+      return;
+    }
+    restored.current = getBasket(token, ident)
       .then((b) => {
         if (b && !b.complete) {
           store(b);
@@ -52,6 +71,38 @@ export function useTebexBasket(token) {
       })
       .catch(() => forgetBasket());
   }, [token]);
+
+  /**
+   * Create the basket for `username`, or join the one already being created.
+   *
+   * Every path to a new basket goes through here, so there is only ever one
+   * name lookup in flight and only one winner writing BASKET_KEY.
+   */
+  function createOnce(username) {
+    if (creating.current) return creating.current;
+    const gen = generation.current;
+    const pending = (async () => {
+      await restored.current;
+      // The saved basket may have arrived while we waited, in which case there
+      // is nothing to create.
+      if (gen === generation.current && basketRef.current) return basketRef.current;
+      const created = await createBasket(token, username);
+      // Superseded by a username change mid-flight: hand it back to the caller
+      // that asked for it, but don't let it become the current basket.
+      if (gen !== generation.current) return created;
+      localStorage.setItem(BASKET_KEY, created.ident);
+      store(created);
+      return created;
+    })();
+    creating.current = pending;
+    const release = () => {
+      if (creating.current === pending) creating.current = null;
+    };
+    // Both arms, so the slot frees on failure too, and so the rejection counts
+    // as handled here as well as by whoever awaits `pending`.
+    pending.then(release, release);
+    return pending;
+  }
 
   /** Record that `packageId` was added as a subscription (or no longer is). */
   function rememberRecurring(ident, packageId, recurring) {
@@ -71,17 +122,18 @@ export function useTebexBasket(token) {
    * on a basket-scoped catalog request, so a player with no cart yet would be
    * quoted full price for a rank they should get credit on. Returns null on
    * failure — a stale saved username must not raise an error before the buyer
-   * has done anything.
+   * has done anything. The reason is kept in `basketError` instead, so the page
+   * can surface it at the step that actually failed.
    */
   async function ensureBasket(username) {
     if (basketRef.current) return basketRef.current;
     if (!token || !username) return null;
     try {
-      const created = await createBasket(token, username);
-      localStorage.setItem(BASKET_KEY, created.ident);
-      store(created);
+      const created = await createOnce(username);
+      setBasketError(null);
       return created;
-    } catch {
+    } catch (err) {
+      setBasketError(err);
       return null;
     }
   }
@@ -96,11 +148,8 @@ export function useTebexBasket(token) {
    */
   async function addItem(pkg, username, quantity = 1, type) {
     let current = basketRef.current;
-    if (!current) {
-      current = await createBasket(token, username);
-      localStorage.setItem(BASKET_KEY, current.ident);
-      basketRef.current = current;
-    }
+    if (!current) current = await createOnce(username);
+    setBasketError(null);
     const resolved = resolveType(pkg, type);
     const updated = await addToBasket(current.ident, pkg.id, quantity, resolved);
     store(updated);
@@ -125,9 +174,15 @@ export function useTebexBasket(token) {
 
   /** Forget the basket (e.g. after a completed checkout, or a username change). */
   function clearBasket() {
+    // Retire any create still in flight before dropping the basket, so one
+    // started under the old username can't land and undo this.
+    generation.current += 1;
+    creating.current = null;
+    restored.current = Promise.resolve();
     forgetBasket();
     store(null);
     setRecurringIds([]);
+    setBasketError(null);
   }
 
   /**
@@ -184,7 +239,7 @@ export function useTebexBasket(token) {
   const giftcards = basket?.giftcards || [];
 
   return {
-    basket, items, count, coupons, giftcards, recurringIds,
+    basket, items, count, coupons, giftcards, recurringIds, basketError,
     ensureBasket, addItem, setQuantity, removeItem, clearBasket,
     addCoupon, dropCoupon, addGiftCard, dropGiftCard,
   };

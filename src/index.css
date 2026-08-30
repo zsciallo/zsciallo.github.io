@@ -1685,6 +1685,17 @@ footer {
   color: inherit;
 }
 
+/* A failed name lookup is usually transient, so the retry lives on the banner
+   itself rather than sending the buyer back through the name modal to retype a
+   name that was already right. */
+.store-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.85rem;
+}
+
 .store-user {
   text-align: center;
   font-size: 1rem;
