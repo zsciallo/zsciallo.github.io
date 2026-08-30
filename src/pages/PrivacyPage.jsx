@@ -16,9 +16,9 @@ export function PrivacyPage() {
     <>
       <NavBar />
       <main>
-        <section class="page-hero container" aria-label="Chromabit privacy policy">
-          <a href="/" class="logo-link" aria-label="Back to Chromabit home">
-            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit" />
+        <section class="page-hero container" aria-label="Chromabit SMP privacy policy">
+          <a href="/" class="logo-link" aria-label="Back to Chromabit SMP home">
+            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit SMP" />
           </a>
 
           <p class="section-eyebrow">LEGAL</p>

@@ -24,13 +24,13 @@ export default function App() {
     <>
       <NavBar current="home" />
       <main>
-        <section class="page-hero container" aria-label="Chromabit Minecraft Server">
+        <section class="page-hero container" aria-label="Chromabit SMP">
 
           <Logo />
 
-          <p class="section-eyebrow">CHROMABIT MINECRAFT SERVER</p>
+          <p class="section-eyebrow">MINECRAFT ECONOMY SERVER</p>
           <h1 class="hero-title hero-title--inline">
-            ECONOMY <span class="accent">SMP</span>
+            CHROMABIT <span class="accent">SMP</span>
           </h1>
           <p class="hero-sub">Chromabit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.</p>
 
@@ -48,7 +48,7 @@ export default function App() {
           <div class="rule" />
         </section>
 
-        <section class="features-section" aria-label="Chromabit features">
+        <section class="features-section" aria-label="Chromabit SMP features">
           <div class="container">
             <SectionHeader
               eyebrow="HOW IT WORKS"

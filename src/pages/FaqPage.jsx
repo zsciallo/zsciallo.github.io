@@ -23,7 +23,7 @@ export function FaqPage() {
     <>
       <NavBar />
       <main>
-        <section class="page-hero container" aria-label="Chromabit FAQ">
+        <section class="page-hero container" aria-label="Chromabit SMP FAQ">
           <p class="section-eyebrow">HELP CENTER</p>
           <h1 class="hero-title">
             HAVE<span class="accent">QUESTIONS?</span>

@@ -21,7 +21,7 @@ export function SmpPage() {
     <>
       <NavBar />
       <main>
-        <section class="page-hero container" aria-label="Chromabit Economy SMP Minecraft Server">
+        <section class="page-hero container" aria-label="Chromabit SMP Economy Minecraft Server">
 
           <Logo />
 

@@ -6,7 +6,7 @@ import { Logo } from './Logo';
 
 export function Hero({ config, status }) {
   return (
-    <section class="hero container" aria-label="Chromabit Minecraft Server">
+    <section class="hero container" aria-label="Chromabit SMP">
       <Logo />
 
       <h1 class="hero-title">
