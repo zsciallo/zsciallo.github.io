@@ -9,13 +9,15 @@ function formatPrice(amount, currency) {
 }
 
 /** Full popout view of a package: image, price, and complete description. */
-export function PackageModal({ pkg, busy, cartQty = 0, owned = false, onBuy, onAddToCart, onClose }) {
+export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
   const onSale = pkg.discount > 0;
   const allowQuantity = !pkg.disable_quantity;
   const limit = limitLabel(pkg.user_limit);
   const cap = limitCount(pkg.user_limit);
   const inCart = cap > 0 && cartQty >= cap;
-  const blocked = owned || inCart;
+  // See PackageCard: `requires` names the rank this package upgrades, and beats
+  // `owned` because Tebex refuses both cases with the same message.
+  const blocked = owned || inCart || Boolean(requires);
   const [closing, setClosing] = useState(false);
   const [qty, setQty] = useState(1);
 
@@ -48,9 +50,10 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, onBuy, onA
             </p>
           )}
 
-          {(limit || owned) && (
+          {(limit || owned || requires) && (
             <p class={`pkg-limit${blocked ? ' pkg-limit--hit' : ''}`}>
-              {owned ? 'YOU ALREADY OWN THIS' : inCart ? 'ALREADY IN YOUR CART' : limit}
+              {requires ? `REQUIRES ${requires.toUpperCase()}`
+                : owned ? 'YOU ALREADY OWN THIS' : inCart ? 'ALREADY IN YOUR CART' : limit}
             </p>
           )}
 
@@ -72,19 +75,21 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, onBuy, onA
               disabled={busy || blocked}
               onClick={() => onBuy(pkg, qty)}
               aria-label={
-                owned ? `You already own ${pkg.name}`
-                  : inCart ? `${pkg.name} is already in your cart`
-                    : `Buy ${qty} × ${pkg.name}`
+                requires ? `${pkg.name} requires ${requires}`
+                  : owned ? `You already own ${pkg.name}`
+                    : inCart ? `${pkg.name} is already in your cart`
+                      : `Buy ${qty} × ${pkg.name}`
               }
             >
-              {owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
+              {requires ? 'LOCKED' : owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
             </button>
             <button
               class="pkg-cart-btn"
               disabled={busy || blocked}
               onClick={() => onAddToCart(pkg, qty)}
               aria-label={`Add ${qty} × ${pkg.name} to cart`}
-              title={owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
+              title={requires ? `Requires ${requires}`
+                : owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
             >
               <CartIcon />
             </button>

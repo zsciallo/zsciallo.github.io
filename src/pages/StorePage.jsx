@@ -7,6 +7,7 @@ import { inferOwnedPackages } from '../lib/inferOwned';
 import { normalizeName, displayName, platformOf } from '../lib/minecraftName';
 import { resolveType } from '../lib/packageType';
 import { purchaseOptions, pairedSubscriptionIds, pairMembers } from '../lib/purchaseOptions';
+import { requiredPackage } from '../lib/requirements';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
 import { isNameLookupFailure } from '../lib/tebex';
@@ -23,8 +24,11 @@ import { NavBar } from '../components/NavBar';
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
 
-// Tebex's refusal for a package the player can't buy — in practice, one they
-// already own. The `.` covers both the straight and curly apostrophe.
+// Tebex's refusal for a package the player can't buy. It does NOT mean they own
+// it: the same message comes back for a package gated behind a rank they don't
+// have yet, which is why the reason is worked out from `packageRequires` rather
+// than read off the message. The `.` covers both the straight and curly
+// apostrophe.
 const NOT_PURCHASABLE = /isn.?t purchasable|not purchasable/i;
 
 // Distinct from NOT_PURCHASABLE: the package is fine, but this basket already
@@ -123,8 +127,11 @@ export function StorePage() {
       setCartOpen(true);
       setBusyPkgId(null);
     } catch (err) {
-      const owned = NOT_PURCHASABLE.test(err.message);
+      const notPurchasable = NOT_PURCHASABLE.test(err.message);
       const overQty = OVER_QUANTITY.test(err.message);
+      // The one refusal Tebex can't explain for us. A missing prerequisite is
+      // the likelier cause when there's no sign the player holds it.
+      const missing = notPurchasable ? missingRequirement(pkg) : null;
 
       const badName = isNameLookupFailure(err);
 
@@ -133,7 +140,8 @@ export function StorePage() {
       capture('checkout_failed', {
         reason: badName
           ? 'invalid_username'
-          : owned ? 'not_purchasable' : overQty ? 'over_quantity' : 'other',
+          : missing ? 'requirement_unmet'
+            : notPurchasable ? 'not_purchasable' : overQty ? 'over_quantity' : 'other',
         message: err.message,
         package: pkg.name,
         mode,
@@ -154,11 +162,18 @@ export function StorePage() {
         // the name is usually right — buyers were "fixing" it by retyping it
         // unchanged, which only ever re-ran the lookup. So offer that directly.
         setRetry({ pkg, mode, quantity, type });
-      } else if (owned) {
+      } else if (notPurchasable) {
         // Remember the refusal so the card greys out from here on, rather than
         // letting them hit the same wall on every visit.
         setUnavailable(markUnavailable(name, pkg.id));
-        setCheckoutError(`You already have ${pkg.name} — it's limited to one per player.`);
+        // The second sentence covers the case this can't rule out: nothing in the
+        // catalog reveals who holds MVP, so an existing MVP+ subscriber re-adding
+        // it lands here too. Naming both keeps the message true either way.
+        setCheckoutError(missing
+          ? `${pkg.name} is an upgrade for ${missing.name} owners — you'll need `
+            + `${missing.name} on your account before you can buy it. If you're `
+            + `already subscribed to ${pkg.name}, it renews on its own.`
+          : `You already have ${pkg.name} — it's limited to one per player.`);
       } else if (overQty) {
         setCheckoutError(`${pkg.name} is limited to one per player, and it's already in your cart.`);
       } else {
@@ -271,16 +286,32 @@ export function StorePage() {
   // capped packages that no discount can betray.
   const ownedIds = new Set([...unavailable, ...inferOwnedPackages(store.categories)]);
 
+  // What a package can't be bought without — MVP+ only sells to MVP holders.
+  // Returns the required package when there's no sign the player has it, so a
+  // refusal can be blamed on the gate instead of on ownership.
+  const missingRequirement = (pkg) => {
+    const required = requiredPackage(pkg, store.packagesById, config.packageRequires);
+    return required && !ownedIds.has(required.id) ? required : null;
+  };
+  // Only ever applied to a package Tebex has actually refused. The catalog
+  // can't reveal who holds MVP, so locking MVP+ on suspicion would hide it from
+  // the very players allowed to buy it.
+  const lockedOf = (pkg) => (unavailable.includes(pkg.id) ? missingRequirement(pkg) : null);
+
   // The cheaper subscription half of a pair is reached through its partner's
   // popup, so it must not also sit in the grid as a package of its own.
   const pairedIds = pairedSubscriptionIds(config.subscriptionPairs);
+  const shownPackages = (category) => category.packages.filter((pkg) => !pairedIds.has(pkg.id));
 
   // A pair is one product to the buyer, so either half in the cart — or refused
   // for this player — has to block the other. Otherwise subscribing leaves the
   // card on BUY and the same pass can be bought twice.
   const pairOf = (pkg) => pairMembers(pkg, config.subscriptionPairs);
   const cartQtyOf = (pkg) => pairOf(pkg).reduce((n, id) => n + (cartQtyById[id] || 0), 0);
-  const ownedOf = (pkg) => pairOf(pkg).some((id) => ownedIds.has(id));
+  // A refusal explained by an unmet requirement says nothing about ownership,
+  // so the lock is read first — otherwise the card claims they own the rank
+  // they were just told they can't buy.
+  const ownedOf = (pkg) => !lockedOf(pkg) && pairOf(pkg).some((id) => ownedIds.has(id));
 
   async function handleApplyCoupon(code) {
     await cart.addCoupon(code);
@@ -334,8 +365,8 @@ export function StorePage() {
       temporary, so try again — or change the name if it's wrong.
     </>
   );
-  // Repeating the request fixes a failed lookup and does nothing for "you
-  // already own this", so only offer it where it can help.
+  // Repeating the request fixes a failed lookup and does nothing for a package
+  // the player can't buy, so only offer it where it can help.
   const canRetry = Boolean(retry) || Boolean(!checkoutError && cart.basketError);
 
   return (
@@ -455,14 +486,17 @@ export function StorePage() {
               .map((category) => (
               <div class="store-category" key={category.id}>
                 <SectionHeader title={category.name.toUpperCase()} />
-                <div class="store-grid">
-                  {category.packages.filter((pkg) => !pairedIds.has(pkg.id)).map((pkg) => (
+                {/* Four across a 900px container wraps 3 + 1, which reads as a
+                    mistake. Narrow the grid so those four sit as a 2x2 block. */}
+                <div class={`store-grid ${shownPackages(category).length === 4 ? 'store-grid--quad' : ''}`}>
+                  {shownPackages(category).map((pkg) => (
                     <PackageCard
                       key={pkg.id}
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
                       cartQty={cartQtyOf(pkg)}
                       owned={ownedOf(pkg)}
+                      requires={lockedOf(pkg)?.name || null}
                       onView={handleView}
                       onBuy={(p, qty, type) => handleAction(p, 'buy', qty, type)}
                       onAddToCart={(p, qty, type) => handleAction(p, 'cart', qty, type)}
@@ -509,6 +543,7 @@ export function StorePage() {
           busy={busyPkgId === viewPkg.id}
           cartQty={cartQtyOf(viewPkg)}
           owned={ownedOf(viewPkg)}
+          requires={lockedOf(viewPkg)?.name || null}
           onBuy={(p, qty, type) => handleAction(p, 'buy', qty, type)}
           onAddToCart={(p, qty, type) => handleAction(p, 'cart', qty, type)}
           onClose={() => setViewPkg(null)}

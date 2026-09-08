@@ -1188,6 +1188,15 @@ footer {
   margin-top: 1.5rem;
 }
 
+/* Exactly four packages: auto-fit puts three on the first row and leaves the
+   fourth hanging, so force two full-width columns for a 2x2. Below the
+   breakpoint auto-fit takes over again and collapses to one column. */
+@media (min-width: 560px) {
+  .store-grid--quad {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .pkg-card {
   background: var(--frost), var(--bg2);
   border: 1px solid var(--border);

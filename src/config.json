@@ -11,5 +11,8 @@
   "posthogHost": "https://us.i.posthog.com",
   "subscriptionPairs": {
     "7581943": 7631864
+  },
+  "packageRequires": {
+    "7663601": 7564228
   }
 }

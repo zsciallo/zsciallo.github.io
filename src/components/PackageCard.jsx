@@ -8,16 +8,20 @@ function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
 
-export function PackageCard({ pkg, busy, cartQty = 0, owned = false, onView, onBuy, onAddToCart }) {
+export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = null, onView, onBuy, onAddToCart }) {
   const onSale = pkg.discount > 0;
   const allowQuantity = !pkg.disable_quantity;
   const limit = limitLabel(pkg.user_limit);
   const cap = limitCount(pkg.user_limit);
-  // `owned` comes from Tebex having already refused this package for the player;
-  // `inCart` is the cheaper case where they simply have it queued up. Both block
-  // the purchase, but they read differently to the buyer.
+  // Three ways to be unbuyable, all of which read differently to the buyer.
+  // `inCart` is the cheap one: they simply have it queued up already. `owned`
+  // and `requires` both come from Tebex refusing the add, which it does with
+  // one message for two opposite reasons — so `requires` names the rank this
+  // package upgrades when there's no sign the player holds it, and it reads
+  // first. Telling an upgrade buyer they already own what they were just
+  // refused is what this did before, and it sent them to support.
   const inCart = cap > 0 && cartQty >= cap;
-  const blocked = owned || inCart;
+  const blocked = owned || inCart || Boolean(requires);
   const [qty, setQty] = useState(1);
 
   return (
@@ -41,9 +45,10 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, onView, onB
           <span class="pkg-price-now">{formatPrice(pkg.total_price, pkg.currency)}</span>
         </p>
         {onSale && <p class="pkg-upgrade">UPGRADE PRICE — {formatPrice(pkg.discount, pkg.currency)} CREDIT APPLIED</p>}
-        {(limit || owned) && (
+        {(limit || owned || requires) && (
           <p class={`pkg-limit${blocked ? ' pkg-limit--hit' : ''}`}>
-            {owned ? 'YOU ALREADY OWN THIS' : inCart ? 'ALREADY IN CART' : limit}
+            {requires ? `REQUIRES ${requires.toUpperCase()}`
+              : owned ? 'YOU ALREADY OWN THIS' : inCart ? 'ALREADY IN CART' : limit}
           </p>
         )}
         <p class="pkg-details-hint">VIEW DETAILS</p>
@@ -61,19 +66,21 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, onView, onB
             disabled={busy || blocked}
             onClick={() => onBuy(pkg, qty)}
             aria-label={
-              owned ? `You already own ${pkg.name}`
-                : inCart ? `${pkg.name} is already in your cart`
-                  : `Buy ${qty} × ${pkg.name}`
+              requires ? `${pkg.name} requires ${requires}`
+                : owned ? `You already own ${pkg.name}`
+                  : inCart ? `${pkg.name} is already in your cart`
+                    : `Buy ${qty} × ${pkg.name}`
             }
           >
-            {owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
+            {requires ? 'LOCKED' : owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
           </button>
           <button
             class="pkg-cart-btn"
             disabled={busy || blocked}
             onClick={() => onAddToCart(pkg, qty)}
             aria-label={`Add ${qty} × ${pkg.name} to cart`}
-            title={owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
+            title={requires ? `Requires ${requires}`
+              : owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
           >
             <CartIcon />
           </button>
