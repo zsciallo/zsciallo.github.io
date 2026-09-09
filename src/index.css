@@ -174,6 +174,218 @@ body::after {
   line-height: 1.7;
 }
 
+/* Three words doing the work a paragraph used to. Sized between the title and
+   the body copy so it reads as a continuation of the headline. */
+.hero-tagline {
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(1.5rem, 4.5vw, 2.2rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+/* ─── market tape ───
+   Two rows of the day's movers, running opposite ways under the hero. The
+   markets are the reason this server exists, so they get said first. */
+
+.tape {
+  width: 100%;
+  max-width: 940px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tape-row {
+  display: flex;
+  align-items: stretch;
+  background: rgba(12, 7, 24, 0.72);
+  min-height: 34px;
+}
+
+.tape-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0.8rem;
+  background: rgba(12, 7, 24, 0.72);
+}
+
+.tape-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--text);
+}
+
+.tape-when {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+/* Fixed width, not content width: GAINERS is a letter longer than LOSERS, and
+   sized to their text the two rows start at different places. */
+.tape-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 5rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  border-right: 1px solid var(--border);
+}
+
+.tape-row--up .tape-label {
+  color: var(--positive);
+  background: rgba(91, 227, 160, 0.08);
+}
+
+.tape-row--down .tape-label {
+  color: #ff8a8a;
+  background: rgba(255, 138, 138, 0.08);
+}
+
+/* The viewport clips; the track slides. Masked at both ends so entries fade
+   in and out rather than being guillotined by the border. */
+.tape-viewport {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+}
+
+.tape-track {
+  display: flex;
+  width: max-content;
+  animation: tape-scroll 55s linear infinite;
+}
+
+/* Losers run against the gainers, which is what makes it read as a board
+   rather than a list. */
+.tape-row--down .tape-track {
+  animation-direction: reverse;
+}
+
+.tape-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes tape-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.tape-run {
+  display: flex;
+  flex: none;
+}
+
+.tape-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  border-right: 1px solid var(--border);
+  transition: color 0.15s, background 0.15s;
+}
+
+.tape-cell:hover {
+  color: var(--text);
+  background: rgba(199, 125, 255, 0.07);
+}
+
+.tape-cell .item-icon {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.tape-name {
+  color: var(--text);
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tape-price {
+  opacity: 0.85;
+}
+
+.tape-change {
+  font-weight: 600;
+}
+
+.tape-row--up .tape-change {
+  color: var(--positive);
+}
+
+.tape-row--down .tape-change {
+  color: #ff8a8a;
+}
+
+.tape-idle {
+  display: flex;
+  align-items: center;
+  padding: 0 0.9rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.64rem;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+@media (max-width: 560px) {
+  .tape-label {
+    width: 4.25rem;
+    font-size: 0.52rem;
+  }
+
+  .tape-title {
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+  }
+
+  .tape-cell {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.62rem;
+  }
+}
+
+/* A moving tape is exactly what this setting is for. Stop it and let the row
+   be scrolled by hand instead, with the duplicate run out of the way so it is
+   not read twice. */
+@media (prefers-reduced-motion: reduce) {
+  .tape-viewport {
+    overflow-x: auto;
+  }
+
+  .tape-track {
+    animation: none;
+  }
+
+  .tape-run[aria-hidden='true'] {
+    display: none;
+  }
+}
+
 .hero-connect {
   display: flex;
   flex-direction: column;
@@ -301,6 +513,12 @@ body::after {
   font-size: 0.85rem;
   letter-spacing: 0.2em;
   color: var(--muted);
+}
+
+/* The live count, carrying the "we are up" signal the status pill used to. */
+.ip-count {
+  font-weight: 600;
+  color: var(--positive);
 }
 
 .ip-value {
@@ -493,7 +711,7 @@ body::after {
   transform: translateY(-2px);
 }
 
-/* Compact .btn for chrome-level controls — filter tabs, the log-in control —
+/* Compact .btn for chrome-level controls - filter tabs, the log-in control -
    so they read as the same button family as Buy, one size down. */
 .btn-sm {
   padding: 0.45rem 1.2rem;
@@ -2523,7 +2741,7 @@ html.js .reveal.is-visible {
   white-space: nowrap;
 }
 
-/* Once it wraps it is a block, not a pill — square it off so the corners
+/* Once it wraps it is a block, not a pill - square it off so the corners
    don't bow around two lines of text. */
 @media (max-width: 560px) {
   .store-promo {
@@ -2634,7 +2852,7 @@ html.js .reveal.is-visible {
   color: var(--muted);
 }
 
-/* Rank upgrade credit — the player already paid for a lower tier. */
+/* Rank upgrade credit - the player already paid for a lower tier. */
 .pkg-upgrade {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.6rem;
@@ -2643,7 +2861,7 @@ html.js .reveal.is-visible {
   margin-top: 0.3rem;
 }
 
-/* Limited package already in the basket — a second one would be rejected at
+/* Limited package already in the basket - a second one would be rejected at
    checkout, so the actions read as unavailable rather than merely busy. */
 .pkg-buy:disabled,
 .pkg-cart-btn:disabled {
@@ -2710,7 +2928,7 @@ html.js .reveal.is-visible {
 }
 
 /* Long-form legal prose (privacy policy). Narrower measure than the marketing
-   sections — this is text people actually read top to bottom. */
+   sections - this is text people actually read top to bottom. */
 .legal-section {
   position: relative;
   z-index: 1;
@@ -2770,7 +2988,7 @@ html.js .reveal.is-visible {
   position: sticky;
   top: 0;
   /* Above the cart FAB (60) so the open mobile panel covers it, below the
-     lightbox (75), cart scrim (80), drawer (90) and modals (100) — those are
+     lightbox (75), cart scrim (80), drawer (90) and modals (100) - those are
      meant to cover the page. */
   z-index: 70;
   background: rgba(12, 7, 24, 0.72);
@@ -2781,7 +2999,7 @@ html.js .reveal.is-visible {
 
 /* Held until Teko is loaded (the inline script in each page head sets
    .fonts-ready, with a 1.5s escape hatch). The bar itself stays painted, so
-   only its contents fade in — otherwise the swap from the fallback face
+   only its contents fade in - otherwise the swap from the fallback face
    flickers across the nav on every navigation. */
 html.js .site-nav-inner {
   opacity: 0;
@@ -2867,7 +3085,7 @@ html.js.fonts-ready .site-nav-inner {
 }
 
 /* Hamburger: mobile only, and only where JS can open the panel it controls. */
-/* Shares the .btn-secondary shell — 2px border, same radius and hover — so it
+/* Shares the .btn-secondary shell - 2px border, same radius and hover - so it
    belongs to the same button family as the rest of the site. */
 .nav-toggle {
   display: none;

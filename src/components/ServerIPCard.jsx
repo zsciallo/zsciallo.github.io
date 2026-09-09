@@ -17,8 +17,9 @@ function CheckIcon() {
   );
 }
 
-export function ServerIPCard({ ip }) {
+export function ServerIPCard({ ip, status }) {
   const [copied, setCopied] = useState(false);
+  const players = status?.players;
 
   function handleCopy() {
     navigator.clipboard.writeText(ip).then(() => {
@@ -29,7 +30,19 @@ export function ServerIPCard({ ip }) {
 
   return (
     <div class="card ip-block">
-      <div class="ip-label">SERVER IP</div>
+      {/* The head count takes the label's place when we have one. It says the
+          server is up more convincingly than the word "online" did, and the
+          address underneath already says what the block is. Falls back to the
+          label while the check is in flight, or when it failed and we assumed
+          the server was up rather than measuring it. */}
+      <div class="ip-label">
+        {players ? (
+          <>
+            <b class="ip-count">{players.online.toLocaleString('en-US')}</b>
+            {players.max ? ` / ${players.max.toLocaleString('en-US')}` : ''} PLAYERS
+          </>
+        ) : 'SERVER IP'}
+      </div>
       <div class="ip-value">
         play.<span class="accent">chromabit</span>.us
       </div>

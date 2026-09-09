@@ -17,18 +17,28 @@ export function useServerStatus(serverIP, underConstruction) {
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(`status check failed (${r.status})`))))
       .then(data => {
         // mcsrvstat has served Cloudflare challenge pages in place of JSON
-        // before — a 200 isn't proof we got an answer, the `online` flag is.
+        // before - a 200 isn't proof we got an answer, the `online` flag is.
         if (typeof data?.online !== 'boolean') throw new Error('unusable status response');
         const ping = Date.now() - start;
-        setStatus({ loading: false, online: data.online, ping: data.online ? ping : null });
+        // A server with nobody on it reports 0, which is a real answer and has
+        // to survive to the card. Only a missing or malformed count is null.
+        const count = data.players?.online;
+        setStatus({
+          loading: false,
+          online: data.online,
+          ping: data.online ? ping : null,
+          players: typeof count === 'number'
+            ? { online: count, max: typeof data.players.max === 'number' ? data.players.max : null }
+            : null,
+        });
       })
       .catch(() => {
         // The *checker* failed, which says nothing about the server. Assume
         // online rather than letting a third-party outage brand the server as
         // under construction and pull the store link off the page. No ping,
-        // since we never measured one — `unknown` marks the guess for anything
+        // since we never measured one - `unknown` marks the guess for anything
         // that wants to treat it differently later.
-        setStatus({ loading: false, online: true, unknown: true });
+        setStatus({ loading: false, online: true, unknown: true, players: null });
       });
   }, [serverIP, underConstruction]);
 

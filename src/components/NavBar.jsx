@@ -12,7 +12,7 @@ export function NavBar({ current = null }) {
   const [open, setOpen] = useState(false);
 
   // The panel is a mobile-only layout, so a rotate to landscape (or a desktop
-  // resize) has to dismiss it — otherwise it lingers as a stray dropdown.
+  // resize) has to dismiss it - otherwise it lingers as a stray dropdown.
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === 'Escape' && setOpen(false);

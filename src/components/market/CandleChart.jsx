@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { count, fullDate, money, percent, shortDate, shortTime } from '../../lib/market';
-import { bollinger, extent, linePath, nearest, PAD, padded, scale, SERIES, sma, ticks, useMeasure } from './chart';
+import { axisMoney, bollinger, extent, linePath, nearest, PAD, padded, scale, SERIES, sma, ticks, useMeasure } from './chart';
 
 const PLOT_HEIGHT = 210;
 const VOLUME_HEIGHT = 54;
@@ -100,6 +100,7 @@ export function CandleChart({ rows, grain }) {
   const height = volumeTop + VOLUME_HEIGHT + 20;
 
   const priceTicks = ticks(priceDomain, 4);
+  const priceLabels = axisMoney(priceTicks);
   const span = rows[rows.length - 1].t - rows[0].t;
   const label = span > 2 * DAY ? shortDate : shortTime;
   // Ticks by index, not by value: the axis is a sequence of buckets.
@@ -151,10 +152,10 @@ export function CandleChart({ rows, grain }) {
             aria-label={`${GRAIN_LABEL[grain] ?? ''}: open, high, low and close, with traded units`}
             onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
 
-            {priceTicks.map((value) => (
+            {priceTicks.map((value, i) => (
               <g key={value}>
                 <line x1={PAD.left} x2={PAD.left + innerWidth} y1={y(value)} y2={y(value)} class="chart-grid" />
-                <text x={PAD.left - 8} y={y(value) + 4} class="chart-tick chart-tick--y">{money(value)}</text>
+                <text x={PAD.left - 8} y={y(value) + 4} class="chart-tick chart-tick--y">{priceLabels[i]}</text>
               </g>
             ))}
 
@@ -183,12 +184,18 @@ export function CandleChart({ rows, grain }) {
               const top = y(Math.max(row.o, row.c));
               const bottom = y(Math.min(row.o, row.c));
               return (
-                <g key={row.t} opacity={hover == null || hover === i ? 1 : 0.55}>
+                // crispEdges because every mark here is axis-aligned: a 1px
+                // wick at a fractional x would otherwise be anti-aliased into
+                // two half-lit columns and read as nothing at all. The body
+                // takes fill only - stroking it in its own colour grew it half
+                // a pixel on each side, which is enough to swallow a short
+                // wick whole.
+                <g key={row.t} shape-rendering="crispEdges"
+                  opacity={hover == null || hover === i ? 1 : 0.55}>
                   <line x1={cx(i)} x2={cx(i)} y1={y(row.h)} y2={y(row.l)}
                     stroke={colour} stroke-width="1" />
                   <rect x={cx(i) - bodyWidth / 2} y={top} width={bodyWidth}
-                    height={Math.max(1, bottom - top)}
-                    fill={colour} stroke={colour} stroke-width="1" />
+                    height={Math.max(1, bottom - top)} fill={colour} />
                 </g>
               );
             })}

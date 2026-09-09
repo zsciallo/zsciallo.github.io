@@ -1,13 +1,13 @@
 import config from './config.json';
 import { useServerStatus } from './hooks/useServerStatus';
 import { useScrollReveal } from './hooks/useScrollReveal';
-import { StatusBadge } from './components/StatusBadge';
 import { ServerStatusSection } from './components/ServerStatusSection';
 import { JoinCTA } from './components/JoinCTA';
 import { SectionHeader } from './components/SectionHeader';
 import { FeatureCard } from './components/FeatureCard';
 import { Events } from './components/Events';
 import { ServerCarousel } from './components/ServerCarousel';
+import { MarketTicker } from './components/MarketTicker';
 import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
 import { Logo } from './components/Logo';
@@ -32,9 +32,11 @@ export default function App() {
           <h1 class="hero-title hero-title--inline">
             CHROMABIT <span class="accent">SMP</span>
           </h1>
-          <p class="hero-sub">Chromabit is a competitive Economy SMP Minecraft server where server events pay out store credit to the players who come out on top.</p>
+          <p class="hero-tagline">
+            Mine it. Price it. <span class="accent">Trade it.</span>
+          </p>
 
-          <StatusBadge status={status} />
+          <MarketTicker />
 
           <ServerCarousel />
 

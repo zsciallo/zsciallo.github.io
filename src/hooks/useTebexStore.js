@@ -9,7 +9,7 @@ import { fetchCategories } from '../lib/tebex';
  *
  * Pass `basketIdent` once one exists and the catalog re-fetches with that
  * player's pricing, so rank upgrade discounts show up. The re-fetch keeps the
- * current catalog on screen rather than flipping back to the loading state —
+ * current catalog on screen rather than flipping back to the loading state -
  * only the very first load has nothing to show.
  */
 export function useTebexStore(token, basketIdent) {

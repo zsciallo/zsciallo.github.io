@@ -94,7 +94,7 @@ function NotYet({ data, markets, pools, now }) {
         </p>
         <p>
           The desk is switched off on the server, so no contracts exist to
-          report. This page is already reading the table it will write to — the
+          report. This page is already reading the table it will write to, and the
           book below fills in the moment it opens.
         </p>
       </div>

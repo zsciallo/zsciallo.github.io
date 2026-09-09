@@ -16,7 +16,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = 
   // Three ways to be unbuyable, all of which read differently to the buyer.
   // `inCart` is the cheap one: they simply have it queued up already. `owned`
   // and `requires` both come from Tebex refusing the add, which it does with
-  // one message for two opposite reasons — so `requires` names the rank this
+  // one message for two opposite reasons - so `requires` names the rank this
   // package upgrades when there's no sign the player holds it, and it reads
   // first. Telling an upgrade buyer they already own what they were just
   // refused is what this did before, and it sent them to support.
@@ -44,7 +44,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = 
           {onSale && <span class="pkg-price-old">{formatPrice(listPrice(pkg), pkg.currency)}</span>}
           <span class="pkg-price-now">{formatPrice(pkg.total_price, pkg.currency)}</span>
         </p>
-        {onSale && <p class="pkg-upgrade">UPGRADE PRICE — {formatPrice(pkg.discount, pkg.currency)} CREDIT APPLIED</p>}
+        {onSale && <p class="pkg-upgrade">UPGRADE PRICE: {formatPrice(pkg.discount, pkg.currency)} CREDIT APPLIED</p>}
         {(limit || owned || requires) && (
           <p class={`pkg-limit${blocked ? ' pkg-limit--hit' : ''}`}>
             {requires ? `REQUIRES ${requires.toUpperCase()}`

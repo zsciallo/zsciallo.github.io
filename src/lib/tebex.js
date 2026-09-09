@@ -30,7 +30,7 @@ function put(url, payload) {
  * Fetch all categories with their packages included.
  *
  * Pass a `basketIdent` to get pricing for the player that basket belongs to.
- * Upgrade discounts — where owning VIP+ knocks its price off MVP — only appear
+ * Upgrade discounts - where owning VIP+ knocks its price off MVP - only appear
  * on a basket-scoped request; the anonymous catalog always quotes full price.
  */
 export async function fetchCategories(token, basketIdent) {
@@ -40,7 +40,7 @@ export async function fetchCategories(token, basketIdent) {
 }
 
 /**
- * Tebex's refusal when it can't resolve a name — which means two different
+ * Tebex's refusal when it can't resolve a name - which means two different
  * things it never distinguishes. A gamertag that doesn't exist and an Xbox Live
  * lookup that timed out or got rate-limited come back with the identical 404,
  * so this can never be read as proof the player isn't real.
@@ -50,7 +50,7 @@ export function isNameLookupFailure(err) {
 }
 
 /**
- * Create a basket for the given Minecraft username — Tebex needs the
+ * Create a basket for the given Minecraft username - Tebex needs the
  * username up front to attribute the purchase and deliver in-game.
  *
  * Retries once on a failed name lookup, because the transient kind is common
@@ -93,7 +93,7 @@ export async function getBasket(token, ident) {
  *
  * `type` is `single` or `subscription`. It is only *required* for packages the
  * store sells either way (catalog `type: "both"`), which reject the request
- * outright without it — but it is accepted on every package, so it's always
+ * outright without it - but it is accepted on every package, so it's always
  * sent rather than making the caller work out when it matters. See
  * `lib/packageType.js` for how the value is chosen.
  */
@@ -141,7 +141,7 @@ export async function removeCoupon(token, ident, code) {
 
 /**
  * Redeem a gift card against the basket. Same bare-flag response as the coupon
- * calls, so the caller re-fetches. Unlike coupons these stack — a basket can
+ * calls, so the caller re-fetches. Unlike coupons these stack - a basket can
  * carry several cards, and Tebex draws on them in turn at checkout.
  */
 export async function applyGiftCard(token, ident, cardNumber) {

@@ -9,7 +9,7 @@ function formatPrice(amount, currency) {
  * Asks how the buyer wants to pay for a package that's sold both ways.
  *
  * Tebex rejects the add-to-basket outright unless the request says which, so
- * this can't be left implicit — but it also shouldn't clutter every card, which
+ * this can't be left implicit - but it also shouldn't clutter every card, which
  * is why it's a popup raised by the buy button rather than a control sitting in
  * the grid.
  *
@@ -75,7 +75,7 @@ export function PurchaseTypeModal({ pkg, options, quantity = 1, mode, onChoose, 
           })}
         </div>
 
-        {/* Any interval shown above comes from the package's own expiry_period —
+        {/* Any interval shown above comes from the package's own expiry_period -
             never inferred from its purchase limit. Tebex confirms the exact
             dates on its own checkout. */}
         <p class="type-modal-note">Exact billing dates and terms are confirmed at checkout.</p>

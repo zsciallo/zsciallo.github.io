@@ -56,7 +56,7 @@ function MarketRow({ item, now, onOpen }) {
 
       <span class="num" role="cell">{item.floor == null ? <em>none</em> : money(item.floor)}</span>
       <span class="num" role="cell">{money(item.vwap7d ?? item.lastSale?.price)}</span>
-      <span class={`num change${direction}`} role="cell">{change ?? '—'}</span>
+      <span class={`num change${direction}`} role="cell">{change ?? '-'}</span>
       <span class="num" role="cell">
         {count(item.salesAll)}
         <em class="market-when">{item.lastSale ? ago(item.lastSale.at, now) : 'never'}</em>

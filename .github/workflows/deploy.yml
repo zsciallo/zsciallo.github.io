@@ -79,6 +79,7 @@ jobs:
           # them is still worth republishing.
           cp .last-deploy/market/pools.json   public/market/ 2>/dev/null || true
           cp .last-deploy/market/futures.json public/market/ 2>/dev/null || true
+          cp .last-deploy/market/ticker.json  public/market/ 2>/dev/null || true
           cp .last-deploy/market/sellers.json public/market/ 2>/dev/null || true
           cp -r .last-deploy/market/items/.   public/market/items/
 

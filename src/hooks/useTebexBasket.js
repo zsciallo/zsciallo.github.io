@@ -15,7 +15,7 @@ import { resolveType, isRecurring } from '../lib/packageType';
 const BASKET_KEY = 'chromabit_basket';
 // Which packages in the saved basket were added as subscriptions. Tebex accepts
 // the choice on the way in but never reports it back on the basket, so it is
-// only knowable by remembering what we sent — and the cart has to be able to
+// only knowable by remembering what we sent - and the cart has to be able to
 // tell the buyer that a line renews.
 const TYPES_KEY = 'chromabit_basket_types';
 
@@ -121,7 +121,7 @@ export function useTebexBasket(token) {
    * Required for pricing, not just convenience: upgrade discounts only appear
    * on a basket-scoped catalog request, so a player with no cart yet would be
    * quoted full price for a rank they should get credit on. Returns null on
-   * failure — a stale saved username must not raise an error before the buyer
+   * failure - a stale saved username must not raise an error before the buyer
    * has done anything. The reason is kept in `basketError` instead, so the page
    * can surface it at the step that actually failed.
    */
@@ -143,7 +143,7 @@ export function useTebexBasket(token) {
    * basket.
    *
    * `type` is the buyer's single/subscription choice, and only means anything
-   * for packages sold both ways — `resolveType` pins everything else to what
+   * for packages sold both ways - `resolveType` pins everything else to what
    * the package actually is, so a stale choice can't ride along.
    */
   async function addItem(pkg, username, quantity = 1, type) {
@@ -254,7 +254,7 @@ function forgetBasket() {
 /**
  * Read back the subscription choices for `ident`. Stamped with the basket they
  * belong to, so a leftover record from a previous cart can't mislabel a line in
- * this one — a wrong "renews automatically" badge is worse than none.
+ * this one - a wrong "renews automatically" badge is worse than none.
  */
 function loadRecurring(ident) {
   try {
@@ -274,7 +274,7 @@ function saveRecurring(ident, ids) {
 }
 
 /**
- * Compare two card numbers ignoring the separators a buyer may have typed —
+ * Compare two card numbers ignoring the separators a buyer may have typed -
  * Tebex accepts `1234-5678-…` and `12345678…` as the same card, so the
  * duplicate check has to as well.
  */

@@ -4,7 +4,7 @@ import { SectionHeader } from '../components/SectionHeader';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
 
-// Bump whenever the substance of the policy changes — not for typo fixes.
+// Bump whenever the substance of the policy changes - not for typo fixes.
 const LAST_UPDATED = 'August 10, 2026';
 
 export function PrivacyPage() {
@@ -47,7 +47,7 @@ export function PrivacyPage() {
                 We use privacy-focused analytics to see how many people visit the site and
                 where they get stuck in the store. We do not record your screen, we do not
                 sell data, we do not run advertising, and we never send your Minecraft
-                username to our analytics provider. Payments are handled entirely by Tebex —
+                username to our analytics provider. Payments are handled entirely by Tebex, and
                 we never see or store your card details.
               </p>
 
@@ -60,7 +60,7 @@ export function PrivacyPage() {
               <ul>
                 <li>Pages you view on this site, and when</li>
                 <li>The site or link that sent you here (referrer and any campaign tags)</li>
-                <li>Approximate location — country and region, derived from your IP address</li>
+                <li>Approximate location: country and region, derived from your IP address</li>
                 <li>Device information: browser, operating system, and screen size</li>
                 <li>
                   Store activity: which packages you open, add to a cart, or begin checkout
@@ -110,11 +110,11 @@ export function PrivacyPage() {
 
               <h2>Other services</h2>
               <ul>
-                <li><strong>Tebex</strong> — runs our store and processes all payments.</li>
-                <li><strong>GitHub Pages</strong> — hosts this website.</li>
-                <li><strong>Google Fonts</strong> — serves the fonts used on these pages.</li>
-                <li><strong>mcsrvstat.us</strong> — supplies the live player count.</li>
-                <li><strong>Discord</strong> — supplies our community member count.</li>
+                <li><strong>Tebex</strong> runs our store and processes all payments.</li>
+                <li><strong>GitHub Pages</strong> hosts this website.</li>
+                <li><strong>Google Fonts</strong> serves the fonts used on these pages.</li>
+                <li><strong>mcsrvstat.us</strong> supplies the live player count.</li>
+                <li><strong>Discord</strong> supplies our community member count.</li>
               </ul>
               <p>
                 Each of these receives your IP address as a normal part of serving you the
@@ -137,14 +137,14 @@ export function PrivacyPage() {
               <h2>Your choices</h2>
               <p>
                 You can opt out of analytics entirely by turning on "Do Not Track" or "Global
-                Privacy Control" in your browser, or by using any standard content blocker —
-                we do not attempt to work around blockers.
+                Privacy Control" in your browser, or by using any standard content blocker. We
+                do not attempt to work around blockers.
               </p>
               <p>
                 Depending on where you live, you may have the right to access, correct, or
                 delete the data we hold, or to object to its processing. Because we collect no
                 names or email addresses, we usually cannot connect analytics data to you
-                personally — but contact us and we will do what we can.
+                personally, but contact us and we will do what we can.
               </p>
 
               <h2>Changes</h2>

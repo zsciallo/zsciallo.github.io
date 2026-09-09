@@ -46,7 +46,7 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires =
           </p>
           {onSale && (
             <p class="pkg-upgrade">
-              UPGRADE PRICE — {formatPrice(pkg.discount, pkg.currency)} CREDIT FOR WHAT YOU ALREADY OWN
+              UPGRADE PRICE: {formatPrice(pkg.discount, pkg.currency)} CREDIT FOR WHAT YOU ALREADY OWN
             </p>
           )}
 

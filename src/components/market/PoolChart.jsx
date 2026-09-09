@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { count, fullDate, money, shortDate, shortTime } from '../../lib/market';
-import { extent, linePath, nearest, PAD, padded, scale, SERIES, ticks, useMeasure } from './chart';
+import { axisMoney, extent, linePath, nearest, PAD, padded, scale, SERIES, ticks, useMeasure } from './chart';
 import { CandleChart, candlesFor } from './CandleChart';
 
 const PLOT_HEIGHT = 190;
@@ -100,6 +100,7 @@ function LineView({ history, spec, now }) {
 
   const height = depthTop + DEPTH_HEIGHT + 20;
   const priceTicks = ticks(priceDomain, 4);
+  const priceLabels = axisMoney(priceTicks);
   const timeTicks = ticks(timeDomain, Math.min(5, Math.max(2, Math.floor(innerWidth / 90))));
   const label = timeDomain[1] - timeDomain[0] <= 2 * DAY ? shortTime : shortDate;
 
@@ -123,10 +124,10 @@ function LineView({ history, spec, now }) {
             aria-label="Mid price and pool inventory over time"
             onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
 
-            {priceTicks.map((value) => (
+            {priceTicks.map((value, i) => (
               <g key={value}>
                 <line x1={PAD.left} x2={PAD.left + innerWidth} y1={y(value)} y2={y(value)} class="chart-grid" />
-                <text x={PAD.left - 8} y={y(value) + 4} class="chart-tick chart-tick--y">{money(value)}</text>
+                <text x={PAD.left - 8} y={y(value) + 4} class="chart-tick chart-tick--y">{priceLabels[i]}</text>
               </g>
             ))}
 

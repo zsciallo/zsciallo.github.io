@@ -55,13 +55,13 @@ export function ItemDetail({ item, now, loading, error, onBack }) {
       )}
 
       <div class="stat-row">
-        <Stat label="Listing floor" value={item.floor == null ? '—' : money(item.floor, { compact: false })}
+        <Stat label="Listing floor" value={item.floor == null ? '-' : money(item.floor, { compact: false })}
           note={item.activeListings ? `${item.activeListings} listed now` : 'nothing listed'} />
-        <Stat label="Last sale" value={item.lastSale ? money(item.lastSale.price, { compact: false }) : '—'}
+        <Stat label="Last sale" value={item.lastSale ? money(item.lastSale.price, { compact: false }) : '-'}
           note={item.lastSale ? ago(item.lastSale.at, now) : 'no sales'} />
-        <Stat label="7d average" value={item.vwap7d ? money(item.vwap7d, { compact: false }) : '—'}
+        <Stat label="7d average" value={item.vwap7d ? money(item.vwap7d, { compact: false }) : '-'}
           note={`${item.sales7d} sale${item.sales7d === 1 ? '' : 's'} this week`} />
-        <Stat label="Week over week" value={change ?? '—'} tone={direction.trim()}
+        <Stat label="Week over week" value={change ?? '-'} tone={direction.trim()}
           note={change ? 'vs. prior 7 days' : 'too few sales to call'} />
         <Stat label="Total sales" value={count(item.salesAll)} note={`${count(item.sales30d)} in 30d`} />
         <Stat label="Lifetime volume" value={money(item.volumeAll)} note="value traded" />

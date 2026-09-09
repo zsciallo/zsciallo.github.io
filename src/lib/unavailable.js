@@ -4,7 +4,7 @@ const KEY = 'chromabit_unavailable';
  * How long a refusal is trusted.
  *
  * This has to expire. An unavailable package has both its buttons disabled, so
- * a successful add — the only thing that clears an entry — can never happen
+ * a successful add - the only thing that clears an entry - can never happen
  * once one is set. Without a TTL, a Battle Pass owner would be locked out of
  * rebuying it forever instead of just until the four-week limit rolls over.
  * A day is short enough to self-heal and long enough to spare the buyer
@@ -33,7 +33,7 @@ function write(all) {
   try {
     localStorage.setItem(KEY, JSON.stringify(all));
   } catch {
-    // Private-mode quota errors are survivable — the buyer just sees the
+    // Private-mode quota errors are survivable - the buyer just sees the
     // rejection again on their next attempt.
   }
 }
@@ -44,7 +44,7 @@ function write(all) {
  * Earlier builds stored a bare array, and later `{ ids, probedAt }`; browsers
  * that ran either still hold those shapes. Returning one untouched left `.ids`
  * undefined, which threw in render the moment the catalog arrived and froze the
- * page on the loading message — so anything unrecognised degrades to empty
+ * page on the loading message - so anything unrecognised degrades to empty
  * rather than propagating.
  */
 function entry(all, username) {

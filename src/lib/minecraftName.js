@@ -1,6 +1,6 @@
 /**
  * Java usernames and Bedrock gamertags are separate namespaces that Tebex
- * resolves against Mojang and Xbox Live respectively — and they collide. There
+ * resolves against Mojang and Xbox Live respectively - and they collide. There
  * is a real Xbox account with the gamertag "Notch" that is a different person
  * from Java Notch, and Tebex will happily resolve either. Nothing in the
  * response says which namespace was used, so the platform has to be known
@@ -16,7 +16,7 @@ function bareGamertag(raw) {
  * The exact string to send to Tebex.
  *
  * Bedrock players arrive through Geyser, which prefixes their gamertag with a
- * dot and drops spaces — ".Toast Enjoyer" is stored as ".Toastenjoyer". Applying
+ * dot and drops spaces - ".Toast Enjoyer" is stored as ".Toastenjoyer". Applying
  * that here means the buyer types their gamertag as they know it.
  */
 export function normalizeName(raw, platform) {
@@ -25,7 +25,7 @@ export function normalizeName(raw, platform) {
 }
 
 /**
- * Loose sanity check only — Tebex is the real validator. Over-strict rules here
+ * Loose sanity check only - Tebex is the real validator. Over-strict rules here
  * previously locked out every Bedrock player whose gamertag contained a space,
  * with no error to explain the dead button.
  */

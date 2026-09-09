@@ -89,7 +89,7 @@ function PoolCard({ pool, selected, onOpen }) {
 
       <span class="pool-card-price">
         <b>{money(pool.mid, { compact: false })}</b>
-        <em class={`change${direction}`}>{change ?? '—'} <span>24h</span></em>
+        <em class={`change${direction}`}>{change ?? '-'} <span>24h</span></em>
       </span>
 
       <span class="pool-card-foot">
@@ -132,7 +132,7 @@ function PoolDetail({ pool, now, onClose }) {
       <div class="stat-row">
         <Stat label="Quoted mid" value={money(pool.mid, { compact: false })}
           note={`updated ${ago(pool.updatedAt, now)}`} />
-        <Stat label="24h move" value={change ?? '—'} tone={direction.trim()}
+        <Stat label="24h move" value={change ?? '-'} tone={direction.trim()}
           note={pool.change7d == null ? 'vs. the mid a day ago' : `${percent(pool.change7d)} over 7 days`} />
         <Stat label="In stock" value={units(pool.inventory)}
           note="units the pool can sell" />

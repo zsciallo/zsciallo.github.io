@@ -2,7 +2,7 @@ import config from '../config.json';
 
 // PostHog is loaded lazily so it stays out of the main bundle and never blocks
 // first paint. Events fired before it lands are queued here and replayed once
-// it does — the store funnel starts on mount, well before the network settles.
+// it does - the store funnel starts on mount, well before the network settles.
 let posthog = null;
 const queue = [];
 
@@ -17,8 +17,8 @@ export function initAnalytics() {
     .then(({ default: ph }) => {
       ph.init(config.posthogKey, {
         api_host: config.posthogHost || 'https://us.i.posthog.com',
-        // Nothing here ever calls identify() — the Minecraft username is
-        // deliberately never sent — so profiles for anonymous visitors would
+        // Nothing here ever calls identify() - the Minecraft username is
+        // deliberately never sent - so profiles for anonymous visitors would
         // cost more per event and buy nothing. Funnels work fine without them.
         person_profiles: 'identified_only',
         capture_pageview: true,

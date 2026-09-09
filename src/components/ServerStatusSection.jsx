@@ -7,7 +7,7 @@ export function ServerStatusSection({ config, status }) {
     return <CountdownTimer targetDate={config.launchDate} subMessage={config.downSubMessage} />;
   }
   if (!isOffline) {
-    return <ServerIPCard ip={config.serverIP} />;
+    return <ServerIPCard ip={config.serverIP} status={status} />;
   }
   return null;
 }

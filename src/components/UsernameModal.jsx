@@ -72,7 +72,7 @@ export function UsernameModal({ initial, initialPlatform = 'java', error, busy, 
 
         <p class="modal-sub">
           {bedrock
-            ? 'Enter your Xbox gamertag exactly as it appears — spaces are fine, and we add the Geyser dot for you.'
+            ? 'Enter your Xbox gamertag exactly as it appears. Spaces are fine, and we add the Geyser dot for you.'
             : 'Enter your Minecraft Java username. Your items are delivered in-game, so this has to match.'}
         </p>
 

@@ -12,7 +12,7 @@ function formatPrice(amount, currency) {
  * Decide which of the two redemption endpoints a typed code belongs to.
  *
  * Gift card numbers are long digit strings (dashes and spaces optional), while
- * promo codes are words like WELCOME20 — so anything that isn't purely numeric
+ * promo codes are words like WELCOME20 - so anything that isn't purely numeric
  * can only be a coupon. Short numbers stay coupons because a promo code of
  * "2026" is plausible and a four-digit gift card isn't.
  */
@@ -93,7 +93,7 @@ export function CartDrawer({
 
   /**
    * One box for both kinds of code. The shape of what was typed picks the
-   * endpoint, and a rejected gift card is retried as a coupon — the guess is
+   * endpoint, and a rejected gift card is retried as a coupon - the guess is
    * only a guess, and an all-numeric promo code shouldn't be turned away.
    */
   async function submitCode(e) {
@@ -116,7 +116,7 @@ export function CartDrawer({
           setCode('');
           applied = true;
         } catch {
-          // Not a coupon either — report the gift card failure below, since
+          // Not a coupon either - report the gift card failure below, since
           // that's what the buyer was most likely holding.
         }
       }
@@ -183,7 +183,7 @@ export function CartDrawer({
                     <p class="cart-item-name">{item.name}</p>
                     {recurring && (
                       <p class="cart-item-sub">
-                        {every ? `SUBSCRIPTION — RENEWS ${every.toUpperCase()}` : 'SUBSCRIPTION — RENEWS AUTOMATICALLY'}
+                        {every ? `SUBSCRIPTION: RENEWS ${every.toUpperCase()}` : 'SUBSCRIPTION: RENEWS AUTOMATICALLY'}
                       </p>
                     )}
                     {allowQuantity ? (
@@ -219,7 +219,7 @@ export function CartDrawer({
 
         {items.length > 0 && (
           <div class="cart-foot">
-            {/* Stays open even with a coupon applied — a gift card can still go
+            {/* Stays open even with a coupon applied - a gift card can still go
                 on top of one. A second *coupon* is refused by the hook, since
                 promo codes here are single-use-per-player and don't stack. */}
             <form class="cart-coupon" onSubmit={submitCode}>
@@ -286,7 +286,7 @@ export function CartDrawer({
 
             {coupons.length > 0 && (
               <p class="cart-coupon-note">
-                Remove this code to use a different one — only one promo code applies per order.
+                Remove this code to use a different one. Only one promo code applies per order.
                 Gift cards can still be added.
               </p>
             )}
@@ -299,7 +299,7 @@ export function CartDrawer({
                 </p>
                 <p class="cart-line cart-line--save">
                   {/* Both a coupon and a redeemed card land in `total_price`,
-                      and nothing in the basket separates them — so name
+                      and nothing in the basket separates them - so name
                       whichever is in play rather than calling it all discount. */}
                   <span>{giftcards.length > 0 ? (coupons.length > 0 ? 'DISCOUNT + GIFT CARD' : 'GIFT CARD') : 'DISCOUNT'}</span>
                   <span>−{formatPrice(saved, currency)}</span>

@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { count, fullDate, money, shortDate } from '../../lib/market';
-import { extent, linePath, nearest, PAD, padded, scale, SERIES, ticks, useMeasure } from './chart';
+import { axisMoney, extent, linePath, nearest, PAD, padded, scale, SERIES, ticks, useMeasure } from './chart';
 
 const PLOT_HEIGHT = 210;
 const VOLUME_HEIGHT = 56;
@@ -70,6 +70,7 @@ export function PriceChart({ history, range, onRange }) {
 
   const height = volumeTop + VOLUME_HEIGHT + 20;
   const priceTicks = ticks(priceDomain, 4);
+  const priceLabels = axisMoney(priceTicks);
   const timeTicks = ticks(timeDomain, Math.min(5, Math.max(2, Math.floor(innerWidth / 90))));
 
   const active = hover != null ? sales[hover] : null;
@@ -99,10 +100,10 @@ export function PriceChart({ history, range, onRange }) {
             aria-label="Price history and traded quantity"
             onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
 
-            {priceTicks.map((value) => (
+            {priceTicks.map((value, i) => (
               <g key={value}>
                 <line x1={PAD.left} x2={PAD.left + innerWidth} y1={y(value)} y2={y(value)} class="chart-grid" />
-                <text x={PAD.left - 8} y={y(value) + 4} class="chart-tick chart-tick--y">{money(value)}</text>
+                <text x={PAD.left - 8} y={y(value) + 4} class="chart-tick chart-tick--y">{priceLabels[i]}</text>
               </g>
             ))}
 

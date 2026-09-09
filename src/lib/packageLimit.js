@@ -2,7 +2,7 @@
  * Turns a package's `user_limit` into a short badge label.
  *
  * Tebex enforces these limits at checkout, and the Headless API gives no way to
- * ask what a given player already owns — that needs the server-side API and a
+ * ask what a given player already owns - that needs the server-side API and a
  * secret key. So the best we can do on a static site is warn up front rather
  * than hide packages the buyer may already have.
  *
@@ -27,7 +27,7 @@ export function limitLabel(userLimit) {
   if (!limit) return null;
 
   // No period means the cap is for life, which is how the rank packages are set
-  // up — one VIP per account, ever.
+  // up - one VIP per account, ever.
   if (!unit) return `LIMIT ${limit} PER PLAYER`;
 
   // Tebex sends the unit already pluralised ("weekly"), so map to a noun.

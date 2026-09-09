@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { money } from '../../lib/market';
 
 // Series hues for the market charts. Both sit inside the dark-mode lightness
 // band and clear CVD separation against the panel surface (#16102a), so the two
@@ -126,4 +127,28 @@ export function bollinger(values, period, k = 2) {
     lower[i] = mean - deviation;
   }
   return { mid, upper, lower };
+}
+
+/**
+ * Money labels for a price axis, scaled and rounded to the axis's own step.
+ *
+ * `money` compacts for lists, where the reader wants the magnitude and nothing
+ * else. An axis wants the opposite: a market trading in a $40 band around
+ * $1,540 gets three ticks that all read "$1.5K", which is not an axis. Pick the
+ * unit from the largest tick and the decimals from the gap between them, so one
+ * tick apart is always one label apart.
+ */
+export function axisMoney(values) {
+  if (values.length === 0) return [];
+  const max = Math.max(...values.map(Math.abs), 1);
+  const step = values.length > 1
+    ? Math.min(...values.slice(1).map((value, i) => Math.abs(value - values[i])))
+    : max;
+  const [size, suffix] = max >= 1e6 ? [1e6, 'M'] : max >= 1e4 ? [1e3, 'K'] : [1, ''];
+  const decimals = Math.max(0, Math.min(2, Math.ceil(Math.log10(size / (step || 1)))));
+  return values.map((value) => {
+    if (value === 0) return '$0';
+    const scaled = value / size;
+    return `$${size === 1 ? Math.round(scaled).toLocaleString('en-US') : scaled.toFixed(decimals)}${suffix}`;
+  });
 }

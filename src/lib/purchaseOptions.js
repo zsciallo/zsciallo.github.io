@@ -4,7 +4,7 @@ import { SINGLE, SUBSCRIPTION, offersBothTypes, defaultType } from './packageTyp
  * Works out the distinct ways a package can be bought, ready to render as a
  * choice for the buyer.
  *
- * Tebex prices a dual-type (`both`) package identically either way — per their
+ * Tebex prices a dual-type (`both`) package identically either way - per their
  * docs, "both options will use the same price; separate pricing for one-time vs
  * subscription is not currently supported". So a real subscribe-and-save
  * discount can't come from the package itself. It comes from a *second*,
@@ -13,7 +13,7 @@ import { SINGLE, SUBSCRIPTION, offersBothTypes, defaultType } from './packageTyp
  * that package instead, and the saving shown is the genuine difference between
  * two real prices rather than a number we invented.
  *
- * With no pair configured a `both` package still offers both choices — just at
+ * With no pair configured a `both` package still offers both choices - just at
  * the one price Tebex gives it, and with no saving claimed.
  *
  * Returns [] when there is nothing to ask: a package sold exactly one way.
@@ -25,7 +25,7 @@ export function purchaseOptions(pkg, packagesById = {}, pairs = {}) {
     ? { key: SINGLE, pkg, type: SINGLE, price: pkg.total_price }
     : null;
 
-  // A pair only counts if the partner is actually in the catalog — a package
+  // A pair only counts if the partner is actually in the catalog - a package
   // that's been disabled or deleted in Tebex must not leave a dead option
   // behind, and pairing something to itself is a config slip, not a choice.
   const partnerId = pairs?.[pkg.id];
@@ -40,7 +40,7 @@ export function purchaseOptions(pkg, packagesById = {}, pairs = {}) {
 
   if (!oneTime || !subscription) return [];
 
-  // Percentage off the one-time price, and only when it's a real saving —
+  // Percentage off the one-time price, and only when it's a real saving -
   // never a "SAVE 0%" badge, and never a negative one if the pair is priced
   // the wrong way round.
   const diff = oneTime.price - subscription.price;
@@ -52,7 +52,7 @@ export function purchaseOptions(pkg, packagesById = {}, pairs = {}) {
 }
 
 /**
- * The package ids that stand for the same purchase — a pair's two halves, or
+ * The package ids that stand for the same purchase - a pair's two halves, or
  * just the one id when nothing is paired to it.
  *
  * The buyer thinks of "Battle Pass" as one thing, so having it in the cart

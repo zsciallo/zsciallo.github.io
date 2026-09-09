@@ -14,6 +14,7 @@ Three documents come out of it, one per tab on the page:
   pools.json                 the liquidity pools - cah_market, cah_price_history,
                              cah_exchange_trade
   futures.json               the futures desk - cah_position, cah_house
+  ticker.json                the day's movers, for the homepage tape
 
 Everything here is derivable by the plugin too, with one exception noted at
 `floor_series`: floor-over-time is reconstructed by replaying historical listing
@@ -383,13 +384,26 @@ def candles(series, trades, size):
     would ever print a wick, because within one bucket the mid only ever walks
     one way.
 
-    A bucket appears only if the mid was sampled in it. Every trade moves the
-    mid and every move is sampled, so a bucket with trades always has samples -
-    the reverse is not true, and a quiet hour is a candle with no volume.
+    Both tables observe that same mid and both are used. cah_price_history is
+    written on a ten-minute timer, and no trade in any market lands within two
+    seconds of one of its samples, so the timer steps straight over the moments
+    the price actually moved: a spike that a trade caused and the next trade
+    took back is invisible to it. cah_exchange_trade.mid_after is the mid
+    immediately after a trade, which is the same quantity read at exactly those
+    moments, so it is folded in here as an extra observation. Without it a
+    candle's high and low are a snapshot's opinion of the extremes rather than
+    the extremes.
+
+    A quiet bucket is a candle with no volume. A bucket with volume but no timer
+    sample is now a candle too, which it could not have been before.
     """
+    observations = [(row["t"], row["mid"]) for row in series]
+    observations += [(trade["at"], trade["midAfter"]) for trade in trades]
+    observations.sort(key=lambda o: o[0])
+
     grouped = defaultdict(list)
-    for row in series:
-        grouped[(row["t"] // size) * size].append(row)
+    for at, mid in observations:
+        grouped[(at // size) * size].append(mid)
 
     volume = defaultdict(lambda: {"units": 0, "gross": 0.0, "n": 0})
     for trade in trades:
@@ -401,7 +415,7 @@ def candles(series, trades, size):
     rows = []
     previous = None
     for t in sorted(grouped):
-        mids = [row["mid"] for row in grouped[t]]
+        mids = grouped[t]
         opened = mids[0] if previous is None else previous
         marks = [opened] + mids
         traded = volume.get(t)
@@ -524,6 +538,7 @@ def build_items(conn, out, fetched_at):
 
     sellers = defaultdict(lambda: {"active": 0, "sold": 0, "keys": set()})
     index = []
+    movers = []
     live_total = 0
 
     for key, info in items.items():
@@ -567,6 +582,17 @@ def build_items(conn, out, fetched_at):
             if before:
                 change = round((after - before) / before * 100, 1)
 
+        # Today against the week behind it, rather than against yesterday.
+        # These markets trade a handful of times a day, so yesterday is often
+        # one sale, and one sale is not a baseline. The week is.
+        today = since(1)
+        week_before = [s for s in item_sales if now - 8 * DAY <= s["at"] < now - DAY]
+        change_today = None
+        if len(today) >= MIN_TREND_SALES and len(week_before) >= MIN_TREND_SALES:
+            settled = vwap(week_before)
+            if settled:
+                change_today = round((vwap(today) - settled) / settled * 100, 1)
+
         summary = {
             "key": key,
             "id": info["material"],
@@ -591,8 +617,19 @@ def build_items(conn, out, fetched_at):
             "vwap7d": round(gross7 / qty7, 2) if qty7 else None,
             "spark": [row["med"] for row in daily[-14:]],
             "changeWow": change,
+            "changeToday": change_today,
+            "vwapToday": round(vwap(today), 2) if change_today is not None else None,
         }
         index.append(summary)
+        if change_today is not None:
+            movers.append({
+                "kind": "auction",
+                "key": key,
+                "id": info["material"],
+                "label": info["name"],
+                "price": summary["vwapToday"],
+                "change": change_today,
+            })
 
         detail = dict(summary)
         detail.update({
@@ -629,7 +666,7 @@ def build_items(conn, out, fetched_at):
     })
     print(f"[market] {seen} listings -> {len(index)} items")
 
-    return {
+    return movers, {
         "generatedAt": now,
         "itemCount": len(index),
         "listingCount": seen,
@@ -783,7 +820,8 @@ def build_pools(conn, out, fetched_at):
         "poolCount": len(pools),
         "poolTrades": sum(p["tradesAll"] for p in pools),
         "poolDepth": round(sum(p["depth"] for p in pools), 2),
-    }, [{k: pool[k] for k in ("id", "name", "mid", "depth", "tradesAll")} for pool in pools]
+    }, [{k: pool[k] for k in ("id", "name", "icon", "mid", "depth", "tradesAll", "change24h")}
+        for pool in pools]
 
 
 # -- The futures desk --------------------------------------------------------
@@ -899,6 +937,47 @@ def build_futures(conn, out, fetched_at, pool_summaries):
     }
 
 
+# How many entries each row of the homepage ticker carries. The row loops, so
+# this is about having enough to read rather than filling the width.
+TICKER_ROWS = 14
+
+
+def write_ticker(out, fetched_at, generated_at, movers, pools):
+    """ticker.json - the day's biggest moves, for the homepage tape.
+
+    Small and standalone on purpose: the homepage would otherwise pull the
+    megabyte index.json to show twenty rows.
+
+    Pool moves and auction moves are measured differently and both are honest.
+    A pool quotes continuously, so its change is 24 hours of quotes. An item
+    trades a handful of times a day, so its change is today's volume-weighted
+    price against the week behind it; yesterday alone is too often a single
+    sale to compare against.
+    """
+    entries = list(movers)
+    for pool in pools:
+        if pool["change24h"] is None or not (pool["depth"] > 0 or pool["tradesAll"] > 0):
+            continue
+        entries.append({
+            "kind": "market",
+            "key": pool["id"],
+            "id": pool["icon"],
+            "label": pool["name"],
+            "price": pool["mid"],
+            "change": pool["change24h"],
+        })
+
+    gainers = sorted((e for e in entries if e["change"] > 0), key=lambda e: -e["change"])
+    losers = sorted((e for e in entries if e["change"] < 0), key=lambda e: e["change"])
+    write(out, "ticker.json", {
+        "generatedAt": generated_at,
+        "fetchedAt": fetched_at,
+        "gainers": gainers[:TICKER_ROWS],
+        "losers": losers[:TICKER_ROWS],
+    })
+    print(f"[market] ticker: {len(gainers)} up, {len(losers)} down")
+
+
 def main():
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ap = argparse.ArgumentParser()
@@ -912,9 +991,10 @@ def main():
 
     conn = db.connect()
     try:
-        items = build_items(conn, args.out, fetched_at)
+        movers, items = build_items(conn, args.out, fetched_at)
         pools, pool_summaries = build_pools(conn, args.out, fetched_at)
         futures = build_futures(conn, args.out, fetched_at, pool_summaries)
+        write_ticker(args.out, fetched_at, items["generatedAt"], movers, pool_summaries)
     finally:
         conn.close()
 

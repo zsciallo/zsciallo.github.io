@@ -28,6 +28,7 @@ export const fetchMeta = () => getJson(`${BASE}/meta.json`);
 export const fetchItem = (key) => getJson(itemPath(key));
 export const fetchPools = () => getJson(`${BASE}/pools.json`);
 export const fetchFutures = () => getJson(`${BASE}/futures.json`);
+export const fetchTicker = () => getJson(`${BASE}/ticker.json`);
 
 export const iconUrl = (materialId) => `${BASE}/icons/${materialId.split(':').pop()}.png`;
 
@@ -41,7 +42,7 @@ const COMPACT = [
 
 /** Economy numbers span six orders of magnitude, so lists get compact forms. */
 export function money(value, { compact = true } = {}) {
-  if (value == null || Number.isNaN(value)) return '—';
+  if (value == null || Number.isNaN(value)) return '-';
   if (!compact) return `$${Math.round(value).toLocaleString('en-US')}`;
   for (const [size, suffix] of COMPACT) {
     if (Math.abs(value) >= size) {
@@ -53,7 +54,7 @@ export function money(value, { compact = true } = {}) {
 }
 
 export function count(value) {
-  if (value == null) return '—';
+  if (value == null) return '-';
   return value >= 1e4 ? `${(value / 1e3).toFixed(1)}K` : value.toLocaleString('en-US');
 }
 
@@ -71,7 +72,7 @@ const UNITS = [
 ];
 
 export function ago(timestamp, now = Date.now()) {
-  if (!timestamp) return '—';
+  if (!timestamp) return '-';
   const delta = Math.max(0, now - timestamp);
   if (delta < 60_000) return 'just now';
   for (const [limit, suffix, size] of UNITS) {
@@ -81,7 +82,7 @@ export function ago(timestamp, now = Date.now()) {
 }
 
 export function until(timestamp, now = Date.now()) {
-  if (!timestamp) return '—';
+  if (!timestamp) return '-';
   const delta = timestamp - now;
   if (delta <= 0) return 'expired';
   if (delta < 3_600_000) return `${Math.max(1, Math.round(delta / 60_000))}m`;
@@ -167,4 +168,4 @@ export const poolIsReal = (pool) => pool.depth > 0 || pool.tradesAll > 0;
 export const poolIsOpen = (pool) => !pool.halted && pool.depth > 0;
 
 export const units = (value) =>
-  value == null ? '—' : value.toLocaleString('en-US');
+  value == null ? '-' : value.toLocaleString('en-US');

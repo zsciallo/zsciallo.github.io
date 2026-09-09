@@ -23,7 +23,7 @@ export function MarketPrimer() {
           <h4>A price is a tug of war</h4>
           <p>
             Nobody sets it. The price sits where buyers and sellers are evenly
-            matched. More people wanting in than out — <b>buy pressure</b> — and
+            matched. More people wanting in than out is <b>buy pressure</b>, and
             sellers can hold out for more, so it climbs. More wanting out than
             in, and they undercut each other, so it falls.
           </p>
@@ -43,7 +43,7 @@ export function MarketPrimer() {
           <h4>Making money, and losing it</h4>
           <p>
             You profit by buying low and selling higher. What you paid is the
-            only number that matters after — a $5,000 totem is a win at $3,000
+            only number that matters after. A $5,000 totem is a win at $3,000
             and a loss at $8,000. Until you sell it is paper: it is worth what
             the next person will pay, not what the chart said yesterday.
           </p>
@@ -55,7 +55,7 @@ export function MarketPrimer() {
             <b>Line</b> is price over time. <b>Candles</b> cut it into buckets:
             the body spans the open and close, green up and red down, and the
             thin wick marks the highest and lowest it touched between. The bars
-            underneath are volume — a big move on no volume is one person's
+            underneath are volume. A big move on no volume is one person's
             opinion.
           </p>
         </section>
@@ -66,7 +66,7 @@ export function MarketPrimer() {
             In game, <code>/stock</code> and the short name on a card, so
             {' '}<code>/stock diamond</code>. Large orders push the price against
             you as they fill, and you buy a shade above the quote and sell a
-            shade below. Prices move fast and don't always come back — don't put
+            shade below. Prices move fast and don't always come back, so don't put
             in what you can't shrug off.
           </p>
         </section>

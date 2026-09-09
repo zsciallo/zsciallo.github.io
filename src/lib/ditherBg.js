@@ -1,5 +1,5 @@
 // Ordered-dither background (replaces the old CSS grid overlay).
-// An ocean of purple stipple rising from the bottom of the viewport —
+// An ocean of purple stipple rising from the bottom of the viewport -
 // quantized per-cell against an 8x8 Bayer matrix and stretched to fill
 // the screen with crisp pixels. Swells travel across the waterline and
 // a slow tide bobs the whole surface up and down.

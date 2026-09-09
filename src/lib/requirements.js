@@ -1,8 +1,8 @@
 /**
  * The package a package can't be bought without.
  *
- * Tebex can gate a package behind a previous purchase — MVP+ is an upgrade,
- * sold only to players who already hold MVP — but the Headless API exposes
+ * Tebex can gate a package behind a previous purchase - MVP+ is an upgrade,
+ * sold only to players who already hold MVP - but the Headless API exposes
  * nothing about that gate. A blocked add comes back as the same flat "The
  * product isn't purchasable" that an already-owned package returns, so without
  * this map the store tells a player who owns no ranks at all that they already

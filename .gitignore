@@ -15,6 +15,7 @@ public/market/meta.json
 public/market/sellers.json
 public/market/pools.json
 public/market/futures.json
+public/market/ticker.json
 public/market/items/
 
 # Credentials for that database. CI supplies the same values as repository

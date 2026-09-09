@@ -50,10 +50,10 @@ export function StorePage() {
   const [cartBusy, setCartBusy] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [viewPkg, setViewPkg] = useState(null);
-  // Raised when a package can be bought more than one way — { pkg, mode, quantity, options }.
+  // Raised when a package can be bought more than one way - { pkg, mode, quantity, options }.
   const [choice, setChoice] = useState(null);
   const [checkoutError, setCheckoutError] = useState(null);
-  // The action to re-run if the buyer hits TRY AGAIN — set only for failures
+  // The action to re-run if the buyer hits TRY AGAIN - set only for failures
   // that repeating can actually fix.
   const [retry, setRetry] = useState(null);
   const [retrying, setRetrying] = useState(false);
@@ -103,7 +103,7 @@ export function StorePage() {
       // different real player instead of failing. The platform is asked for up
       // front now, so the name we were given is the name we send.
       const basket = await cart.addItem(pkg, name, quantity, type);
-      // Succeeded, so any remembered refusal is stale — Battle Pass limits
+      // Succeeded, so any remembered refusal is stale - Battle Pass limits
       // expire, and a rank may have been refunded.
       if (unavailable.includes(pkg.id)) setUnavailable(unmarkUnavailable(name, pkg.id));
 
@@ -112,7 +112,7 @@ export function StorePage() {
         package_id: pkg.id,
         quantity,
         // Which way a dual-type package actually sells is worth knowing, and
-        // it's only visible here — nothing downstream reports it back.
+        // it's only visible here - nothing downstream reports it back.
         purchase_type: resolveType(pkg, type),
         // Everything past this point happens on Tebex's domain, so the drop
         // between checkout_started and purchase_completed is the payment step.
@@ -135,7 +135,7 @@ export function StorePage() {
 
       const badName = isNameLookupFailure(err);
 
-      // The clearest "why they didn't buy" signal on the whole site — these
+      // The clearest "why they didn't buy" signal on the whole site - these
       // are buyers who tried and were stopped.
       capture('checkout_failed', {
         reason: badName
@@ -155,11 +155,11 @@ export function StorePage() {
           `We couldn't confirm the ${bedrock ? 'Xbox gamertag' : 'Java username'} `
           + `"${displayName(name, bedrock ? 'bedrock' : 'java')}" with `
           + `${bedrock ? 'Xbox Live' : 'Mojang'}. That lookup is often just slow, `
-          + `so try again — and check the spelling, or your edition, if it keeps failing.`,
+          + `so try again, and check the spelling, or your edition, if it keeps failing.`,
         );
         // Deliberately not straight back to the name modal. Tebex reports a
         // lookup that timed out and a name that doesn't exist identically, and
-        // the name is usually right — buyers were "fixing" it by retyping it
+        // the name is usually right - buyers were "fixing" it by retyping it
         // unchanged, which only ever re-ran the lookup. So offer that directly.
         setRetry({ pkg, mode, quantity, type });
       } else if (notPurchasable) {
@@ -170,10 +170,10 @@ export function StorePage() {
         // catalog reveals who holds MVP, so an existing MVP+ subscriber re-adding
         // it lands here too. Naming both keeps the message true either way.
         setCheckoutError(missing
-          ? `${pkg.name} is an upgrade for ${missing.name} owners — you'll need `
+          ? `${pkg.name} is an upgrade for ${missing.name} owners, so you'll need `
             + `${missing.name} on your account before you can buy it. If you're `
             + `already subscribed to ${pkg.name}, it renews on its own.`
-          : `You already have ${pkg.name} — it's limited to one per player.`);
+          : `You already have ${pkg.name} . It's limited to one per player.`);
       } else if (overQty) {
         setCheckoutError(`${pkg.name} is limited to one per player, and it's already in your cart.`);
       } else {
@@ -200,7 +200,7 @@ export function StorePage() {
       runAction(pkg, mode, username, quantity, type);
     } else {
       // Buyers who reach the prompt but never fire add_to_cart / checkout_started
-      // abandoned at the username gate — the one step unique to this store.
+      // abandoned at the username gate - the one step unique to this store.
       capture('username_prompted', { package: pkg.name, mode });
       setPending({ pkg, mode, quantity, type });
     }
@@ -216,7 +216,7 @@ export function StorePage() {
     localStorage.setItem(PLATFORM_KEY, chosenPlatform);
     setUsername(name);
     setPlatform(chosenPlatform);
-    // Refusals belong to the player, not the browser — swap in this account's.
+    // Refusals belong to the player, not the browser - swap in this account's.
     setUnavailable(loadUnavailable(name));
     if (pending?.pkg) {
       runAction(pending.pkg, pending.mode, name, pending.quantity, pending.type);
@@ -286,7 +286,7 @@ export function StorePage() {
   // capped packages that no discount can betray.
   const ownedIds = new Set([...unavailable, ...inferOwnedPackages(store.categories)]);
 
-  // What a package can't be bought without — MVP+ only sells to MVP holders.
+  // What a package can't be bought without - MVP+ only sells to MVP holders.
   // Returns the required package when there's no sign the player has it, so a
   // refusal can be blamed on the gate instead of on ownership.
   const missingRequirement = (pkg) => {
@@ -303,13 +303,13 @@ export function StorePage() {
   const pairedIds = pairedSubscriptionIds(config.subscriptionPairs);
   const shownPackages = (category) => category.packages.filter((pkg) => !pairedIds.has(pkg.id));
 
-  // A pair is one product to the buyer, so either half in the cart — or refused
-  // for this player — has to block the other. Otherwise subscribing leaves the
+  // A pair is one product to the buyer, so either half in the cart - or refused
+  // for this player - has to block the other. Otherwise subscribing leaves the
   // card on BUY and the same pass can be bought twice.
   const pairOf = (pkg) => pairMembers(pkg, config.subscriptionPairs);
   const cartQtyOf = (pkg) => pairOf(pkg).reduce((n, id) => n + (cartQtyById[id] || 0), 0);
   // A refusal explained by an unmet requirement says nothing about ownership,
-  // so the lock is read first — otherwise the card claims they own the rank
+  // so the lock is read first - otherwise the card claims they own the rank
   // they were just told they can't buy.
   const ownedOf = (pkg) => !lockedOf(pkg) && pairOf(pkg).some((id) => ownedIds.has(id));
 
@@ -323,7 +323,7 @@ export function StorePage() {
     capture('coupon_removed', { code });
   }
 
-  // Card numbers are stored value — never send one to the funnel. The event is
+  // Card numbers are stored value - never send one to the funnel. The event is
   // only here to show gift cards are being redeemed at all.
   async function handleApplyGiftCard(number) {
     await cart.addGiftCard(number);
@@ -362,7 +362,7 @@ export function StorePage() {
     <>
       We couldn't confirm <strong>{username}</strong> with{' '}
       {platform === 'bedrock' ? 'Xbox Live' : 'Mojang'} just now. That's usually
-      temporary, so try again — or change the name if it's wrong.
+      temporary, so try again, or change the name if it's wrong.
     </>
   );
   // Repeating the request fixes a failed lookup and does nothing for a package
@@ -398,7 +398,7 @@ export function StorePage() {
         <section class="store-section" aria-label="Store packages">
           <div class="container">
             {/* Always rendered, so there's a visible account control before the
-                buyer ever reaches a Buy button — not just a modal that ambushes
+                buyer ever reaches a Buy button - not just a modal that ambushes
                 them at checkout. */}
             <p class="store-user">
               {username ? (
@@ -569,7 +569,7 @@ export function StorePage() {
           busy={pending.pkg != null && busyPkgId === pending.pkg.id}
           onConfirm={handleConfirmUsername}
           onClose={() => {
-            // Closed the username gate without completing it — an explicit
+            // Closed the username gate without completing it - an explicit
             // abandon, as opposed to simply going idle on the page.
             if (pending.pkg) capture('username_prompt_dismissed', { package: pending.pkg.name });
             setPending(null);
