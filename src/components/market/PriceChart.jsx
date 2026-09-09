@@ -1,10 +1,9 @@
 import { useState } from 'preact/hooks';
 import { count, fullDate, money, shortDate } from '../../lib/market';
-import { extent, linePath, nearest, padded, scale, SERIES, ticks, useMeasure } from './chart';
+import { extent, linePath, nearest, PAD, padded, scale, SERIES, ticks, useMeasure } from './chart';
 
 const PLOT_HEIGHT = 210;
 const VOLUME_HEIGHT = 56;
-const PAD = { top: 12, right: 14, bottom: 22, left: 58 };
 
 export const RANGES = [
   { id: '7d', label: '7D', days: 7, grain: 'hourly' },

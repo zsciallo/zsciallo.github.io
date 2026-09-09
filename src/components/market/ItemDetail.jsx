@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import { ago, count, enchantName, fullDate, money, percent, roman, sellerLabel, until } from '../../lib/market';
 import { ItemIcon } from './ItemIcon';
 import { PriceChart } from './PriceChart';
+import { Stat } from './Stat';
 
 // Enough rows to read the shape of the book without turning the panel into a
 // scroll trap; the count in the heading says how much is being held back.
@@ -79,16 +80,6 @@ export function ItemDetail({ item, now, loading, error, onBack }) {
           {item.lore.map((line, i) => <p key={i}>{line}</p>)}
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value, note, tone }) {
-  return (
-    <div class="stat">
-      <p class="stat-label">{label}</p>
-      <p class={`stat-value${tone ? ` change ${tone}` : ''}`}>{value}</p>
-      {note && <p class="stat-note">{note}</p>}
     </div>
   );
 }

@@ -1,5 +1,11 @@
-# Only build_market_data.py needs anything outside the standard library: a pure
-# Python reader for the Java serialization stream that Bukkit writes item_data
-# in. snbt.py parses the component payloads it yields, so no Minecraft server
-# or Bukkit jar is involved anywhere in this pipeline.
+# build_market_data.py needs two things outside the standard library.
+#
+# PyMySQL talks to the auction house's database, which the plugin moved from a
+# SQLite file to MySQL; a pure Python driver keeps the deploy free of a build
+# toolchain for a C extension.
+PyMySQL==1.1.1
+
+# javaobj reads the Java serialization stream that Bukkit writes item_data in.
+# snbt.py parses the component payloads it yields, so no Minecraft server or
+# Bukkit jar is involved anywhere in this pipeline.
 javaobj-py3==0.6.1

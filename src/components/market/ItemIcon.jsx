@@ -14,8 +14,10 @@ export function ItemIcon({ item, size = 34 }) {
   const [failed, setFailed] = useState(false);
   const style = `width:${size}px;height:${size}px`;
 
-  if (failed) {
-    const h = hue(item.id);
+  // A pool can trade a custom item with no sprite to point at, and says so with
+  // a null id rather than a URL that is known to 404.
+  if (failed || !item.id) {
+    const h = hue(item.id ?? item.materialName);
     return (
       <span class="item-icon item-icon--glyph" style={`${style};background:hsl(${h} 45% 22%);color:hsl(${h} 70% 78%)`}
         aria-hidden="true">

@@ -1,7 +1,8 @@
 """Vendor the item textures the marketplace needs.
 
-Reads the materials named in the generated market index and pulls one sprite
-per material into public/market/icons/. Vendoring rather than hot-linking keeps
+Reads the materials named in the generated market index and pool list and pulls
+one sprite per material into public/market/icons/. Vendoring rather than
+hot-linking keeps
 the page free of a third-party runtime dependency and keeps the icons working
 if the source disappears; the set is a few hundred PNGs of ~400 bytes each.
 
@@ -45,12 +46,20 @@ def main():
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ap = argparse.ArgumentParser()
     ap.add_argument("--index", default=os.path.join(here, "public", "market", "index.json"))
+    ap.add_argument("--pools", default=os.path.join(here, "public", "market", "pools.json"))
     ap.add_argument("--out", default=os.path.join(here, "public", "market", "icons"))
     ap.add_argument("--force", action="store_true", help="re-download sprites already on disk")
     args = ap.parse_args()
 
     with open(args.index, encoding="utf-8") as fh:
-        materials = sorted({item["id"] for item in json.load(fh)["items"]})
+        materials = {item["id"] for item in json.load(fh)["items"]}
+
+    # A pool can trade a custom item that never reaches the auction house, so
+    # its sprite is not implied by the index.
+    if os.path.exists(args.pools):
+        with open(args.pools, encoding="utf-8") as fh:
+            materials |= {pool["icon"] for pool in json.load(fh)["pools"] if pool["icon"]}
+    materials = sorted(materials)
     os.makedirs(args.out, exist_ok=True)
 
     fetched = skipped = missing = 0

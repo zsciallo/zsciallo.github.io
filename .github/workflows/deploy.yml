@@ -4,9 +4,9 @@ on:
   push:
     branches: [source]
   schedule:
-    # Hourly. GitHub's scheduler is best-effort and can drift 5-30 minutes
-    # under load, which is fine for floor prices.
-    - cron: '17 * * * *'
+    # Every half hour. GitHub's scheduler is best-effort and can drift 5-30
+    # minutes under load, which is fine for floor prices.
+    - cron: '17,47 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -23,8 +23,8 @@ jobs:
       - uses: actions/checkout@v4
 
       # The published branch holds the last market data that deployed cleanly.
-      # It is the fallback when the game server is unreachable, so a down
-      # server means stale prices rather than a failed deploy.
+      # It is the fallback when the database is unreachable, so a down server
+      # means stale prices rather than a failed deploy.
       - name: Check out last deployed data
         uses: actions/checkout@v4
         continue-on-error: true
@@ -44,128 +44,22 @@ jobs:
       - run: npm ci
       - run: pip install -r tools/requirements.txt
 
-      - name: Fetch auctions.db
-        id: fetch
-        continue-on-error: true
-        env:
-          SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SFTP_PORT: ${{ secrets.SFTP_PORT }}
-          SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_PASS }}
-          SFTP_PATH: ${{ secrets.SFTP_PATH }}
-          SFTP_KEY: ${{ secrets.SFTP_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-        run: |
-          set -euo pipefail
-          mkdir -p .data ~/.ssh
-          chmod 700 ~/.ssh
-
-          # A secret set by piping on Windows carries a trailing CRLF, which
-          # OpenSSH rejects with "remote username contains invalid characters".
-          # Strip it so how the secret was set stops mattering.
-          SFTP_HOST=$(printf %s "${SFTP_HOST:-}" | tr -d '\r\n')
-          SFTP_USER=$(printf %s "${SFTP_USER:-}" | tr -d '\r\n')
-          SFTP_PASS=$(printf %s "${SFTP_PASS:-}" | tr -d '\r\n')
-          SFTP_PORT=$(printf %s "${SFTP_PORT:-}" | tr -d '\r\n')
-          SFTP_PATH=$(printf %s "${SFTP_PATH:-}" | tr -d '\r\n')
-          SFTP_HOST=${SFTP_HOST#sftp://}
-          SFTP_HOST=${SFTP_HOST#ssh://}
-          # A host pasted with the port attached would otherwise reach sftp
-          # as a remote path. Split it, but never override an explicit port.
-          case $SFTP_HOST in
-            *:*)
-              SFTP_PORT=${SFTP_PORT:-${SFTP_HOST##*:}}
-              SFTP_HOST=${SFTP_HOST%%:*}
-              ;;
-          esac
-          echo "lengths after trim - host=${#SFTP_HOST} user=${#SFTP_USER} pass=${#SFTP_PASS} port=${SFTP_PORT:-2022}"
-
-          # Pin the host key when one is supplied. Without it every run is
-          # trust-on-first-use, which is tolerable for a public auction dump
-          # but not something to lean on if this credential is reused anywhere.
-          if [ -n "${SSH_KNOWN_HOSTS:-}" ]; then
-            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-            chmod 600 ~/.ssh/known_hosts
-            HOSTKEY="-o StrictHostKeyChecking=yes"
-          else
-            HOSTKEY="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          fi
-
-          # Wings chroots SFTP to the server data directory, so the panel's
-          # /home/container/... path is usually just /... over SFTP - but that
-          # varies by version. A leading dash tells sftp to keep going when a
-          # get fails, so try both and check afterwards which one landed.
-          if [ -n "${SFTP_PATH:-}" ]; then
-            printf -- '-get %s .data/auctions.db\n' "$SFTP_PATH" > .data/batch
-          else
-            printf -- '-get %s .data/auctions.db\n' /plugins/DonutAuctionHouse/auctions.db > .data/batch
-            printf -- '-get %s .data/auctions.db\n' /home/container/plugins/DonutAuctionHouse/auctions.db >> .data/batch
-          fi
-          printf 'bye\n' >> .data/batch
-
-          # Key auth when SFTP_KEY is set, password otherwise. Game panels
-          # (Pterodactyl and friends) generally only accept the panel password;
-          # a plain VPS will take a key.
-          if [ -n "${SFTP_KEY:-}" ]; then
-            printf '%s\n' "$SFTP_KEY" > ~/.ssh/id_sftp
-            chmod 600 ~/.ssh/id_sftp
-            sftp -b .data/batch \
-              -i ~/.ssh/id_sftp \
-              -o IdentitiesOnly=yes \
-              $HOSTKEY \
-              -o ConnectTimeout=30 \
-              -P "${SFTP_PORT:-2022}" \
-              "$SFTP_USER@$SFTP_HOST"
-          else
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq sshpass
-            # -b implies BatchMode=yes, which disables password auth outright.
-            # ssh takes the first value it sees for an option, so this has to
-            # come before -b. Skipping pubkey too, so a server with a low
-            # MaxAuthTries does not spend its budget on a key we do not have.
-            sshpass -p "$SFTP_PASS" sftp \
-              -o BatchMode=no \
-              -o PreferredAuthentications=password \
-              -o PubkeyAuthentication=no \
-              -b .data/batch \
-              $HOSTKEY \
-              -o ConnectTimeout=30 \
-              -P "${SFTP_PORT:-2022}" \
-              "$SFTP_USER@$SFTP_HOST"
-          fi
-          if [ ! -s .data/auctions.db ]; then
-            echo "connected, but no auctions.db was retrieved - check SFTP_PATH"
-            exit 1
-          fi
-          ls -lh .data/auctions.db
-
-      # A live SQLite file copied over SFTP can be torn if the server happened
-      # to be mid-write. Cheap to detect, and a torn copy is worth discarding
-      # in favour of last-good data rather than publishing garbage.
-      - name: Verify the snapshot
-        id: verify
-        if: steps.fetch.outcome == 'success'
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import sqlite3, sys
-          conn = sqlite3.connect("file:.data/auctions.db?mode=ro", uri=True)
-          check = conn.execute("PRAGMA quick_check").fetchone()[0]
-          if check != "ok":
-              sys.exit(f"integrity check failed: {check}")
-          rows = conn.execute("SELECT COUNT(*) FROM auctions").fetchone()[0]
-          if rows < 1:
-              sys.exit("auctions table is empty")
-          print(f"snapshot ok - {rows} rows")
-          PY
-
+      # The auction house keeps its state in MySQL, so this reads the live
+      # tables. There is no snapshot to copy off the server and no torn-file
+      # check to do: the database either answers or it does not, and the
+      # fallback below covers the second case.
       - name: Generate market data
         id: generate
-        if: steps.fetch.outcome == 'success' && steps.verify.outcome == 'success'
+        continue-on-error: true
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           set -euo pipefail
-          python tools/build_market_data.py --db .data/auctions.db
+          python tools/build_market_data.py
           python tools/fetch_icons.py
 
       - name: Fall back to last deployed data
@@ -173,13 +67,18 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f .last-deploy/market/index.json ]; then
-            echo "::error::No fresh snapshot and no previously deployed data to fall back on."
+            echo "::error::Could not reach the database and there is no previously deployed data to fall back on."
             exit 1
           fi
           echo "::warning::Could not build fresh market data - republishing the last deployed snapshot."
           mkdir -p public/market/items
           cp .last-deploy/market/index.json   public/market/
           cp .last-deploy/market/meta.json    public/market/
+          # Added after the first deploys, and the pools and futures tabs both
+          # render an empty state without them, so a snapshot that predates
+          # them is still worth republishing.
+          cp .last-deploy/market/pools.json   public/market/ 2>/dev/null || true
+          cp .last-deploy/market/futures.json public/market/ 2>/dev/null || true
           cp .last-deploy/market/sellers.json public/market/ 2>/dev/null || true
           cp -r .last-deploy/market/items/.   public/market/items/
 
@@ -191,6 +90,6 @@ jobs:
           publish_dir: dist
           publish_branch: main
           # Market data is rewritten on every run. Keeping history would put a
-          # fresh copy of the whole dataset into the branch every hour, so the
-          # published branch is squashed to a single commit instead.
+          # fresh copy of the whole dataset into the branch every half hour, so
+          # the published branch is squashed to a single commit instead.
           force_orphan: true

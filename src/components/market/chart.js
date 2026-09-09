@@ -7,7 +7,20 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 export const SERIES = {
   price: '#ab68f2',
   floor: '#1ba873',
+  // Candle direction. Green/red is the convention a trader already reads, but
+  // it is never the only cue: an up candle is drawn hollow and a down candle
+  // filled, so direction survives both colour blindness and a greyscale print.
+  up: '#3fcf8e',
+  down: '#f2707c',
+  // A bucket that opened and closed at the same price is neither. These
+  // markets sit still for hours at a time, and painting every quiet hour green
+  // reports a climb that never happened.
+  flat: '#7f6ea6',
 };
+
+/** Plot margins, shared so the price, pool and candle charts line up when a
+ *  reader switches between them. Left is wide enough for a money tick. */
+export const PAD = { top: 12, right: 14, bottom: 22, left: 58 };
 
 /** SVG needs a pixel width, and the panel is fluid. */
 export function useMeasure() {
@@ -74,4 +87,43 @@ export function nearest(points, x) {
     if (distance < bestDistance) { bestDistance = distance; best = i; }
   });
   return best;
+}
+
+// ─── indicators ───
+// Computed in the browser rather than the build: they are a toy to play with,
+// three of them would triple what a pool document carries, and a few hundred
+// closes is nothing to a modern phone.
+
+/**
+ * Simple moving average, aligned to the input so index i is the average of the
+ * `period` closes ending there. The leading window is null - the average of
+ * three candles is not a 25-candle average, and drawing it as one would put a
+ * confident line where there is no data.
+ */
+export function sma(values, period) {
+  const out = new Array(values.length).fill(null);
+  let sum = 0;
+  for (let i = 0; i < values.length; i += 1) {
+    sum += values[i];
+    if (i >= period) sum -= values[i - period];
+    if (i >= period - 1) out[i] = sum / period;
+  }
+  return out;
+}
+
+/** Bollinger bands: a moving average with a channel `k` standard deviations
+ *  wide either side, so the channel widens exactly when the market gets noisy. */
+export function bollinger(values, period, k = 2) {
+  const mid = sma(values, period);
+  const upper = new Array(values.length).fill(null);
+  const lower = new Array(values.length).fill(null);
+  for (let i = period - 1; i < values.length; i += 1) {
+    const mean = mid[i];
+    let sum = 0;
+    for (let j = i - period + 1; j <= i; j += 1) sum += (values[j] - mean) ** 2;
+    const deviation = Math.sqrt(sum / period) * k;
+    upper[i] = mean + deviation;
+    lower[i] = mean - deviation;
+  }
+  return { mid, upper, lower };
 }

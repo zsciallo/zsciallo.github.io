@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { fetchIndex, fetchItem, fetchMeta } from '../lib/market';
+import { fetchFutures, fetchIndex, fetchItem, fetchMeta, fetchPools } from '../lib/market';
 
 /** The index and meta documents load once and drive the whole page. */
 export function useMarketIndex() {
@@ -54,3 +54,30 @@ export function useMarketItem(key) {
 
   return state;
 }
+
+/**
+ * A whole document, fetched the first time its tab is opened.
+ *
+ * The pools and futures documents together are a couple of hundred kilobytes,
+ * and most visitors only ever read the items table, so they are not part of
+ * the page's first load. Once fetched the result is kept for the session:
+ * these documents only change when the deploy regenerates them.
+ */
+function useDocument(load, active) {
+  const [state, setState] = useState({ loading: false, error: null, data: null });
+
+  useEffect(() => {
+    if (!active || state.data || state.error) return undefined;
+    let live = true;
+    setState({ loading: true, error: null, data: null });
+    load()
+      .then((data) => live && setState({ loading: false, error: null, data }))
+      .catch((error) => live && setState({ loading: false, error, data: null }));
+    return () => { live = false; };
+  }, [active]);
+
+  return state;
+}
+
+export const usePools = (active) => useDocument(fetchPools, active);
+export const useFutures = (active) => useDocument(fetchFutures, active);

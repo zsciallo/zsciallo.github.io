@@ -6,9 +6,13 @@ import { h } from 'preact';
 
 // The auctions page fetches these at runtime, so a build with them missing
 // succeeds and then shows an empty market on the deployed site. Fail here
-// instead. In CI the deploy workflow generates them from a fresh copy of
-// auctions.db, falling back to the last deployed snapshot if the server is
-// unreachable, so reaching this point means both of those went wrong.
+// instead. In CI the deploy workflow generates them by reading the live
+// database, falling back to the last deployed snapshot if it is unreachable,
+// so reaching this point means both of those went wrong.
+//
+// Only the items tab is required. The pools and futures documents are newer
+// than the first deploys and each tab renders an explicit empty state without
+// one, which beats refusing to publish the rest of the site over it.
 const required = ['dist/market/index.json', 'dist/market/meta.json'];
 
 const pages = [

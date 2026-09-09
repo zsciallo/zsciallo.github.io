@@ -2,12 +2,10 @@ node_modules/
 dist/
 tools/__pycache__/
 
-# Fetched by the deploy workflow, never committed - it is 15 MB of binary that
-# changes wholesale on every write.
-.data/
+# Checked out by the deploy workflow to fall back on, never committed.
 .last-deploy/
 
-# Market data is generated during the deploy from a fresh copy of auctions.db,
+# Market data is generated during the deploy by reading the live SMP database,
 # so it no longer lives in the repo. The icons beside it are vendored on
 # purpose and stay committed: they are small, effectively static, and
 # re-fetching a few hundred sprites from a third party on every build would be
@@ -15,4 +13,10 @@ tools/__pycache__/
 public/market/index.json
 public/market/meta.json
 public/market/sellers.json
+public/market/pools.json
+public/market/futures.json
 public/market/items/
+
+# Credentials for that database. CI supplies the same values as repository
+# secrets, so this file only ever exists on a developer's machine.
+local.env

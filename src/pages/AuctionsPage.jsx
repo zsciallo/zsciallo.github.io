@@ -1,50 +1,79 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { ago, count, matches, SORTS } from '../lib/market';
-import { useMarketIndex, useMarketItem } from '../hooks/useMarket';
+import { useFutures, useMarketIndex, useMarketItem, usePools } from '../hooks/useMarket';
 import { MarketList } from '../components/market/MarketList';
 import { ItemDetail } from '../components/market/ItemDetail';
+import { PoolsPanel } from '../components/market/PoolsPanel';
+import { FuturesPanel } from '../components/market/FuturesPanel';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
 
 const PAGE_SIZE = 40;
 
-/** Which item is open lives in the query string, so a market page is linkable
- *  and the browser's back button does the obvious thing. */
-function readKey() {
-  if (typeof window === 'undefined') return null;
-  return new URLSearchParams(window.location.search).get('item');
+// The three halves of the economy, in the order a reader meets them: what
+// players sell each other, what the server will always trade, and what you can
+// bet on either doing next.
+const TABS = [
+  { id: 'items', label: 'ITEMS' },
+  { id: 'markets', label: 'MARKETS' },
+  { id: 'futures', label: 'FUTURES' },
+];
+
+/** Which tab is open, and which item or pool inside it, live in the query
+ *  string, so any of them is linkable and the browser's back button does the
+ *  obvious thing. An item link implies the tab that shows items. */
+function readView() {
+  if (typeof window === 'undefined') return { tab: 'items', key: null, pool: null };
+  const params = new URLSearchParams(window.location.search);
+  const key = params.get('item');
+  const named = TABS.find((tab) => tab.id === params.get('tab'));
+  return {
+    tab: key || !named ? 'items' : named.id,
+    key,
+    pool: params.get('pool'),
+  };
 }
+
+const search = ({ tab, key, pool }) => {
+  if (key) return `?item=${encodeURIComponent(key)}`;
+  if (tab === 'items') return '';
+  return pool ? `?tab=${tab}&pool=${encodeURIComponent(pool)}` : `?tab=${tab}`;
+};
 
 export function AuctionsPage() {
   const { loading, error, items, meta } = useMarketIndex();
+  const [view, setView] = useState(readView);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('traded');
   const [listedOnly, setListedOnly] = useState(false);
   const [limit, setLimit] = useState(PAGE_SIZE);
-  const [openKey, setOpenKey] = useState(readKey);
 
-  const detail = useMarketItem(openKey);
+  const detail = useMarketItem(view.key);
+  // Both documents are a good deal larger than the tab that opens them is
+  // likely to be read, so neither is fetched until it is. Futures settle
+  // against the pool mids and chart them, so that tab needs both.
+  const pools = usePools(view.tab === 'markets' || view.tab === 'futures');
+  const futures = useFutures(view.tab === 'futures');
+
   // Relative times are measured against when the data was pulled, not against
   // the newest row in it - otherwise a sale that closed just before the pull
   // reads as 'just now' hours later.
   const now = meta?.fetchedAt ?? Date.now();
 
   useEffect(() => {
-    const onPop = () => setOpenKey(readKey());
+    const onPop = () => setView(readView());
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  const open = (key) => {
-    history.pushState(null, '', `?item=${encodeURIComponent(key)}`);
-    setOpenKey(key);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const go = (next, { top = false } = {}) => {
+    history.pushState(null, '', `${window.location.pathname}${search(next)}`);
+    setView(next);
+    if (top) window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const back = () => {
-    history.pushState(null, '', window.location.pathname);
-    setOpenKey(null);
-  };
+  const open = (key) => go({ tab: 'items', key, pool: null }, { top: true });
+  const back = () => go({ tab: 'items', key: null, pool: null });
 
   const visible = useMemo(() => {
     const rank = (SORTS.find((s) => s.id === sort) ?? SORTS[0]).key;
@@ -77,6 +106,7 @@ export function AuctionsPage() {
                 <b>{count(meta.itemCount)}</b> items ·
                 <b> {count(meta.salesRecorded)}</b> sales ·
                 <b> {count(meta.activeListings)}</b> listed ·
+                {meta.poolCount ? <><b> {meta.poolCount}</b> pools · </> : null}
                 updated {ago(meta.fetchedAt ?? meta.generatedAt)} ·
                 last trade {ago(meta.generatedAt)}
               </p>
@@ -86,7 +116,28 @@ export function AuctionsPage() {
 
         <section class="market-section">
           <div class="market-container">
-            {openKey ? (
+            <div class="market-tabs" role="tablist" aria-label="Market sections">
+              {TABS.map((tab) => (
+                <button key={tab.id} type="button" role="tab" aria-selected={view.tab === tab.id}
+                  class={`market-tab${view.tab === tab.id ? ' active' : ''}`}
+                  onClick={() => go({ tab: tab.id, key: null, pool: null })}>
+                  {tab.label}
+                  {/* meta knows whether the desk is open without loading the
+                      futures document, so the tab can say so up front. */}
+                  {tab.id === 'futures' && meta && meta.futuresLive === false && (
+                    <span class="market-tab-flag">soon</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {view.tab === 'markets' && (
+              <PoolsPanel {...pools} now={now} openId={view.pool}
+                onOpen={(pool) => go({ tab: 'markets', key: null, pool })} />
+            )}
+            {view.tab === 'futures' && <FuturesPanel {...futures} pools={pools} now={now} />}
+
+            {view.tab === 'items' && (view.key ? (
               <ItemDetail item={detail.item} now={now} loading={detail.loading}
                 error={detail.error} onBack={back} />
             ) : (
@@ -117,7 +168,7 @@ export function AuctionsPage() {
                   <div class="market-status market-status--error">
                     <p>No market data on this site yet.</p>
                     <p class="market-status-hint">
-                      Generate the stand-in dataset with <code>npm run market</code>, or point
+                      Generate the dataset with <code>npm run market</code>, or point
                       <code>BASE</code> in <code>src/lib/market.js</code> at the Auction Tracker plugin.
                     </p>
                   </div>
@@ -147,7 +198,7 @@ export function AuctionsPage() {
                   </>
                 )}
               </>
-            )}
+            ))}
           </div>
         </section>
       </main>

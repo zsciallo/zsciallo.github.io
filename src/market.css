@@ -106,6 +106,55 @@
   padding: 0 0 5rem;
 }
 
+/* ─── section tabs ───
+   The three markets sit on one page because they price the same economy, so
+   switching between them should not feel like a navigation. */
+
+.market-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.market-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.9rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.market-tab:hover {
+  color: var(--text);
+}
+
+.market-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.market-tab-flag {
+  padding: 0.05rem 0.32rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  background: var(--border-pink);
+  border-radius: 3px;
+}
+
 /* ─── controls ─── */
 
 .market-controls {
@@ -518,6 +567,10 @@
   overflow: hidden;
 }
 
+.stat-row--tight {
+  margin-bottom: 1rem;
+}
+
 .stat {
   padding: 0.8rem 0.95rem;
   background: var(--bg2);
@@ -573,6 +626,13 @@
   color: var(--text);
 }
 
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .range-tabs {
   display: flex;
   gap: 2px;
@@ -623,6 +683,81 @@
   width: 11px;
   height: 3px;
   border-radius: 2px;
+}
+
+.legend-candle {
+  width: 9px;
+  height: 13px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  flex: none;
+}
+
+.legend-candle--up {
+  color: #3fcf8e;
+  background: currentColor;
+}
+
+.legend-candle--down {
+  color: #f2707c;
+  background: currentColor;
+}
+
+.legend-candle--flat {
+  color: #7f6ea6;
+  background: currentColor;
+  height: 3px;
+  align-self: center;
+}
+
+.chart-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.55rem 0 0.1rem;
+}
+
+.indicator-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.indicator-tab i {
+  width: 8px;
+  height: 8px;
+  margin-right: 0.4rem;
+  border-radius: 2px;
+  opacity: 0.4;
+}
+
+.indicator-tab:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--accent-deep);
+}
+
+.indicator-tab.active {
+  color: var(--text);
+  background: var(--bg3);
+  border-color: var(--accent-deep);
+}
+
+.indicator-tab.active i {
+  opacity: 1;
+}
+
+.indicator-tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .legend-key--wash i {
@@ -821,6 +956,344 @@
   color: var(--muted);
 }
 
+/* ─── the primer ───
+   A disclosure above the markets, closed by default. It reads as a panel when
+   open and as a single quiet row when shut, so it never competes with the
+   prices for the top of the page. */
+
+.explainer {
+  margin-bottom: 1rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.explainer > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text);
+}
+
+.explainer > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A chevron of our own, so it points the same way in every browser. */
+.explainer > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.18s;
+}
+
+.explainer[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.explainer > summary:hover .explainer-title {
+  color: var(--accent);
+}
+
+.explainer > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.explainer-title {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  transition: color 0.15s;
+}
+
+.explainer-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.explainer-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem 1.75rem;
+  padding: 0.25rem 1rem 1.1rem;
+  border-top: 1px solid var(--border);
+  margin-top: 0.1rem;
+  padding-top: 1rem;
+}
+
+.explainer-body h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.explainer-body p {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.explainer-body b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.explainer-body code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+  background: var(--bg3);
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+}
+
+/* ─── liquidity pools ───
+   Nine markets, not two thousand, so they get cards: a pool is read for its
+   price and how much stock stands behind it, and both fit on a tile. */
+
+.pool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.pool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  font-family: 'Barlow', sans-serif;
+  color: var(--text);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.pool-card:hover {
+  background: var(--bg3);
+  border-color: var(--accent-deep);
+}
+
+.pool-card.selected {
+  border-color: var(--accent);
+  background: var(--bg3);
+}
+
+.pool-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pool-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.pool-card-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.pool-ticker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.pool-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pool-flag {
+  align-self: flex-start;
+}
+
+.pool-card-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pool-card-price b {
+  font-size: 1.28rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.pool-card-price em {
+  font-style: normal;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pool-card-price em span {
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.pool-card-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pool-card-depth {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pool-card-depth em {
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.pool-detail {
+  /* It is scrolled into view when a pool opens, and the site nav is sticky. */
+  scroll-margin-top: calc(var(--nav-h) + 0.75rem);
+}
+
+.pool-detail .detail-head {
+  align-items: flex-start;
+}
+
+.pool-close {
+  margin: 0 0 0 auto;
+  flex: none;
+}
+
+/* Buy and sell read at a glance in a table of otherwise identical rows; long
+   and short are the same distinction on the futures book. */
+.side {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  padding: 0.08rem 0.36rem;
+  border-radius: 3px;
+}
+
+.side--buy,
+.side--long {
+  color: var(--positive);
+  background: rgba(91, 227, 160, 0.13);
+}
+
+.side--sell,
+.side--short {
+  color: #ff8a8a;
+  background: rgba(255, 138, 138, 0.13);
+}
+
+/* The futures chart is drawn for one market at a time; eight tickers wrap
+   rather than scroll, so none of them is hidden off the edge. */
+.market-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 0.75rem;
+  background: var(--bg3);
+  border-radius: 7px;
+}
+
+.futures-chart {
+  margin-bottom: 1.25rem;
+}
+
+/* ─── futures ─── */
+
+.futures-intro {
+  padding: 1.5rem 1.6rem;
+  margin-bottom: 1.25rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 62ch;
+}
+
+.futures-badge {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.1rem 0.45rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-2);
+  background: var(--border-pink);
+  border-radius: 3px;
+}
+
+.futures-intro h2 {
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(1.5rem, 3.4vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  margin-bottom: 0.6rem;
+}
+
+.futures-intro p + p {
+  margin-top: 0.7rem;
+}
+
+.futures-intro p:not(.futures-badge) {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.futures-markets {
+  margin-bottom: 1.25rem;
+}
+
+.futures-market-name {
+  margin-left: 0.5rem;
+  color: var(--muted);
+}
+
+.futures-lev {
+  margin-left: 0.35rem;
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
 /* ─── narrow screens ───
    The table drops its middle columns rather than scrolling sideways: floor,
    trend and the sparkline are what the list is read for. */
@@ -849,6 +1322,24 @@
 }
 
 @media (max-width: 560px) {
+  .market-tabs {
+    gap: 0;
+  }
+
+  .market-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0.55rem 0.4rem;
+  }
+
+  .pool-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .futures-intro {
+    padding: 1.1rem 1rem;
+  }
+
   /* Floor and the trailing-week move are what a phone reader is here for; the
      sparkline needs more pixels than the width can spare. Header labels stay
      in step with the columns that survive. */
@@ -878,6 +1369,11 @@
 @media (prefers-reduced-motion: reduce) {
   .market-row,
   .market-toggle,
+  .market-tab,
+  .explainer > summary::after,
+  .explainer-title,
+  .pool-card,
+  .indicator-tab,
   .range-tab,
   .detail-back,
   .market-more {
