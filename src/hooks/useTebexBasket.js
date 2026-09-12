@@ -13,6 +13,13 @@ import {
 import { resolveType, isRecurring } from '../lib/packageType';
 
 const BASKET_KEY = 'chromabit_basket';
+// A Tebex basket freezes the name it was created for - delivery uses that, not
+// whatever the site thinks the buyer is called now - so the ident is stored
+// with its owner and an age, and is only ever reused for that same player.
+// Older builds stored a bare ident string; those parse as junk here and are
+// dropped, which is the point: they are exactly the baskets that might predate
+// a rename.
+const BASKET_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 // Which packages in the saved basket were added as subscriptions. Tebex accepts
 // the choice on the way in but never reports it back on the basket, so it is
 // only knowable by remembering what we sent - and the cart has to be able to
@@ -24,17 +31,19 @@ const TYPES_KEY = 'chromabit_basket_types';
  * localStorage so the cart survives reloads; stale or completed baskets are
  * silently discarded on load.
  */
-export function useTebexBasket(token) {
+export function useTebexBasket(token, username) {
   const [basket, setBasket] = useState(null);
   // Package ids in the current basket that were added as subscriptions.
   const [recurringIds, setRecurringIds] = useState([]);
   // Mirrors `basket` so callers that clear and immediately re-add within one
   // event handler (changing username) don't act on the pre-clear state.
   const basketRef = useRef(null);
-  // The create that's already in flight. Without this a click that lands before
-  // the page-load basket settles starts a second POST for the same name, and
-  // two concurrent Xbox Live lookups is a good way to draw a rate-limited
-  // "Invalid username" on a gamertag that's perfectly real.
+  // The create that's already in flight, as { username, promise }. Without this
+  // a click that lands before the page-load basket settles starts a second POST
+  // for the same name, and two concurrent Xbox Live lookups is a good way to
+  // draw a rate-limited "Invalid username" on a gamertag that's perfectly real.
+  // Tagged with its name so only a create for the *same* player is joined - one
+  // for a name they have left has to be retired, not waited on.
   const creating = useRef(null);
   // Resolves once the saved basket has been looked up. A create that races the
   // restore leaves two baskets and whichever lands last wins, which is how a
@@ -54,23 +63,41 @@ export function useTebexBasket(token) {
   }
 
   useEffect(() => {
-    if (!token) return;
-    const ident = localStorage.getItem(BASKET_KEY);
-    if (!ident) {
+    // Runs once, but not until we know who is buying: a saved basket can only
+    // be reused if it belongs to them.
+    if (!token || restored.current) return;
+    const saved = loadSavedBasket();
+    if (!saved) {
       restored.current = Promise.resolve();
       return;
     }
-    restored.current = getBasket(token, ident)
+    if (!username) return;
+    // Saved under a different name, or old enough that the player may have
+    // renamed since. Either way the basket would deliver to whoever it was
+    // created for, so it is not worth the round trip.
+    if (!sameName(saved.username, username) || Date.now() - saved.at > BASKET_MAX_AGE_MS) {
+      forgetBasket();
+      restored.current = Promise.resolve();
+      return;
+    }
+    const gen = generation.current;
+    restored.current = getBasket(token, saved.ident)
       .then((b) => {
-        if (b && !b.complete) {
+        // Retired by a clearBasket while this was in flight. Without this the
+        // restore lands afterwards and reinstates the basket that was just
+        // thrown away - which is how a basket created under the old name
+        // survived the buyer correcting it and kept delivering there.
+        if (gen !== generation.current) return;
+        // Tebex's own answer, not our stored string, decides who it delivers to.
+        if (b && !b.complete && sameName(b.username, username)) {
           store(b);
-          setRecurringIds(loadRecurring(ident));
+          setRecurringIds(loadRecurring(saved.ident));
         } else {
           forgetBasket();
         }
       })
       .catch(() => forgetBasket());
-  }, [token]);
+  }, [token, username]);
 
   /**
    * Create the basket for `username`, or join the one already being created.
@@ -79,29 +106,63 @@ export function useTebexBasket(token) {
    * name lookup in flight and only one winner writing BASKET_KEY.
    */
   function createOnce(username) {
-    if (creating.current) return creating.current;
+    const inFlight = creating.current;
+    if (inFlight && sameName(inFlight.username, username)) return inFlight.promise;
     const gen = generation.current;
     const pending = (async () => {
       await restored.current;
       // The saved basket may have arrived while we waited, in which case there
-      // is nothing to create.
-      if (gen === generation.current && basketRef.current) return basketRef.current;
+      // is nothing to create - but only if it is this player's. One belonging
+      // to a name they have since left would deliver there.
+      const settled = basketRef.current;
+      if (gen === generation.current && settled && sameName(settled.username, username)) return settled;
       const created = await createBasket(token, username);
       // Superseded by a username change mid-flight: hand it back to the caller
       // that asked for it, but don't let it become the current basket.
       if (gen !== generation.current) return created;
-      localStorage.setItem(BASKET_KEY, created.ident);
+      // Tebex echoes the name it resolved, so save that rather than what we
+      // sent - it is the name the commands will actually run against.
+      saveBasket(created.ident, created.username || username);
       store(created);
       return created;
     })();
-    creating.current = pending;
+    creating.current = { username, promise: pending };
     const release = () => {
-      if (creating.current === pending) creating.current = null;
+      if (creating.current?.promise === pending) creating.current = null;
     };
     // Both arms, so the slot frees on failure too, and so the rejection counts
     // as handled here as well as by whoever awaits `pending`.
     pending.then(release, release);
     return pending;
+  }
+
+  /**
+   * Drop the current basket if it isn't the one `username` buys with.
+   *
+   * The last line of defence, checked at the moment of use rather than trusted
+   * from load: Tebex bakes the name into the basket at creation and delivers
+   * there whatever happens afterwards, so a basket carrying a name the buyer
+   * has moved off runs every command against a player that no longer exists.
+   * `clearBasket` handles the buyer changing their name here; this catches the
+   * paths that never went through it.
+   *
+   * A create still in flight for the old name is retired too, since it would
+   * otherwise land and reinstate exactly what was just dropped. One running for
+   * *this* name is left alone - it is the basket we want.
+   */
+  function dropForeignBasket(username) {
+    const current = basketRef.current;
+    const inFlight = creating.current;
+    const foreignCreate = Boolean(inFlight) && !sameName(inFlight.username, username);
+    const foreignBasket = Boolean(current) && !sameName(current.username, username);
+    if (!foreignCreate && !foreignBasket) return;
+    if (foreignCreate) {
+      generation.current += 1;
+      creating.current = null;
+    }
+    forgetBasket();
+    store(null);
+    setRecurringIds([]);
   }
 
   /** Record that `packageId` was added as a subscription (or no longer is). */
@@ -126,8 +187,9 @@ export function useTebexBasket(token) {
    * can surface it at the step that actually failed.
    */
   async function ensureBasket(username) {
-    if (basketRef.current) return basketRef.current;
     if (!token || !username) return null;
+    dropForeignBasket(username);
+    if (basketRef.current) return basketRef.current;
     try {
       const created = await createOnce(username);
       setBasketError(null);
@@ -147,6 +209,7 @@ export function useTebexBasket(token) {
    * the package actually is, so a stale choice can't ride along.
    */
   async function addItem(pkg, username, quantity = 1, type) {
+    dropForeignBasket(username);
     let current = basketRef.current;
     if (!current) current = await createOnce(username);
     setBasketError(null);
@@ -243,6 +306,40 @@ export function useTebexBasket(token) {
     ensureBasket, addItem, setQuantity, removeItem, clearBasket,
     addCoupon, dropCoupon, addGiftCard, dropGiftCard,
   };
+}
+
+/**
+ * Minecraft names are matched case-insensitively, because Tebex answers with
+ * Mojang's canonical spelling rather than the one the buyer typed. Bedrock
+ * gamertags carry the Geyser dot on both sides by the time they reach here.
+ */
+function sameName(a, b) {
+  return String(a || '').toLowerCase() === String(b || '').toLowerCase();
+}
+
+/** Save the basket ident together with the player it delivers to. */
+function saveBasket(ident, username) {
+  try {
+    localStorage.setItem(BASKET_KEY, JSON.stringify({ ident, username, at: Date.now() }));
+  } catch {
+    // Private-mode storage failure only costs the cart across reloads.
+  }
+}
+
+/**
+ * Read back the saved basket, or null if there is nothing usable. A bare ident
+ * string from an older build fails to parse, which is the intended outcome:
+ * those records carry no owner, so there is no way to tell whether they predate
+ * a rename.
+ */
+function loadSavedBasket() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(BASKET_KEY));
+    if (!saved?.ident || !saved?.username) return null;
+    return { ident: saved.ident, username: saved.username, at: saved.at || 0 };
+  } catch {
+    return null;
+  }
 }
 
 /** Drop the saved basket and the subscription choices that belonged to it. */

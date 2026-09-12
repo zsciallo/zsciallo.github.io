@@ -36,15 +36,17 @@ const NOT_PURCHASABLE = /isn.?t purchasable|not purchasable/i;
 const OVER_QUANTITY = /quantity cannot be greater than/i;
 
 export function StorePage() {
-  const cart = useTebexBasket(config.tebexToken);
+  // Declared before the basket hook because a basket belongs to a player: it
+  // needs the name to know whether a saved one may be reused.
+  const [username, setUsername] = useState('');
+  const [platform, setPlatform] = useState('java');
+  const cart = useTebexBasket(config.tebexToken, username);
   // Scoping the catalog to the basket is what surfaces rank upgrade discounts;
   // without an ident every player is quoted the full price.
   const store = useTebexStore(config.tebexToken, cart.basket?.ident);
   const [activeCat, setActiveCat] = useState(null); // null = all categories
   useScrollReveal([store.categories, activeCat]);
 
-  const [username, setUsername] = useState('');
-  const [platform, setPlatform] = useState('java');
   const [pending, setPending] = useState(null); // { pkg, mode: 'buy' | 'cart', quantity, type }
   const [busyPkgId, setBusyPkgId] = useState(null);
   const [cartBusy, setCartBusy] = useState(false);
