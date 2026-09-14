@@ -160,6 +160,7 @@ export function useTebexBasket(token, username) {
       generation.current += 1;
       creating.current = null;
     }
+    revokeBasket(current);
     forgetBasket();
     store(null);
     setRecurringIds([]);
@@ -242,6 +243,7 @@ export function useTebexBasket(token, username) {
     generation.current += 1;
     creating.current = null;
     restored.current = Promise.resolve();
+    revokeBasket(basketRef.current);
     forgetBasket();
     store(null);
     setRecurringIds([]);
@@ -306,6 +308,42 @@ export function useTebexBasket(token, username) {
     ensureBasket, addItem, setQuantity, removeItem, clearBasket,
     addCoupon, dropCoupon, addGiftCard, dropGiftCard,
   };
+}
+
+/**
+ * Empty a basket on Tebex before letting go of it locally.
+ *
+ * Forgetting the ident only hides the basket from this browser. Tebex keeps it
+ * payable indefinitely with the username frozen in at creation, and
+ * `links.checkout` is an ordinary URL that outlives us in an open tab, in
+ * history, or in whatever the buyer bookmarked. So a player who fills a cart,
+ * renames in-game, and then tells us the new name can still pay on the old
+ * basket - and delivery runs every command against the name they left, which
+ * no longer resolves. Every local guard in this file is powerless there: the
+ * payment never comes back through the site.
+ *
+ * Emptying is the only revocation Headless offers - there is no delete-basket
+ * endpoint - and a basket with nothing in it cannot be checked out.
+ *
+ * Deliberately not awaited. This runs behind a rename or a completed checkout,
+ * where the buyer is already on to the next thing, and a failure leaves them no
+ * worse off than not trying: the basket is gone from this session either way.
+ */
+function revokeBasket(basket) {
+  const packages = basket?.packages || [];
+  if (!basket?.ident || basket.complete || !packages.length) return;
+  void (async () => {
+    for (const pkg of packages) {
+      try {
+        // One at a time: Tebex answers each change with the whole basket, and
+        // concurrent removes against one ident have no defined winner.
+        await removeFromBasket(basket.ident, pkg.id);
+      } catch {
+        // Nothing useful to retry into - we have already stopped tracking this
+        // basket, and the buyer has no view of it to correct.
+      }
+    }
+  })();
 }
 
 /**

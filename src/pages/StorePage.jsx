@@ -157,7 +157,9 @@ export function StorePage() {
           `We couldn't confirm the ${bedrock ? 'Xbox gamertag' : 'Java username'} `
           + `"${displayName(name, bedrock ? 'bedrock' : 'java')}" with `
           + `${bedrock ? 'Xbox Live' : 'Mojang'}. That lookup is often just slow, `
-          + `so try again, and check the spelling, or your edition, if it keeps failing.`,
+          + `so try again. If it keeps failing, check the spelling and your edition `
+          + `- and if you've changed your ${bedrock ? 'gamertag' : 'name'} in Minecraft `
+          + `since, enter the new one.`,
         );
         // Deliberately not straight back to the name modal. Tebex reports a
         // lookup that timed out and a name that doesn't exist identically, and
@@ -360,11 +362,20 @@ export function StorePage() {
   // The saved name failed its lookup before the buyer touched anything. Worth
   // saying up front: this used to fail in silence and only resurface two clicks
   // later as an add-to-cart error, which blamed the wrong step.
+  //
+  // A name the player has renamed off lands here too, and looks identical - the
+  // lookup 404s the same way whether the name is retired or the service is just
+  // slow, so there is nothing to branch on. Naming the possibility is the only
+  // way a returning renamed player learns why the store is stuck on a name they
+  // no longer have; "that's usually temporary, try again" on its own sent them
+  // round the retry loop forever.
   const nameCheckFailed = (
     <>
       We couldn't confirm <strong>{username}</strong> with{' '}
       {platform === 'bedrock' ? 'Xbox Live' : 'Mojang'} just now. That's usually
-      temporary, so try again, or change the name if it's wrong.
+      temporary, so try again - but if you've changed your{' '}
+      {platform === 'bedrock' ? 'gamertag' : 'name'} in Minecraft since you last
+      bought, set the new one here first.
     </>
   );
   // Repeating the request fixes a failed lookup and does nothing for a package
