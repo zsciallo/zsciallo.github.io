@@ -11,7 +11,6 @@ import { requiredPackage } from '../lib/requirements';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
 import { isNameLookupFailure } from '../lib/tebex';
-import { preloadCheckout, launchCheckout } from '../lib/checkout';
 import { SectionHeader } from '../components/SectionHeader';
 import { PackageCard } from '../components/PackageCard';
 import { UsernameModal } from '../components/UsernameModal';
@@ -76,49 +75,18 @@ export function StorePage() {
     // players who have already bought once and know the flow.
     capture('store_viewed', { returning: Boolean(saved) });
     const params = new URLSearchParams(window.location.search);
-    // Still reachable, and still needed: the panel falls back to a full-page
-    // redirect when a small-viewport browser blocks its window, and that
-    // journey comes back here rather than through `payment:complete`.
     if (params.get('checkout') === 'complete') {
-      completePurchase(saved);
+      setPurchaseComplete(true);
+      // Client-side and best-effort: buyers who close the tab on Tebex's
+      // confirmation page never get here. Tebex remains the source of truth
+      // for revenue; this only gives the funnel its final step.
+      capture('purchase_completed');
+      // What they own just changed, so anything learned before is stale.
+      clearUnavailable(saved);
+      cart.clearBasket();
       history.replaceState(null, '', window.location.pathname);
     }
-    // Pulled ahead of the first Buy click so the panel opens on the click
-    // rather than starting a 220kB download at it. Deferred to idle so it
-    // doesn't race the catalog for bandwidth, and skipped entirely when the
-    // panel is off - there is no sense shipping the chunk to buyers who will
-    // be sent to the hosted checkout anyway.
-    if (config.embeddedCheckout) {
-      const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1200));
-      idle(() => preloadCheckout().catch(() => {
-        // Recoverable: the next launch retries, and failing that falls back to
-        // the hosted page. Nothing to tell the buyer about yet.
-      }));
-    }
   }, []);
-
-  /**
-   * The order is paid for. Tebex has it from here - this only resets the store
-   * around it.
-   *
-   * Nothing here confirms money moved: the panel's own event and the redirect
-   * both just mean the buyer got to the end. Tebex's webhooks are the source of
-   * truth for revenue and delivery, so this is presentation and funnel only.
-   *
-   * The state resets matter more than they used to. The embedded checkout never
-   * reloads the page, so anything left standing here - the cart, the packages
-   * this player had been refused - stays on screen and stale until they
-   * navigate away themselves.
-   */
-  function completePurchase(name) {
-    setPurchaseComplete(true);
-    capture('purchase_completed');
-    // What they own just changed, so anything learned before is stale.
-    clearUnavailable(name);
-    setUnavailable([]);
-    cart.clearBasket();
-    setCartOpen(false);
-  }
 
   // A basket is what ties catalog pricing to a player, so make sure one exists
   // as soon as we know who they are.
@@ -130,19 +98,12 @@ export function StorePage() {
     setBusyPkgId(pkg.id);
     setCheckoutError(null);
     setRetry(null);
-    // Tebex.js reports a failing launch callback as an error of its own, with
-    // the cause folded into the message. The branches below read Tebex's
-    // wording to tell a dead name from an unbuyable package, so the original is
-    // set aside on the way past and rethrown rather than matched through the
-    // wrapper.
-    let failure = null;
-
-    // No auto-retry with a dot prefix here any more. That silently moved a
-    // purchase into the Bedrock namespace, and since plenty of gamertags also
-    // exist as Java usernames, the undotted name often resolved to a different
-    // real player instead of failing. The platform is asked for up front now,
-    // so the name we were given is the name we send.
-    const fill = async () => {
+    try {
+      // No auto-retry with a dot prefix here any more. That silently moved a
+      // purchase into the Bedrock namespace, and since plenty of gamertags also
+      // exist as Java usernames, the undotted name often resolved to a
+      // different real player instead of failing. The platform is asked for up
+      // front now, so the name we were given is the name we send.
       const basket = await cart.addItem(pkg, name, quantity, type);
       // Succeeded, so any remembered refusal is stale - Battle Pass limits
       // expire, and a rank may have been refunded.
@@ -155,55 +116,19 @@ export function StorePage() {
         // Which way a dual-type package actually sells is worth knowing, and
         // it's only visible here - nothing downstream reports it back.
         purchase_type: resolveType(pkg, type),
-        // Payment happens in Tebex's frame from here, so the drop between
-        // checkout_started and purchase_completed is the payment step.
+        // Everything past this point happens on Tebex's domain, so the drop
+        // between checkout_started and purchase_completed is the payment step.
         value: basket.total_price,
       });
-      return basket;
-    };
-
-    try {
-      if (mode === 'buy' && !config.embeddedCheckout) {
-        // Hosted checkout: fill the basket, then hand the buyer over. The panel
-        // is off, so there is nothing to open over the page.
-        window.location.href = (await fill()).links.checkout;
-        return;
-      }
       if (mode === 'buy') {
-        // Panel first, basket second. Adding the package before launching would
-        // put a network round trip between the click and the panel, and the
-        // buyer would watch a dead button through it - so the add goes inside
-        // the callback, where it runs behind the panel's own spinner.
-        await launchCheckout(
-          async () => {
-            try {
-              return (await fill()).ident;
-            } catch (err) {
-              failure = err;
-              throw err;
-            }
-          },
-          { onComplete: () => completePurchase(name) },
-        );
-        // Resolves once the panel is up, not once it is paid or dismissed, so
-        // the card stops spinning while the buyer is still deciding.
-        //
-        // The modals behind it are dismissed here rather than before the
-        // launch, so a name the lookup rejects still reports itself inside the
-        // username modal the buyer typed it into, instead of throwing them back
-        // to the page with a banner.
-        setPending(null);
-        setViewPkg(null);
-        setBusyPkgId(null);
+        window.location.href = basket.links.checkout;
         return;
       }
-      await fill();
       setPending(null);
       setViewPkg(null);
       setCartOpen(true);
       setBusyPkgId(null);
-    } catch (wrapped) {
-      const err = failure || wrapped;
+    } catch (err) {
       const notPurchasable = NOT_PURCHASABLE.test(err.message);
       const overQty = OVER_QUANTITY.test(err.message);
       // The one refusal Tebex can't explain for us. A missing prerequisite is
@@ -414,42 +339,6 @@ export function StorePage() {
     capture('giftcard_removed');
   }
 
-  /**
-   * Pay for what's already in the cart.
-   *
-   * Deliberately not `async`, and the promise deliberately not awaited before
-   * `launchCheckout`: the basket exists already, so there is nothing to wait
-   * for, and anything awaited first could cost the click the browser needs to
-   * let Tebex.js open its window.
-   */
-  function handleCheckout() {
-    const basket = cart.basket;
-    if (!basket) return;
-    capture('checkout_started', {
-      from: 'cart',
-      items: cart.count,
-      value: basket.total_price,
-    });
-    if (!config.embeddedCheckout) {
-      window.location.href = basket.links.checkout;
-      return;
-    }
-    launchCheckout(async () => basket.ident, { onComplete: () => completePurchase(username) })
-      .catch((err) => {
-        // Nothing here can fail except the panel itself - the ident is already
-        // in hand. The basket is real and payable whether or not Tebex.js
-        // loaded, so fall back to the page it would have framed rather than
-        // leaving the buyer holding a full cart and an error.
-        const hosted = basket.links?.checkout;
-        if (hosted) {
-          window.location.href = hosted;
-          return;
-        }
-        setCheckoutError(err.message);
-      });
-    setCartOpen(false);
-  }
-
   async function handleRemove(packageId) {
     setCartBusy(true);
     try {
@@ -650,7 +539,6 @@ export function StorePage() {
         onRemoveCoupon={handleRemoveCoupon}
         onApplyGiftCard={handleApplyGiftCard}
         onRemoveGiftCard={handleRemoveGiftCard}
-        onCheckout={handleCheckout}
         onClose={() => setCartOpen(false)}
       />
 

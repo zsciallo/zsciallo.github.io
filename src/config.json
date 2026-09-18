@@ -6,8 +6,6 @@
   "launchDate": "2026-06-19",
   "downSubMessage": "Under maintenance",
   "hideVisitStore": false,
-  "// embeddedCheckout": "Open payment in a Tebex.js panel over the store instead of sending the buyer to Tebex's hosted checkout. Off because the panel does not work on this store: it is a Geyser (Dot Prefix) store, and Tebex's own checkout app 403s looking the player up at ident.tebex.io/gametypes/31/username/<username_id>, then hangs at Continue to payment. Nothing on this side supplies that call. Turn on to retest - the whole path is still here.",
-  "embeddedCheckout": false,
   "tebexToken": "13t0r-a99444be06fcd80be9bc3361d1d07f80d8666f6b",
   "posthogKey": "phc_z2uQBm2CGv6esry9jK6u6fxXcpcGoaY9GZgj4QraF8Je",
   "posthogHost": "https://us.i.posthog.com",

@@ -59,12 +59,6 @@ export function isNameLookupFailure(err) {
  * wrong name one extra round trip and saves the rest a dead end.
  */
 export async function createBasket(token, username) {
-  // Still pointed back at the store, and still set to redirect, even though
-  // payment now happens in a panel over the page and reports itself through
-  // Tebex.js's own `payment:complete`. These only come into play on the path
-  // that skips all of that: a browser that refuses Tebex.js its window gets
-  // sent to the hosted checkout full-page, and without them that buyer pays and
-  // then has nowhere to go back to.
   const base = `${window.location.origin}/store/`;
   const url = `${API}/accounts/${token}/baskets`;
   const payload = {

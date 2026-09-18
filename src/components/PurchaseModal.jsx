@@ -46,20 +46,6 @@ export function PurchaseModal({ serverIP, username, onClose }) {
           are delivered in-game within a few minutes. You need to be online to receive them.
         </p>
 
-        {/* The one way a paid order can strand itself. Delivery is queued
-            against the name on the order and waits for that name to log in, so
-            a player who renames before collecting is never matched again and
-            the commands sit as due forever - it takes a manual re-queue on the
-            Tebex side to recover. Nothing on this site can prevent it once the
-            payment is through; saying so here is the whole defence. */}
-        {username && (
-          <p class="modal-note">
-            Log in as <strong>{username}</strong> to collect before you change your
-            Minecraft name - delivery waits for this name, and a rename in between
-            leaves the order stuck.
-          </p>
-        )}
-
         <button class="purchase-ip" onClick={copyIP} title="Copy server IP">
           <span class="ip-label">SERVER IP</span>
           <span class="ip-value">{serverIP}</span>

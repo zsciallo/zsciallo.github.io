@@ -2191,82 +2191,6 @@ footer {
   justify-content: center;
 }
 
-/* ─── EMBEDDED TEBEX CHECKOUT ─── */
-
-/*
- * The payment panel is an iframe on Tebex's origin, so nothing in here reaches
- * the form itself - that is themed through `colors` in lib/checkout.js. What
- * *is* ours is the backdrop Tebex.js drops behind it, which lives in this
- * document and ships as flat black. Matched to `.modal-overlay` so the checkout
- * arrives the same way every other panel on the store does.
- *
- * These four custom properties are Tebex.js's own hooks, documented in its
- * stylesheet as `var(--tebex-js-*, fallback)`. Set on :root because the element
- * is appended to <body> at launch and never exists in our markup to target.
- */
-:root {
-  --tebex-js-lightbox-bg: rgba(8, 4, 17, 0.75);
-  --tebex-js-duration: 0.25s;
-  --tebex-js-timing: ease;
-}
-
-.tebex-js-lightbox {
-  backdrop-filter: blur(4px);
-}
-
-/*
- * Size the panel to the screen.
- *
- * Tebex.js hands zoid a fixed 800x760 iframe with `autoResize` off for both
- * axes, so left alone it neither shrinks on a phone nor grows for the payment
- * step - which is the tallest, and scrolled inside its own box while the room
- * to show it sat unused. The iframe is cross-origin, so its content can't be
- * reached from here, but the element itself is in this document and its inline
- * dimensions are ordinary styles to be overridden.
- *
- * Mobile first, and not only as a convention: `popupOnMobile` means phones get
- * this panel now rather than a new tab, so the small-screen case is the one
- * that has to be right. It takes the whole viewport - a payment form is not
- * something to read through a letterbox - and only becomes a floating card once
- * there is room for one.
- *
- * Only the holder and zoid's wrapper are sized; the iframes inside are already
- * 100% of that wrapper, so leaving them alone keeps one source of truth. The
- * `!important` is not decoration - zoid writes the size as `#uid { width }` in
- * a stylesheet of its own, and an id beats any selector available here.
- */
-.tebex-js-lightbox__holder,
-.tebex-js-lightbox__holder > div {
-  width: 100vw !important;
-  height: 100vh !important;
-  /* Discounts mobile browser chrome where supported, so the pay button isn't
-     stranded behind an address bar. Ignored by anything that doesn't know it,
-     which leaves the vh line above as the fallback rather than a duplicate. */
-  height: 100dvh !important;
-}
-
-.tebex-js-lightbox__holder {
-  border-radius: 0 !important;
-}
-
-@media (min-width: 600px) and (min-height: 560px) {
-  .tebex-js-lightbox__holder,
-  .tebex-js-lightbox__holder > div {
-    /* 800 is the width Tebex designed the panel around, so it is a ceiling and
-       not a target. The height is allowed well past their 760 because that is
-       what stops the payment step scrolling: there is nothing being stretched,
-       the content simply gets the room it already wanted. */
-    width: min(800px, 100vw - 3rem) !important;
-    height: min(900px, 100vh - 3rem) !important;
-    height: min(900px, 100dvh - 3rem) !important;
-  }
-
-  .tebex-js-lightbox__holder {
-    border-radius: 12px !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
-  }
-}
-
 /* ─── USERNAME MODAL ─── */
 .modal-overlay {
   position: fixed;
@@ -2749,23 +2673,6 @@ html.js .reveal.is-visible {
 
 .modal-preview strong {
   color: var(--positive);
-}
-
-/* The rename warning on the purchase-complete modal. Boxed rather than left as
-   another line of sub text: it is the one instruction on that screen that can
-   cost the buyer their order if it is skimmed past. */
-.modal-note {
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: var(--muted);
-  text-align: left;
-  border-left: 2px solid var(--accent);
-  padding: 0.1rem 0 0.1rem 0.7rem;
-  margin: 0.9rem 0 0;
-}
-
-.modal-note strong {
-  color: var(--text);
 }
 
 .store-user-platform {

@@ -25,16 +25,6 @@ const BASKET_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 // only knowable by remembering what we sent - and the cart has to be able to
 // tell the buyer that a line renews.
 const TYPES_KEY = 'chromabit_basket_types';
-// The account the saved username resolved to last time, as { name, id }.
-//
-// Tebex answers a basket create with `username_id` - the Mojang UUID for Java,
-// the XUID for a Geyser gamertag. That is the only stable identity anywhere in
-// this flow. A Minecraft name is rented, not owned: the moment a player renames
-// off one, it goes back in the pool and anyone can take it. So a name matching
-// is not the same as a player matching, and every check in this file that
-// compares names alone will happily hand a purchase to whoever holds the name
-// now. Pinning the saved name to the id it resolved to is what closes that.
-const ACCOUNT_KEY = 'chromabit_account';
 
 /**
  * Manages a persistent Tebex basket (the cart). The basket ident is kept in
@@ -98,11 +88,8 @@ export function useTebexBasket(token, username) {
         // thrown away - which is how a basket created under the old name
         // survived the buyer correcting it and kept delivering there.
         if (gen !== generation.current) return;
-        // Tebex's own answer, not our stored string, decides who it delivers to
-        // - and the id decides it over the name, since the name can have moved
-        // to someone else since this basket was saved.
-        if (b && !b.complete && sameName(b.username, username)
-            && !differentAccount(b.username_id, saved.uuid)) {
+        // Tebex's own answer, not our stored string, decides who it delivers to.
+        if (b && !b.complete && sameName(b.username, username)) {
           store(b);
           setRecurringIds(loadRecurring(saved.ident));
         } else {
@@ -133,24 +120,9 @@ export function useTebexBasket(token, username) {
       // Superseded by a username change mid-flight: hand it back to the caller
       // that asked for it, but don't let it become the current basket.
       if (gen !== generation.current) return created;
-      // Same name, different account: this name has changed hands since the
-      // buyer last used it here, and the basket would pay for items delivered
-      // to a stranger. Deliberately not self-healing - the record is kept, so
-      // retyping the same name lands here again and the only way forward is the
-      // name they actually hold now.
-      const known = loadAccount();
-      if (known && sameName(known.name, username) && differentAccount(known.id, created.username_id)) {
-        throw new Error(
-          `"${username}" now belongs to a different Minecraft account than the `
-          + `one that used it here before. If you've renamed, enter your current `
-          + `name - buying under this one would deliver to whoever holds it now.`,
-        );
-      }
       // Tebex echoes the name it resolved, so save that rather than what we
-      // sent - it is the name the commands will actually run against - and the
-      // id it resolved to, which outlives the name.
-      saveAccount(created.username || username, created.username_id);
-      saveBasket(created.ident, created.username || username, created.username_id);
+      // sent - it is the name the commands will actually run against.
+      saveBasket(created.ident, created.username || username);
       store(created);
       return created;
     })();
@@ -384,9 +356,9 @@ function sameName(a, b) {
 }
 
 /** Save the basket ident together with the player it delivers to. */
-function saveBasket(ident, username, uuid) {
+function saveBasket(ident, username) {
   try {
-    localStorage.setItem(BASKET_KEY, JSON.stringify({ ident, username, uuid, at: Date.now() }));
+    localStorage.setItem(BASKET_KEY, JSON.stringify({ ident, username, at: Date.now() }));
   } catch {
     // Private-mode storage failure only costs the cart across reloads.
   }
@@ -402,7 +374,7 @@ function loadSavedBasket() {
   try {
     const saved = JSON.parse(localStorage.getItem(BASKET_KEY));
     if (!saved?.ident || !saved?.username) return null;
-    return { ident: saved.ident, username: saved.username, uuid: saved.uuid || null, at: saved.at || 0 };
+    return { ident: saved.ident, username: saved.username, at: saved.at || 0 };
   } catch {
     return null;
   }
@@ -412,41 +384,6 @@ function loadSavedBasket() {
 function forgetBasket() {
   localStorage.removeItem(BASKET_KEY);
   localStorage.removeItem(TYPES_KEY);
-}
-
-/**
- * Whether two Tebex `username_id` values name different accounts.
- *
- * False when either is missing rather than true: a store that stops returning
- * an id would otherwise lock out every returning buyer at once, which is a far
- * worse failure than the one this guards against. Compared as strings because
- * the field is a UUID for Java, an XUID for Bedrock, and an integer in Tebex's
- * own docs - only equality matters, never the shape.
- */
-function differentAccount(a, b) {
-  if (!a || !b) return false;
-  return String(a).toLowerCase() !== String(b).toLowerCase();
-}
-
-/** The account the saved username last resolved to, or null. */
-function loadAccount() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(ACCOUNT_KEY));
-    if (!saved?.name || !saved?.id) return null;
-    return { name: saved.name, id: saved.id };
-  } catch {
-    return null;
-  }
-}
-
-/** Remember which account a name resolved to. Survives baskets and checkouts. */
-function saveAccount(name, id) {
-  if (!name || !id) return;
-  try {
-    localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ name, id }));
-  } catch {
-    // Private mode. The name-reuse check is a safety net, not the sale.
-  }
 }
 
 /**

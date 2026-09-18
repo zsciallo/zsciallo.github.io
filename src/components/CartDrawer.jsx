@@ -78,7 +78,6 @@ export function CartDrawer({
   onRemoveCoupon,
   onApplyGiftCard,
   onRemoveGiftCard,
-  onCheckout,
   onClose,
 }) {
   const currency = basket?.currency || 'USD';
@@ -153,23 +152,7 @@ export function CartDrawer({
   return (
     <>
       <div class={`cart-scrim${open ? ' open' : ''}`} onClick={onClose} />
-      {/* `inert` as well as `aria-hidden`, and spread so the attribute is simply
-          absent when the drawer is open rather than present and false. Closing
-          the drawer on a click - which CHECKOUT now does - left the button
-          focused inside an aria-hidden subtree, which browsers refuse: focus
-          must not be hidden from assistive technology. `inert` moves focus out
-          for us, and stops a closed drawer holding tab stops either way.
-
-          `true`, not `''`: Preact assigns this as a DOM property rather than an
-          attribute, and an empty string is falsy there - it would have rendered
-          the attribute in the prerendered HTML and then quietly done nothing
-          once the page hydrated. */}
-      <aside
-        class={`cart-drawer${open ? ' open' : ''}`}
-        aria-label="Shopping cart"
-        aria-hidden={!open}
-        {...(open ? {} : { inert: true })}
-      >
+      <aside class={`cart-drawer${open ? ' open' : ''}`} aria-label="Shopping cart" aria-hidden={!open}>
         <div class="cart-head">
           <p class="cart-title"><CartIcon /> YOUR CART</p>
           <button class="cart-close" onClick={onClose} aria-label="Close cart">✕</button>
@@ -328,14 +311,9 @@ export function CartDrawer({
               <span>TOTAL</span>
               <span>{formatPrice(total, currency)}</span>
             </p>
-            {/* A button rather than the link to `basket.links.checkout` this
-                used to be, because where CHECKOUT goes is no longer fixed: the
-                store either opens the payment panel over the page or hands the
-                buyer to the hosted checkout, and only StorePage knows which. An
-                anchor would have to commit to one of them in markup. */}
-            <button type="button" class="btn btn-primary cart-checkout" onClick={onCheckout} disabled={busy}>
+            <a class="btn btn-primary cart-checkout" href={basket.links?.checkout}>
               CHECKOUT
-            </button>
+            </a>
           </div>
         )}
       </aside>
