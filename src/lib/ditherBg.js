@@ -35,8 +35,15 @@ function start() {
   const DIM = 0.35; // opacity multiplier behind the content
 
   const resize = () => {
-    w = Math.ceil(window.innerWidth / SCALE);
-    h = Math.ceil(window.innerHeight / SCALE);
+    // Floored at one cell. A zero-width viewport is not hypothetical - it comes
+    // up while the tab is being restored or backgrounded, and when the page is
+    // measured inside an embedded browser before layout - and `createImageData`
+    // throws on a zero dimension rather than returning something empty. That
+    // threw out of the resize listener, left `img` at the previous size, and on
+    // the very first call left it undefined, which took the whole animation
+    // down with it.
+    w = Math.max(1, Math.ceil(window.innerWidth / SCALE));
+    h = Math.max(1, Math.ceil(window.innerHeight / SCALE));
     canvas.width = w;
     canvas.height = h;
     img = ctx.createImageData(w, h);

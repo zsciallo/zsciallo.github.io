@@ -43,6 +43,28 @@
   <meta name="twitter:title" content="Store | Chromabit SMP">
   <meta name="twitter:description" content="Buy ranks, crate keys, and more. Every purchase supports Chromabit SMP.">
 
+  <!--
+    Four origins this page is certain to talk to, warmed while the HTML is
+    still parsing so the DNS lookup, TCP handshake and TLS negotiation are
+    already done by the time anything asks for them.
+
+    headless.tebex.io is fetched the moment the store mounts, for the catalog
+    and the buyer's basket, and pay.tebex.io is the checkout panel's iframe -
+    that one is a cold connection opened at the worst possible moment, right
+    after a Buy click, so it is worth paying for up front.
+
+    The font origins are split by design: the stylesheet comes from
+    fonts.googleapis.com and the font files it names come from
+    fonts.gstatic.com, which is a second connection that otherwise cannot even
+    begin until the first has answered. It needs `crossorigin` because fonts
+    are fetched in CORS mode, and without the attribute the warmed connection
+    is the wrong kind and goes unused.
+  -->
+  <link rel="preconnect" href="https://headless.tebex.io">
+  <link rel="preconnect" href="https://pay.tebex.io">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link
     href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Barlow:wght@400;500&display=swap"
     rel="stylesheet">
