@@ -8,6 +8,7 @@ import { normalizeName, displayName, platformOf } from '../lib/minecraftName';
 import { resolveType } from '../lib/packageType';
 import { purchaseOptions, pairedSubscriptionIds, pairMembers } from '../lib/purchaseOptions';
 import { requiredPackage } from '../lib/requirements';
+import { limitCount } from '../lib/packageLimit';
 import { useTebexStore } from '../hooks/useTebexStore';
 import { useTebexBasket } from '../hooks/useTebexBasket';
 import { isNameLookupFailure } from '../lib/tebex';
@@ -136,6 +137,9 @@ export function StorePage() {
       const missing = notPurchasable ? missingRequirement(pkg) : null;
 
       const badName = isNameLookupFailure(err);
+      // What the catalog says about how many of this a player may hold. 0 means
+      // unlimited, which is what separates a consumable from something ownable.
+      const cap = limitCount(pkg.user_limit);
 
       // The clearest "why they didn't buy" signal on the whole site - these
       // are buyers who tried and were stopped.
@@ -143,7 +147,12 @@ export function StorePage() {
         reason: badName
           ? 'invalid_username'
           : missing ? 'requirement_unmet'
-            : notPurchasable ? 'not_purchasable' : overQty ? 'over_quantity' : 'other',
+            // Split out from not_purchasable: a refusal on a package with no
+            // cap is the one shape that should never happen, so it is worth
+            // being able to see it on its own rather than buried with the
+            // legitimate "you already have this" refusals.
+            : notPurchasable && !cap ? 'refused_uncapped'
+              : notPurchasable ? 'not_purchasable' : overQty ? 'over_quantity' : 'other',
         message: err.message,
         package: pkg.name,
         mode,
@@ -166,9 +175,32 @@ export function StorePage() {
         // the name is usually right - buyers were "fixing" it by retyping it
         // unchanged, which only ever re-ran the lookup. So offer that directly.
         setRetry({ pkg, mode, quantity, type });
+      } else if (notPurchasable && !missing && !cap) {
+        // Tebex refused a package that has no per-player cap and no unmet
+        // requirement - a crate key, say, which is a consumable the catalog
+        // says outright can be bought any number of times. Whatever it was
+        // refused for, it was not ownership, so say nothing about owning it and
+        // leave the card alone.
+        //
+        // This branch exists because the old code had none: every "isn't
+        // purchasable" became "you already have this", and was then remembered.
+        // On an uncapped package that claim is not merely unproven, it is
+        // impossible - and it stuck, because `markUnavailable` disables both
+        // buttons, and a successful add is the only thing that clears one. A
+        // player who saw it once could not buy that key again for a day, from
+        // any page, and nobody else could reproduce it: the flag lives in their
+        // browser, not on their account.
+        setCheckoutError(
+          `${pkg.name} couldn't be added just now - Tebex said: "${err.message}". `
+          + `This one has no purchase limit, so it isn't anything you already own. `
+          + `Try again, and let us know on Discord if it keeps happening.`,
+        );
+        setRetry({ pkg, mode, quantity, type });
       } else if (notPurchasable) {
         // Remember the refusal so the card greys out from here on, rather than
-        // letting them hit the same wall on every visit.
+        // letting them hit the same wall on every visit. Only reached now for
+        // packages where being refused actually implies something durable: a
+        // capped package they may hold, or one gated behind a rank they lack.
         setUnavailable(markUnavailable(name, pkg.id));
         // The second sentence covers the case this can't rule out: nothing in the
         // catalog reveals who holds MVP, so an existing MVP+ subscriber re-adding
@@ -177,7 +209,9 @@ export function StorePage() {
           ? `${pkg.name} is an upgrade for ${missing.name} owners, so you'll need `
             + `${missing.name} on your account before you can buy it. If you're `
             + `already subscribed to ${pkg.name}, it renews on its own.`
-          : `You already have ${pkg.name} . It's limited to one per player.`);
+          // Reads the cap off the package rather than asserting "one": the
+          // Battle Pass is one per four weeks, not one ever.
+          : `You already have ${pkg.name}. It's limited to ${cap} per player.`);
       } else if (overQty) {
         setCheckoutError(`${pkg.name} is limited to one per player, and it's already in your cart.`);
       } else {
@@ -288,7 +322,18 @@ export function StorePage() {
   // Two sources, deliberately combined: upgrade credits in the priced catalog
   // reveal the rank ladder for free, and rejected adds cover the standalone
   // capped packages that no discount can betray.
-  const ownedIds = new Set([...unavailable, ...inferOwnedPackages(store.categories)]);
+  //
+  // Remembered refusals are filtered to packages that can actually be held. A
+  // refusal on an uncapped package - the crate keys, claim blocks, the sell
+  // chest - never meant ownership, and browsers are still carrying entries
+  // written before this was checked. Ignoring them here rather than waiting out
+  // the 24h TTL means anyone currently staring at YOU ALREADY OWN THIS on a
+  // crate key gets their buttons back on the next page load.
+  const ownable = (id) => limitCount(store.packagesById[id]?.user_limit) > 0;
+  const ownedIds = new Set([
+    ...unavailable.filter(ownable),
+    ...inferOwnedPackages(store.categories),
+  ]);
 
   // What a package can't be bought without - MVP+ only sells to MVP holders.
   // Returns the required package when there's no sign the player has it, so a
