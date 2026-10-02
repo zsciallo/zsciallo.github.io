@@ -1,0 +1,3645 @@
+{
+  "source": {
+    "repo": "mc-server",
+    "ref": "origin/main",
+    "commit": "f868939eb28e9b99b3ae6a7c26f3fff395c27a8e"
+  },
+  "vanillaIcons": [
+    "amethyst_cluster",
+    "amethyst_shard",
+    "anvil",
+    "blaze_spawn_egg",
+    "bolt_armor_trim_smithing_template",
+    "bow",
+    "breeze_spawn_egg",
+    "chest",
+    "clock",
+    "coast_armor_trim_smithing_template",
+    "compass",
+    "cooked_beef",
+    "crafting_table",
+    "creeper_spawn_egg",
+    "crossbow",
+    "diamond_boots",
+    "diamond_chestplate",
+    "diamond_helmet",
+    "diamond_leggings",
+    "diamond_pickaxe",
+    "diamond_sword",
+    "dune_armor_trim_smithing_template",
+    "echo_shard",
+    "elytra",
+    "emerald",
+    "emerald_block",
+    "enchanted_book",
+    "ender_chest",
+    "ender_pearl",
+    "enderman_spawn_egg",
+    "evoker_spawn_egg",
+    "experience_bottle",
+    "eye_armor_trim_smithing_template",
+    "fishing_rod",
+    "flow_armor_trim_smithing_template",
+    "ghast_spawn_egg",
+    "gold_ingot",
+    "golden_shovel",
+    "heart_of_the_sea",
+    "heavy_core",
+    "hopper",
+    "host_armor_trim_smithing_template",
+    "iron_block",
+    "iron_golem_spawn_egg",
+    "leather_helmet",
+    "mace",
+    "magenta_dye",
+    "magma_cube_spawn_egg",
+    "name_tag",
+    "netherite_axe",
+    "netherite_boots",
+    "netherite_chestplate",
+    "netherite_helmet",
+    "netherite_hoe",
+    "netherite_ingot",
+    "netherite_leggings",
+    "netherite_pickaxe",
+    "netherite_shovel",
+    "netherite_spear",
+    "netherite_sword",
+    "oak_sign",
+    "ominous_trial_key",
+    "piglin_spawn_egg",
+    "popped_chorus_fruit",
+    "purple_dye",
+    "rabbit_foot",
+    "raiser_armor_trim_smithing_template",
+    "red_bed",
+    "rib_armor_trim_smithing_template",
+    "sentry_armor_trim_smithing_template",
+    "shaper_armor_trim_smithing_template",
+    "shield",
+    "shulker_spawn_egg",
+    "silence_armor_trim_smithing_template",
+    "slime_spawn_egg",
+    "snout_armor_trim_smithing_template",
+    "spawner",
+    "spire_armor_trim_smithing_template",
+    "tide_armor_trim_smithing_template",
+    "totem_of_undying",
+    "trial_key",
+    "vex_armor_trim_smithing_template",
+    "ward_armor_trim_smithing_template",
+    "warden_spawn_egg",
+    "wayfinder_armor_trim_smithing_template",
+    "wild_armor_trim_smithing_template",
+    "witch_spawn_egg",
+    "wither_skeleton_spawn_egg"
+  ],
+  "packages": {
+    "7557969": {
+      "kind": "crate_key",
+      "summary": "Opens the Chroma Crate: 62 possible rewards",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "1x Chroma Key. Each key opens the Chroma Crate once and gives you one of the 62 rewards below."
+        },
+        {
+          "type": "rewards",
+          "title": "Chroma Crate rewards",
+          "groups": [
+            {
+              "rarity": "chroma",
+              "label": "Chroma",
+              "colors": [
+                "#7b2fbe",
+                "#c77dff"
+              ],
+              "items": [
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "Chromatic Sword",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VIII",
+                    "Looting V",
+                    "Fire Aspect II",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Arsenal",
+                    "The prism remembers every kill.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Trophy Hunter - claims your victim's head",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:mace",
+                  "name": "Chromatic Mace",
+                  "glow": true,
+                  "enchants": [
+                    "Density VI",
+                    "Breach V",
+                    "Wind Burst III",
+                    "Fire Aspect II",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Arsenal",
+                    "Light, compressed until it falls.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismquake - shatters the ground around your target",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_spear",
+                  "name": "Chromatic Spear",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VII",
+                    "Lunge III",
+                    "Knockback II",
+                    "Looting IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Arsenal",
+                    "It drinks what it pierces.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismdrain - every thrust drinks a little life",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:bow",
+                  "name": "Chromatic Bow",
+                  "glow": true,
+                  "enchants": [
+                    "Power VII",
+                    "Punch II",
+                    "Flame",
+                    "Infinity",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Arsenal",
+                    "It knows where you went.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Heatseeker - marks your target, looses 2 more arrows",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:crossbow",
+                  "name": "Chromatic Crossbow",
+                  "glow": true,
+                  "enchants": [
+                    "Quick Charge V",
+                    "Piercing V",
+                    "Multishot",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Arsenal",
+                    "It does not stop.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismstorm - instant reload, every bolt spits 3 more",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "mythic",
+              "label": "Mythic",
+              "items": [
+                {
+                  "icon": "mc:netherite_helmet",
+                  "name": "Chromatic Helmet",
+                  "glow": true,
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Respiration III",
+                    "Aqua Affinity",
+                    "Thorns IV"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Set",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Set Bonus - Resistance I",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "custom:chromatic/chromatic_chestplate",
+                  "name": "Chromatic Chestplate",
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Thorns IV"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Set",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Set Bonus - Resistance I",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "custom:chromatic/chromatic_leggings",
+                  "name": "Chromatic Leggings",
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Swift Sneak III",
+                    "Thorns IV"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Set",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Set Bonus - Resistance I",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "custom:chromatic/chromatic_boots",
+                  "name": "Chromatic Boots",
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Feather Falling IV",
+                    "Depth Strider III",
+                    "Thorns IV"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Set",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Set Bonus - Resistance I",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:elytra",
+                  "name": "Chromatic Elytra",
+                  "glow": true,
+                  "enchants": [
+                    "Protection IV",
+                    "Unbreaking III",
+                    "Thorns III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Set",
+                    "Cut from living prism.",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$2,000,000"
+                },
+                {
+                  "icon": "mc:trial_key",
+                  "name": "Chroma Key x3"
+                }
+              ]
+            },
+            {
+              "rarity": "legendary",
+              "label": "Legendary",
+              "items": [
+                {
+                  "icon": "mc:netherite_pickaxe",
+                  "name": "Chromatic Pickaxe",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Tools",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismbreaker - mines a 3x3 area",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_axe",
+                  "name": "Chromatic Axe",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Tools",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismfell - fells an entire tree",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_shovel",
+                  "name": "Chromatic Shovel",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Tools",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismbreaker - mines a 3x3 area",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_hoe",
+                  "name": "Chromatic Harvester",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Tools",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismreap - harvests a 3x3 of grown crops and replants",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:fishing_rod",
+                  "name": "Chromatic Angler",
+                  "glow": true,
+                  "enchants": [
+                    "Luck Of The Sea IV",
+                    "Lure III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Chromatic Tools",
+                    "Cut from living prism.",
+                    "",
+                    "◈ Chromatic Abilities",
+                    "Prismcatch - lands a double catch every 15 seconds",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,500,000"
+                },
+                {
+                  "icon": "mc:trial_key",
+                  "name": "Chroma Key x2"
+                }
+              ]
+            },
+            {
+              "rarity": "epic",
+              "label": "Epic",
+              "items": [
+                {
+                  "icon": "mc:netherite_helmet",
+                  "name": "Corrupted Helmet",
+                  "glow": true,
+                  "enchants": [
+                    "Protection IV",
+                    "Unbreaking III",
+                    "Respiration III",
+                    "Aqua Affinity"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Set",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_chestplate",
+                  "name": "Corrupted Chestplate",
+                  "glow": true,
+                  "enchants": [
+                    "Protection IV",
+                    "Unbreaking III",
+                    "Thorns III"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Set",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_leggings",
+                  "name": "Corrupted Leggings",
+                  "glow": true,
+                  "enchants": [
+                    "Protection IV",
+                    "Unbreaking III",
+                    "Swift Sneak III"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Set",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_boots",
+                  "name": "Corrupted Boots",
+                  "glow": true,
+                  "enchants": [
+                    "Protection IV",
+                    "Unbreaking III",
+                    "Feather Falling IV",
+                    "Depth Strider III"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Set",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "Corrupted Blade",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness V",
+                    "Looting III",
+                    "Fire Aspect II",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Tools",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:elytra",
+                  "name": "Corrupted Elytra",
+                  "glow": true,
+                  "enchants": [
+                    "Protection III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Set",
+                    "Membrane, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,250,000"
+                },
+                {
+                  "icon": "mc:trial_key",
+                  "name": "Chroma Key"
+                }
+              ]
+            },
+            {
+              "rarity": "rare",
+              "label": "Rare",
+              "items": [
+                {
+                  "icon": "mc:elytra",
+                  "name": "Elytra"
+                },
+                {
+                  "icon": "mc:netherite_pickaxe",
+                  "name": "Corrupted Pickaxe",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency V",
+                    "Fortune III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Tools",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_axe",
+                  "name": "Corrupted Axe",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency V",
+                    "Fortune III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Tools",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_shovel",
+                  "name": "Corrupted Shovel",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency V",
+                    "Fortune III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Corrupted Tools",
+                    "Netherite, tainted through."
+                  ]
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,000,000"
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Legendary Book",
+                  "lore": [
+                    "One random Legendary enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_ingot",
+                  "name": "Netherite Ingot",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "2,000 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "uncommon",
+              "label": "Uncommon",
+              "items": [
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$750,000"
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Fabled Book",
+                  "lore": [
+                    "One random Fabled enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Ultimate Book",
+                  "lore": [
+                    "One random Ultimate enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Elite Book",
+                  "lore": [
+                    "One random Elite enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "1,500 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "common",
+              "label": "Common",
+              "items": [
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$500,000"
+                },
+                {
+                  "icon": "mc:heavy_core",
+                  "name": "Heavy Core"
+                },
+                {
+                  "icon": "mc:sentry_armor_trim_smithing_template",
+                  "name": "Sentry Armor Trim"
+                },
+                {
+                  "icon": "mc:dune_armor_trim_smithing_template",
+                  "name": "Dune Armor Trim"
+                },
+                {
+                  "icon": "mc:coast_armor_trim_smithing_template",
+                  "name": "Coast Armor Trim"
+                },
+                {
+                  "icon": "mc:wild_armor_trim_smithing_template",
+                  "name": "Wild Armor Trim"
+                },
+                {
+                  "icon": "mc:ward_armor_trim_smithing_template",
+                  "name": "Ward Armor Trim"
+                },
+                {
+                  "icon": "mc:eye_armor_trim_smithing_template",
+                  "name": "Eye Armor Trim"
+                },
+                {
+                  "icon": "mc:vex_armor_trim_smithing_template",
+                  "name": "Vex Armor Trim"
+                },
+                {
+                  "icon": "mc:tide_armor_trim_smithing_template",
+                  "name": "Tide Armor Trim"
+                },
+                {
+                  "icon": "mc:snout_armor_trim_smithing_template",
+                  "name": "Snout Armor Trim"
+                },
+                {
+                  "icon": "mc:rib_armor_trim_smithing_template",
+                  "name": "Rib Armor Trim"
+                },
+                {
+                  "icon": "mc:spire_armor_trim_smithing_template",
+                  "name": "Spire Armor Trim"
+                },
+                {
+                  "icon": "mc:wayfinder_armor_trim_smithing_template",
+                  "name": "Wayfinder Armor Trim"
+                },
+                {
+                  "icon": "mc:shaper_armor_trim_smithing_template",
+                  "name": "Shaper Armor Trim"
+                },
+                {
+                  "icon": "mc:silence_armor_trim_smithing_template",
+                  "name": "Silence Armor Trim"
+                },
+                {
+                  "icon": "mc:raiser_armor_trim_smithing_template",
+                  "name": "Raiser Armor Trim"
+                },
+                {
+                  "icon": "mc:host_armor_trim_smithing_template",
+                  "name": "Host Armor Trim"
+                },
+                {
+                  "icon": "mc:flow_armor_trim_smithing_template",
+                  "name": "Flow Armor Trim"
+                },
+                {
+                  "icon": "mc:bolt_armor_trim_smithing_template",
+                  "name": "Bolt Armor Trim"
+                },
+                {
+                  "icon": "mc:golden_shovel",
+                  "name": "1,000 Claim Blocks",
+                  "lore": [
+                    "Room to build."
+                  ]
+                },
+                {
+                  "icon": "mc:golden_shovel",
+                  "name": "3,000 Claim Blocks",
+                  "lore": [
+                    "Room to build."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "perks",
+          "title": "Guaranteed milestone rewards",
+          "note": "Earned by opening this crate, on top of what each key gives. The track restarts after the last milestone.",
+          "items": [
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "1,500 Prism Shards",
+              "detail": "At 3 opens"
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "2,000 Prism Shards",
+              "detail": "At 5 opens"
+            },
+            {
+              "icon": "mc:trial_key",
+              "text": "Chroma Key",
+              "detail": "At 5 opens"
+            },
+            {
+              "icon": "mc:emerald_block",
+              "text": "$1,250,000",
+              "detail": "At 12 opens"
+            },
+            {
+              "icon": "mc:trial_key",
+              "text": "Chroma Key x2",
+              "detail": "At 20 opens"
+            },
+            {
+              "icon": "mc:netherite_sword",
+              "text": "Chromatic Sword",
+              "detail": "At 30 opens"
+            },
+            {
+              "icon": "mc:emerald_block",
+              "text": "$2,000,000",
+              "detail": "At 40 opens"
+            },
+            {
+              "icon": "mc:mace",
+              "text": "Chromatic Mace",
+              "detail": "At 50 opens"
+            }
+          ]
+        }
+      ]
+    },
+    "7557992": {
+      "kind": "crate_key",
+      "summary": "Opens the Spawner Crate: 46 possible rewards",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "1x Spawner Key. Each key opens the Spawner Crate once and gives you one of the 46 rewards below."
+        },
+        {
+          "type": "rewards",
+          "title": "Spawner Crate rewards",
+          "groups": [
+            {
+              "rarity": "chroma",
+              "label": "Chroma",
+              "colors": [
+                "#7b2fbe",
+                "#c77dff"
+              ],
+              "items": [
+                {
+                  "icon": "mc:warden_spawn_egg",
+                  "name": "Warden Spawner"
+                }
+              ]
+            },
+            {
+              "rarity": "legendary",
+              "label": "Legendary",
+              "items": [
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Spawner Key x5"
+                },
+                {
+                  "icon": "mc:shulker_spawn_egg",
+                  "name": "Shulker Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:iron_golem_spawn_egg",
+                  "name": "Iron Golem Spawner"
+                },
+                {
+                  "icon": "mc:evoker_spawn_egg",
+                  "name": "Evoker Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:wither_skeleton_spawn_egg",
+                  "name": "Wither Skeleton Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:witch_spawn_egg",
+                  "name": "Witch Spawner",
+                  "qty": 4
+                }
+              ]
+            },
+            {
+              "rarity": "epic",
+              "label": "Epic",
+              "items": [
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Spawner Key x3"
+                },
+                {
+                  "icon": "mc:witch_spawn_egg",
+                  "name": "Witch Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:shulker_spawn_egg",
+                  "name": "Shulker Spawner"
+                },
+                {
+                  "icon": "mc:ghast_spawn_egg",
+                  "name": "Ghast Spawner",
+                  "qty": 5
+                },
+                {
+                  "icon": "mc:creeper_spawn_egg",
+                  "name": "Creeper Spawner",
+                  "qty": 8
+                },
+                {
+                  "icon": "mc:breeze_spawn_egg",
+                  "name": "Breeze Spawner",
+                  "qty": 7
+                },
+                {
+                  "icon": "mc:blaze_spawn_egg",
+                  "name": "Blaze Spawner",
+                  "qty": 5
+                },
+                {
+                  "icon": "mc:enderman_spawn_egg",
+                  "name": "Enderman Spawner",
+                  "qty": 5
+                },
+                {
+                  "icon": "mc:slime_spawn_egg",
+                  "name": "Slime Spawner",
+                  "qty": 4
+                },
+                {
+                  "icon": "mc:evoker_spawn_egg",
+                  "name": "Evoker Spawner"
+                }
+              ]
+            },
+            {
+              "rarity": "rare",
+              "label": "Rare",
+              "items": [
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Spawner Key x2"
+                },
+                {
+                  "icon": "mc:witch_spawn_egg",
+                  "name": "Witch Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:ghast_spawn_egg",
+                  "name": "Ghast Spawner",
+                  "qty": 4
+                },
+                {
+                  "icon": "mc:creeper_spawn_egg",
+                  "name": "Creeper Spawner",
+                  "qty": 6
+                },
+                {
+                  "icon": "mc:breeze_spawn_egg",
+                  "name": "Breeze Spawner",
+                  "qty": 5
+                },
+                {
+                  "icon": "mc:blaze_spawn_egg",
+                  "name": "Blaze Spawner",
+                  "qty": 4
+                },
+                {
+                  "icon": "mc:enderman_spawn_egg",
+                  "name": "Enderman Spawner",
+                  "qty": 4
+                },
+                {
+                  "icon": "mc:wither_skeleton_spawn_egg",
+                  "name": "Wither Skeleton Spawner"
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "2,000 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                },
+                {
+                  "icon": "mc:piglin_spawn_egg",
+                  "name": "Piglin Spawner",
+                  "qty": 3
+                }
+              ]
+            },
+            {
+              "rarity": "uncommon",
+              "label": "Uncommon",
+              "items": [
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Spawner Key"
+                },
+                {
+                  "icon": "mc:ghast_spawn_egg",
+                  "name": "Ghast Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:magma_cube_spawn_egg",
+                  "name": "Magma Cube Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:slime_spawn_egg",
+                  "name": "Slime Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:creeper_spawn_egg",
+                  "name": "Creeper Spawner",
+                  "qty": 4
+                },
+                {
+                  "icon": "mc:breeze_spawn_egg",
+                  "name": "Breeze Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:blaze_spawn_egg",
+                  "name": "Blaze Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:enderman_spawn_egg",
+                  "name": "Enderman Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "1,500 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                },
+                {
+                  "icon": "mc:piglin_spawn_egg",
+                  "name": "Piglin Spawner",
+                  "qty": 2
+                }
+              ]
+            },
+            {
+              "rarity": "common",
+              "label": "Common",
+              "items": [
+                {
+                  "icon": "mc:ghast_spawn_egg",
+                  "name": "Ghast Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:magma_cube_spawn_egg",
+                  "name": "Magma Cube Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:slime_spawn_egg",
+                  "name": "Slime Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:creeper_spawn_egg",
+                  "name": "Creeper Spawner",
+                  "qty": 3
+                },
+                {
+                  "icon": "mc:breeze_spawn_egg",
+                  "name": "Breeze Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:blaze_spawn_egg",
+                  "name": "Blaze Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:enderman_spawn_egg",
+                  "name": "Enderman Spawner",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:witch_spawn_egg",
+                  "name": "Witch Spawner"
+                },
+                {
+                  "icon": "mc:piglin_spawn_egg",
+                  "name": "Piglin Spawner"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "perks",
+          "title": "Guaranteed milestone rewards",
+          "note": "Earned by opening this crate, on top of what each key gives. The track restarts after the last milestone.",
+          "items": [
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "1,500 Prism Shards",
+              "detail": "At 3 opens"
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "2,000 Prism Shards",
+              "detail": "At 5 opens"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "Spawner Key",
+              "detail": "At 50 opens"
+            },
+            {
+              "icon": "mc:warden_spawn_egg",
+              "text": "Warden Spawner",
+              "detail": "At 100 opens"
+            }
+          ]
+        }
+      ]
+    },
+    "7564223": {
+      "kind": "rank",
+      "summary": "[VIP] tag, daily /kit diamond",
+      "blocks": [
+        {
+          "type": "perks",
+          "title": "VIP perks",
+          "items": [
+            {
+              "icon": "mc:name_tag",
+              "text": "[VIP] chat tag"
+            },
+            {
+              "icon": "mc:red_bed",
+              "text": "10 homes",
+              "detail": "/sethome"
+            },
+            {
+              "icon": "mc:chest",
+              "text": "5 Auto Sell Chests placed at once"
+            },
+            {
+              "text": "15 auction house listings",
+              "icon": "mc:gold_ingot"
+            },
+            {
+              "text": "2 player warps",
+              "detail": "/pwarp",
+              "icon": "mc:oak_sign"
+            },
+            {
+              "text": "/back",
+              "detail": "Return to your previous location",
+              "icon": "mc:ender_pearl"
+            },
+            {
+              "text": "/back after death",
+              "detail": "Return to where you died",
+              "icon": "mc:totem_of_undying"
+            },
+            {
+              "text": "/hat",
+              "detail": "Wear the item in your hand",
+              "icon": "mc:leather_helmet"
+            },
+            {
+              "text": "/near",
+              "detail": "See nearby players",
+              "icon": "mc:compass"
+            },
+            {
+              "text": "/nick",
+              "detail": "Set a nickname",
+              "icon": "mc:name_tag"
+            },
+            {
+              "text": "1.25x mcMMO XP",
+              "icon": "mc:experience_bottle"
+            },
+            {
+              "text": "2 spawner storage pages",
+              "icon": "mc:spawner"
+            },
+            {
+              "text": "150 upgradeable hoppers",
+              "icon": "mc:hopper"
+            }
+          ]
+        },
+        {
+          "type": "kit",
+          "title": "Kit: /kit diamond",
+          "command": "/kit diamond",
+          "cooldown": "once every 24 hours",
+          "items": [
+            {
+              "icon": "mc:diamond_helmet",
+              "name": "Diamond Helmet",
+              "glow": true,
+              "enchants": [
+                "Protection I"
+              ]
+            },
+            {
+              "icon": "mc:diamond_chestplate",
+              "name": "Diamond Chestplate",
+              "glow": true,
+              "enchants": [
+                "Protection I"
+              ]
+            },
+            {
+              "icon": "mc:diamond_leggings",
+              "name": "Diamond Leggings",
+              "glow": true,
+              "enchants": [
+                "Protection I"
+              ]
+            },
+            {
+              "icon": "mc:diamond_boots",
+              "name": "Diamond Boots",
+              "glow": true,
+              "enchants": [
+                "Protection I"
+              ]
+            },
+            {
+              "icon": "mc:diamond_sword",
+              "name": "Diamond Sword",
+              "glow": true,
+              "enchants": [
+                "Sharpness II"
+              ]
+            },
+            {
+              "icon": "mc:diamond_pickaxe",
+              "name": "Diamond Pickaxe",
+              "glow": true,
+              "enchants": [
+                "Efficiency II"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "kit",
+          "title": "Kit: /kit vip",
+          "command": "/kit vip",
+          "cooldown": "once every 24 hours",
+          "items": [
+            {
+              "icon": "mc:heart_of_the_sea",
+              "name": "Shard Key",
+              "lore": [
+                "Opens the Shard Crate"
+              ]
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "name": "200 Prism Shards"
+            }
+          ]
+        }
+      ],
+      "rank": {
+        "tag": "VIP",
+        "colors": [
+          "#9558cf",
+          "#ad95c3"
+        ],
+        "ladder": [
+          {
+            "label": "VIP",
+            "colors": [
+              "#9558cf",
+              "#ad95c3"
+            ],
+            "current": true
+          },
+          {
+            "label": "VIP+",
+            "colors": [
+              "#b24bf3",
+              "#bc93d5"
+            ]
+          },
+          {
+            "label": "MVP",
+            "colors": [
+              "#e264e8",
+              "#d19fd3"
+            ]
+          },
+          {
+            "label": "MVP+",
+            "colors": [
+              "#b24bf3",
+              "#ff6ec7"
+            ]
+          }
+        ]
+      }
+    },
+    "7564226": {
+      "kind": "rank",
+      "summary": "[VIP+] tag, daily /kit vipplus",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Everything in VIP, plus:"
+        },
+        {
+          "type": "perks",
+          "title": "VIP+ perks",
+          "items": [
+            {
+              "icon": "mc:name_tag",
+              "text": "[VIP+] chat tag"
+            },
+            {
+              "icon": "mc:red_bed",
+              "text": "15 homes",
+              "detail": "/sethome"
+            },
+            {
+              "icon": "mc:chest",
+              "text": "10 Auto Sell Chests placed at once"
+            },
+            {
+              "text": "25 auction house listings",
+              "icon": "mc:gold_ingot"
+            },
+            {
+              "text": "3 player warps",
+              "detail": "/pwarp",
+              "icon": "mc:oak_sign"
+            },
+            {
+              "text": "/enderchest",
+              "detail": "Open your ender chest anywhere",
+              "icon": "mc:ender_chest"
+            },
+            {
+              "text": "/itemname",
+              "detail": "Rename the item in your hand",
+              "icon": "mc:anvil"
+            },
+            {
+              "text": "Colour codes in /itemname",
+              "icon": "mc:magenta_dye"
+            },
+            {
+              "text": "1.5x mcMMO XP",
+              "icon": "mc:experience_bottle"
+            },
+            {
+              "text": "3 spawner storage pages",
+              "icon": "mc:spawner"
+            },
+            {
+              "text": "175 upgradeable hoppers",
+              "icon": "mc:hopper"
+            }
+          ]
+        },
+        {
+          "type": "kit",
+          "title": "Kit: /kit vipplus",
+          "command": "/kit vipplus",
+          "cooldown": "once every 24 hours",
+          "items": [
+            {
+              "icon": "mc:ominous_trial_key",
+              "name": "Spawner Key",
+              "lore": [
+                "Opens the Spawner Crate"
+              ]
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "name": "500 Prism Shards"
+            }
+          ]
+        }
+      ],
+      "rank": {
+        "tag": "VIP+",
+        "colors": [
+          "#b24bf3",
+          "#bc93d5"
+        ],
+        "ladder": [
+          {
+            "label": "VIP",
+            "colors": [
+              "#9558cf",
+              "#ad95c3"
+            ]
+          },
+          {
+            "label": "VIP+",
+            "colors": [
+              "#b24bf3",
+              "#bc93d5"
+            ],
+            "current": true
+          },
+          {
+            "label": "MVP",
+            "colors": [
+              "#e264e8",
+              "#d19fd3"
+            ]
+          },
+          {
+            "label": "MVP+",
+            "colors": [
+              "#b24bf3",
+              "#ff6ec7"
+            ]
+          }
+        ]
+      }
+    },
+    "7564228": {
+      "kind": "rank",
+      "summary": "[MVP] tag, daily /kit mvp",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Everything in VIP+, plus:"
+        },
+        {
+          "type": "perks",
+          "title": "MVP perks",
+          "items": [
+            {
+              "icon": "mc:name_tag",
+              "text": "[MVP] chat tag"
+            },
+            {
+              "icon": "mc:red_bed",
+              "text": "20 homes",
+              "detail": "/sethome"
+            },
+            {
+              "icon": "mc:chest",
+              "text": "15 Auto Sell Chests placed at once"
+            },
+            {
+              "text": "50 auction house listings",
+              "icon": "mc:gold_ingot"
+            },
+            {
+              "text": "8 player warps",
+              "detail": "/pwarp",
+              "icon": "mc:oak_sign"
+            },
+            {
+              "text": "/condense",
+              "detail": "Pack items into blocks",
+              "icon": "mc:iron_block"
+            },
+            {
+              "text": "/enderchest",
+              "detail": "Open your ender chest anywhere",
+              "icon": "mc:ender_chest"
+            },
+            {
+              "text": "/feed",
+              "icon": "mc:cooked_beef"
+            },
+            {
+              "text": "/repair",
+              "detail": "Repair the item in your hand",
+              "icon": "mc:anvil"
+            },
+            {
+              "text": "/repair all",
+              "detail": "Repair everything you carry",
+              "icon": "mc:anvil"
+            },
+            {
+              "text": "/workbench",
+              "detail": "Open a crafting table anywhere",
+              "icon": "mc:crafting_table"
+            },
+            {
+              "text": "mcMMO abilities last 12 seconds longer",
+              "icon": "mc:clock"
+            },
+            {
+              "text": "Halved mcMMO ability cooldowns",
+              "icon": "mc:clock"
+            },
+            {
+              "text": "mcMMO Lucky perk",
+              "icon": "mc:rabbit_foot"
+            },
+            {
+              "text": "5 spawner storage pages",
+              "icon": "mc:spawner"
+            },
+            {
+              "text": "200 upgradeable hoppers",
+              "icon": "mc:hopper"
+            }
+          ]
+        },
+        {
+          "type": "kit",
+          "title": "Kit: /kit mvp",
+          "command": "/kit mvp",
+          "cooldown": "once every 24 hours",
+          "items": [
+            {
+              "icon": "mc:trial_key",
+              "name": "Chroma Key",
+              "lore": [
+                "Opens the Chroma Crate"
+              ]
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "name": "750 Prism Shards"
+            }
+          ]
+        }
+      ],
+      "rank": {
+        "tag": "MVP",
+        "colors": [
+          "#e264e8",
+          "#d19fd3"
+        ],
+        "ladder": [
+          {
+            "label": "VIP",
+            "colors": [
+              "#9558cf",
+              "#ad95c3"
+            ]
+          },
+          {
+            "label": "VIP+",
+            "colors": [
+              "#b24bf3",
+              "#bc93d5"
+            ]
+          },
+          {
+            "label": "MVP",
+            "colors": [
+              "#e264e8",
+              "#d19fd3"
+            ],
+            "current": true
+          },
+          {
+            "label": "MVP+",
+            "colors": [
+              "#b24bf3",
+              "#ff6ec7"
+            ]
+          }
+        ]
+      }
+    },
+    "7564235": {
+      "kind": "claim_blocks",
+      "summary": "1,000 bonus claim blocks",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "1,000 bonus claim blocks added to your balance, to claim more land with the golden shovel."
+        }
+      ]
+    },
+    "7564237": {
+      "kind": "sell_chest",
+      "summary": "Sells its contents to the server shop automatically",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "A chest that sells whatever is inside it to the server shop on a timer. Place it at your farm and let it run."
+        },
+        {
+          "type": "perks",
+          "title": "What you get",
+          "items": [
+            {
+              "icon": "mc:chest",
+              "text": "1x Auto Sell Chest"
+            },
+            {
+              "icon": "mc:clock",
+              "text": "Sells its contents every 5 minutes",
+              "detail": "Upgradeable in game down to 15 seconds"
+            },
+            {
+              "icon": "mc:emerald",
+              "text": "4 sell price multiplier levels",
+              "detail": "Upgraded in game with in-game money"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "How many you can place",
+          "columns": [
+            "Rank",
+            "Sell chests"
+          ],
+          "rows": [
+            [
+              "Default",
+              "2"
+            ],
+            [
+              "VIP",
+              "5"
+            ],
+            [
+              "VIP+",
+              "10"
+            ],
+            [
+              "MVP",
+              "15"
+            ]
+          ]
+        }
+      ]
+    },
+    "7581943": {
+      "kind": "battlepass",
+      "summary": "50 tiers of Chroma Pass rewards",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Unlocks the Chroma Pass reward track: 50 tiers, with a reward on every one. You keep claiming the Free Pass too, so the table below is everything you can earn."
+        },
+        {
+          "type": "perks",
+          "title": "At a glance",
+          "items": [
+            {
+              "icon": "mc:experience_bottle",
+              "text": "60 points per tier"
+            },
+            {
+              "icon": "mc:trial_key",
+              "text": "11x Chroma Key",
+              "detail": "Across both tracks"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "22x Spawner Key",
+              "detail": "Across both tracks"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "15x Halloween Key",
+              "detail": "Across both tracks"
+            },
+            {
+              "icon": "mc:heart_of_the_sea",
+              "text": "20x Shard Key",
+              "detail": "Across both tracks"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Rewards by tier",
+          "columns": [
+            "Tier",
+            "Free Pass",
+            "Chroma Pass"
+          ],
+          "rows": [
+            [
+              "1",
+              [
+                "1x Spawner Key"
+              ],
+              [
+                "2x Spawner Key"
+              ]
+            ],
+            [
+              "2",
+              [
+                "1x Zombie Spawner"
+              ],
+              [
+                "1x Skeleton Spawner"
+              ]
+            ],
+            [
+              "3",
+              [
+                "Trim Pack - Rib + Spire"
+              ],
+              [
+                "1x Halloween Key"
+              ]
+            ],
+            [
+              "4",
+              [
+                "1x Halloween Key"
+              ],
+              [
+                "Trim Pack - Coast + Sentry"
+              ]
+            ],
+            [
+              "5",
+              [
+                "1x Chroma Key"
+              ],
+              [
+                "1x Spider Spawner",
+                "1x Spawner Key"
+              ]
+            ],
+            [
+              "6",
+              [
+                "1x Skeleton Spawner"
+              ],
+              [
+                "2x Chroma Key"
+              ]
+            ],
+            [
+              "7",
+              [],
+              [
+                "1x Cave Spider Spawner"
+              ]
+            ],
+            [
+              "8",
+              [
+                "1x Spawner Key"
+              ],
+              [
+                "500 Prism Shards"
+              ]
+            ],
+            [
+              "9",
+              [
+                "1x Spider Spawner"
+              ],
+              [
+                "1x Random Elite Book"
+              ]
+            ],
+            [
+              "10",
+              [
+                "2x Spawner Key",
+                "500 Prism Shards"
+              ],
+              [
+                "1x Witch Spawner",
+                "2x Shard Key"
+              ]
+            ],
+            [
+              "11",
+              [],
+              [
+                "1x Creeper Spawner"
+              ]
+            ],
+            [
+              "12",
+              [
+                "Trim Pack - Eye + Vex"
+              ],
+              [
+                "1x Halloween Key"
+              ]
+            ],
+            [
+              "13",
+              [
+                "1x Shard Key"
+              ],
+              [
+                "Trim Pack - Dune + Wild"
+              ]
+            ],
+            [
+              "14",
+              [
+                "1x Random Elite Book"
+              ],
+              [
+                "1x Drowned Spawner"
+              ]
+            ],
+            [
+              "15",
+              [
+                "1x Halloween Key"
+              ],
+              [
+                "3x Spawner Key",
+                "1x Slime Spawner"
+              ]
+            ],
+            [
+              "16",
+              [
+                "1x Cave Spider Spawner"
+              ],
+              [
+                "Vein Miner III (pickaxes)"
+              ]
+            ],
+            [
+              "17",
+              [],
+              [
+                "1x MobTrak"
+              ]
+            ],
+            [
+              "18",
+              [
+                "2x Shard Key"
+              ],
+              [
+                "1,000 Prism Shards"
+              ]
+            ],
+            [
+              "19",
+              [],
+              [
+                "2x Shard Key"
+              ]
+            ],
+            [
+              "20",
+              [
+                "1x Creeper Spawner",
+                "1x Spawner Key"
+              ],
+              [
+                "Bobbing for Souls (fishing rod)",
+                "1x Enderman Spawner"
+              ]
+            ],
+            [
+              "21",
+              [],
+              [
+                "1x Chroma Key"
+              ]
+            ],
+            [
+              "22",
+              [
+                "1x Drowned Spawner"
+              ],
+              [
+                "1x Guardian Spawner"
+              ]
+            ],
+            [
+              "23",
+              [],
+              [
+                "Trim Pack - Tide + Snout"
+              ]
+            ],
+            [
+              "24",
+              [
+                "1,000 Prism Shards"
+              ],
+              [
+                "Telepathy IV (tools)"
+              ]
+            ],
+            [
+              "25",
+              [
+                "1x Halloween Key",
+                "$250,000"
+              ],
+              [
+                "2x Halloween Key",
+                "+25% Points Booster (24h)",
+                "$250,000"
+              ]
+            ],
+            [
+              "26",
+              [
+                "1,000 Prism Shards"
+              ],
+              [
+                "1x Blaze Spawner"
+              ]
+            ],
+            [
+              "27",
+              [],
+              [
+                "1x Random Ultimate Book"
+              ]
+            ],
+            [
+              "28",
+              [
+                "2x White Scroll"
+              ],
+              [
+                "1,000 Prism Shards"
+              ]
+            ],
+            [
+              "29",
+              [],
+              [
+                "2x Shard Key"
+              ]
+            ],
+            [
+              "30",
+              [
+                "1x Slime Spawner",
+                "2x Spawner Key"
+              ],
+              [
+                "1x Ghast Spawner",
+                "1x Random Legendary Book"
+              ]
+            ],
+            [
+              "31",
+              [],
+              [
+                "1x Transmog Scroll",
+                "2x White Scroll"
+              ]
+            ],
+            [
+              "32",
+              [
+                "Trim Pack - Shaper + Silence"
+              ],
+              [
+                "1x Halloween Key"
+              ]
+            ],
+            [
+              "33",
+              [],
+              [
+                "Trim Pack - Flow + Bolt"
+              ]
+            ],
+            [
+              "34",
+              [
+                "1x MobTrak"
+              ],
+              [
+                "3x Spawner Key"
+              ]
+            ],
+            [
+              "35",
+              [
+                "2x Shard Key"
+              ],
+              [
+                "1x Evoker Spawner",
+                "Shard of Night (rare)"
+              ]
+            ],
+            [
+              "36",
+              [
+                "3x Zombie Spawner"
+              ],
+              [
+                "Lifesteal IV (swords)"
+              ]
+            ],
+            [
+              "37",
+              [],
+              [
+                "2x Chroma Key"
+              ]
+            ],
+            [
+              "38",
+              [
+                "3x Spawner Key"
+              ],
+              [
+                "1x Iron Golem Spawner"
+              ]
+            ],
+            [
+              "39",
+              [],
+              [
+                "3x Shard Key"
+              ]
+            ],
+            [
+              "40",
+              [
+                "1x Witch Spawner",
+                "2x Chroma Key"
+              ],
+              [
+                "Grave Digger (shovel)",
+                "1x Wither Skeleton Spawner"
+              ]
+            ],
+            [
+              "41",
+              [],
+              [
+                "2x Halloween Key"
+              ]
+            ],
+            [
+              "42",
+              [
+                "Trim Pack - Raiser + Host"
+              ],
+              [
+                "2x Enderman Spawner",
+                "Double Strike III (swords)"
+              ]
+            ],
+            [
+              "43",
+              [],
+              [
+                "1x StatTrak",
+                "1x Scroll of Binding"
+              ]
+            ],
+            [
+              "44",
+              [
+                "3x Skeleton Spawner"
+              ],
+              [
+                "1x Random Fabled Book"
+              ]
+            ],
+            [
+              "45",
+              [
+                "1x Random Ultimate Book"
+              ],
+              [
+                "1x Shulker Spawner",
+                "1x Elytra"
+              ]
+            ],
+            [
+              "46",
+              [
+                "1x Magma Cube Spawner"
+              ],
+              [
+                "2,500 Prism Shards"
+              ]
+            ],
+            [
+              "47",
+              [],
+              [
+                "3x Halloween Key",
+                "3x Shard Key"
+              ]
+            ],
+            [
+              "48",
+              [
+                "Trim Pack - Ward + Wayfinder"
+              ],
+              [
+                "1x Beacon",
+                "Soulbound III (weapons, tools, bows)"
+              ]
+            ],
+            [
+              "49",
+              [
+                "3x Spawner Key"
+              ],
+              [
+                "2x Wither Skeleton Spawner",
+                "Shard of Haste (legendary)"
+              ]
+            ],
+            [
+              "50",
+              [
+                "COFFIN LID (shield)",
+                "2x Halloween Key",
+                "3x Shard Key",
+                "Season Finale Celebration"
+              ],
+              [
+                "THE LAST HARVEST",
+                "1x StatTrak",
+                "1x Warden Spawner",
+                "3x Chroma Key",
+                "$1,000,000"
+              ]
+            ]
+          ]
+        }
+      ]
+    },
+    "7620947": {
+      "kind": "crate_key",
+      "summary": "Opens the Shard Crate: 29 possible rewards",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "1x Shard Key. Each key opens the Shard Crate once and gives you one of the 29 rewards below."
+        },
+        {
+          "type": "rewards",
+          "title": "Shard Crate rewards",
+          "groups": [
+            {
+              "rarity": "chroma",
+              "label": "Chroma",
+              "colors": [
+                "#7b2fbe",
+                "#c77dff"
+              ],
+              "items": [
+                {
+                  "icon": "custom:clusters/warmongers_prism",
+                  "name": "Warmonger's Prism",
+                  "lore": [
+                    "* Apex Cluster",
+                    "Five shard effects in one off-hand slot.",
+                    "Otherwise only craftable."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/architects_prism",
+                  "name": "Architect's Prism",
+                  "lore": [
+                    "* Apex Cluster",
+                    "Five shard effects in one off-hand slot.",
+                    "Otherwise only craftable."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/wayfarers_prism",
+                  "name": "Wayfarer's Prism",
+                  "lore": [
+                    "* Apex Cluster",
+                    "Five shard effects in one off-hand slot.",
+                    "Otherwise only craftable."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/magnates_prism",
+                  "name": "Magnate's Prism",
+                  "lore": [
+                    "* Apex Cluster",
+                    "Five shard effects in one off-hand slot.",
+                    "Otherwise only craftable."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "mythic",
+              "label": "Mythic",
+              "items": [
+                {
+                  "icon": "custom:shards/shard_of_strength",
+                  "name": "Shard of Strength",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Strength II"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_vitality",
+                  "name": "Shard of Vitality",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Absorption II"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_vigor",
+                  "name": "Shard of Vigor",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Health Boost II"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_healing",
+                  "name": "Shard of Healing",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Regeneration I"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_hunger",
+                  "name": "Shard of Hunger",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Saturation"
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "legendary",
+              "label": "Legendary",
+              "items": [
+                {
+                  "icon": "custom:clusters/cluster_strength_vigor",
+                  "name": "Cluster of Wrath",
+                  "lore": [
+                    "* Cluster",
+                    "Two shard effects in one off-hand slot.",
+                    "Carries a one-shot ability."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/cluster_embers_swiftness",
+                  "name": "Cluster of Cinders",
+                  "lore": [
+                    "* Cluster",
+                    "Two shard effects in one off-hand slot.",
+                    "Carries a one-shot ability."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/cluster_vitality_healing",
+                  "name": "Cluster of Renewal",
+                  "lore": [
+                    "* Cluster",
+                    "Two shard effects in one off-hand slot.",
+                    "Carries a one-shot ability."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/cluster_haste_hunger",
+                  "name": "Cluster of Industry",
+                  "lore": [
+                    "* Cluster",
+                    "Two shard effects in one off-hand slot.",
+                    "Carries a one-shot ability."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/cluster_feather_night",
+                  "name": "Cluster of the Descent",
+                  "lore": [
+                    "* Cluster",
+                    "Two shard effects in one off-hand slot.",
+                    "Carries a one-shot ability."
+                  ]
+                },
+                {
+                  "icon": "custom:clusters/cluster_tides_luck",
+                  "name": "Cluster of the Depths",
+                  "lore": [
+                    "* Cluster",
+                    "Two shard effects in one off-hand slot.",
+                    "Carries a one-shot ability."
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_haste",
+                  "name": "Shard of Haste",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Haste II"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_swiftness",
+                  "name": "Shard of Swiftness",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Speed II"
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "epic",
+              "label": "Epic",
+              "items": [
+                {
+                  "icon": "custom:shards/shard_of_the_tides",
+                  "name": "Shard of the Tides",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Water Breathing + Dolphin's Grace"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_embers",
+                  "name": "Shard of Embers",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Fire Resistance"
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "rare",
+              "label": "Rare",
+              "items": [
+                {
+                  "icon": "custom:shards/shard_of_night",
+                  "name": "Shard of Night",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Night Vision"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_the_feather",
+                  "name": "Shard of the Feather",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Slow Falling"
+                  ]
+                },
+                {
+                  "icon": "custom:shards/shard_of_luck",
+                  "name": "Shard of Luck",
+                  "lore": [
+                    "◈ Shard",
+                    "Hold in your off hand.",
+                    "",
+                    "Luck"
+                  ]
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "2,000 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "uncommon",
+              "label": "Uncommon",
+              "items": [
+                {
+                  "icon": "mc:heart_of_the_sea",
+                  "name": "Shard Key",
+                  "lore": [
+                    "One more roll of the crate."
+                  ]
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "1,500 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "common",
+              "label": "Common",
+              "items": [
+                {
+                  "icon": "mc:amethyst_cluster",
+                  "name": "BlockTrak Creator",
+                  "lore": [
+                    "Tracks blocks mined",
+                    "Drag onto an item to apply."
+                  ]
+                },
+                {
+                  "icon": "mc:echo_shard",
+                  "name": "StatTrak Creator",
+                  "lore": [
+                    "Tracks player kills",
+                    "Drag onto an item to apply."
+                  ]
+                },
+                {
+                  "icon": "mc:popped_chorus_fruit",
+                  "name": "MobTrak Creator",
+                  "lore": [
+                    "Tracks mob kills",
+                    "Drag onto an item to apply."
+                  ]
+                },
+                {
+                  "icon": "mc:purple_dye",
+                  "name": "FishTrak Creator",
+                  "lore": [
+                    "Tracks fish caught",
+                    "Drag onto an item to apply."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "perks",
+          "title": "Guaranteed milestone rewards",
+          "note": "Earned by opening this crate, on top of what each key gives. The track restarts after the last milestone.",
+          "items": [
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "1,500 Prism Shards",
+              "detail": "At 3 opens"
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "2,000 Prism Shards",
+              "detail": "At 5 opens"
+            },
+            {
+              "icon": "mc:heart_of_the_sea",
+              "text": "Shard Key",
+              "detail": "At 10 opens"
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "1,500 Prism Shards",
+              "detail": "At 43 opens"
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "2,000 Prism Shards",
+              "detail": "At 45 opens"
+            },
+            {
+              "icon": "mc:heart_of_the_sea",
+              "text": "Shard Key",
+              "detail": "At 50 opens"
+            },
+            {
+              "icon": "custom:shards/shard_of_strength",
+              "text": "Shard of Strength",
+              "detail": "At 80 opens"
+            }
+          ]
+        }
+      ]
+    },
+    "7631864": {
+      "kind": "battlepass",
+      "summary": "50 tiers of Chroma Pass rewards",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Unlocks the Chroma Pass reward track: 50 tiers, with a reward on every one. You keep claiming the Free Pass too, so the table below is everything you can earn."
+        },
+        {
+          "type": "perks",
+          "title": "At a glance",
+          "items": [
+            {
+              "icon": "mc:experience_bottle",
+              "text": "60 points per tier"
+            },
+            {
+              "icon": "mc:trial_key",
+              "text": "11x Chroma Key",
+              "detail": "Across both tracks"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "22x Spawner Key",
+              "detail": "Across both tracks"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "15x Halloween Key",
+              "detail": "Across both tracks"
+            },
+            {
+              "icon": "mc:heart_of_the_sea",
+              "text": "20x Shard Key",
+              "detail": "Across both tracks"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Rewards by tier",
+          "columns": [
+            "Tier",
+            "Free Pass",
+            "Chroma Pass"
+          ],
+          "rows": [
+            [
+              "1",
+              [
+                "1x Spawner Key"
+              ],
+              [
+                "2x Spawner Key"
+              ]
+            ],
+            [
+              "2",
+              [
+                "1x Zombie Spawner"
+              ],
+              [
+                "1x Skeleton Spawner"
+              ]
+            ],
+            [
+              "3",
+              [
+                "Trim Pack - Rib + Spire"
+              ],
+              [
+                "1x Halloween Key"
+              ]
+            ],
+            [
+              "4",
+              [
+                "1x Halloween Key"
+              ],
+              [
+                "Trim Pack - Coast + Sentry"
+              ]
+            ],
+            [
+              "5",
+              [
+                "1x Chroma Key"
+              ],
+              [
+                "1x Spider Spawner",
+                "1x Spawner Key"
+              ]
+            ],
+            [
+              "6",
+              [
+                "1x Skeleton Spawner"
+              ],
+              [
+                "2x Chroma Key"
+              ]
+            ],
+            [
+              "7",
+              [],
+              [
+                "1x Cave Spider Spawner"
+              ]
+            ],
+            [
+              "8",
+              [
+                "1x Spawner Key"
+              ],
+              [
+                "500 Prism Shards"
+              ]
+            ],
+            [
+              "9",
+              [
+                "1x Spider Spawner"
+              ],
+              [
+                "1x Random Elite Book"
+              ]
+            ],
+            [
+              "10",
+              [
+                "2x Spawner Key",
+                "500 Prism Shards"
+              ],
+              [
+                "1x Witch Spawner",
+                "2x Shard Key"
+              ]
+            ],
+            [
+              "11",
+              [],
+              [
+                "1x Creeper Spawner"
+              ]
+            ],
+            [
+              "12",
+              [
+                "Trim Pack - Eye + Vex"
+              ],
+              [
+                "1x Halloween Key"
+              ]
+            ],
+            [
+              "13",
+              [
+                "1x Shard Key"
+              ],
+              [
+                "Trim Pack - Dune + Wild"
+              ]
+            ],
+            [
+              "14",
+              [
+                "1x Random Elite Book"
+              ],
+              [
+                "1x Drowned Spawner"
+              ]
+            ],
+            [
+              "15",
+              [
+                "1x Halloween Key"
+              ],
+              [
+                "3x Spawner Key",
+                "1x Slime Spawner"
+              ]
+            ],
+            [
+              "16",
+              [
+                "1x Cave Spider Spawner"
+              ],
+              [
+                "Vein Miner III (pickaxes)"
+              ]
+            ],
+            [
+              "17",
+              [],
+              [
+                "1x MobTrak"
+              ]
+            ],
+            [
+              "18",
+              [
+                "2x Shard Key"
+              ],
+              [
+                "1,000 Prism Shards"
+              ]
+            ],
+            [
+              "19",
+              [],
+              [
+                "2x Shard Key"
+              ]
+            ],
+            [
+              "20",
+              [
+                "1x Creeper Spawner",
+                "1x Spawner Key"
+              ],
+              [
+                "Bobbing for Souls (fishing rod)",
+                "1x Enderman Spawner"
+              ]
+            ],
+            [
+              "21",
+              [],
+              [
+                "1x Chroma Key"
+              ]
+            ],
+            [
+              "22",
+              [
+                "1x Drowned Spawner"
+              ],
+              [
+                "1x Guardian Spawner"
+              ]
+            ],
+            [
+              "23",
+              [],
+              [
+                "Trim Pack - Tide + Snout"
+              ]
+            ],
+            [
+              "24",
+              [
+                "1,000 Prism Shards"
+              ],
+              [
+                "Telepathy IV (tools)"
+              ]
+            ],
+            [
+              "25",
+              [
+                "1x Halloween Key",
+                "$250,000"
+              ],
+              [
+                "2x Halloween Key",
+                "+25% Points Booster (24h)",
+                "$250,000"
+              ]
+            ],
+            [
+              "26",
+              [
+                "1,000 Prism Shards"
+              ],
+              [
+                "1x Blaze Spawner"
+              ]
+            ],
+            [
+              "27",
+              [],
+              [
+                "1x Random Ultimate Book"
+              ]
+            ],
+            [
+              "28",
+              [
+                "2x White Scroll"
+              ],
+              [
+                "1,000 Prism Shards"
+              ]
+            ],
+            [
+              "29",
+              [],
+              [
+                "2x Shard Key"
+              ]
+            ],
+            [
+              "30",
+              [
+                "1x Slime Spawner",
+                "2x Spawner Key"
+              ],
+              [
+                "1x Ghast Spawner",
+                "1x Random Legendary Book"
+              ]
+            ],
+            [
+              "31",
+              [],
+              [
+                "1x Transmog Scroll",
+                "2x White Scroll"
+              ]
+            ],
+            [
+              "32",
+              [
+                "Trim Pack - Shaper + Silence"
+              ],
+              [
+                "1x Halloween Key"
+              ]
+            ],
+            [
+              "33",
+              [],
+              [
+                "Trim Pack - Flow + Bolt"
+              ]
+            ],
+            [
+              "34",
+              [
+                "1x MobTrak"
+              ],
+              [
+                "3x Spawner Key"
+              ]
+            ],
+            [
+              "35",
+              [
+                "2x Shard Key"
+              ],
+              [
+                "1x Evoker Spawner",
+                "Shard of Night (rare)"
+              ]
+            ],
+            [
+              "36",
+              [
+                "3x Zombie Spawner"
+              ],
+              [
+                "Lifesteal IV (swords)"
+              ]
+            ],
+            [
+              "37",
+              [],
+              [
+                "2x Chroma Key"
+              ]
+            ],
+            [
+              "38",
+              [
+                "3x Spawner Key"
+              ],
+              [
+                "1x Iron Golem Spawner"
+              ]
+            ],
+            [
+              "39",
+              [],
+              [
+                "3x Shard Key"
+              ]
+            ],
+            [
+              "40",
+              [
+                "1x Witch Spawner",
+                "2x Chroma Key"
+              ],
+              [
+                "Grave Digger (shovel)",
+                "1x Wither Skeleton Spawner"
+              ]
+            ],
+            [
+              "41",
+              [],
+              [
+                "2x Halloween Key"
+              ]
+            ],
+            [
+              "42",
+              [
+                "Trim Pack - Raiser + Host"
+              ],
+              [
+                "2x Enderman Spawner",
+                "Double Strike III (swords)"
+              ]
+            ],
+            [
+              "43",
+              [],
+              [
+                "1x StatTrak",
+                "1x Scroll of Binding"
+              ]
+            ],
+            [
+              "44",
+              [
+                "3x Skeleton Spawner"
+              ],
+              [
+                "1x Random Fabled Book"
+              ]
+            ],
+            [
+              "45",
+              [
+                "1x Random Ultimate Book"
+              ],
+              [
+                "1x Shulker Spawner",
+                "1x Elytra"
+              ]
+            ],
+            [
+              "46",
+              [
+                "1x Magma Cube Spawner"
+              ],
+              [
+                "2,500 Prism Shards"
+              ]
+            ],
+            [
+              "47",
+              [],
+              [
+                "3x Halloween Key",
+                "3x Shard Key"
+              ]
+            ],
+            [
+              "48",
+              [
+                "Trim Pack - Ward + Wayfinder"
+              ],
+              [
+                "1x Beacon",
+                "Soulbound III (weapons, tools, bows)"
+              ]
+            ],
+            [
+              "49",
+              [
+                "3x Spawner Key"
+              ],
+              [
+                "2x Wither Skeleton Spawner",
+                "Shard of Haste (legendary)"
+              ]
+            ],
+            [
+              "50",
+              [
+                "COFFIN LID (shield)",
+                "2x Halloween Key",
+                "3x Shard Key",
+                "Season Finale Celebration"
+              ],
+              [
+                "THE LAST HARVEST",
+                "1x StatTrak",
+                "1x Warden Spawner",
+                "3x Chroma Key",
+                "$1,000,000"
+              ]
+            ]
+          ]
+        }
+      ]
+    },
+    "7663601": {
+      "kind": "rank",
+      "summary": "[MVP+] tag, daily /kit mvpplus",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Everything in MVP, plus:"
+        },
+        {
+          "type": "perks",
+          "title": "MVP+ perks",
+          "items": [
+            {
+              "icon": "mc:name_tag",
+              "text": "[MVP+] chat tag"
+            },
+            {
+              "icon": "mc:red_bed",
+              "text": "25 homes",
+              "detail": "/sethome"
+            },
+            {
+              "text": "250 upgradeable hoppers",
+              "icon": "mc:hopper"
+            }
+          ]
+        },
+        {
+          "type": "kit",
+          "title": "Kit: /kit mvpplus",
+          "command": "/kit mvpplus",
+          "cooldown": "once every 24 hours",
+          "items": [
+            {
+              "icon": "mc:trial_key",
+              "name": "Chroma Key",
+              "lore": [
+                "Opens the Chroma Crate"
+              ]
+            },
+            {
+              "icon": "mc:heart_of_the_sea",
+              "name": "Shard Key",
+              "lore": [
+                "Opens the Shard Crate"
+              ]
+            },
+            {
+              "icon": "mc:amethyst_shard",
+              "name": "1,000 Prism Shards"
+            }
+          ]
+        }
+      ],
+      "rank": {
+        "tag": "MVP+",
+        "colors": [
+          "#b24bf3",
+          "#ff6ec7"
+        ],
+        "ladder": [
+          {
+            "label": "VIP",
+            "colors": [
+              "#9558cf",
+              "#ad95c3"
+            ]
+          },
+          {
+            "label": "VIP+",
+            "colors": [
+              "#b24bf3",
+              "#bc93d5"
+            ]
+          },
+          {
+            "label": "MVP",
+            "colors": [
+              "#e264e8",
+              "#d19fd3"
+            ]
+          },
+          {
+            "label": "MVP+",
+            "colors": [
+              "#b24bf3",
+              "#ff6ec7"
+            ],
+            "current": true
+          }
+        ]
+      }
+    },
+    "7709276": {
+      "kind": "crate_key",
+      "summary": "Opens the Halloween Crate: 41 possible rewards",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "1x Halloween Key. Each key opens the Halloween Crate once and gives you one of the 41 rewards below."
+        },
+        {
+          "type": "rewards",
+          "title": "Halloween Crate rewards",
+          "note": "Reaper's Toll is limited to 1 for the whole server: once it has been pulled, it can no longer drop from this crate.",
+          "groups": [
+            {
+              "rarity": "1 of 1",
+              "label": "1 of 1",
+              "colors": [
+                "#ffa23a",
+                "#9b4ddb"
+              ],
+              "items": [
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "Reaper's Toll",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness XV",
+                    "Looting V",
+                    "Fire Aspect II",
+                    "Unbreaking X",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“There can only be one”",
+                    "",
+                    "✦ 1 OF 1 ✦",
+                    "",
+                    "* Every hit steals 1-3 health"
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "hallowed",
+              "label": "Hallowed",
+              "colors": [
+                "#ffa23a",
+                "#9b4ddb"
+              ],
+              "items": [
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "The Count's Fang",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VI",
+                    "Looting III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“I vant to poke your blood.”",
+                    "",
+                    "* Swift strikes that sip a little health",
+                    "* Hits sometimes make your target bleed"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "Trick or Stab",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VII",
+                    "Looting III",
+                    "Unbreaking III",
+                    "Mending"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "The Last Harvest",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VII",
+                    "Sweeping Edge V",
+                    "Looting III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“No refunds.”",
+                    "",
+                    "* Every strike cuts down everything nearby"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_spear",
+                  "name": "Stake Out",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VII",
+                    "Smite V",
+                    "Lunge III",
+                    "Looting IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“Vampires hate this one simple trick.”",
+                    "",
+                    "* Bonus damage against the undead"
+                  ]
+                },
+                {
+                  "icon": "mc:mace",
+                  "name": "Pumpkin Smasher",
+                  "glow": true,
+                  "enchants": [
+                    "Density VI",
+                    "Breach IV",
+                    "Wind Burst III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“Gourd-geous damage.”",
+                    "",
+                    "* Every strike blasts everything nearby away"
+                  ]
+                },
+                {
+                  "icon": "mc:bow",
+                  "name": "Nightmare Fuel",
+                  "glow": true,
+                  "enchants": [
+                    "Power VII",
+                    "Punch II",
+                    "Flame",
+                    "Infinity",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“Sleep is for the living.”",
+                    "",
+                    "* Arrows plunge targets into Darkness and slow them"
+                  ]
+                },
+                {
+                  "icon": "mc:crossbow",
+                  "name": "Stake Launcher",
+                  "glow": true,
+                  "enchants": [
+                    "Quick Charge V",
+                    "Piercing VII",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“For vampires. And whoever took your diamonds.”",
+                    "",
+                    "* Piercing bolts that sometimes ignore armor"
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "mythic",
+              "label": "Mythic",
+              "items": [
+                {
+                  "icon": "mc:netherite_helmet",
+                  "name": "Witch Hat",
+                  "glow": true,
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Respiration III",
+                    "Aqua Affinity"
+                  ],
+                  "lore": [
+                    "◈ Widow Set",
+                    "“Brim full of bad decisions.”",
+                    "",
+                    "SET BONUS",
+                    "* Night Vision",
+                    "(Requires all 4 Widow pieces.)"
+                  ]
+                },
+                {
+                  "icon": "custom:halloween/widow_chestplate",
+                  "name": "Widow's Carapace",
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Widow Set",
+                    "",
+                    "SET BONUS",
+                    "* Night Vision",
+                    "(Requires all 4 Widow pieces.)"
+                  ]
+                },
+                {
+                  "icon": "custom:halloween/widow_leggings",
+                  "name": "Widow's Legwraps",
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Swift Sneak III"
+                  ],
+                  "lore": [
+                    "◈ Widow Set",
+                    "",
+                    "SET BONUS",
+                    "* Night Vision",
+                    "(Requires all 4 Widow pieces.)"
+                  ]
+                },
+                {
+                  "icon": "custom:halloween/widow_boots",
+                  "name": "Widow's Creepers",
+                  "enchants": [
+                    "Protection V",
+                    "Unbreaking III",
+                    "Mending",
+                    "Feather Falling IV",
+                    "Depth Strider III"
+                  ],
+                  "lore": [
+                    "◈ Widow Set",
+                    "",
+                    "SET BONUS",
+                    "* Night Vision",
+                    "(Requires all 4 Widow pieces.)"
+                  ]
+                },
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Halloween Key x3"
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$2,000,000"
+                }
+              ]
+            },
+            {
+              "rarity": "legendary",
+              "label": "Legendary",
+              "items": [
+                {
+                  "icon": "mc:netherite_pickaxe",
+                  "name": "Grave Robber",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Tools",
+                    "“Six feet is just the first layer.”",
+                    "",
+                    "* Mines an entire ore vein at once"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_shovel",
+                  "name": "Grave Digger",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune IV",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Tools",
+                    "“Every grave needs a good plot.”",
+                    "",
+                    "* Digs a 3x3 area"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_hoe",
+                  "name": "Grim Harvester",
+                  "glow": true,
+                  "enchants": [
+                    "Efficiency VI",
+                    "Fortune V",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Tools",
+                    "“Reaping what you sow. Literally.”",
+                    "",
+                    "* Harvests a 3x3 of grown crops"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_axe",
+                  "name": "Headless Hatchet",
+                  "glow": true,
+                  "enchants": [
+                    "Sharpness VII",
+                    "Efficiency VI",
+                    "Looting III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Tools",
+                    "“Lost its head over you.”",
+                    "",
+                    "* Players drop their head, mobs sometimes do"
+                  ]
+                },
+                {
+                  "icon": "mc:fishing_rod",
+                  "name": "Bobbing for Souls",
+                  "glow": true,
+                  "enchants": [
+                    "Luck Of The Sea V",
+                    "Lure III",
+                    "Unbreaking III",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Tools",
+                    "“Apples were too easy.”",
+                    "",
+                    "* Luck II while held -- better treasure"
+                  ]
+                },
+                {
+                  "icon": "mc:shield",
+                  "name": "Coffin Lid",
+                  "glow": true,
+                  "enchants": [
+                    "Unbreaking X",
+                    "Mending"
+                  ],
+                  "lore": [
+                    "◈ Halloween Arsenal",
+                    "“Looks sturdy(ish)”",
+                    "",
+                    "* Blocking a hit knocks the attacker back"
+                  ]
+                },
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Halloween Key x2"
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,500,000"
+                }
+              ]
+            },
+            {
+              "rarity": "epic",
+              "label": "Epic",
+              "items": [
+                {
+                  "icon": "mc:ominous_trial_key",
+                  "name": "Halloween Key"
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,250,000"
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Fabled Book",
+                  "lore": [
+                    "One random Fabled enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:elytra",
+                  "name": "Elytra"
+                }
+              ]
+            },
+            {
+              "rarity": "rare",
+              "label": "Rare",
+              "items": [
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,000,000"
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Legendary Book",
+                  "lore": [
+                    "One random Legendary enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_ingot",
+                  "name": "Netherite Ingot",
+                  "qty": 2
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "2,000 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "uncommon",
+              "label": "Uncommon",
+              "items": [
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$750,000"
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Ultimate Book",
+                  "lore": [
+                    "One random Ultimate enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Elite Book",
+                  "lore": [
+                    "One random Elite enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "1,500 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
+                }
+              ]
+            },
+            {
+              "rarity": "common",
+              "label": "Common",
+              "items": [
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$500,000"
+                },
+                {
+                  "icon": "mc:golden_shovel",
+                  "name": "3,000 Claim Blocks",
+                  "lore": [
+                    "Room to build."
+                  ]
+                },
+                {
+                  "icon": "mc:heavy_core",
+                  "name": "Heavy Core"
+                },
+                {
+                  "icon": "mc:rib_armor_trim_smithing_template",
+                  "name": "Rib Armor Trim"
+                },
+                {
+                  "icon": "mc:vex_armor_trim_smithing_template",
+                  "name": "Vex Armor Trim"
+                },
+                {
+                  "icon": "mc:silence_armor_trim_smithing_template",
+                  "name": "Silence Armor Trim"
+                },
+                {
+                  "icon": "mc:ward_armor_trim_smithing_template",
+                  "name": "Ward Armor Trim"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "perks",
+          "title": "Guaranteed milestone rewards",
+          "note": "Earned by opening this crate, on top of what each key gives. The track restarts after the last milestone.",
+          "items": [
+            {
+              "icon": "mc:amethyst_shard",
+              "text": "1,500 Prism Shards",
+              "detail": "At 3 opens"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "Halloween Key",
+              "detail": "At 6 opens"
+            },
+            {
+              "icon": "mc:emerald_block",
+              "text": "$1,250,000",
+              "detail": "At 13 opens"
+            },
+            {
+              "icon": "mc:ominous_trial_key",
+              "text": "Halloween Key x2",
+              "detail": "At 22 opens"
+            },
+            {
+              "icon": "mc:netherite_helmet",
+              "text": "Witch Hat",
+              "detail": "At 33 opens"
+            },
+            {
+              "icon": "mc:emerald_block",
+              "text": "$2,000,000",
+              "detail": "At 44 opens"
+            },
+            {
+              "icon": "mc:mace",
+              "text": "Pumpkin Smasher",
+              "detail": "At 55 opens"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

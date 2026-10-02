@@ -47,18 +47,29 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--index", default=os.path.join(here, "public", "market", "index.json"))
     ap.add_argument("--pools", default=os.path.join(here, "public", "market", "pools.json"))
+    ap.add_argument("--store", default=os.path.join(here, "src", "data", "storeContent.json"))
     ap.add_argument("--out", default=os.path.join(here, "public", "market", "icons"))
     ap.add_argument("--force", action="store_true", help="re-download sprites already on disk")
     args = ap.parse_args()
 
-    with open(args.index, encoding="utf-8") as fh:
-        materials = {item["id"] for item in json.load(fh)["items"]}
+    # The market index is generated from the live database and is not in the
+    # repo, so it can be absent on a machine that only wants the store's icons.
+    materials = set()
+    if os.path.exists(args.index):
+        with open(args.index, encoding="utf-8") as fh:
+            materials |= {item["id"] for item in json.load(fh)["items"]}
 
     # A pool can trade a custom item that never reaches the auction house, so
     # its sprite is not implied by the index.
     if os.path.exists(args.pools):
         with open(args.pools, encoding="utf-8") as fh:
             materials |= {pool["icon"] for pool in json.load(fh)["pools"] if pool["icon"]}
+
+    # The store's package descriptions show item icons too (crate rewards, kit
+    # contents). The generated content lists every vanilla sprite it refers to.
+    if os.path.exists(args.store):
+        with open(args.store, encoding="utf-8") as fh:
+            materials |= set(json.load(fh).get("vanillaIcons", []))
     materials = sorted(materials)
     os.makedirs(args.out, exist_ok=True)
 

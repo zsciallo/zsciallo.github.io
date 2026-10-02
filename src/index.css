@@ -1610,6 +1610,628 @@ footer {
   padding-left: 1.2em;
 }
 
+/* A Tebex description is free-form HTML from the panel editor (sanitized in
+   lib/sanitizeHtml), so the elements it is allowed to use all need a style. */
+.pkg-desc h2,
+.pkg-desc h3,
+.pkg-desc h4,
+.pkg-desc h5 {
+  font-family: 'Teko', sans-serif;
+  font-weight: 500;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  margin-top: 0.9em;
+}
+
+.pkg-desc ol {
+  margin-top: 0.5em;
+  padding-left: 1.4em;
+}
+
+.pkg-desc a {
+  color: var(--accent-2);
+}
+
+.pkg-desc img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-top: 0.5em;
+}
+
+/* display: block lets a wide table scroll inside the popout instead of
+   stretching it. */
+.pkg-desc table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin-top: 0.75em;
+}
+
+.pkg-desc th,
+.pkg-desc td {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.pkg-desc th {
+  color: var(--text);
+  background: var(--bg3);
+}
+
+/* ─── GENERATED PACKAGE CONTENT ─── */
+/* Rendered by components/store/RichDescription from src/data/storeContent.json. */
+.pkg-summary {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* Reward grids and tier tables need more room than a paragraph of text did. */
+.pkg-modal--rich {
+  max-width: 720px;
+}
+
+.store-rich {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  margin-top: 0.75rem;
+  text-align: left;
+}
+
+.store-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.store-block-title {
+  font-family: 'Teko', sans-serif;
+  font-weight: 500;
+  font-size: 1.2rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.store-block-note {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-bottom: 0.7rem;
+}
+
+/* Rarity tiers. The colours follow the tiers' in-game colours; --rarity also
+   tints the tile border of an opened item in that tier. */
+.store-rarity {
+  --rarity: #cfc8de;
+  border-left: 2px solid var(--rarity);
+  padding-left: 0.8rem;
+}
+
+.store-rarity + .store-rarity {
+  margin-top: 1rem;
+}
+
+.store-rarity--chroma { --rarity: #ff7de1; }
+.store-rarity--mythic { --rarity: #d6a8ff; }
+.store-rarity--legendary { --rarity: #ffc24d; }
+.store-rarity--epic { --rarity: #a855f7; }
+.store-rarity--rare { --rarity: #5cb8ff; }
+.store-rarity--uncommon { --rarity: #6fe39a; }
+
+.rarity-text--common { color: #cfc8de; }
+.rarity-text--uncommon { color: #6fe39a; }
+.rarity-text--rare { color: #5cb8ff; }
+.rarity-text--epic { color: #a855f7; }
+.rarity-text--legendary { color: #ffc24d; }
+.rarity-text--mythic { color: #d6a8ff; }
+
+.rarity-text--chroma {
+  background: var(--grad-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A tier that carries its own in-game gradient (set inline as --rarity and
+   --rarity-b): the bar down its left edge and its label both use it. */
+.store-rarity--gradient {
+  border-image: linear-gradient(180deg, var(--rarity), var(--rarity-b)) 1;
+}
+
+.rarity-text--gradient {
+  background: linear-gradient(100deg, var(--rarity), var(--rarity-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A note that changes what a buyer is getting, such as a reward capped
+   server-wide, is not fine print. */
+.store-block-note--strong {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(255, 194, 77, 0.45);
+  border-radius: 8px;
+  background: rgba(255, 194, 77, 0.08);
+  font-size: 0.84rem;
+  color: var(--text);
+}
+
+.store-rarity-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.store-rarity-label {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.store-rarity-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+}
+
+/* `dense` matters: an opened tooltip takes a full row, and the tiles after it
+   flow back into the cells beside the tile that opened it. */
+.store-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-auto-flow: row dense;
+  gap: 0.4rem;
+}
+
+.store-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.4rem 0.55rem;
+  background: rgba(12, 7, 24, 0.45);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+}
+
+.store-item--button {
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.store-item--button:hover,
+.store-item--button.is-open {
+  border-color: var(--rarity, var(--accent));
+  background: rgba(199, 125, 255, 0.08);
+}
+
+.store-item--button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.store-item-icon {
+  position: relative;
+  flex: none;
+  line-height: 0;
+}
+
+/* Stack count, bottom right of the icon like an inventory slot. */
+.store-item-qty {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 1px 1px 0 #1b0b33, -1px 1px 0 #1b0b33, 1px -1px 0 #1b0b33, -1px -1px 0 #1b0b33;
+}
+
+.store-item-name {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.store-icon {
+  flex: none;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+/* Enchanted and custom items. Custom weapons are 3D models with no flat sprite,
+   so they show their vanilla base item; the glow marks them as more than that. */
+.store-icon--glow {
+  filter: drop-shadow(0 0 4px rgba(199, 125, 255, 0.8));
+}
+
+.store-icon--glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+/* Modelled on the in-game item tooltip. */
+.store-tooltip {
+  grid-column: 1 / -1;
+  padding: 0.6rem 0.8rem;
+  background: #12051f;
+  border: 2px solid #3b0f7a;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px #1a0730;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.store-tooltip-name {
+  font-weight: 600;
+}
+
+.store-tooltip-enchant {
+  color: #a9b4d6;
+}
+
+.store-tooltip-lore {
+  margin-top: 0.35rem;
+  color: #b48be0;
+  font-style: italic;
+}
+
+.store-tooltip-gap {
+  height: 0.5em;
+}
+
+.store-kit {
+  padding: 0.85rem;
+  background: rgba(12, 7, 24, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.store-kit-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.store-kit-command {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent-2);
+  background: rgba(255, 125, 225, 0.08);
+  border: 1px solid var(--border-pink);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+}
+
+.store-kit-cooldown {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.store-perks {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.55rem 1rem;
+}
+
+.store-perk {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.store-perk-detail {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.store-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.store-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.store-table th,
+.store-table td {
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.store-table tbody tr:last-child th,
+.store-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.store-table thead th {
+  font-family: 'Teko', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg3);
+}
+
+.store-table tbody th {
+  width: 1%;
+  white-space: nowrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.store-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.store-table-line {
+  display: block;
+}
+
+.store-table-empty {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+@media (max-width: 480px) {
+  .store-items {
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  }
+
+  .store-table th,
+  .store-table td {
+    padding: 0.4rem 0.5rem;
+  }
+}
+
+/* ─── RANK POPOUT ─── */
+/* A rank popout wears the rank's own in-game tag gradient. --rank-a/--rank-b are
+   set inline from the generated content (which reads them out of the server's
+   TAB config), so the four ranks climb violet to pink here exactly as their
+   tags do in chat. The defaults only apply if a rank has no tag colours. */
+.pkg-modal--rank {
+  --rank-a: var(--accent-deep);
+  --rank-b: var(--accent-2);
+  --rank-grad: linear-gradient(100deg, var(--rank-a), var(--rank-b));
+  border-color: color-mix(in srgb, var(--rank-a) 55%, var(--border));
+  box-shadow:
+    0 0 40px color-mix(in srgb, var(--rank-a) 24%, transparent),
+    0 0 90px color-mix(in srgb, var(--rank-b) 12%, transparent);
+}
+
+.pkg-modal--rank::before {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--rank-a), var(--rank-b), transparent);
+  opacity: 1;
+}
+
+.pkg-modal--rank .pkg-modal-image-wrap {
+  background:
+    radial-gradient(ellipse at 50% 125%, color-mix(in srgb, var(--rank-a) 42%, transparent), transparent 70%),
+    var(--bg3);
+}
+
+.pkg-modal--rank .pkg-modal-image {
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--rank-b) 55%, transparent));
+}
+
+.pkg-modal--rank .pkg-name {
+  font-size: 2.3rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: var(--rank-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rank-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.15rem 0 0.35rem;
+}
+
+.rank-hero-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+}
+
+.rank-tag {
+  padding: 0.3rem 0.9rem 0.15rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--rank-a) 60%, transparent);
+  background: color-mix(in srgb, var(--rank-a) 12%, transparent);
+  font-family: 'Teko', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+}
+
+.rank-tag span {
+  background: var(--rank-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The paid ranks in order. Each step carries its own tag colours inline, so the
+   ladder shows the climb; ranks below the one on sale read as already included. */
+.rank-ladder {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem 1.1rem;
+  margin-top: 0.2rem;
+}
+
+.rank-step {
+  position: relative;
+  padding: 0.12rem 0.75rem 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-family: 'Teko', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.rank-step + .rank-step::before {
+  content: '';
+  position: absolute;
+  right: calc(100% + 1px);
+  top: 50%;
+  width: 1.1rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
+}
+
+.rank-step--below {
+  color: var(--text);
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--rank-a) 60%, var(--border));
+  background: color-mix(in srgb, var(--rank-a) 14%, transparent);
+}
+
+.rank-step--current {
+  color: #12071f;
+  font-weight: 600;
+  opacity: 1;
+  border-color: transparent;
+  background: linear-gradient(100deg, var(--rank-a), var(--rank-b));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rank-b) 55%, transparent);
+}
+
+/* Perk lists. A leading figure ("20 homes") is set apart everywhere; inside a
+   rank popout the rows become cards and the figure takes the rank's gradient. */
+.store-perk-figure {
+  margin-right: 0.3rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.store-cmd {
+  padding: 0.05rem 0.38rem;
+  border: 1px solid var(--border-pink);
+  border-radius: 5px;
+  background: rgba(255, 125, 225, 0.08);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.74rem;
+  color: var(--accent-2);
+  white-space: nowrap;
+}
+
+.pkg-modal--rank .store-perks {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.45rem;
+}
+
+.pkg-modal--rank .store-perk {
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background:
+    linear-gradient(100deg, color-mix(in srgb, var(--rank-a) 11%, transparent), transparent 70%),
+    rgba(12, 7, 24, 0.45);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.pkg-modal--rank .store-perk:hover {
+  border-color: color-mix(in srgb, var(--rank-b) 60%, var(--border));
+  transform: translateX(2px);
+}
+
+.pkg-modal--rank .store-perk-figure {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  vertical-align: -0.08em;
+  background: var(--rank-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pkg-modal--rank .store-cmd,
+.pkg-modal--rank .store-kit-command {
+  border-color: color-mix(in srgb, var(--rank-b) 32%, transparent);
+  background: color-mix(in srgb, var(--rank-b) 10%, transparent);
+  color: var(--rank-b);
+}
+
+.pkg-modal--rank .store-block-title {
+  border-bottom-color: color-mix(in srgb, var(--rank-a) 45%, var(--border));
+}
+
+.pkg-modal--rank .store-kit {
+  border-color: color-mix(in srgb, var(--rank-a) 45%, var(--border));
+  background:
+    linear-gradient(100deg, color-mix(in srgb, var(--rank-a) 10%, transparent), transparent 70%),
+    rgba(12, 7, 24, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkg-modal--rank .store-perk {
+    transition: none;
+  }
+
+  .pkg-modal--rank .store-perk:hover {
+    transform: none;
+  }
+}
+
 .pkg-modal .pkg-actions {
   flex-shrink: 0;
 }

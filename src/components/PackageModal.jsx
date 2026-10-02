@@ -1,8 +1,12 @@
-import { useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { CartIcon } from './CartDrawer';
 import { QuantityStepper } from './QuantityStepper';
+import { RankHero, rankVars } from './store/RankHero';
+import { RichDescription } from './store/RichDescription';
 import { limitLabel, limitCount } from '../lib/packageLimit';
 import { listPrice } from '../lib/price';
+import { sanitizeHtml } from '../lib/sanitizeHtml';
+import { contentFor } from '../lib/storeContent';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -21,15 +25,64 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires =
   const [closing, setClosing] = useState(false);
   const [qty, setQty] = useState(1);
 
+  // The server config is the source of truth for what a package grants. When
+  // generated content exists (see lib/storeContent) it is the whole description
+  // and the Tebex text is not shown at all: that text is typed by hand in the
+  // Tebex panel and has advertised perks the server does not give. Only a
+  // package nobody has mapped yet falls back to its Tebex description.
+  const content = contentFor(pkg);
+  const rich = Boolean(content?.blocks.length);
+  const tebexHtml = useMemo(() => (rich ? '' : sanitizeHtml(pkg.description)), [pkg.description, rich]);
+  // Ranks wear their in-game tag colours.
+  const rank = content?.rank ?? null;
+
   function close() {
     if (busy || closing) return;
     setClosing(true);
     setTimeout(onClose, 200);
   }
 
+  const buy = (
+    <>
+      {allowQuantity && !blocked && (
+        <div class="pkg-qty pkg-modal-qty">
+          <span class="pkg-qty-label">QTY</span>
+          <QuantityStepper value={qty} onChange={setQty} disabled={busy} label={`${pkg.name} quantity`} />
+          {qty > 1 && <span class="pkg-qty-sub">{formatPrice(pkg.total_price * qty, pkg.currency)}</span>}
+        </div>
+      )}
+
+      <div class="pkg-actions">
+        <button
+          class="btn btn-primary pkg-buy"
+          disabled={busy || blocked}
+          onClick={() => onBuy(pkg, qty)}
+          aria-label={
+            requires ? `${pkg.name} requires ${requires}`
+              : owned ? `You already own ${pkg.name}`
+                : inCart ? `${pkg.name} is already in your cart`
+                  : `Buy ${qty} × ${pkg.name}`
+          }
+        >
+          {requires ? 'LOCKED' : owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
+        </button>
+        <button
+          class="pkg-cart-btn"
+          disabled={busy || blocked}
+          onClick={() => onAddToCart(pkg, qty)}
+          aria-label={`Add ${qty} × ${pkg.name} to cart`}
+          title={requires ? `Requires ${requires}`
+            : owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
+        >
+          <CartIcon />
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div class={`modal-overlay${closing ? ' closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
-      <div class="pkg-modal card">
+      <div class={`pkg-modal card${rich ? ' pkg-modal--rich' : ''}${rank ? ' pkg-modal--rank' : ''}`} style={rankVars(rank?.colors)}>
         <button class="pkg-modal-close" onClick={close} aria-label="Close">✕</button>
 
         {pkg.image && (
@@ -57,43 +110,17 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires =
             </p>
           )}
 
-          {pkg.description && (
-            <div class="pkg-desc pkg-modal-desc" dangerouslySetInnerHTML={{ __html: pkg.description }} />
-          )}
+          {/* A rich description can run long - the battle pass lists fifty tiers -
+              so the buy controls move above it instead of sitting a scroll away. */}
+          {rank && <RankHero rank={rank} />}
+          {rich && buy}
 
-          {allowQuantity && !blocked && (
-            <div class="pkg-qty pkg-modal-qty">
-              <span class="pkg-qty-label">QTY</span>
-              <QuantityStepper value={qty} onChange={setQty} disabled={busy} label={`${pkg.name} quantity`} />
-              {qty > 1 && <span class="pkg-qty-sub">{formatPrice(pkg.total_price * qty, pkg.currency)}</span>}
-            </div>
+          {tebexHtml && (
+            <div class="pkg-desc pkg-modal-desc" dangerouslySetInnerHTML={{ __html: tebexHtml }} />
           )}
+          {rich && <RichDescription blocks={content.blocks} />}
 
-          <div class="pkg-actions">
-            <button
-              class="btn btn-primary pkg-buy"
-              disabled={busy || blocked}
-              onClick={() => onBuy(pkg, qty)}
-              aria-label={
-                requires ? `${pkg.name} requires ${requires}`
-                  : owned ? `You already own ${pkg.name}`
-                    : inCart ? `${pkg.name} is already in your cart`
-                      : `Buy ${qty} × ${pkg.name}`
-              }
-            >
-              {requires ? 'LOCKED' : owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
-            </button>
-            <button
-              class="pkg-cart-btn"
-              disabled={busy || blocked}
-              onClick={() => onAddToCart(pkg, qty)}
-              aria-label={`Add ${qty} × ${pkg.name} to cart`}
-              title={requires ? `Requires ${requires}`
-                : owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
-            >
-              <CartIcon />
-            </button>
-          </div>
+          {!rich && buy}
         </div>
       </div>
     </div>

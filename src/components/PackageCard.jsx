@@ -3,6 +3,7 @@ import { CartIcon } from './CartDrawer';
 import { QuantityStepper } from './QuantityStepper';
 import { limitLabel, limitCount } from '../lib/packageLimit';
 import { listPrice } from '../lib/price';
+import { contentFor } from '../lib/storeContent';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -23,6 +24,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = 
   const inCart = cap > 0 && cartQty >= cap;
   const blocked = owned || inCart || Boolean(requires);
   const [qty, setQty] = useState(1);
+  const summary = contentFor(pkg)?.summary;
 
   return (
     <div
@@ -40,6 +42,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = 
       )}
       <div class="pkg-body">
         <p class="pkg-name">{pkg.name}</p>
+        {summary && <p class="pkg-summary">{summary}</p>}
         <p class="pkg-price">
           {onSale && <span class="pkg-price-old">{formatPrice(listPrice(pkg), pkg.currency)}</span>}
           <span class="pkg-price-now">{formatPrice(pkg.total_price, pkg.currency)}</span>
