@@ -7,16 +7,16 @@
   <script>
     // The nav bar is the first text painted - hero content is still faded out
     // at that point - so a webfont swapping in under it reads as a flicker on
-    // every navigation. Reveal it once Teko has actually loaded, or after
+    // every navigation. Reveal it once Teko, Jersey 10 and VT323 have loaded, or after
     // 1.5s if the font never arrives.
     (function () {
       var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
       el.classList.add('js');
       if (!document.fonts || !document.fonts.load) return ready();
       // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
-      // no Teko face to wait on, and the request would resolve instantly.
+      // no webfont face to wait on, and the request would resolve instantly.
       addEventListener('DOMContentLoaded', function () {
-        document.fonts.load('400 1rem Teko').then(ready, ready);
+        Promise.all([document.fonts.load('700 1rem Teko'), document.fonts.load('400 1rem "Jersey 10"'), document.fonts.load('400 1rem VT323')]).then(ready, ready);
       });
       setTimeout(ready, 1500);
     })();
@@ -25,9 +25,9 @@
   <link rel="icon" type="image/png" href="/server-icon-old-2.png">
   <title>FAQ | Chromabit SMP</title>
   <meta name="description"
-    content="Frequently asked questions about Chromabit, the Economy SMP Minecraft server with store credit prizes. Learn how server events work, server IP, launch date, and more.">
+    content="Server address for Java and Bedrock, versions, ranks, the auction house, events, claims and rules. Every answer checked against the server config.">
   <meta name="keywords"
-    content="Chromabit FAQ, Economy SMP FAQ, Minecraft server FAQ, Chromabit events, Chromabit help">
+    content="Chromabit FAQ, Chromabit server IP, Chromabit Bedrock, Minecraft economy server help">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Chromabit SMP">
   <link rel="canonical" href="https://chromabit.us/faq/">
@@ -37,40 +37,245 @@
   <meta property="og:url" content="https://chromabit.us/faq/">
   <meta property="og:title" content="FAQ | Chromabit SMP">
   <meta property="og:description"
-    content="Everything you need to know about Chromabit: server IP, launch date, how to win, and more.">
+    content="Server address for Java and Bedrock, versions, ranks, the auction house, events, claims and rules. Every answer checked against the server config.">
   <meta property="og:image" content="https://chromabit.us/og-preview.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FAQ | Chromabit SMP">
-  <meta name="twitter:description" content="All your Chromabit questions answered. Server IP, prizes, launch date, and more.">
+  <meta name="twitter:description" content="Server address for Java and Bedrock, versions, ranks, the auction house, events, claims and rules. Every answer checked against the server config.">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "url": "https://chromabit.us/faq/",
-    "isPartOf": { "@type": "WebSite", "name": "Chromabit SMP", "url": "https://chromabit.us" },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Chromabit SMP",
+      "url": "https://chromabit.us"
+    },
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is Chromabit?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Chromabit is a competitive Economy SMP Minecraft server where players build wealth through a player-driven economy and win store credit in server events." }
+        "name": "What is the server address?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "play.chromabit.us for Java Edition. Bedrock Edition uses the same address with port 19132. There is no whitelist and no application."
+        }
       },
       {
         "@type": "Question",
-        "name": "How do server events work?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Events are announced in the Chromabit Discord along with the rules and the closing date. The winner takes home 100 store credit, and the top 5 all earn credit: 100, 50, 25, 10, and 5." }
+        "name": "Can I play on Bedrock, phone or console?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. More than half of the players connect from Bedrock. Add a server in Bedrock with address play.chromabit.us and port 19132. Your name appears in game with a dot in front of it, and you use that dotted name in the store too."
+        }
       },
       {
         "@type": "Question",
-        "name": "What is the server IP address?",
-        "acceptedAnswer": { "@type": "Answer", "text": "The server IP is play.chromabit.us." }
+        "name": "Which Minecraft version do I need?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Any Java version up to 26.3 connects, and older releases work too, so you do not have to update or downgrade to play. Bedrock players always connect on their current version."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there voice chat?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, through the Simple Voice Chat mod on Java. It is optional and works without it installed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What kind of server is Chromabit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A survival server with a player-run economy. The difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What should I do first?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run /rtp to leave spawn, /sethome where you land, then /kit claim for a golden shovel and claim your land. Sell what you gathered with /sell, and open /kit starter for gear, food and two crate keys. /help in game walks you through it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do spawners work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Mine any spawner without Silk Touch and carry it with you. Up to 64 of the same kind stack into one block. Drops collect inside the spawner instead of on the floor; right-click to open its storage, or put an upgradeable hopper under it. Spawners come from /shop, from ranking up, and from the Spawner Crate."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens when I die?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You lose 0.5% of your balance (0.1%, capped at $100,000, in the dungeon) and drop your inventory, except Chromatic and Halloween gear, which always stays with you. Logging out during a fight costs 5% instead. Keep inventory is on at spawn, in the dungeon and in the KOTH arena."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is PvP on?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "On in the overworld, the Nether and the End, and in the KOTH arena. Off at spawn, inside claims and in the dungeon. A 15-second combat tag blocks /home, /spawn and teleports while you are fighting."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much money do I start with?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "$80,000. There is no upkeep and no tax on holding it. The balance leaderboard in the tab list shows where you stand."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is in the auction house?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open /ah for four tabs. The auction house holds buy-now listings, up to 75 per player for seven days each. Orders let you post a buy request. Coinflip plays against the house. Liquidity pools are an exchange for elytra, enchanted golden apples, totems, mending books, fireworks, netherite, iron and diamonds, with futures up to 3x leverage. Live prices and history are on the auctions page."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What do listings cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 5% listing fee with a $100 minimum, and a 2% tax on both the buyer and the seller when it sells."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are Prism Shards?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A second currency used at /craft, where the Chromatic Arsenal, Shards, Clusters, Prisms and other custom items are made. You earn them from crates, kits and the battle pass."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do Auto Sell Chests work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Anything placed in one is sold automatically on a timer, every ten minutes by default and upgradeable down to fifteen seconds, with price multipliers you can level up. Everyone can place two; VIP gets 5, VIP+ 10 and MVP 15."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I rank up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Type /rankup. Each of the ten free ranks, from Tin to Prismatic, asks for things you do in the game: mobs killed, blocks mined, hours played and a balance you have to hold. Only Adamantine takes money from you; every other rank just checks you have it. Each rank hands out spawners, cash or keys."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What do paid ranks give?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Convenience, not power: more homes, more Auto Sell Chests, more player warps, extra spawner storage pages, more upgradeable hoppers, commands like /back, /hat, /feed and /repair, faster mcMMO, and a daily kit with crate keys and Prism Shards. VIP, VIP+, MVP and MVP+ each include everything below them. The store lists exactly what each one grants."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How many homes do I get?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Three to start. Silver adds one and Adamantine adds another. VIP has 10, VIP+ 15, MVP 20 and MVP+ 25."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When are the events?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "King of the Hill runs every two hours, on the hour, as long as three players are online, in the Backrooms or the Halloween arena. Envoys drop every hour for ten minutes. A vote party fires every twenty votes. The dungeon at /warp dungeon is open all the time. Seasonal events are announced on Discord."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What do I win?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rewards are in game: the KOTH winner takes a Reward Key, envoys drop spawners and Reward Keys, vote parties give everyone online a Vote Key, and clearing a dungeon camp drops loot worth up to about $5,000,000 at market prices."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the battle pass?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Fifty tiers of daily and weekly quests each season. The free track is on for everyone. The Chroma Pass, sold in the store, adds the premium reward on every tier. Season 3, Octoberbit, runs from 1 October to 4 November 2026 and does not carry over from the season before."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do crates work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Crates sit at spawn and open with a matching key: Chroma, Shard, Spawner and the seasonal Halloween crate from the store, plus Reward and Vote crates earned in game. Each crate also has guaranteed milestone rewards after a set number of opens. Every reward in the store crates is listed on that crate's key in the store, by rarity."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I vote?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Five sites, each giving a Vote Key every 24 hours: minecraftservers.org, minecraft.buzz, topminecraftservers.org, mc-servers.com and topg.org."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I protect my land?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "With a golden shovel from /kit claim. Right-click two corners to claim the area; nobody else can build, break or open containers inside. You start with 100 claim blocks and earn 100 more for every hour you play, up to 80,000. Extra blocks come from the store and from crates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do claims expire?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A claim with only a chest in it expires after 7 days and an unused claim after 14. Everything expires after 40 days without logging in, unless you hold at least 40,000 claim blocks or 10,000 bonus blocks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can mobs or TNT damage my base?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Explosions and creeper damage are blocked inside claims, and most mob griefing is blocked across the overworld. Raiding unclaimed land is allowed, so claim before you build."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the rules?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No cheating or hacking. No griefing. No lag machines. Keep chat civil. Breaking into a claim counts as griefing. Scamming and teleport traps are not banned but are frowned on. Punishments go from mute to temporary ban to ban; the full list is on Discord."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there anti-cheat?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Movement and combat cheats are caught by GrimAC, and ores are hidden until you reach them so X-ray does not work."
+        }
       }
     ]
   }
   </script>
 
   <link
-    href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Barlow:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Jersey+10&family=VT323&display=swap"
     rel="stylesheet">
 </head>
 

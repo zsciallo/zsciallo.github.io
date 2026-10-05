@@ -15,13 +15,14 @@ import emeraldIcon from './assets/emerald_icon.webp';
 import diamondIcon from './assets/diamond_icon.webp';
 import shieldIcon from './assets/shield_icon.webp';
 import spawnerIcon from './assets/spawner_icon.webp';
+import { MotionRoot } from './lib/motion';
 
 export default function App() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
   useScrollReveal();
 
   return (
-    <>
+    <MotionRoot>
       <NavBar current="home" />
       <main>
         <section class="page-hero container" aria-label="Chromabit SMP">
@@ -89,6 +90,6 @@ export default function App() {
         <Events prize={config.prize} discord={config.discord} />
       </main>
       <Footer />
-    </>
+    </MotionRoot>
   );
 }

@@ -3,6 +3,7 @@ import { useScrollReveal } from '../hooks/useScrollReveal';
 import { SectionHeader } from '../components/SectionHeader';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
+import { MotionRoot } from '../lib/motion';
 
 // Bump whenever the substance of the policy changes - not for typo fixes.
 const LAST_UPDATED = 'August 10, 2026';
@@ -13,7 +14,7 @@ export function PrivacyPage() {
   useScrollReveal();
 
   return (
-    <>
+    <MotionRoot>
       <NavBar />
       <main>
         <section class="page-hero container" aria-label="Chromabit SMP privacy policy">
@@ -164,6 +165,6 @@ export function PrivacyPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </MotionRoot>
   );
 }

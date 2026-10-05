@@ -4,6 +4,7 @@ import { QuantityStepper } from './QuantityStepper';
 import { limitLabel, limitCount } from '../lib/packageLimit';
 import { listPrice } from '../lib/price';
 import { contentFor } from '../lib/storeContent';
+import { ArcadeButton } from './ArcadeButton';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -64,8 +65,9 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = 
         )}
 
         <div class="pkg-actions" onClick={(e) => e.stopPropagation()}>
-          <button
-            class="btn btn-primary pkg-buy"
+          <ArcadeButton
+            variant="primary"
+            class="pkg-buy"
             disabled={busy || blocked}
             onClick={() => onBuy(pkg, qty)}
             aria-label={
@@ -76,7 +78,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, owned = false, requires = 
             }
           >
             {requires ? 'LOCKED' : owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
-          </button>
+          </ArcadeButton>
           <button
             class="pkg-cart-btn"
             disabled={busy || blocked}

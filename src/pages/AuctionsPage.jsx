@@ -7,6 +7,7 @@ import { PoolsPanel } from '../components/market/PoolsPanel';
 import { FuturesPanel } from '../components/market/FuturesPanel';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
+import { MotionRoot } from '../lib/motion';
 
 const PAGE_SIZE = 40;
 
@@ -86,7 +87,7 @@ export function AuctionsPage() {
   useEffect(() => setLimit(PAGE_SIZE), [query, sort, listedOnly]);
 
   return (
-    <>
+    <MotionRoot>
       <NavBar current="auctions" />
       <main>
         {/* A slim masthead rather than the site's full hero: this page is read
@@ -203,6 +204,6 @@ export function AuctionsPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </MotionRoot>
   );
 }

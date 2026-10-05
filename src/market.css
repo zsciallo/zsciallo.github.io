@@ -47,13 +47,14 @@
 
 .market-eyebrow {
   text-align: left;
-  font-size: 0.62rem;
+  font-size: 0.81rem;
   letter-spacing: 0.24em;
   margin-bottom: 0.05rem;
 }
 
 .market-h1 {
-  font-family: 'Teko', sans-serif;
+  font-family: var(--font-hud);
+  font-size-adjust: cap-height 0.63;
   font-size: 1.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -68,8 +69,9 @@
 }
 
 .beta-tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.79rem;
   font-weight: 600;
   letter-spacing: 0.16em;
   line-height: 1;
@@ -91,8 +93,9 @@
 .market-meta {
   flex: 0 1 auto;
   text-align: right;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.84rem;
   letter-spacing: 0.04em;
   color: var(--muted);
 }
@@ -123,9 +126,11 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.6rem 0.9rem;
-  font-family: 'Teko', sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
   color: var(--muted);
   background: none;
   border: 0;
@@ -146,8 +151,9 @@
 
 .market-tab-flag {
   padding: 0.05rem 0.32rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.55rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.79rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-2);
@@ -172,7 +178,8 @@
 .market-sort select {
   width: 100%;
   padding: 0.7rem 0.9rem;
-  font-family: 'Barlow', sans-serif;
+  font-family: var(--font-body);
+  font-size-adjust: cap-height 0.7;
   font-size: 0.92rem;
   color: var(--text);
   background: var(--bg2);
@@ -210,15 +217,17 @@
 
 .market-toggle {
   padding: 0.7rem 1.1rem;
-  font-family: 'Teko', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.09em;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
   color: var(--muted);
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .market-toggle:hover {
@@ -233,8 +242,9 @@
 }
 
 .market-count {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.84rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
@@ -258,7 +268,8 @@
   width: 100%;
   padding: 0.6rem 1rem;
   text-align: left;
-  font-family: 'Barlow', sans-serif;
+  font-family: var(--font-body);
+  font-size-adjust: cap-height 0.7;
   font-size: 0.9rem;
   color: var(--text);
   background: none;
@@ -285,8 +296,9 @@
   cursor: default;
   padding-top: 0.7rem;
   padding-bottom: 0.7rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--muted);
@@ -299,7 +311,8 @@
 
 .market-row .num {
   text-align: right;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
 }
@@ -312,7 +325,7 @@
 
 .market-when {
   display: block;
-  font-size: 0.66rem;
+  font-size: 0.82rem;
   letter-spacing: 0.02em;
 }
 
@@ -333,8 +346,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.83rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -355,7 +369,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -372,8 +386,9 @@
 .market-tag {
   flex: none;
   padding: 0.05rem 0.36rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.80rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-2);
@@ -410,15 +425,16 @@
   width: 100%;
   margin-top: 0.75rem;
   padding: 0.75rem;
-  font-family: 'Teko', sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.1em;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
   color: var(--muted);
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
 
 .market-more:hover {
@@ -443,7 +459,8 @@
 }
 
 .market-status-hint code {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
   font-size: 0.8rem;
   color: var(--text);
   background: var(--bg3);
@@ -457,14 +474,15 @@
 .detail-back {
   margin-bottom: 1.1rem;
   padding: 0.4rem 0.75rem 0.4rem 0.55rem;
-  font-family: 'Barlow', sans-serif;
+  font-family: var(--font-body);
+  font-size-adjust: cap-height 0.7;
   font-size: 0.85rem;
   color: var(--muted);
   background: none;
   border: 1px solid var(--border);
   border-radius: 7px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
 
 .detail-back:hover {
@@ -480,7 +498,8 @@
 }
 
 .detail-name {
-  font-family: 'Teko', sans-serif;
+  font-family: var(--font-hud);
+  font-size-adjust: cap-height 0.63;
   font-size: clamp(1.7rem, 4vw, 2.4rem);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -497,8 +516,9 @@
 }
 
 .detail-key {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.83rem;
   color: var(--muted);
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -533,15 +553,17 @@
 
 .detail-contents li b {
   color: var(--positive);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.85rem;
 }
 
 .detail-contents h4,
 .detail-lore h4,
 .mini-table h4 {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -577,8 +599,9 @@
 }
 
 .stat-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.81rem;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--muted);
@@ -586,7 +609,8 @@
 }
 
 .stat-value {
-  font-family: 'Barlow', sans-serif;
+  font-family: var(--font-body);
+  font-size-adjust: cap-height 0.7;
   font-size: 1.22rem;
   font-weight: 600;
   line-height: 1.15;
@@ -594,7 +618,7 @@
 }
 
 .stat-note {
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   color: var(--muted);
   opacity: 0.8;
   margin-top: 0.15rem;
@@ -619,7 +643,8 @@
 }
 
 .chart-title {
-  font-family: 'Teko', sans-serif;
+  font-family: var(--font-hud);
+  font-size-adjust: cap-height 0.63;
   font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -643,8 +668,9 @@
 
 .range-tab {
   padding: 0.28rem 0.7rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.83rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -675,7 +701,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.74rem;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 
@@ -721,8 +747,9 @@
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.6rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.64rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   letter-spacing: 0.06em;
   color: var(--muted);
   background: none;
@@ -787,7 +814,8 @@
 
 .chart-tick {
   fill: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
   font-size: 9.5px;
   font-variant-numeric: tabular-nums;
 }
@@ -835,8 +863,9 @@
 }
 
 .chart-tip-time {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.64rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   letter-spacing: 0.05em;
   color: var(--muted);
   margin-bottom: 0.35rem;
@@ -847,7 +876,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.9rem;
-  font-size: 0.76rem;
+  font-size: 0.85rem;
   line-height: 1.6;
 }
 
@@ -865,7 +894,8 @@
 }
 
 .chart-tip dd {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
@@ -895,8 +925,9 @@
 .mini-table th {
   padding: 0.3rem 0.4rem 0.45rem;
   text-align: left;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.80rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -921,20 +952,23 @@
 }
 
 .mini-table .mono {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
   font-variant-numeric: tabular-nums;
 }
 
 .mini-table .seller {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.84rem;
   color: var(--muted);
 }
 
 .mini-more {
   padding: 0.55rem 0.4rem 0.2rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   letter-spacing: 0.06em;
   color: var(--muted);
   opacity: 0.7;
@@ -1009,15 +1043,17 @@
 }
 
 .explainer-title {
-  font-family: 'Teko', sans-serif;
+  font-family: var(--font-hud);
+  font-size-adjust: cap-height 0.63;
   font-size: 1.2rem;
   letter-spacing: 0.05em;
   transition: color 0.15s;
 }
 
 .explainer-hint {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.81rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-2);
@@ -1034,8 +1070,9 @@
 }
 
 .explainer-body h4 {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -1054,7 +1091,8 @@
 }
 
 .explainer-body code {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
   font-size: 0.78rem;
   color: var(--text);
   background: var(--bg3);
@@ -1079,13 +1117,14 @@
   gap: 0.6rem;
   padding: 0.8rem 0.9rem;
   text-align: left;
-  font-family: 'Barlow', sans-serif;
+  font-family: var(--font-body);
+  font-size-adjust: cap-height 0.7;
   color: var(--text);
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 12px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .pool-card:hover {
@@ -1117,8 +1156,9 @@
 }
 
 .pool-ticker {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.84rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
@@ -1157,7 +1197,7 @@
 }
 
 .pool-card-price em span {
-  font-size: 0.62rem;
+  font-size: 0.81rem;
   font-weight: 400;
   color: var(--muted);
   letter-spacing: 0.06em;
@@ -1174,7 +1214,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  font-size: 0.7rem;
+  font-size: 0.84rem;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -1201,8 +1241,9 @@
 /* Buy and sell read at a glance in a table of otherwise identical rows; long
    and short are the same distinction on the futures book. */
 .side {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.82rem;
   letter-spacing: 0.06em;
   padding: 0.08rem 0.36rem;
   border-radius: 3px;
@@ -1251,8 +1292,9 @@
   display: inline-block;
   margin-bottom: 0.6rem;
   padding: 0.1rem 0.45rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  font-size-adjust: cap-height 0.7;
+  font-size: 0.80rem;
   letter-spacing: 0.12em;
   color: var(--accent-2);
   background: var(--border-pink);
@@ -1260,7 +1302,8 @@
 }
 
 .futures-intro h2 {
-  font-family: 'Teko', sans-serif;
+  font-family: var(--font-hud);
+  font-size-adjust: cap-height 0.63;
   font-size: clamp(1.5rem, 3.4vw, 2rem);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1290,7 +1333,7 @@
 .futures-lev {
   margin-left: 0.35rem;
   font-style: normal;
-  font-size: 0.7rem;
+  font-size: 0.84rem;
   color: var(--muted);
 }
 
@@ -1379,4 +1422,79 @@
   .market-more {
     transition: none;
   }
+}
+
+
+/* ─── PRESS LAYER (auctions) ────────────────────────────────────────────
+   Same rules as the press layer in index.css: individual translate / scale
+   properties with an overshooting curve, so nothing fights a transform. */
+
+/* Raised controls sit on a hard edge and press flat. */
+.market-toggle,
+.market-more,
+.pool-card {
+  box-shadow: 0 3px 0 var(--edge-raised);
+  transition:
+    translate 0.3s var(--ease-spring),
+    box-shadow 0.15s,
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.market-toggle:hover,
+.market-more:hover {
+  translate: 0 -2px;
+  box-shadow: 0 5px 0 var(--edge-lit);
+}
+
+.pool-card:hover {
+  translate: 0 -3px;
+  box-shadow: 0 6px 0 var(--edge-lit), 0 12px 30px rgba(199, 125, 255, 0.14);
+}
+
+.pool-card.selected {
+  box-shadow: 0 3px 0 var(--edge-lit);
+}
+
+.market-toggle:active,
+.market-more:active,
+.pool-card:active {
+  translate: 0 3px;
+  box-shadow: 0 0 0 var(--edge-lit);
+  transition-duration: 0.06s;
+}
+
+.market-toggle.active {
+  box-shadow: 0 3px 0 var(--edge-primary);
+}
+
+/* Flat tabs and chips squash on press. */
+.market-tab,
+.range-tab,
+.indicator-tab,
+.detail-back {
+  transition-property: color, background, border-color, translate, scale;
+  transition-duration: 0.14s, 0.14s, 0.14s, 0.3s, 0.3s;
+  transition-timing-function: ease, ease, ease, var(--ease-spring), var(--ease-spring);
+}
+
+.market-tab:active,
+.range-tab:active,
+.indicator-tab:active:not(:disabled) {
+  scale: 0.92;
+  transition-duration: 0.06s;
+}
+
+/* The back button leans the way it goes. */
+.detail-back:hover {
+  translate: -3px 0;
+}
+
+.detail-back:active {
+  scale: 0.95;
+}
+
+.market-row:active:not(.market-row--head) {
+  background: var(--glow);
 }

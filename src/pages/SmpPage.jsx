@@ -12,13 +12,14 @@ import { Events } from '../components/Events';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
 import { Logo } from '../components/Logo';
+import { MotionRoot } from '../lib/motion';
 
 export function SmpPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
   useScrollReveal();
 
   return (
-    <>
+    <MotionRoot>
       <NavBar />
       <main>
         <section class="page-hero container" aria-label="Chromabit SMP Economy Minecraft Server">
@@ -82,6 +83,6 @@ export function SmpPage() {
         <Events prize={config.prize} discord={config.discord} />
       </main>
       <Footer />
-    </>
+    </MotionRoot>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { isValidName, normalizeName } from '../lib/minecraftName';
+import { ArcadeButton } from './ArcadeButton';
 
 /**
  * Asks which edition the buyer plays and for their name.
@@ -97,10 +98,10 @@ export function UsernameModal({ initial, initialPlatform = 'java', error, busy, 
         {error && <p class="modal-error">{error}</p>}
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onClick={close} disabled={busy}>CANCEL</button>
-          <button type="submit" class="btn btn-primary" disabled={!valid || busy}>
+          <ArcadeButton type="button" variant="secondary" onClick={close} disabled={busy}>CANCEL</ArcadeButton>
+          <ArcadeButton type="submit" variant="primary" disabled={!valid || busy}>
             {busy ? 'REDIRECTING…' : 'CONTINUE'}
-          </button>
+          </ArcadeButton>
         </div>
       </form>
     </div>

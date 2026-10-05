@@ -17,6 +17,7 @@ function DiscordIcon() {
 }
 
 import { useDiscordMembers } from '../hooks/useDiscordMembers';
+import { ArcadeButton } from './ArcadeButton';
 
 export function JoinCTA({ config }) {
   // Deliberately not tied to server status any more. Purchases deliver whenever
@@ -30,13 +31,13 @@ export function JoinCTA({ config }) {
   return (
     <div class="cta-group">
       {showStore && (
-        <a href="/store/" class="btn btn-primary" aria-label="Visit Chromabit store">
+        <ArcadeButton href="/store/" variant="primary" aria-label="Visit Chromabit store">
           <StoreIcon /> VISIT STORE
-        </a>
+        </ArcadeButton>
       )}
-      <a href={config.discord} target="_blank" rel="noopener" class="btn btn-secondary" aria-label="Join Chromabit Discord">
+      <ArcadeButton href={config.discord} target="_blank" rel="noopener" variant="secondary" aria-label="Join Chromabit Discord">
         <DiscordIcon /> JOIN {memberLabel} PLAYERS ON DISCORD
-      </a>
+      </ArcadeButton>
     </div>
   );
 }

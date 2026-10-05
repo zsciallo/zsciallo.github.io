@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
 import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
+import { ArcadeButton } from './ArcadeButton';
 
 export const WELCOME_CODE = 'WELCOME20';
 
@@ -311,9 +312,9 @@ export function CartDrawer({
               <span>TOTAL</span>
               <span>{formatPrice(total, currency)}</span>
             </p>
-            <a class="btn btn-primary cart-checkout" href={basket.links?.checkout}>
+            <ArcadeButton variant="primary" class="cart-checkout" href={basket.links?.checkout}>
               CHECKOUT
-            </a>
+            </ArcadeButton>
           </div>
         )}
       </aside>

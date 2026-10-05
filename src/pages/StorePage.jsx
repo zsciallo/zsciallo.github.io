@@ -21,6 +21,8 @@ import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
+import { MotionRoot } from '../lib/motion';
+import { ArcadeButton } from '../components/ArcadeButton';
 
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
@@ -428,7 +430,7 @@ export function StorePage() {
   const canRetry = Boolean(retry) || Boolean(!checkoutError && cart.basketError);
 
   return (
-    <>
+    <MotionRoot>
       <NavBar current="store" />
       <main>
         <section class="page-hero container" aria-label="Chromabit SMP Store">
@@ -467,7 +469,7 @@ export function StorePage() {
                 </>
               ) : (
                 <>
-                  <button class="btn btn-secondary btn-sm store-login" onClick={openLogin}>LOG IN</button>
+                  <ArcadeButton type="button" variant="secondary" size="sm" class="store-login" onClick={openLogin}>LOG IN</ArcadeButton>
                   <span class="store-user-hint">Set your Minecraft username to buy</span>
                 </>
               )}
@@ -488,20 +490,24 @@ export function StorePage() {
                 <span>{checkoutError || nameCheckFailed}</span>
                 {canRetry && (
                   <span class="store-banner-actions">
-                    <button
-                      class="btn btn-sm btn-secondary"
+                    <ArcadeButton
+                      type="button"
+                      size="sm"
+                      variant="secondary"
                       onClick={handleRetry}
                       disabled={retrying}
                     >
                       {retrying ? 'CHECKING…' : 'TRY AGAIN'}
-                    </button>
-                    <button
-                      class="btn btn-sm btn-secondary"
+                    </ArcadeButton>
+                    <ArcadeButton
+                      type="button"
+                      size="sm"
+                      variant="secondary"
                       onClick={openLogin}
                       disabled={retrying}
                     >
                       CHANGE NAME
-                    </button>
+                    </ArcadeButton>
                   </span>
                 )}
               </div>
@@ -518,22 +524,28 @@ export function StorePage() {
 
             {store.categories.length > 1 && (
               <nav class="store-tabs" aria-label="Package categories">
-                <button
-                  class={`btn btn-sm store-tab ${activeCat == null ? 'btn-primary' : 'btn-secondary'}`}
+                <ArcadeButton
+                  type="button"
+                  size="sm"
+                  class="store-tab"
+                  variant={activeCat == null ? 'primary' : 'secondary'}
                   aria-pressed={activeCat == null}
                   onClick={() => setActiveCat(null)}
                 >
                   ALL
-                </button>
+                </ArcadeButton>
                 {store.categories.map((c) => (
-                  <button
+                  <ArcadeButton
                     key={c.id}
-                    class={`btn btn-sm store-tab ${activeCat === c.id ? 'btn-primary' : 'btn-secondary'}`}
+                    type="button"
+                    size="sm"
+                    class="store-tab"
+                    variant={activeCat === c.id ? 'primary' : 'secondary'}
                     aria-pressed={activeCat === c.id}
                     onClick={() => setActiveCat(c.id)}
                   >
                     {c.name.toUpperCase()}
-                  </button>
+                  </ArcadeButton>
                 ))}
               </nav>
             )}
@@ -635,6 +647,6 @@ export function StorePage() {
           }}
         />
       )}
-    </>
+    </MotionRoot>
   );
 }

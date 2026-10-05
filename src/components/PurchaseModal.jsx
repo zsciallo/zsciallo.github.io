@@ -1,4 +1,5 @@
 import { useState } from 'preact/hooks';
+import { ArcadeButton } from './ArcadeButton';
 
 /**
  * Shown when the buyer lands back on the store from Tebex with
@@ -53,7 +54,7 @@ export function PurchaseModal({ serverIP, username, onClose }) {
         </button>
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-primary" onClick={close}>DONE</button>
+          <ArcadeButton type="button" variant="primary" onClick={close}>DONE</ArcadeButton>
         </div>
       </div>
     </div>

@@ -8,20 +8,35 @@ import { SectionHeader } from '../components/SectionHeader';
 import { FaqItem } from '../components/FaqItem';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
+import { MotionRoot } from '../lib/motion';
+import faq from '../data/faq.json';
 
-function formatDate(iso) {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+// Answers in faq.json use a tiny markdown: **bold**, `code` and [text](href).
+// Anything else is plain text, which keeps the JSON readable and lets
+// tools/build_faq_ld.py strip it the same way for the page's JSON-LD.
+const TOKEN = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
+
+function rich(text) {
+  return text.split(TOKEN).map((part, i) => {
+    if (!part) return null;
+    if (part.startsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith('`')) return <code key={i}>{part.slice(1, -1)}</code>;
+    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    if (link) {
+      const external = /^https?:/.test(link[2]);
+      return <a key={i} href={link[2]} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>{link[1]}</a>;
+    }
+    return part;
+  });
 }
 
 export function FaqPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);
-  const launchDate = formatDate(config.launchDate);
   useScrollReveal();
 
   return (
-    <>
-      <NavBar />
+    <MotionRoot>
+      <NavBar current="faq" />
       <main>
         <section class="page-hero container" aria-label="Chromabit SMP FAQ">
           <p class="section-eyebrow">HELP CENTER</p>
@@ -44,58 +59,21 @@ export function FaqPage() {
           <div class="container">
             <SectionHeader eyebrow="QUESTIONS" title="FAQ" />
             <div class="faq-list">
-            <p class="faq-section-label">GAMEPLAY</p>
-
-              <FaqItem question="What type of server is Chromabit?">
-                Chromabit is a spawner-based Economy SMP. Mob spawners are a core part of the economy they generate sellable drops that you use to build wealth, run shops, and climb the balance leaderboard.
-              </FaqItem>
-
-              <FaqItem question="How does the rank system work?">
-                Progress through ranks as you play using <strong>/rankup</strong>
-                <br />
-                Each rank unlocks new perks. Acheieving the highest rank grants exclusive items such as Sell Chests.
-              </FaqItem>
-
-              <FaqItem question="How do spawners work?">
-                Spawners store mob drops directly inside them right-click a spawner to open its storage and collect your loot. Place a hopper underneath to automate collection. Spawners can be picked up from the world, purchased via <strong>/shop</strong>, or won from the Spawner Crate at spawn (keys available through ranking up, voting, or the store).
-              </FaqItem>
-
-              <p class="faq-section-label">PRIZES</p>
-
-              <FaqItem question="How do server events work?">
-                Events are announced in our <a href={config.discord} target="_blank" rel="noopener">Discord</a> along with the rules and the closing date. The winner takes home <strong>{config.prize}</strong>, and the top 5 all earn credit: 100, 50, 25, 10, and 5. No entry fee required, just play.
-              </FaqItem>
-
-              <FaqItem question="How do I receive my prize?">
-                Prizes are paid out as store credit. Winners will need to submit a ticket in the #prize-claims channel, and the credit is applied to your account so you can spend it on ranks, crate keys, or anything else in the <a href="/store/">store</a>.
-              </FaqItem>
-
-              <p class="faq-section-label">GENERAL</p>
-
-              <FaqItem question="What is Chromabit?">
-                Chromabit is a competitive Economy SMP Minecraft server. Players build wealth through a player-driven economy, compete on the balance leaderboard, and win store credit in server events.
-              </FaqItem>
-
-              <FaqItem question="What is an Economy SMP Minecraft server?">
-                An Economy SMP is a Survival Multiplayer server built around a player-driven economic system. Players earn in-game currency by farming, trading, and running shops, then compete for top spots on leaderboards. On Chromabit, server events pay out store credit to the top finishers.
-              </FaqItem>
-
-              <FaqItem question="What is the server IP address?">
-                The server IP is <strong>play.chromabit.us</strong>.
-              </FaqItem>
-
-              <FaqItem question="Is Chromabit Java or Bedrock Edition?">
-                Chromabit runs on Java Edition. Join our <a href={config.discord} target="_blank" rel="noopener">Discord</a> for the latest info on supported versions and any cross-play options.
-              </FaqItem>
-
-              <FaqItem question="Does Chromabit have grief protection?">
-                Yes. Your builds, land, and storage are fully protected by grief prevention. You can focus on competing in the economy without worrying about other players destroying your work.
-              </FaqItem>
+              {faq.groups.map((group) => (
+                <div class="faq-group" id={group.id} key={group.id}>
+                  <p class="faq-section-label">{group.title.toUpperCase()}</p>
+                  {group.items.map((item) => (
+                    <FaqItem question={item.q} key={item.q}>
+                      {rich(item.a)}
+                    </FaqItem>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </section>
       </main>
       <Footer />
-    </>
+    </MotionRoot>
   );
 }

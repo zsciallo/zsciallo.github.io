@@ -1,4 +1,6 @@
 import { useState } from 'preact/hooks';
+import { m, useReducedMotion } from 'motion/react';
+import { spring } from '../lib/motion';
 
 function CopyIcon() {
   return (
@@ -19,9 +21,14 @@ function CheckIcon() {
 
 export function ServerIPCard({ ip, status }) {
   const [copied, setCopied] = useState(false);
+  const still = useReducedMotion();
+  // The label pops only when it changes - never on first paint, where it
+  // would ship invisible in the server-rendered HTML.
+  const [clicked, setClicked] = useState(false);
   const players = status?.players;
 
   function handleCopy() {
+    setClicked(true);
     navigator.clipboard.writeText(ip).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -46,10 +53,18 @@ export function ServerIPCard({ ip, status }) {
       <div class="ip-value">
         play.<span class="accent">chromabit</span>.us
       </div>
-      <button class={`copy-btn${copied ? ' copied' : ''}`} onClick={handleCopy}>
-        {copied ? <CheckIcon /> : <CopyIcon />}
-        {copied ? 'COPIED!' : 'COPY IP'}
-      </button>
+      <m.button class={`copy-btn${copied ? ' copied' : ''}`} onClick={handleCopy}
+        whileHover={still ? undefined : { y: -2 }}
+        whileTap={still ? undefined : { y: 2, scale: 0.97, transition: spring.press }}
+        transition={spring.hover}>
+        {/* Keyed on state so the label remounts and pops in on each change. */}
+        <m.span class="copy-btn-label" key={copied ? 'copied' : 'copy'}
+          initial={still || !clicked ? false : { scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+          transition={spring.pop}>
+          {copied ? <CheckIcon /> : <CopyIcon />}
+          {copied ? 'COPIED!' : 'COPY IP'}
+        </m.span>
+      </m.button>
     </div>
   );
 }

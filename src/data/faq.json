@@ -1,0 +1,162 @@
+{
+  "note": "Hand-authored. Every answer traces to a file in mc-server on main (see CLAUDE.md). Markdown-lite: **bold**, `code`, [text](href). Feeds the FAQ page and its JSON-LD via tools/build_faq_ld.py.",
+  "groups": [
+    {
+      "id": "joining",
+      "title": "Joining",
+      "sub": "Address, editions and versions.",
+      "items": [
+        {
+          "q": "What is the server address?",
+          "a": "**play.chromabit.us** for Java Edition. Bedrock Edition uses the same address with port **19132**. There is no whitelist and no application."
+        },
+        {
+          "q": "Can I play on Bedrock, phone or console?",
+          "a": "Yes. More than half of the players connect from Bedrock. Add a server in Bedrock with address `play.chromabit.us` and port `19132`. Your name appears in game with a dot in front of it, and you use that dotted name in the store too."
+        },
+        {
+          "q": "Which Minecraft version do I need?",
+          "a": "Any Java version up to 26.3 connects, and older releases work too, so you do not have to update or downgrade to play. Bedrock players always connect on their current version."
+        },
+        {
+          "q": "Is there voice chat?",
+          "a": "Yes, through the Simple Voice Chat mod on Java. It is optional and works without it installed."
+        }
+      ]
+    },
+    {
+      "id": "gameplay",
+      "title": "Gameplay",
+      "sub": "How the server plays day to day.",
+      "items": [
+        {
+          "q": "What kind of server is Chromabit?",
+          "a": "A survival server with a player-run economy. The difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank."
+        },
+        {
+          "q": "What should I do first?",
+          "a": "Run `/rtp` to leave spawn, `/sethome` where you land, then `/kit claim` for a golden shovel and claim your land. Sell what you gathered with `/sell`, and open `/kit starter` for gear, food and two crate keys. `/help` in game walks you through it."
+        },
+        {
+          "q": "How do spawners work?",
+          "a": "Mine any spawner without Silk Touch and carry it with you. Up to 64 of the same kind stack into one block. Drops collect inside the spawner instead of on the floor; right-click to open its storage, or put an upgradeable hopper under it. Spawners come from `/shop`, from ranking up, and from the Spawner Crate."
+        },
+        {
+          "q": "What happens when I die?",
+          "a": "You lose **0.5%** of your balance (0.1%, capped at $100,000, in the dungeon) and drop your inventory, except Chromatic and Halloween gear, which always stays with you. Logging out during a fight costs 5% instead. Keep inventory is on at spawn, in the dungeon and in the KOTH arena."
+        },
+        {
+          "q": "Is PvP on?",
+          "a": "On in the overworld, the Nether and the End, and in the KOTH arena. Off at spawn, inside claims and in the dungeon. A 15-second combat tag blocks `/home`, `/spawn` and teleports while you are fighting."
+        }
+      ]
+    },
+    {
+      "id": "economy",
+      "title": "Economy and market",
+      "sub": "Money, trading and the exchange.",
+      "items": [
+        {
+          "q": "How much money do I start with?",
+          "a": "**$80,000**. There is no upkeep and no tax on holding it. The balance leaderboard in the tab list shows where you stand."
+        },
+        {
+          "q": "What is in the auction house?",
+          "a": "Open `/ah` for four tabs. The auction house holds buy-now listings, up to 75 per player for seven days each. Orders let you post a buy request. Coinflip plays against the house. Liquidity pools are an exchange for elytra, enchanted golden apples, totems, mending books, fireworks, netherite, iron and diamonds, with futures up to 3x leverage. Live prices and history are on the [auctions page](/auctions/)."
+        },
+        {
+          "q": "What do listings cost?",
+          "a": "A 5% listing fee with a $100 minimum, and a 2% tax on both the buyer and the seller when it sells."
+        },
+        {
+          "q": "What are Prism Shards?",
+          "a": "A second currency used at `/craft`, where the Chromatic Arsenal, Shards, Clusters, Prisms and other custom items are made. You earn them from crates, kits and the battle pass."
+        },
+        {
+          "q": "How do Auto Sell Chests work?",
+          "a": "Anything placed in one is sold automatically on a timer, every ten minutes by default and upgradeable down to fifteen seconds, with price multipliers you can level up. Everyone can place two; VIP gets 5, VIP+ 10 and MVP 15."
+        }
+      ]
+    },
+    {
+      "id": "ranks",
+      "title": "Ranks",
+      "sub": "Ten you earn and four you can buy.",
+      "items": [
+        {
+          "q": "How do I rank up?",
+          "a": "Type `/rankup`. Each of the ten free ranks, from Tin to Prismatic, asks for things you do in the game: mobs killed, blocks mined, hours played and a balance you have to hold. Only Adamantine takes money from you; every other rank just checks you have it. Each rank hands out spawners, cash or keys."
+        },
+        {
+          "q": "What do paid ranks give?",
+          "a": "Convenience, not power: more homes, more Auto Sell Chests, more player warps, extra spawner storage pages, more upgradeable hoppers, commands like `/back`, `/hat`, `/feed` and `/repair`, faster mcMMO, and a daily kit with crate keys and Prism Shards. VIP, VIP+, MVP and MVP+ each include everything below them. The [store](/store/) lists exactly what each one grants."
+        },
+        {
+          "q": "How many homes do I get?",
+          "a": "Three to start. Silver adds one and Adamantine adds another. VIP has 10, VIP+ 15, MVP 20 and MVP+ 25."
+        }
+      ]
+    },
+    {
+      "id": "events",
+      "title": "Events and crates",
+      "sub": "What runs on a schedule, and what the keys open.",
+      "items": [
+        {
+          "q": "When are the events?",
+          "a": "King of the Hill runs **every two hours**, on the hour, as long as three players are online, in the Backrooms or the Halloween arena. Envoys drop **every hour** for ten minutes. A vote party fires every twenty votes. The dungeon at `/warp dungeon` is open all the time. Seasonal events are announced on [Discord](https://discord.chromabit.us)."
+        },
+        {
+          "q": "What do I win?",
+          "a": "Rewards are in game: the KOTH winner takes a Reward Key, envoys drop spawners and Reward Keys, vote parties give everyone online a Vote Key, and clearing a dungeon camp drops loot worth up to about $5,000,000 at market prices."
+        },
+        {
+          "q": "What is the battle pass?",
+          "a": "Fifty tiers of daily and weekly quests each season. The free track is on for everyone. The Chroma Pass, sold in the store, adds the premium reward on every tier. Season 3, Octoberbit, runs from 1 October to 4 November 2026 and does not carry over from the season before."
+        },
+        {
+          "q": "How do crates work?",
+          "a": "Crates sit at spawn and open with a matching key: Chroma, Shard, Spawner and the seasonal Halloween crate from the store, plus Reward and Vote crates earned in game. Each crate also has guaranteed milestone rewards after a set number of opens. Every reward in the store crates is listed on that crate's key in the [store](/store/), by rarity."
+        },
+        {
+          "q": "How do I vote?",
+          "a": "Five sites, each giving a Vote Key every 24 hours: [minecraftservers.org](https://minecraftservers.org/vote/689442), [minecraft.buzz](https://minecraft.buzz/vote/21980), [topminecraftservers.org](https://topminecraftservers.org/server/43855), [mc-servers.com](https://mc-servers.com/vote/6589) and [topg.org](https://topg.org/minecraft-servers/server-683638)."
+        }
+      ]
+    },
+    {
+      "id": "protection",
+      "title": "Claims and protection",
+      "sub": "Keeping what you build.",
+      "items": [
+        {
+          "q": "How do I protect my land?",
+          "a": "With a golden shovel from `/kit claim`. Right-click two corners to claim the area; nobody else can build, break or open containers inside. You start with 100 claim blocks and earn 100 more for every hour you play, up to 80,000. Extra blocks come from the store and from crates."
+        },
+        {
+          "q": "Do claims expire?",
+          "a": "A claim with only a chest in it expires after 7 days and an unused claim after 14. Everything expires after **40 days** without logging in, unless you hold at least 40,000 claim blocks or 10,000 bonus blocks."
+        },
+        {
+          "q": "Can mobs or TNT damage my base?",
+          "a": "Explosions and creeper damage are blocked inside claims, and most mob griefing is blocked across the overworld. Raiding unclaimed land is allowed, so claim before you build."
+        }
+      ]
+    },
+    {
+      "id": "rules",
+      "title": "Rules",
+      "sub": "Short list. Enforced.",
+      "items": [
+        {
+          "q": "What are the rules?",
+          "a": "No cheating or hacking. No griefing. No lag machines. Keep chat civil. Breaking into a claim counts as griefing. Scamming and teleport traps are not banned but are frowned on. Punishments go from mute to temporary ban to ban; the full list is on [Discord](https://discord.chromabit.us)."
+        },
+        {
+          "q": "Is there anti-cheat?",
+          "a": "Yes. Movement and combat cheats are caught by GrimAC, and ores are hidden until you reach them so X-ray does not work."
+        }
+      ]
+    }
+  ]
+}
