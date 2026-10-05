@@ -1,18 +1,23 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 
 // Every image dropped into src/assets/serverImages is picked up
-// automatically at build time, sorted by filename. Captions come from any
-// .json file in the same directory mapping filename -> description.
+// automatically at build time. Captions come from any .json file in the same
+// directory mapping filename -> description, and the order images are listed
+// in there is the order they show; anything not listed follows, sorted by
+// filename.
 const descriptions = Object.assign(
   {},
   ...Object.values(import.meta.glob('../assets/serverImages/*.json', { eager: true, import: 'default' }))
 );
+const listed = Object.keys(descriptions);
+const rank = (name) => (listed.includes(name) ? listed.indexOf(name) : listed.length);
 
 const images = Object.entries(
   import.meta.glob('../assets/serverImages/*.{png,jpg,jpeg,webp,gif}', { eager: true, import: 'default' })
 )
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([path, src]) => ({ src, desc: descriptions[path.split('/').pop()] || '' }));
+  .map(([path, src]) => ({ name: path.split('/').pop(), src }))
+  .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name))
+  .map(({ name, src }) => ({ src, desc: descriptions[name] || '' }));
 
 function ZoomIcon() {
   return (
