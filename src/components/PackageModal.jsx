@@ -8,13 +8,16 @@ import { listPrice } from '../lib/price';
 import { sanitizeHtml } from '../lib/sanitizeHtml';
 import { contentFor } from '../lib/storeContent';
 import { ArcadeButton } from './ArcadeButton';
+import { m } from 'motion/react';
+import { spring } from '../lib/motion';
+import { freeKeysFor } from '../lib/freeKeys';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
 
 /** Full popout view of a package: image, price, and complete description. */
-export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
+export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
   const onSale = pkg.discount > 0;
   const allowQuantity = !pkg.disable_quantity;
   const limit = limitLabel(pkg.user_limit);
@@ -25,6 +28,8 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires =
   const blocked = owned || inCart || Boolean(requires);
   const [closing, setClosing] = useState(false);
   const [qty, setQty] = useState(1);
+  const freeGain = freeKeySpend == null ? 0
+    : freeKeysFor(freeKeySpend + qty * pkg.total_price) - freeKeysFor(freeKeySpend);
 
   // The server config is the source of truth for what a package grants. When
   // generated content exists (see lib/storeContent) it is the whole description
@@ -48,8 +53,15 @@ export function PackageModal({ pkg, busy, cartQty = 0, owned = false, requires =
       {allowQuantity && !blocked && (
         <div class="pkg-qty pkg-modal-qty">
           <span class="pkg-qty-label">QTY</span>
-          <QuantityStepper value={qty} onChange={setQty} disabled={busy} label={`${pkg.name} quantity`} />
-          {qty > 1 && <span class="pkg-qty-sub">{formatPrice(pkg.total_price * qty, pkg.currency)}</span>}
+          <QuantityStepper value={qty} onChange={setQty} disabled={busy} label={`${pkg.name} quantity`}
+            rewardAt={freeKeySpend == null ? null : (q) => freeKeysFor(freeKeySpend + q * pkg.total_price)} />
+          {freeGain > 0 && <span class="pkg-freekey-chip">+{freeGain} FREE KEY{freeGain > 1 ? 'S' : ''}</span>}
+          {qty > 1 && (
+            // Keyed on qty so the running total pops each time it changes.
+            <m.span key={qty} class="pkg-qty-sub" initial={{ scale: 1.35 }} animate={{ scale: 1 }} transition={spring.pop}>
+              {formatPrice(pkg.total_price * qty, pkg.currency)}
+            </m.span>
+          )}
         </div>
       )}
 

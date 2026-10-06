@@ -1,7 +1,9 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
 import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
 import { ArcadeButton } from './ArcadeButton';
+import { FREE_KEY, freeKeysFor, toNextFreeKey } from '../lib/freeKeys';
+import { freeKey as freeKeySound } from '../lib/sound';
 
 export const WELCOME_CODE = 'WELCOME20';
 
@@ -73,6 +75,8 @@ export function CartDrawer({
   busy,
   coupons = [],
   giftcards = [],
+  bonusKeys = 0,
+  freeKeySpend = 0,
   onSetQuantity,
   onRemove,
   onApplyCoupon,
@@ -86,10 +90,31 @@ export function CartDrawer({
   const [couponError, setCouponError] = useState(null);
   const [couponBusy, setCouponBusy] = useState(false);
 
+  // The free keys' value is named as such in the totals, separate from any
+  // promo code or gift card, so the buyer sees what they earned.
+  const keyUnit = packagesById[FREE_KEY.packageId]?.total_price ?? FREE_KEY.price;
   const subtotal = fullSubtotal(items, packagesById);
+  const freeValue = bonusKeys * keyUnit;
   const total = basket?.total_price ?? 0;
+  const nextKeyIn = toNextFreeKey(freeKeySpend);
+  // Fill of the bar toward the next key; full once at the cap.
+  const keyProgress = nextKeyIn == null ? 1 : 1 - nextKeyIn / FREE_KEY.every;
   // Sub-cent drift from Tebex's own rounding shouldn't render as "you saved $0.00".
-  const saved = subtotal - total > 0.005 ? subtotal - total : 0;
+  const saved = subtotal - freeValue - total > 0.005 ? subtotal - freeValue - total : 0;
+
+  // A key landing gets its moment: the box flares, the new pips pop, the
+  // jingle plays. Only on an increase the buyer caused, not on first load.
+  const [celebrating, setCelebrating] = useState(null);
+  const prevKeys = useRef(null);
+  useEffect(() => {
+    const prev = prevKeys.current;
+    prevKeys.current = bonusKeys;
+    if (prev == null || bonusKeys <= prev) return;
+    setCelebrating({ from: prev, gained: bonusKeys - prev });
+    freeKeySound();
+    const t = setTimeout(() => setCelebrating(null), 1900);
+    return () => clearTimeout(t);
+  }, [bonusKeys]);
   const hasWelcome = coupons.some((c) => c.code?.toUpperCase() === WELCOME_CODE);
 
   /**
@@ -166,7 +191,29 @@ export function CartDrawer({
         ) : (
           <div class="cart-items">
             {items.map((item) => {
-              const qty = item.in_basket.quantity;
+              // On the Chroma Key line, only the keys the buyer chose count
+              // toward its stepper and price; the promo's free ones sit beside.
+              const free = item.id === FREE_KEY.packageId ? Math.min(bonusKeys, item.in_basket.quantity) : 0;
+              const qty = item.in_basket.quantity - free;
+              const unit = item.in_basket.price;
+              // A quantity change here moves the spend, so the stepper can
+              // shout FREE KEY! when it crosses the next $10.
+              const rewardAt = (q) => freeKeysFor(freeKeySpend + (q - qty) * unit);
+
+              if (free > 0 && qty === 0) {
+                return (
+                  <div class="cart-item cart-item--free" key={item.id}>
+                    {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
+                    <div class="cart-item-info">
+                      <p class="cart-item-name">{item.name}</p>
+                      <p class="cart-item-sub cart-item-sub--free">{free} FREE · FOR EVERY ${FREE_KEY.every} SPENT</p>
+                    </div>
+                    <div class="cart-item-end">
+                      <p class="cart-item-line cart-item-line--free">FREE</p>
+                    </div>
+                  </div>
+                );
+              }
               // Basket entries don't carry the catalog flags, so look them up.
               const allowQuantity = !packagesById[item.id]?.disable_quantity;
               // Nor do they say whether the line was added as a subscription.
@@ -187,13 +234,18 @@ export function CartDrawer({
                         {every ? `SUBSCRIPTION: RENEWS ${every.toUpperCase()}` : 'SUBSCRIPTION: RENEWS AUTOMATICALLY'}
                       </p>
                     )}
+                    {free > 0 && (
+                      <p class="cart-item-sub cart-item-sub--free">+{free} FREE</p>
+                    )}
                     {allowQuantity ? (
                       <QuantityStepper
                         value={qty}
-                        onChange={(next) => onSetQuantity(item.id, next)}
+                        onChange={(next) => onSetQuantity(item.id, next + free)}
                         disabled={busy}
                         size="sm"
                         label={`${item.name} quantity`}
+                        rewardAt={rewardAt}
+                        commitDelay={650}
                       />
                     ) : (
                       <p class="cart-item-meta">
@@ -202,10 +254,11 @@ export function CartDrawer({
                     )}
                   </div>
                   <div class="cart-item-end">
-                    <p class="cart-item-line">{formatPrice(item.in_basket.price * qty, currency)}</p>
+                    <p class="cart-item-line">{formatPrice(unit * qty, currency)}</p>
                     <button
                       class="cart-item-remove"
-                      onClick={() => onRemove(item.id)}
+                      // Removing the bought keys leaves the free ones in place.
+                      onClick={() => (free > 0 ? onSetQuantity(item.id, free) : onRemove(item.id))}
                       disabled={busy}
                       aria-label={`Remove ${item.name} from cart`}
                     >
@@ -220,6 +273,31 @@ export function CartDrawer({
 
         {items.length > 0 && (
           <div class="cart-foot">
+            {/* Progress toward the next free key, pips for each earned. */}
+            <div class={`cart-keys${celebrating ? ' is-celebrating' : ''}`} aria-live="polite">
+              <div class="cart-keys-head">
+                <span class="cart-keys-pips" aria-hidden="true">
+                  {Array.from({ length: FREE_KEY.max }, (_, i) => (
+                    <i key={i} class={[
+                      i < bonusKeys && 'is-earned',
+                      celebrating && i >= celebrating.from && i < bonusKeys && 'is-new',
+                    ].filter(Boolean).join(' ') || undefined} />
+                  ))}
+                </span>
+                <span class="cart-keys-text">
+                  {celebrating
+                    ? `FREE KEY${celebrating.gained > 1 ? 'S' : ''} EARNED!`
+                    : nextKeyIn == null
+                      ? `ALL ${FREE_KEY.max} FREE KEYS UNLOCKED`
+                      : `${formatPrice(nextKeyIn, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
+                </span>
+              </div>
+              <div class="cart-keys-bar" role="progressbar" aria-label="Progress to next free Chroma Key"
+                aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(keyProgress * 100)}>
+                <span style={{ width: `${keyProgress * 100}%` }} />
+              </div>
+            </div>
+
             {/* Stays open even with a coupon applied - a gift card can still go
                 on top of one. A second *coupon* is refused by the hook, since
                 promo codes here are single-use-per-player and don't stack. */}
@@ -292,12 +370,22 @@ export function CartDrawer({
               </p>
             )}
 
+            {(saved > 0 || freeValue > 0) && (
+              <p class="cart-line">
+                <span>SUBTOTAL</span>
+                <span>{formatPrice(subtotal, currency)}</span>
+              </p>
+            )}
+
+            {freeValue > 0 && (
+              <p class="cart-line cart-line--free">
+                <span>{bonusKeys} FREE CHROMA KEY{bonusKeys > 1 ? 'S' : ''}</span>
+                <span>−{formatPrice(freeValue, currency)}</span>
+              </p>
+            )}
+
             {saved > 0 && (
               <>
-                <p class="cart-line">
-                  <span>SUBTOTAL</span>
-                  <span>{formatPrice(subtotal, currency)}</span>
-                </p>
                 <p class="cart-line cart-line--save">
                   {/* Both a coupon and a redeemed card land in `total_price`,
                       and nothing in the basket separates them - so name

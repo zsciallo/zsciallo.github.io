@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { m, useReducedMotion } from 'motion/react';
 import { spring } from '../lib/motion';
+import { useSound } from '../hooks/useSound';
+import { click } from '../lib/sound';
 
 const LINKS = [
   { id: 'home', href: '/', label: 'HOME' },
@@ -44,6 +46,44 @@ function Brand({ still }) {
   );
 }
 
+/** Speaker in pixel steps: waves when sound is on, an X when it's muted. */
+function SpeakerIcon({ on }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M2 7h3l5-4v14l-5-4H2z" />
+      {on ? (
+        <>
+          <rect x="12" y="8" width="2" height="4" />
+          <rect x="15" y="5" width="2" height="2" />
+          <rect x="17" y="7" width="2" height="6" />
+          <rect x="15" y="13" width="2" height="2" />
+        </>
+      ) : (
+        <>
+          <rect x="12" y="7" width="2" height="2" />
+          <rect x="14" y="9" width="2" height="2" />
+          <rect x="16" y="11" width="2" height="2" />
+          <rect x="16" y="7" width="2" height="2" />
+          <rect x="12" y="11" width="2" height="2" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Global sound on/off, remembered per visitor (lib/sound.js). Turning it on
+ *  answers with a click so the visitor hears what they just enabled. */
+function SoundToggle() {
+  const [on, toggle] = useSound();
+  return (
+    <button type="button" class="sound-toggle" aria-pressed={on}
+      aria-label={on ? 'Sound on' : 'Sound off'} title={on ? 'Mute sounds' : 'Turn sounds on'}
+      onClick={() => { const wasOn = on; toggle(); if (!wasOn) click(); }}>
+      <SpeakerIcon on={on} />
+    </button>
+  );
+}
+
 /** Sticky site nav. `current` is the id of the page rendering it, passed in
  *  rather than read from location so the server-rendered markup matches. */
 export function NavBar({ current = null }) {
@@ -69,6 +109,8 @@ export function NavBar({ current = null }) {
     <header class="site-nav">
       <nav class="site-nav-inner" aria-label="Primary">
         <Brand still={still} />
+
+        <SoundToggle />
 
         <button type="button" class={`nav-toggle${open ? ' open' : ''}`}
           aria-expanded={open} aria-controls="site-nav-links"

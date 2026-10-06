@@ -18,6 +18,7 @@ import { UsernameModal } from '../components/UsernameModal';
 import { PackageModal } from '../components/PackageModal';
 import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
+import { FREE_KEY } from '../lib/freeKeys';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
@@ -475,6 +476,14 @@ export function StorePage() {
               )}
             </p>
 
+            <div class="store-promo store-promo--key">
+              <span class="store-promo-tag">FREE KEYS</span>
+              <span class="store-promo-text">
+                Get a <strong>free Chroma Key</strong> for every <strong>${FREE_KEY.every}</strong> in your cart,
+                up to {FREE_KEY.max} per order. Added automatically.
+              </span>
+            </div>
+
             {!username && (
               <div class="store-promo">
                 <span class="store-promo-tag">NEW HERE?</span>
@@ -565,6 +574,7 @@ export function StorePage() {
                       pkg={pkg}
                       busy={busyPkgId === pkg.id}
                       cartQty={cartQtyOf(pkg)}
+                      freeKeySpend={cart.freeKeySpend}
                       owned={ownedOf(pkg)}
                       requires={lockedOf(pkg)?.name || null}
                       onView={handleView}
@@ -590,6 +600,8 @@ export function StorePage() {
         busy={cartBusy}
         coupons={cart.coupons}
         giftcards={cart.giftcards}
+        bonusKeys={cart.bonusKeys}
+        freeKeySpend={cart.freeKeySpend}
         onSetQuantity={handleSetQuantity}
         onRemove={handleRemove}
         onApplyCoupon={handleApplyCoupon}
@@ -612,6 +624,7 @@ export function StorePage() {
           pkg={viewPkg}
           busy={busyPkgId === viewPkg.id}
           cartQty={cartQtyOf(viewPkg)}
+          freeKeySpend={cart.freeKeySpend}
           owned={ownedOf(viewPkg)}
           requires={lockedOf(viewPkg)?.name || null}
           onBuy={(p, qty, type) => handleAction(p, 'buy', qty, type)}
