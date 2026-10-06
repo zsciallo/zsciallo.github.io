@@ -1,5 +1,14 @@
 const API = 'https://headless.tebex.io/api';
 
+/**
+ * Most of one package a basket line can hold. Tebex enforces it: a single add
+ * above it is refused as "The product isn't purchasable", and adding onto a
+ * line that would pass it as "Quantity cannot be greater than 50" (measured
+ * 2026-10-05; the catalog doesn't expose it). Every quantity control is
+ * capped to this, less what's already in the cart.
+ */
+export const MAX_QUANTITY = 50;
+
 async function request(url, options) {
   const res = await fetch(url, options);
   const body = await res.json().catch(() => null);

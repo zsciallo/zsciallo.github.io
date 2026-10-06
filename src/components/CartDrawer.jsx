@@ -4,6 +4,7 @@ import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
 import { ArcadeButton } from './ArcadeButton';
 import { FREE_KEY, freeKeysFor, toNextFreeKey } from '../lib/freeKeys';
 import { freeKey as freeKeySound } from '../lib/sound';
+import { MAX_QUANTITY } from '../lib/tebex';
 
 export const WELCOME_CODE = 'WELCOME20';
 
@@ -246,6 +247,7 @@ export function CartDrawer({
                         label={`${item.name} quantity`}
                         rewardAt={rewardAt}
                         commitDelay={650}
+                        max={MAX_QUANTITY - free}
                       />
                     ) : (
                       <p class="cart-item-meta">

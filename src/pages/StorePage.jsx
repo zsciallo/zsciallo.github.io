@@ -19,6 +19,7 @@ import { PackageModal } from '../components/PackageModal';
 import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
 import { FREE_KEY } from '../lib/freeKeys';
+import { MAX_QUANTITY } from '../lib/tebex';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
@@ -133,8 +134,13 @@ export function StorePage() {
       setCartOpen(true);
       setBusyPkgId(null);
     } catch (err) {
-      const notPurchasable = NOT_PURCHASABLE.test(err.message);
-      const overQty = OVER_QUANTITY.test(err.message);
+      // Tebex refuses anything past MAX_QUANTITY of a package per basket -
+      // as "isn't purchasable" for a single add, "Quantity cannot be greater
+      // than" when adding onto a line - so check that before reading either
+      // as a purchase limit.
+      const overQty = OVER_QUANTITY.test(err.message)
+        || (NOT_PURCHASABLE.test(err.message) && cartQtyOf(pkg) + quantity > MAX_QUANTITY);
+      const notPurchasable = !overQty && NOT_PURCHASABLE.test(err.message);
       // The one refusal Tebex can't explain for us. A missing prerequisite is
       // the likelier cause when there's no sign the player holds it.
       const missing = notPurchasable ? missingRequirement(pkg) : null;
@@ -216,7 +222,12 @@ export function StorePage() {
           // Battle Pass is one per four weeks, not one ever.
           : `You already have ${pkg.name}. It's limited to ${cap} per player.`);
       } else if (overQty) {
-        setCheckoutError(`${pkg.name} is limited to one per player, and it's already in your cart.`);
+        const have = cartQtyOf(pkg);
+        setCheckoutError(
+          `You can have up to ${MAX_QUANTITY} ${pkg.name} in one order`
+          + (have ? `, and your cart already has ${have}.` : '.')
+          + (have < MAX_QUANTITY ? ` Add ${MAX_QUANTITY - have} or fewer.` : ''),
+        );
       } else {
         setCheckoutError(err.message);
       }

@@ -5,6 +5,7 @@ import {
   addToBasket,
   removeFromBasket,
   setBasketQuantity,
+  MAX_QUANTITY,
   applyCoupon,
   removeCoupon,
   applyGiftCard,
@@ -100,7 +101,8 @@ export function useTebexBasket(token, username) {
       const unit = b.packages?.find((p) => p.id === id)?.in_basket?.price ?? FREE_KEY.price;
       // Real spend: the total, less any free keys not (yet) covered by a code.
       const spend = b.total_price - Math.max(0, bonus - applied.length) * unit;
-      const target = freeKeysFor(spend);
+      // Only as many as still fit on the Chroma Key line beside the bought ones.
+      const target = Math.min(freeKeysFor(spend), Math.max(0, MAX_QUANTITY - (qty - bonus)));
       const want = FREE_KEY.codes.slice(0, target);
       if (bonus === target && applied.length === want.length && want.every((c) => applied.includes(c))) {
         saveFreeKeys(ident, bonus);

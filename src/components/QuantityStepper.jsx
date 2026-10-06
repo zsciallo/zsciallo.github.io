@@ -3,13 +3,16 @@ import { m, useReducedMotion } from 'motion/react';
 import { spring } from '../lib/motion';
 import { click, deflate, freeKey, ignite, levelUp as levelUpSound, maxOut, stopFire, tick } from '../lib/sound';
 
-export const MAX_QUANTITY = 99;
+import { MAX_QUANTITY } from '../lib/tebex';
+
+export { MAX_QUANTITY };
 
 // Quantity "levels", every 5 through the range most people buy (1-10 keys):
-// 5 purple, 10 pink, 15 gold, 20 mint, then 30 diamond and 50 inferno for the
-// big spenders, 99 MAX. Crossing up into a new one fires LEVEL UP; the stepper
-// and its number take the tier's colour (see .qty-fx[data-tier] in index.css).
-const TIER_FLOORS = [1, 5, 10, 15, 20, 30, 50, MAX_QUANTITY];
+// 5 purple, 10 pink, 15 gold, 20 mint, then 30 diamond and 40 inferno for the
+// big spenders, and MAX at Tebex's cap of 50. Crossing up into a new one fires
+// LEVEL UP; the stepper and its number take the tier's colour (see
+// .qty-fx[data-tier] in index.css).
+const TIER_FLOORS = [1, 5, 10, 15, 20, 30, 40, MAX_QUANTITY];
 const TIER_SHOUT = { 6: 'DIAMOND!', 7: 'INFERNO!' };
 
 function tierOf(value) {

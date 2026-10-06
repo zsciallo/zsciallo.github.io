@@ -2461,8 +2461,9 @@ footer {
   display: inline-flex;
 }
 
-/* Tiers 1-4, 5-9, 10-14, 15-19, 20-29, 30-49, 50-98, 99 (QuantityStepper
-   TIER_FLOORS); 6 and 7 are styled under STEPPER: HIGH TIERS below. */
+/* Tiers 1-4, 5-9, 10-14, 15-19, 20-29, 30-39, 40-49, 50 (QuantityStepper
+   TIER_FLOORS, MAX = Tebex's per-line cap); 6 and 7 are styled under
+   STEPPER: HIGH TIERS below. */
 .qty-fx[data-tier='2'] { --tier: var(--accent); --spark: var(--accent); }
 .qty-fx[data-tier='3'] { --tier: var(--accent-2); --spark: var(--accent-2); }
 .qty-fx[data-tier='4'] { --tier: #ffd27a; --spark: #ffd27a; }
@@ -2846,7 +2847,7 @@ footer {
 }
 
 /* ─── STEPPER: HIGH TIERS ─── */
-/* 30+ DIAMOND: icy cyan with a shine that sweeps the display. */
+/* 30-39 DIAMOND: icy cyan with a shine that sweeps the display. */
 .qty-fx[data-tier='6'] { --tier: #7de8ff; --spark: #fff; }
 
 .qty-fx[data-tier='6'] .qty-field {
@@ -2861,7 +2862,7 @@ footer {
   55%, 100% { background-position: -30% 0, 0 0; }
 }
 
-/* 50+ INFERNO: a molten number and a display that beats like a heart. */
+/* 40-49 INFERNO: a molten number and a display that beats like a heart. */
 .qty-fx[data-tier='7'] { --tier: #ff4d6d; --spark: #ffb14d; }
 
 .qty-fx[data-tier='7'] .qty-num {

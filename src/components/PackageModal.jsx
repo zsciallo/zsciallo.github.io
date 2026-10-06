@@ -11,6 +11,7 @@ import { ArcadeButton } from './ArcadeButton';
 import { m } from 'motion/react';
 import { spring } from '../lib/motion';
 import { freeKeysFor } from '../lib/freeKeys';
+import { MAX_QUANTITY } from '../lib/tebex';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -23,13 +24,18 @@ export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, owne
   const limit = limitLabel(pkg.user_limit);
   const cap = limitCount(pkg.user_limit);
   const inCart = cap > 0 && cartQty >= cap;
+  // Tebex holds at most MAX_QUANTITY of a package per basket, so the room
+  // left is what this control may add.
+  const room = Math.max(0, MAX_QUANTITY - cartQty);
+  const full = room === 0;
   // See PackageCard: `requires` names the rank this package upgrades, and beats
   // `owned` because Tebex refuses both cases with the same message.
-  const blocked = owned || inCart || Boolean(requires);
+  const blocked = owned || inCart || full || Boolean(requires);
   const [closing, setClosing] = useState(false);
   const [qty, setQty] = useState(1);
+  const sendQty = Math.min(qty, Math.max(1, room));
   const freeGain = freeKeySpend == null ? 0
-    : freeKeysFor(freeKeySpend + qty * pkg.total_price) - freeKeysFor(freeKeySpend);
+    : freeKeysFor(freeKeySpend + sendQty * pkg.total_price) - freeKeysFor(freeKeySpend);
 
   // The server config is the source of truth for what a package grants. When
   // generated content exists (see lib/storeContent) it is the whole description
@@ -53,7 +59,8 @@ export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, owne
       {allowQuantity && !blocked && (
         <div class="pkg-qty pkg-modal-qty">
           <span class="pkg-qty-label">QTY</span>
-          <QuantityStepper value={qty} onChange={setQty} disabled={busy} label={`${pkg.name} quantity`}
+          <QuantityStepper value={sendQty} onChange={setQty} disabled={busy} max={Math.max(1, room)}
+            label={`${pkg.name} quantity`}
             rewardAt={freeKeySpend == null ? null : (q) => freeKeysFor(freeKeySpend + q * pkg.total_price)} />
           {freeGain > 0 && <span class="pkg-freekey-chip">+{freeGain} FREE KEY{freeGain > 1 ? 'S' : ''}</span>}
           {qty > 1 && (
@@ -70,23 +77,23 @@ export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, owne
           variant="primary"
           class="pkg-buy"
           disabled={busy || blocked}
-          onClick={() => onBuy(pkg, qty)}
+          onClick={() => onBuy(pkg, sendQty)}
           aria-label={
             requires ? `${pkg.name} requires ${requires}`
               : owned ? `You already own ${pkg.name}`
-                : inCart ? `${pkg.name} is already in your cart`
+                : inCart || full ? `${pkg.name} is already in your cart`
                   : `Buy ${qty} × ${pkg.name}`
           }
         >
-          {requires ? 'LOCKED' : owned ? 'OWNED' : inCart ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
+          {requires ? 'LOCKED' : owned ? 'OWNED' : inCart || full ? 'IN CART' : busy ? 'ADDING…' : 'BUY'}
         </ArcadeButton>
         <button
           class="pkg-cart-btn"
           disabled={busy || blocked}
-          onClick={() => onAddToCart(pkg, qty)}
+          onClick={() => onAddToCart(pkg, sendQty)}
           aria-label={`Add ${qty} × ${pkg.name} to cart`}
           title={requires ? `Requires ${requires}`
-            : owned ? 'You already own this' : inCart ? 'Already in your cart' : 'Add to cart'}
+            : owned ? 'You already own this' : inCart || full ? 'Already in your cart' : 'Add to cart'}
         >
           <CartIcon />
         </button>
@@ -117,10 +124,10 @@ export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, owne
             </p>
           )}
 
-          {(limit || owned || requires) && (
+          {(limit || owned || requires || full) && (
             <p class={`pkg-limit${blocked ? ' pkg-limit--hit' : ''}`}>
               {requires ? `REQUIRES ${requires.toUpperCase()}`
-                : owned ? 'YOU ALREADY OWN THIS' : inCart ? 'ALREADY IN YOUR CART' : limit}
+                : owned ? 'YOU ALREADY OWN THIS' : inCart ? 'ALREADY IN YOUR CART' : full ? `MAX ${MAX_QUANTITY} PER ORDER - ALL IN YOUR CART` : limit}
             </p>
           )}
 
