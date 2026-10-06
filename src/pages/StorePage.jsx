@@ -25,6 +25,7 @@ import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
 import { MotionRoot } from '../lib/motion';
 import { ArcadeButton } from '../components/ArcadeButton';
+import { KeyRoll } from '../components/KeyRoll';
 
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
@@ -56,6 +57,8 @@ export function StorePage() {
   const [busyPkgId, setBusyPkgId] = useState(null);
   const [cartBusy, setCartBusy] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  // The hidden RANDOM? key roll.
+  const [slotOpen, setSlotOpen] = useState(false);
   const [viewPkg, setViewPkg] = useState(null);
   // Raised when a package can be bought more than one way - { pkg, mode, quantity, options }.
   const [choice, setChoice] = useState(null);
@@ -270,7 +273,9 @@ export function StorePage() {
     setPlatform(chosenPlatform);
     // Refusals belong to the player, not the browser - swap in this account's.
     setUnavailable(loadUnavailable(name));
-    if (pending?.pkg) {
+    if (pending?.batch) {
+      addRolled(pending.batch, name);
+    } else if (pending?.pkg) {
       runAction(pending.pkg, pending.mode, name, pending.quantity, pending.type);
     } else {
       setPending(null);
@@ -375,6 +380,50 @@ export function StorePage() {
   // so the lock is read first - otherwise the card claims they own the rank
   // they were just told they can't buy.
   const ownedOf = (pkg) => !lockedOf(pkg) && pairOf(pkg).some((id) => ownedIds.has(id));
+
+  // RANDOM?: a roll of three crate keys. Keys only - consumables, so there's
+  // nothing to own twice and no limit to trip - and only ones with room for
+  // all three under Tebex's per-line cap, since a roll can land one key thrice.
+  const ROLL_SIZE = 3;
+  const randomPool = store.categories
+    .filter((c) => /key/i.test(c.name))
+    .flatMap(shownPackages)
+    .filter((pkg) => pkg.type !== 'subscription'
+      && !limitCount(pkg.user_limit)
+      && cartQtyOf(pkg) + ROLL_SIZE <= MAX_QUANTITY);
+
+  function openRoll() {
+    capture('roll_opened', { pool: randomPool.length });
+    setSlotOpen(true);
+  }
+
+  /** Add the rolled keys: one add per kind, with the count it came up. */
+  async function addRolled(items, name) {
+    for (const { pkg, quantity } of items) {
+      // 'single' so nothing stops to ask one-time-or-subscribe.
+      await runAction(pkg, 'cart', name, quantity, 'single');
+    }
+  }
+
+  function handleRollWin(keys) {
+    setSlotOpen(false);
+    const items = [];
+    keys.forEach((pkg) => {
+      const found = items.find((i) => i.pkg.id === pkg.id);
+      if (found) found.quantity += 1;
+      else items.push({ pkg, quantity: 1 });
+    });
+    capture('roll_won', {
+      outcome: items.length === 1 ? 'jackpot' : items.length === 2 ? 'double' : 'mixed',
+      packages: items.map((i) => `${i.quantity}x ${i.pkg.name}`).join(', '),
+    });
+    if (username) {
+      addRolled(items, username);
+    } else {
+      // The name prompt carries the whole roll, so none of it is lost.
+      setPending({ pkg: items[0].pkg, mode: 'cart', quantity: items[0].quantity, type: 'single', batch: items });
+    }
+  }
 
   async function handleApplyCoupon(code) {
     await cart.addCoupon(code);
@@ -567,6 +616,19 @@ export function StorePage() {
                     {c.name.toUpperCase()}
                   </ArcadeButton>
                 ))}
+                {/* Looks like a disabled tab on purpose: a hidden feature. */}
+                <ArcadeButton
+                  type="button"
+                  size="sm"
+                  class="store-tab store-tab--random"
+                  variant="secondary"
+                  aria-label="Roll three random crate keys"
+                  title={randomPool.length ? 'Feeling lucky?' : 'Nothing left to roll'}
+                  disabled={!randomPool.length}
+                  onClick={openRoll}
+                >
+                  RANDOM?
+                </ArcadeButton>
               </nav>
             )}
 
@@ -621,6 +683,15 @@ export function StorePage() {
         onRemoveGiftCard={handleRemoveGiftCard}
         onClose={() => setCartOpen(false)}
       />
+
+      {slotOpen && (
+        <KeyRoll
+          pool={randomPool}
+          currency={randomPool[0]?.currency}
+          onWin={handleRollWin}
+          onClose={() => setSlotOpen(false)}
+        />
+      )}
 
       {purchaseComplete && (
         <PurchaseModal

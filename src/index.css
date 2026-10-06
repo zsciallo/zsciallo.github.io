@@ -5016,3 +5016,311 @@ html.js .event-card.reveal {
   }
 }
 
+
+/* ─── RANDOM? (hidden slot machine) ─── */
+/* The tab is meant to look switched off, so it reads as a secret. ArcadeButton
+   sets --edge inline, so the flat look overrides the shadow itself. */
+.store-tab--random.btn {
+  opacity: 0.4;
+  color: var(--muted);
+  box-shadow: none;
+  outline: 2px dashed var(--border);
+  outline-offset: -2px;
+  transition: opacity 0.25s, color 0.2s, background 0.2s, outline-color 0.2s;
+}
+
+.store-tab--random.btn:hover:not(:disabled),
+.store-tab--random.btn:focus-visible {
+  opacity: 1;
+  outline-color: #ffd27a;
+  box-shadow:
+    0 var(--edge) 0 var(--edge-primary),
+    0 calc(var(--edge) + 2px) 0 var(--edge-line),
+    0 0 18px rgba(255, 210, 122, 0.35);
+  background:
+    linear-gradient(90deg, #ff7de1, #ffd27a, #5be3a0, #7dd3ff, #c77dff, #ff7de1) 0 0 / 300% 100%,
+    var(--bg2);
+  -webkit-background-clip: text, padding-box;
+  background-clip: text, padding-box;
+  color: transparent;
+  animation: randomWiggle 0.5s ease-in-out, qtyRainbow 2.2s linear infinite;
+}
+
+.store-tab--random.btn:disabled {
+  opacity: 0.25;
+}
+
+@keyframes randomWiggle {
+  20% { rotate: -4deg; }
+  45% { rotate: 3deg; }
+  70% { rotate: -2deg; }
+}
+
+/* The cabinet. */
+.slot-overlay {
+  align-items: center;
+}
+
+.slot-cabinet {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  margin: auto 0;
+  padding: 1.1rem 1.2rem 1.3rem;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(199, 125, 255, 0.14), rgba(12, 7, 24, 0) 40%),
+    var(--bg2);
+  border: 2px solid #4b2386;
+  box-shadow: 0 6px 0 #2a1450, 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(154, 77, 255, 0.25);
+}
+
+.slot-marquee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.2rem 2rem 0.9rem;
+}
+
+.slot-title {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 2.3rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #fff1c2, #ffd27a 50%, #ff7de1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 #2a1450) drop-shadow(0 0 10px rgba(255, 210, 122, 0.45));
+}
+
+/* Marquee bulbs: neighbours alternate once a second - a chase, never a
+   strobe (each bulb changes twice a second at most). */
+.slot-bulbs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.slot-bulbs i {
+  width: 7px;
+  height: 7px;
+  background: #ffd27a;
+  box-shadow: 0 0 8px #ffd27a;
+  animation: slotBulb 1s steps(1, end) infinite;
+}
+
+.slot-bulbs i:nth-child(even) {
+  animation-delay: -0.5s;
+}
+
+@keyframes slotBulb {
+  50% { background: #5b2a9e; box-shadow: none; }
+}
+
+.slot-cabinet.is-rolling .slot-bulbs i {
+  animation-duration: 0.7s;
+}
+
+.slot-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.slot-reels {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: #05020c;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 2px #2a1e44, inset 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 0 3px #ffd27a33;
+}
+
+.slot-window {
+  position: relative;
+  width: 84px;
+  height: 168px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #120b22, #2a2050 50%, #120b22);
+}
+
+/* The drum's curve: symbols darken toward the top and bottom edges. */
+.slot-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 2, 12, 0.85), transparent 30%, transparent 70%, rgba(5, 2, 12, 0.85));
+}
+
+.slot-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 84px;
+}
+
+.slot-symbol img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.5));
+}
+
+.slot-symbol b {
+  font-family: var(--font-hud);
+  font-size: 2.4rem;
+  color: var(--muted);
+}
+
+
+/* A reel at rest settles a shade brighter. */
+.slot-window.is-locked {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Two matching and one still turning: the pair glows pink and the last
+   window breathes (about once a second - suspense, not a strobe). */
+.slot-window.is-pair {
+  box-shadow: 0 0 0 2px #ff7de1, 0 0 18px rgba(255, 125, 225, 0.5);
+}
+
+.slot-window.is-pending {
+  animation: rollPending 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes rollPending {
+  from { box-shadow: 0 0 0 2px rgba(255, 210, 122, 0.25); }
+  to { box-shadow: 0 0 0 2px #ffd27a, 0 0 26px rgba(255, 210, 122, 0.55); }
+}
+
+.slot-cabinet.is-tense .slot-bulbs i {
+  animation-duration: 0.75s;
+}
+
+.slot-hint--tense {
+  color: #ff7de1;
+  font-size: 1.7rem;
+  animation: rollTense 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes rollTense {
+  from { opacity: 0.7; }
+  to { opacity: 1; text-shadow: 0 0 14px #ff7de1; }
+}
+
+/* Landed: the windows holding the match light up (all three on a no-match
+   roll, since every key is a win), with one flash. */
+.slot-window.is-lit {
+  box-shadow: 0 0 0 2px var(--roll-glow, #ffd27a), 0 0 22px color-mix(in srgb, var(--roll-glow, #ffd27a) 60%, transparent);
+  animation: slotWin 0.6s ease-out;
+}
+
+/* Outcome colours: gold jackpot, pink double, mint for one of each. */
+.slot-cabinet.is-match-3 { --roll-glow: #ffd27a; }
+.slot-cabinet.is-match-2 { --roll-glow: #ff7de1; }
+.slot-cabinet.is-match-1 { --roll-glow: #5be3a0; }
+
+@keyframes slotWin {
+  30% { background: color-mix(in srgb, var(--roll-glow, #ffd27a) 33%, transparent); }
+}
+
+.slot-foot {
+  position: relative;
+  margin-top: 1rem;
+  min-height: 6.2rem;
+}
+
+.slot-hint {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.slot-hint--spin {
+  color: #ffd27a;
+  font-size: 1.5rem;
+  padding-top: 1.4rem;
+}
+
+.slot-spin.btn {
+  width: 100%;
+  font-size: 1.9rem;
+}
+
+.slot-prize {
+  position: relative;
+}
+
+.slot-jackpot {
+  --shout: #ffd27a;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 2.8rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--shout);
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.75), 0 0 20px var(--shout), 0 0 46px #ff7de1;
+}
+
+.slot-jackpot--2 { --shout: #ff7de1; font-size: 2.4rem; }
+.slot-jackpot--1 { --shout: #5be3a0; font-size: 2.1rem; }
+
+.slot-prize-name {
+  margin-top: 0.4rem;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.slot-prize-name span {
+  color: var(--accent-2);
+  margin-left: 0.3rem;
+}
+
+.slot-prize-note {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: var(--positive);
+}
+
+.slot-burst {
+  top: 1.3rem;
+}
+
+@media (max-width: 420px) {
+  .slot-cabinet {
+    padding: 1rem 0.7rem 1.1rem;
+  }
+
+  .slot-window {
+    width: 72px;
+  }
+
+  .slot-symbol img {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot-bulbs i,
+  .slot-window.is-lit,
+  .slot-window.is-pending,
+  .slot-hint--tense,
+  .store-tab--random.btn:hover:not(:disabled),
+  .store-tab--random.btn:focus-visible {
+    animation: none;
+  }
+}

@@ -199,6 +199,43 @@ export function freeKey() {
   });
 }
 
+// ── Key roll (the RANDOM? reels) ──
+// Each reel that lands sounds a step richer and higher than the last - in
+// character, not loudness; peaks stay at the same levels as the rest.
+
+let lastTick = [0, 0, 0];
+
+/** A key passing the centre. Throttled per reel, since a fast reel would
+ *  otherwise tick every frame; each reel ticks a little higher, and a reel
+ *  that could make a match ticks brighter still. */
+export function reelTick(reel = 0, tense = false) {
+  const now = performance.now();
+  if (now - lastTick[reel] < 45) return;
+  lastTick[reel] = now;
+  const ac = audio();
+  if (!ac) return;
+  tone(ac, 1250 + reel * 140 + (tense ? 150 : 0), { dur: 0.025, peak: 0.05, type: 'square' });
+}
+
+// Notes laid over each successive landing: nothing, a note, two notes.
+const STOP_NOTES = [[], [659.25], [783.99, 987.77]];
+
+/**
+ * A reel locking into place. The clunk is the same every time; what rides on
+ * it grows with each reel (`stage` 0-2), and a landing that makes a pair
+ * answers with a rising two-note ding instead.
+ */
+export function reelStop(stage = 0, matched = false) {
+  const ac = audio();
+  if (!ac) return;
+  noise(ac, { dur: 0.04, peak: 0.18, freq: 900 + stage * 200, q: 1.1 });
+  tone(ac, 150 + stage * 12, { dur: 0.13, peak: 0.26, type: 'sine', to: 58 });
+  const notes = matched ? [1046.5, 1567.98] : STOP_NOTES[stage] || [];
+  notes.forEach((f, i) => {
+    tone(ac, f, { at: 0.03 + i * (matched ? 0.08 : 0.04), dur: 0.12, peak: 0.05, type: 'triangle' });
+  });
+}
+
 /** 99: a two-octave fanfare that lands on a held chord. */
 export function maxOut() {
   const ac = audio();
