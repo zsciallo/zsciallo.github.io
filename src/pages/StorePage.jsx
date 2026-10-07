@@ -53,12 +53,12 @@ export function StorePage() {
   // The catalog needs the basket's ident and the basket needs the catalog's
   // exchange rate (free-key minimums are in USD), so the rate is carried in
   // state: one render behind the catalog, never behind a basket change.
-  const [fxRate, setFxRate] = useState(1);
-  const cart = useTebexBasket(config.tebexToken, username, fxRate);
+  const [fx, setFx] = useState({ rate: 1, shownRate: 1 });
+  const cart = useTebexBasket(config.tebexToken, username, fx.rate);
   // Scoping the catalog to the basket is what surfaces rank upgrade discounts;
   // without an ident every player is quoted the full price.
   const store = useTebexStore(config.tebexToken, cart.basket?.ident);
-  useEffect(() => setFxRate(usdRate(store.packagesById)), [store.packagesById]);
+  useEffect(() => setFx(usdRate(store.packagesById)), [store.packagesById]);
   const [activeCat, setActiveCat] = useState(null); // null = all categories
   useScrollReveal([store.categories, activeCat]);
 
@@ -549,8 +549,8 @@ export function StorePage() {
               <span class="store-promo-tag">FREE KEYS</span>
               <span class="store-promo-text">
                 Get a <strong>free Chroma Key</strong> for every <strong>US${FREE_KEY.every}</strong>
-                {fxRate !== 1 && store.packagesById[FREE_KEY.packageId] && (
-                  <> (about {formatPrice(FREE_KEY.every * fxRate, store.packagesById[FREE_KEY.packageId].currency)})</>
+                {store.packagesById[FREE_KEY.packageId]?.currency && store.packagesById[FREE_KEY.packageId].currency !== 'USD' && (
+                  <> (about {formatPrice(FREE_KEY.every * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
                 )}{' '}in your cart,
                 up to {FREE_KEY.max} per order. Added automatically.
               </span>
@@ -689,6 +689,7 @@ export function StorePage() {
         bonusKeys={cart.bonusKeys}
         freeKeySpend={cart.freeKeySpend}
         rate={cart.rate}
+        shownRate={fx.shownRate}
         onSetQuantity={handleSetQuantity}
         onRemove={handleRemove}
         onApplyCoupon={handleApplyCoupon}

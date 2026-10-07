@@ -79,6 +79,7 @@ export function CartDrawer({
   bonusKeys = 0,
   freeKeySpend = 0,
   rate = 1,
+  shownRate = 1,
   onSetQuantity,
   onRemove,
   onApplyCoupon,
@@ -94,7 +95,7 @@ export function CartDrawer({
 
   // The free keys' value is named as such in the totals, separate from any
   // promo code or gift card, so the buyer sees what they earned.
-  const keyUnit = packagesById[FREE_KEY.packageId]?.total_price ?? FREE_KEY.price * rate;
+  const keyUnit = packagesById[FREE_KEY.packageId]?.total_price ?? FREE_KEY.price * shownRate;
   const subtotal = fullSubtotal(items, packagesById);
   const freeValue = bonusKeys * keyUnit;
   const total = basket?.total_price ?? 0;
@@ -292,7 +293,7 @@ export function CartDrawer({
                     ? `FREE KEY${celebrating.gained > 1 ? 'S' : ''} EARNED!`
                     : nextKeyIn == null
                       ? `ALL ${FREE_KEY.max} FREE KEYS UNLOCKED`
-                      : `${formatPrice(nextKeyIn * rate, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
+                      : `${formatPrice(nextKeyIn * shownRate, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
                 </span>
               </div>
               <div class="cart-keys-bar" role="progressbar" aria-label="Progress to next free Chroma Key"

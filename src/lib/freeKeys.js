@@ -14,6 +14,12 @@ import { listPrice } from './price';
 // held against the $10 steps - otherwise CA$21 reads as two keys when it is
 // about US$15, and Tebex (rightly) refuses the second code.
 //
+// Spend is also counted before sales tax. Catalog prices include VAT where it
+// applies, but basket totals don't, so a tax-inclusive rate undercounts an EU
+// basket by the VAT - the cart said two keys where the cards said three.
+// Amounts shown to the buyer use the tax-inclusive rate, so they add up with
+// the prices on the cards.
+//
 // The coupons live in the Tebex panel. Raising MAX means creating FREEKEY4
 // ($0.99 off Chroma Key, basket rule, minimum $40.99) and so on first.
 
@@ -32,16 +38,27 @@ export function isFreeKeyCode(code) {
   return FREE_KEY.codes.includes(String(code || '').toUpperCase());
 }
 
+/** What a package adds to the basket total: its price less sales tax. */
+export function preTaxPrice(pkg) {
+  return (pkg.total_price ?? 0) - (pkg.sales_tax ?? 0);
+}
+
 /**
  * Local currency per US dollar, read off the Chroma Key: Tebex has no
  * exchange-rate field, but it quotes this package's known USD price in the
  * buyer's currency. 1 when the key isn't in the catalog (yet) or it's USD.
+ *
+ * `rate` is pre-tax, for counting basket spend. `shownRate` includes tax, for
+ * turning a USD amount into what the buyer's card prices add up to.
  */
 export function usdRate(packagesById = {}) {
   const pkg = packagesById[FREE_KEY.packageId];
-  if (!pkg || !pkg.currency || pkg.currency === 'USD') return 1;
-  const local = listPrice(pkg);
-  return local > 0 ? local / FREE_KEY.price : 1;
+  const shown = pkg ? listPrice(pkg) : 0;
+  const preTax = pkg ? shown - (pkg.sales_tax ?? 0) : 0;
+  if (!pkg?.currency || pkg.currency === 'USD' || preTax <= 0) {
+    return { rate: 1, shownRate: preTax > 0 ? shown / preTax : 1 };
+  }
+  return { rate: preTax / FREE_KEY.price, shownRate: shown / FREE_KEY.price };
 }
 
 /** Free keys earned by `spend` US dollars of real (non-free-key) basket value. */
