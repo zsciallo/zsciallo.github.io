@@ -78,6 +78,7 @@ export function CartDrawer({
   giftcards = [],
   bonusKeys = 0,
   freeKeySpend = 0,
+  rate = 1,
   onSetQuantity,
   onRemove,
   onApplyCoupon,
@@ -93,7 +94,7 @@ export function CartDrawer({
 
   // The free keys' value is named as such in the totals, separate from any
   // promo code or gift card, so the buyer sees what they earned.
-  const keyUnit = packagesById[FREE_KEY.packageId]?.total_price ?? FREE_KEY.price;
+  const keyUnit = packagesById[FREE_KEY.packageId]?.total_price ?? FREE_KEY.price * rate;
   const subtotal = fullSubtotal(items, packagesById);
   const freeValue = bonusKeys * keyUnit;
   const total = basket?.total_price ?? 0;
@@ -198,8 +199,8 @@ export function CartDrawer({
               const qty = item.in_basket.quantity - free;
               const unit = item.in_basket.price;
               // A quantity change here moves the spend, so the stepper can
-              // shout FREE KEY! when it crosses the next $10.
-              const rewardAt = (q) => freeKeysFor(freeKeySpend + (q - qty) * unit);
+              // shout FREE KEY! when it crosses the next US$10.
+              const rewardAt = (q) => freeKeysFor(freeKeySpend + (q - qty) * unit / rate);
 
               if (free > 0 && qty === 0) {
                 return (
@@ -207,7 +208,7 @@ export function CartDrawer({
                     {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
                     <div class="cart-item-info">
                       <p class="cart-item-name">{item.name}</p>
-                      <p class="cart-item-sub cart-item-sub--free">{free} FREE · FOR EVERY ${FREE_KEY.every} SPENT</p>
+                      <p class="cart-item-sub cart-item-sub--free">{free} FREE · FOR EVERY US${FREE_KEY.every} SPENT</p>
                     </div>
                     <div class="cart-item-end">
                       <p class="cart-item-line cart-item-line--free">FREE</p>
@@ -291,7 +292,7 @@ export function CartDrawer({
                     ? `FREE KEY${celebrating.gained > 1 ? 'S' : ''} EARNED!`
                     : nextKeyIn == null
                       ? `ALL ${FREE_KEY.max} FREE KEYS UNLOCKED`
-                      : `${formatPrice(nextKeyIn, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
+                      : `${formatPrice(nextKeyIn * rate, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
                 </span>
               </div>
               <div class="cart-keys-bar" role="progressbar" aria-label="Progress to next free Chroma Key"

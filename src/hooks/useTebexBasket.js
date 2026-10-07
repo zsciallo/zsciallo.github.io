@@ -37,8 +37,13 @@ const FREE_KEYS_KEY = 'chromabit_basket_freekeys';
  * localStorage so the cart survives reloads; stale or completed baskets are
  * silently discarded on load.
  */
-export function useTebexBasket(token, username) {
+export function useTebexBasket(token, username, rate = 1) {
   const [basket, setBasket] = useState(null);
+  // Local currency per US dollar (see usdRate). The free-key minimums are in
+  // USD, so spend is divided by this before it is counted. A ref so a reconcile
+  // already queued uses the rate the catalog has since reported.
+  const rateRef = useRef(rate);
+  rateRef.current = rate;
   // Package ids in the current basket that were added as subscriptions.
   const [recurringIds, setRecurringIds] = useState([]);
   // Mirrors `basket` so callers that clear and immediately re-add within one
@@ -98,11 +103,12 @@ export function useTebexBasket(token, username) {
       // Each code on the basket is a free key in it, so that's the floor even
       // if the stored count was lost.
       const bonus = Math.min(Math.max(loadFreeKeys(ident), applied.length), qty);
-      const unit = b.packages?.find((p) => p.id === id)?.in_basket?.price ?? FREE_KEY.price;
+      const fx = rateRef.current;
+      const unit = b.packages?.find((p) => p.id === id)?.in_basket?.price ?? FREE_KEY.price * fx;
       // Real spend: the total, less any free keys not (yet) covered by a code.
       const spend = b.total_price - Math.max(0, bonus - applied.length) * unit;
       // Only as many as still fit on the Chroma Key line beside the bought ones.
-      const target = Math.min(freeKeysFor(spend), Math.max(0, MAX_QUANTITY - (qty - bonus)));
+      const target = Math.min(freeKeysFor(spend / fx), Math.max(0, MAX_QUANTITY - (qty - bonus)));
       const want = FREE_KEY.codes.slice(0, target);
       if (bonus === target && applied.length === want.length && want.every((c) => applied.includes(c))) {
         saveFreeKeys(ident, bonus);
@@ -426,9 +432,9 @@ export function useTebexBasket(token, username) {
   // they stay out of the promo-code UI.
   const coupons = (basket?.coupons || []).filter((c) => !isFreeKeyCode(c.code));
   const giftcards = basket?.giftcards || [];
-  // Real spend toward the next free key. Once reconciled, each free key is
-  // netted out by its code, so the basket total is the spend.
-  const freeKeySpend = basket ? basket.total_price : 0;
+  // Real spend toward the next free key, in USD. Once reconciled, each free
+  // key is netted out by its code, so the basket total is the spend.
+  const freeKeySpend = basket ? basket.total_price / rate : 0;
   // Free keys in the basket: one per FREEKEY code Tebex is honouring, never
   // more than the Chroma Keys actually there.
   const chromaQty = items.find((p) => p.id === FREE_KEY.packageId)?.in_basket?.quantity ?? 0;
@@ -436,7 +442,7 @@ export function useTebexBasket(token, username) {
 
   return {
     basket, items, count, coupons, giftcards, recurringIds, basketError,
-    bonusKeys, freeKeySpend,
+    bonusKeys, freeKeySpend, rate,
     ensureBasket, addItem, setQuantity, removeItem, clearBasket,
     addCoupon, dropCoupon, addGiftCard, dropGiftCard,
   };

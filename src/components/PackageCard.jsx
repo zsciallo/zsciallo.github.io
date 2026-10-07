@@ -14,7 +14,7 @@ function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
 
-export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, owned = false, requires = null, onView, onBuy, onAddToCart }) {
+export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, rate = 1, owned = false, requires = null, onView, onBuy, onAddToCart }) {
   const onSale = pkg.discount > 0;
   const allowQuantity = !pkg.disable_quantity;
   const limit = limitLabel(pkg.user_limit);
@@ -35,7 +35,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, owned
   const [qty, setQty] = useState(1);
   const sendQty = Math.min(qty, Math.max(1, room));
   const freeGain = freeKeySpend == null ? 0
-    : freeKeysFor(freeKeySpend + sendQty * pkg.total_price) - freeKeysFor(freeKeySpend);
+    : freeKeysFor(freeKeySpend + sendQty * pkg.total_price / rate) - freeKeysFor(freeKeySpend);
   const summary = contentFor(pkg)?.summary;
 
   return (
@@ -72,7 +72,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, owned
           <div class="pkg-qty">
             <QuantityStepper value={sendQty} onChange={setQty} disabled={busy} max={Math.max(1, room)}
             label={`${pkg.name} quantity`}
-              rewardAt={freeKeySpend == null ? null : (q) => freeKeysFor(freeKeySpend + q * pkg.total_price)} />
+              rewardAt={freeKeySpend == null ? null : (q) => freeKeysFor(freeKeySpend + q * pkg.total_price / rate)} />
             {freeGain > 0 && <span class="pkg-freekey-chip">+{freeGain} FREE KEY{freeGain > 1 ? 'S' : ''}</span>}
             {qty > 1 && (
               // Keyed on qty so the running total pops each time it changes.

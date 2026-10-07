@@ -18,7 +18,7 @@ import { UsernameModal } from '../components/UsernameModal';
 import { PackageModal } from '../components/PackageModal';
 import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
-import { FREE_KEY } from '../lib/freeKeys';
+import { FREE_KEY, usdRate } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
@@ -41,15 +41,24 @@ const NOT_PURCHASABLE = /isn.?t purchasable|not purchasable/i;
 // holds the maximum allowed quantity.
 const OVER_QUANTITY = /quantity cannot be greater than/i;
 
+function formatPrice(amount, currency) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
+}
+
 export function StorePage() {
   // Declared before the basket hook because a basket belongs to a player: it
   // needs the name to know whether a saved one may be reused.
   const [username, setUsername] = useState('');
   const [platform, setPlatform] = useState('java');
-  const cart = useTebexBasket(config.tebexToken, username);
+  // The catalog needs the basket's ident and the basket needs the catalog's
+  // exchange rate (free-key minimums are in USD), so the rate is carried in
+  // state: one render behind the catalog, never behind a basket change.
+  const [fxRate, setFxRate] = useState(1);
+  const cart = useTebexBasket(config.tebexToken, username, fxRate);
   // Scoping the catalog to the basket is what surfaces rank upgrade discounts;
   // without an ident every player is quoted the full price.
   const store = useTebexStore(config.tebexToken, cart.basket?.ident);
+  useEffect(() => setFxRate(usdRate(store.packagesById)), [store.packagesById]);
   const [activeCat, setActiveCat] = useState(null); // null = all categories
   useScrollReveal([store.categories, activeCat]);
 
@@ -539,7 +548,10 @@ export function StorePage() {
             <div class="store-promo store-promo--key">
               <span class="store-promo-tag">FREE KEYS</span>
               <span class="store-promo-text">
-                Get a <strong>free Chroma Key</strong> for every <strong>${FREE_KEY.every}</strong> in your cart,
+                Get a <strong>free Chroma Key</strong> for every <strong>US${FREE_KEY.every}</strong>
+                {fxRate !== 1 && store.packagesById[FREE_KEY.packageId] && (
+                  <> (about {formatPrice(FREE_KEY.every * fxRate, store.packagesById[FREE_KEY.packageId].currency)})</>
+                )}{' '}in your cart,
                 up to {FREE_KEY.max} per order. Added automatically.
               </span>
             </div>
@@ -648,6 +660,7 @@ export function StorePage() {
                       busy={busyPkgId === pkg.id}
                       cartQty={cartQtyOf(pkg)}
                       freeKeySpend={cart.freeKeySpend}
+                      rate={cart.rate}
                       owned={ownedOf(pkg)}
                       requires={lockedOf(pkg)?.name || null}
                       onView={handleView}
@@ -675,6 +688,7 @@ export function StorePage() {
         giftcards={cart.giftcards}
         bonusKeys={cart.bonusKeys}
         freeKeySpend={cart.freeKeySpend}
+        rate={cart.rate}
         onSetQuantity={handleSetQuantity}
         onRemove={handleRemove}
         onApplyCoupon={handleApplyCoupon}
@@ -707,6 +721,7 @@ export function StorePage() {
           busy={busyPkgId === viewPkg.id}
           cartQty={cartQtyOf(viewPkg)}
           freeKeySpend={cart.freeKeySpend}
+          rate={cart.rate}
           owned={ownedOf(viewPkg)}
           requires={lockedOf(viewPkg)?.name || null}
           onBuy={(p, qty, type) => handleAction(p, 'buy', qty, type)}
