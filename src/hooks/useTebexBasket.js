@@ -122,8 +122,8 @@ export function useTebexBasket(token, username, rate = 1) {
         else if (qty === 0) await addToBasket(ident, id, nextQty, 'single');
         else await setBasketQuantity(ident, id, nextQty);
       }
-      // Then the codes, lowest first: each one's minimum is checked with the
-      // codes already on taken off, which is what the thresholds assume.
+      // Then the codes, lowest first: each one's minimum is checked against
+      // the total with every code on taken off, its own included.
       for (const code of applied) {
         if (!want.includes(code)) await removeCoupon(token, ident, code).catch(() => {});
       }

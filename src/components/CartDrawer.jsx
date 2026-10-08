@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
 import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
 import { ArcadeButton } from './ArcadeButton';
-import { FREE_KEY, freeKeysFor, toNextFreeKey } from '../lib/freeKeys';
+import { FREE_KEY, freeKeysFor, nextFreeKey, preTaxPrice } from '../lib/freeKeys';
 import { freeKey as freeKeySound } from '../lib/sound';
 import { MAX_QUANTITY } from '../lib/tebex';
 
@@ -38,10 +38,14 @@ function maskCard(number) {
  * show what the buyer saved is to re-add it up from catalog prices. Falls back
  * to the basket's line price for anything missing from the catalog, which just
  * makes that line contribute zero savings rather than breaking the total.
+ *
+ * Before tax, like the basket total it is set against - catalog prices include
+ * VAT where it applies, and counting that would pass the VAT off as a discount.
  */
 function fullSubtotal(items, packagesById) {
   return items.reduce((sum, item) => {
-    const unit = packagesById[item.id]?.total_price ?? item.in_basket.price;
+    const pkg = packagesById[item.id];
+    const unit = pkg ? preTaxPrice(pkg) : item.in_basket.price;
     return sum + unit * item.in_basket.quantity;
   }, 0);
 }
@@ -95,15 +99,21 @@ export function CartDrawer({
 
   // The free keys' value is named as such in the totals, separate from any
   // promo code or gift card, so the buyer sees what they earned.
-  const keyUnit = packagesById[FREE_KEY.packageId]?.total_price ?? FREE_KEY.price * shownRate;
+  const keyPkg = packagesById[FREE_KEY.packageId];
+  const keyUnit = keyPkg ? preTaxPrice(keyPkg) : FREE_KEY.price * rate;
   const subtotal = fullSubtotal(items, packagesById);
   const freeValue = bonusKeys * keyUnit;
   const total = basket?.total_price ?? 0;
-  const nextKeyIn = toNextFreeKey(freeKeySpend);
+  // Counted on from the keys Tebex actually granted, not from our estimate of
+  // the spend: the two can disagree right at a step, and the cart must never
+  // announce a key the checkout won't give.
   // Fill of the bar toward the next key; full once at the cap.
-  const keyProgress = nextKeyIn == null ? 1 : 1 - nextKeyIn / FREE_KEY.every;
-  // Sub-cent drift from Tebex's own rounding shouldn't render as "you saved $0.00".
-  const saved = subtotal - freeValue - total > 0.005 ? subtotal - freeValue - total : 0;
+  const { left: nextKeyIn, progress: keyProgress } = nextFreeKey(bonusKeys, freeKeySpend);
+  // Drift from Tebex's own rounding (per-unit tax, currency conversion) is a
+  // cent or two across a big basket, and shouldn't render as a discount.
+  const saved = subtotal - freeValue - total > 0.05 ? subtotal - freeValue - total : 0;
+  // The basket is priced before tax; VAT goes on at checkout.
+  const taxed = items.some((item) => packagesById[item.id]?.sales_tax > 0);
 
   // A key landing gets its moment: the box flares, the new pips pop, the
   // jingle plays. Only on an increase the buyer caused, not on first load.
@@ -200,7 +210,7 @@ export function CartDrawer({
               const qty = item.in_basket.quantity - free;
               const unit = item.in_basket.price;
               // A quantity change here moves the spend, so the stepper can
-              // shout FREE KEY! when it crosses the next US$10.
+              // shout FREE KEY! when it crosses the next minimum.
               const rewardAt = (q) => freeKeysFor(freeKeySpend + (q - qty) * unit / rate);
 
               if (free > 0 && qty === 0) {
@@ -209,7 +219,7 @@ export function CartDrawer({
                     {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
                     <div class="cart-item-info">
                       <p class="cart-item-name">{item.name}</p>
-                      <p class="cart-item-sub cart-item-sub--free">{free} FREE · FOR EVERY US${FREE_KEY.every} SPENT</p>
+                      <p class="cart-item-sub cart-item-sub--free">{free} FREE · SPEND REWARD</p>
                     </div>
                     <div class="cart-item-end">
                       <p class="cart-item-line cart-item-line--free">FREE</p>
@@ -401,7 +411,7 @@ export function CartDrawer({
             )}
 
             <p class="cart-total">
-              <span>TOTAL</span>
+              <span>{taxed ? 'TOTAL BEFORE VAT' : 'TOTAL'}</span>
               <span>{formatPrice(total, currency)}</span>
             </p>
             <ArcadeButton variant="primary" class="cart-checkout" href={basket.links?.checkout}>

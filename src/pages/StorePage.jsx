@@ -548,10 +548,10 @@ export function StorePage() {
             <div class="store-promo store-promo--key">
               <span class="store-promo-tag">FREE KEYS</span>
               <span class="store-promo-text">
-                Get a <strong>free Chroma Key</strong> for every <strong>US${FREE_KEY.every}</strong>
+                Get a <strong>free Chroma Key</strong> when you spend <strong>US${FREE_KEY.minimums[0]}</strong>
                 {store.packagesById[FREE_KEY.packageId]?.currency && store.packagesById[FREE_KEY.packageId].currency !== 'USD' && (
-                  <> (about {formatPrice(FREE_KEY.every * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
-                )}{' '}in your cart,
+                  <> (about {formatPrice(FREE_KEY.minimums[0] * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
+                )}, and another every US$10 after that,
                 up to {FREE_KEY.max} per order. Added automatically.
               </span>
             </div>
