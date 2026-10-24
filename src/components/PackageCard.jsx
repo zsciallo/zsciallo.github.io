@@ -9,12 +9,14 @@ import { m } from 'motion/react';
 import { spring } from '../lib/motion';
 import { freeKeysFor, preTaxPrice } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
+import { DealBadge } from './DealBadge';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
 
-export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, rate = 1, owned = false, requires = null, onView, onBuy, onAddToCart }) {
+export function PackageCard({ pkg, sales, busy, cartQty = 0, freeKeySpend = null, rate = 1, owned = false, requires = null, onView, onBuy, onAddToCart }) {
+  // A sale or an upgrade credit; the sticker says which (see lib/deal).
   const onSale = pkg.discount > 0;
   const allowQuantity = !pkg.disable_quantity;
   const limit = limitLabel(pkg.user_limit);
@@ -47,6 +49,7 @@ export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, rate 
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onView(pkg); } }}
       aria-label={`View details for ${pkg.name}`}
     >
+      <DealBadge pkg={pkg} sales={sales} />
       {pkg.image && (
         <div class="pkg-image-wrap">
           <img class="pkg-image" src={pkg.image} alt="" loading="lazy" />
@@ -59,7 +62,6 @@ export function PackageCard({ pkg, busy, cartQty = 0, freeKeySpend = null, rate 
           {onSale && <span class="pkg-price-old">{formatPrice(listPrice(pkg), pkg.currency)}</span>}
           <span class="pkg-price-now">{formatPrice(pkg.total_price, pkg.currency)}</span>
         </p>
-        {onSale && <p class="pkg-upgrade">UPGRADE PRICE: {formatPrice(pkg.discount, pkg.currency)} CREDIT APPLIED</p>}
         {(limit || owned || requires || full) && (
           <p class={`pkg-limit${blocked ? ' pkg-limit--hit' : ''}`}>
             {requires ? `REQUIRES ${requires.toUpperCase()}`

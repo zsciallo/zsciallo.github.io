@@ -12,14 +12,17 @@ import { m } from 'motion/react';
 import { spring } from '../lib/motion';
 import { freeKeysFor, preTaxPrice } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
+import { DealBadge } from './DealBadge';
+import { dealFor } from '../lib/deal';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
 
 /** Full popout view of a package: image, price, and complete description. */
-export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, rate = 1, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
-  const onSale = pkg.discount > 0;
+export function PackageModal({ pkg, sales, busy, cartQty = 0, freeKeySpend = null, rate = 1, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
+  const deal = dealFor(pkg, sales);
+  const onSale = Boolean(deal);
   const allowQuantity = !pkg.disable_quantity;
   const limit = limitLabel(pkg.user_limit);
   const cap = limitCount(pkg.user_limit);
@@ -118,9 +121,10 @@ export function PackageModal({ pkg, busy, cartQty = 0, freeKeySpend = null, rate
             {onSale && <span class="pkg-price-old">{formatPrice(listPrice(pkg), pkg.currency)}</span>}
             <span class="pkg-price-now">{formatPrice(pkg.total_price, pkg.currency)}</span>
           </p>
-          {onSale && (
+          <DealBadge pkg={pkg} sales={sales} class="pkg-deal--inline" />
+          {deal?.kind === 'credit' && (
             <p class="pkg-upgrade">
-              UPGRADE PRICE: {formatPrice(pkg.discount, pkg.currency)} CREDIT FOR WHAT YOU ALREADY OWN
+              {formatPrice(deal.amount, pkg.currency)} OFF FOR THE RANK YOU ALREADY OWN
             </p>
           )}
 

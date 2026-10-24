@@ -4288,6 +4288,119 @@ html.js .reveal.is-visible {
   margin-top: 0.3rem;
 }
 
+/* ─── DEAL STICKER ─── */
+/* A sale or an upgrade credit, stuck over the corner of the card art like a
+   price tag and bouncing so it's the first thing read. Sale takes the CTA
+   gradient - the loudest colour on the store - and a credit the paid mint.
+   Individual translate / scale, per the press layer, so the bounce composes
+   with the card's own hover lift. */
+.pkg-deal {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.35rem 0.7rem 0.4rem;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  border-radius: 6px;
+  rotate: 5deg;
+  pointer-events: none;
+  animation:
+    dealIn 0.45s var(--ease-spring) both,
+    dealBounce 1.7s ease-in-out 0.45s infinite;
+}
+
+.pkg-deal b {
+  font-size: 1.45rem;
+  font-weight: 400;
+}
+
+.pkg-deal small {
+  margin-top: 3px;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  opacity: 0.9;
+}
+
+.pkg-deal--sale {
+  color: #fff;
+  background: var(--grad-cta);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 0 #6e2bbf, 0 0 18px rgba(255, 125, 225, 0.55), 0 0 40px rgba(199, 125, 255, 0.25);
+}
+
+.pkg-deal--credit {
+  color: #06261a;
+  background: var(--positive);
+  box-shadow: 0 3px 0 #2d9c69, 0 0 14px rgba(91, 227, 160, 0.4);
+}
+
+/* In the popout it sits under the price instead of over the art. */
+.pkg-deal--inline {
+  position: static;
+  align-self: center;
+  rotate: -2deg;
+}
+
+@keyframes dealIn {
+  from {
+    scale: 0.3;
+    opacity: 0;
+  }
+}
+
+/* Crouch, spring up, hang, land with a squash, small rebound, rest. */
+@keyframes dealBounce {
+
+  0%,
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+
+  8% {
+    translate: 0 0;
+    scale: 1.1 0.88;
+  }
+
+  28% {
+    translate: 0 -9px;
+    scale: 0.95 1.06;
+  }
+
+  42% {
+    translate: 0 -9px;
+    scale: 1;
+  }
+
+  56% {
+    translate: 0 0;
+    scale: 1.08 0.92;
+  }
+
+  68% {
+    translate: 0 -3px;
+    scale: 1;
+  }
+
+  78% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkg-deal {
+    animation: none;
+  }
+}
+
 /* Limited package already in the basket - a second one would be rejected at
    checkout, so the actions read as unavailable rather than merely busy. */
 .pkg-buy:disabled,

@@ -9,7 +9,12 @@
  *
  * Verified against a live account owning VIP+: MVP came back as
  * total_price 4.00, base_price 4.00, discount 4.99 - original 8.99.
+ *
+ * Built from `base_price` rather than `total_price` because only the total is
+ * rounded to the cent: the Halloween Key at half price reported base 0.495,
+ * total 0.50, discount 0.495, and total + discount strikes through "$1.00" on
+ * a $0.99 key. Tax is added back since the total carries it where VAT applies.
  */
 export function listPrice(pkg) {
-  return (pkg.total_price ?? 0) + (pkg.discount ?? 0);
+  return (pkg.base_price ?? 0) + (pkg.sales_tax ?? 0) + (pkg.discount ?? 0);
 }

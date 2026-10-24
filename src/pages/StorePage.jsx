@@ -360,7 +360,7 @@ export function StorePage() {
   const ownable = (id) => limitCount(store.packagesById[id]?.user_limit) > 0;
   const ownedIds = new Set([
     ...unavailable.filter(ownable),
-    ...inferOwnedPackages(store.categories),
+    ...inferOwnedPackages(store.categories, store.salesById),
   ]);
 
   // What a package can't be bought without - MVP+ only sells to MVP holders.
@@ -657,6 +657,7 @@ export function StorePage() {
                     <PackageCard
                       key={pkg.id}
                       pkg={pkg}
+                      sales={store.salesById}
                       busy={busyPkgId === pkg.id}
                       cartQty={cartQtyOf(pkg)}
                       freeKeySpend={cart.freeKeySpend}
@@ -719,6 +720,7 @@ export function StorePage() {
       {viewPkg && !pending && !choice && (
         <PackageModal
           pkg={viewPkg}
+          sales={store.salesById}
           busy={busyPkgId === viewPkg.id}
           cartQty={cartQtyOf(viewPkg)}
           freeKeySpend={cart.freeKeySpend}

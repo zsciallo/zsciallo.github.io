@@ -18,13 +18,20 @@ const EPSILON = 0.005;
  * Only works for laddered packages. A standalone capped package like the Battle
  * Pass has nothing above it to discount, so it reports `discount: 0` even for an
  * owner and is left out - those are still learned from a rejected add.
+ *
+ * `sales` is the anonymous catalog's discounts (see lib/deal). A sale uses the
+ * same field as a credit, and a sale cut that happened to equal a cheaper
+ * package's price would read as owning it - so packages on sale are not
+ * consulted at all, even if a credit is folded in with the sale.
  */
-export function inferOwnedPackages(categories) {
+export function inferOwnedPackages(categories, sales = {}) {
   const owned = [];
 
   for (const category of categories) {
     const packages = category.packages || [];
-    const credits = packages.map((p) => p.discount || 0).filter((d) => d > 0);
+    const credits = packages
+      .map((p) => ((sales[p.id] || 0) > 0 ? 0 : p.discount || 0))
+      .filter((d) => d > 0);
     if (!credits.length) continue;
 
     // Several tiers can be discounted at once; the largest credit corresponds
