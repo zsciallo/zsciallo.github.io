@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build && node ssg.js",
     "preview": "vite preview",
-    "market": "python tools/build_market_data.py && python tools/fetch_icons.py"
+    "market": "python tools/fetch_market.py && python tools/fetch_icons.py"
   },
   "dependencies": {
     "dompurify": "^3.4.16",

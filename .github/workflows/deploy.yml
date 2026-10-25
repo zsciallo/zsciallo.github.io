@@ -42,24 +42,17 @@ jobs:
           python-version: '3.12'
 
       - run: npm ci
-      - run: pip install -r tools/requirements.txt
 
-      # The auction house keeps its state in MySQL, so this reads the live
-      # tables. There is no snapshot to copy off the server and no torn-file
-      # check to do: the database either answers or it does not, and the
-      # fallback below covers the second case.
-      - name: Generate market data
+      # The auction-house documents are generated on the staff bot's box
+      # (discord-bot repo) and published as one tarball by the API. The build
+      # only downloads and unpacks it, so the website has no database access
+      # and no secrets. The fallback below covers the API being down.
+      - name: Fetch market data from the API
         id: generate
         continue-on-error: true
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           set -euo pipefail
-          python tools/build_market_data.py
+          python tools/fetch_market.py
           python tools/fetch_icons.py
 
       - name: Fall back to last deployed data
@@ -67,10 +60,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f .last-deploy/market/index.json ]; then
-            echo "::error::Could not reach the database and there is no previously deployed data to fall back on."
+            echo "::error::Could not reach the API and there is no previously deployed data to fall back on."
             exit 1
           fi
-          echo "::warning::Could not build fresh market data - republishing the last deployed snapshot."
+          echo "::warning::Could not fetch fresh market data - republishing the last deployed snapshot."
           mkdir -p public/market/items
           cp .last-deploy/market/index.json   public/market/
           cp .last-deploy/market/meta.json    public/market/
