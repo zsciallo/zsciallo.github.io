@@ -224,7 +224,7 @@ export function StorePage() {
         // This branch exists because the old code had none: every "isn't
         // purchasable" became "you already have this", and was then remembered.
         // On an uncapped package that claim is not merely unproven, it is
-        // impossible - and it stuck, because `markUnavailable` disables both
+        // impossible - and it stuck, because the remembered refusal disabled both
         // buttons, and a successful add is the only thing that clears one. A
         // player who saw it once could not buy that key again for a day, from
         // any page, and nobody else could reproduce it: the flag lives in their
@@ -297,8 +297,7 @@ export function StorePage() {
     localStorage.setItem(PLATFORM_KEY, chosenPlatform);
     setUsername(name);
     setPlatform(chosenPlatform);
-    // Refusals belong to the player, not the browser - swap in this account's.
-    setUnavailable(loadUnavailable(name));
+    // Ownership follows the name: the lookup effect re-runs for the new player.
     if (pending?.batch) {
       addRolled(pending.batch, name);
     } else if (pending?.pkg) {
