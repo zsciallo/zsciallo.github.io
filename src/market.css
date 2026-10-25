@@ -1498,3 +1498,35 @@
 .market-row:active:not(.market-row--head) {
   background: var(--glow);
 }
+
+/* ─── Recent Listings tab ─── */
+
+.listings-table table { width: 100%; }
+.listings-table td.listing-item { max-width: 0; }
+.listing-open,
+.listing-seller {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.listing-open span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.listing-open:hover span,
+.listing-seller:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.listing-open .market-tag { flex: none; }
+.listing-seller { color: var(--accent, inherit); }
+.market-controls form.market-search { margin: 0; }

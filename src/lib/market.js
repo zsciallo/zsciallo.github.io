@@ -57,6 +57,10 @@ export const fetchItem = (key) => getJson(itemPath(key));
 export const fetchPools = () => getJson('/pools.json');
 export const fetchFutures = () => getJson('/futures.json');
 export const fetchTicker = () => getJson('/ticker.json');
+// Every live listing plus the last week of sales, across items (the Recent
+// Listings tab), and the seller uuid -> name map the API box maintains.
+export const fetchListings = () => getJson('/listings.json');
+export const fetchNames = () => getJson('/names.json');
 
 // Icons are committed to the site repo and never served by the API.
 export const iconUrl = (materialId) => `${FALLBACK_BASE}/icons/${materialId.split(':').pop()}.png`;
@@ -131,12 +135,27 @@ export const fullDate = (timestamp) =>
     month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   });
 
-/** Sellers arrive as raw UUIDs until the plugin can resolve them against the
- *  server's user cache. A short stable handle beats a 36-character string. */
+// Sellers arrive as raw UUIDs; the API box resolves them to names (other
+// plugins' records, Mojang, Geyser) and publishes names.json. useNames() loads
+// it once and installs it here so every sellerLabel on the page picks it up
+// without threading a prop through each table.
+let sellerNames = {};
+export const setSellerNames = (names) => { sellerNames = names || {}; };
+export const isBedrockUuid = (uuid) => Boolean(uuid?.startsWith('00000000-0000-0000-0009'));
+
+/** The player's name when known, else a short stable handle - better than a
+ *  36-character string, and the same handle every time that player appears. */
 export const sellerLabel = (uuid) =>
-  uuid?.startsWith('00000000-0000-0000-0009')
-    ? `Bedrock·${uuid.slice(-4)}`
-    : `Player·${uuid?.slice(0, 4) ?? '????'}`;
+  sellerNames[uuid]
+  ?? (isBedrockUuid(uuid) ? `Bedrock·${uuid.slice(-4)}` : `Player·${uuid?.slice(0, 4) ?? '????'}`);
+
+/** Whether a listing's seller matches a typed name or uuid fragment. */
+export function sellerMatches(uuid, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const name = sellerNames[uuid];
+  return Boolean(name && name.toLowerCase().includes(q)) || Boolean(uuid && uuid.toLowerCase().includes(q));
+}
 
 export const enchantName = (id) =>
   id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

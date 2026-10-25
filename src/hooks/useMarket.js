@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { fetchFutures, fetchIndex, fetchItem, fetchMeta, fetchPools } from '../lib/market';
+import { fetchFutures, fetchIndex, fetchItem, fetchListings, fetchMeta, fetchNames, fetchPools, setSellerNames } from '../lib/market';
 
 /** The index and meta documents load once and drive the whole page. */
 export function useMarketIndex() {
@@ -81,3 +81,25 @@ function useDocument(load, active) {
 
 export const usePools = (active) => useDocument(fetchPools, active);
 export const useFutures = (active) => useDocument(fetchFutures, active);
+export const useListings = (active) => useDocument(fetchListings, active);
+
+// One fetch per session, shared by every tab: the map is small and every
+// seller cell on the page reads it through sellerLabel().
+let namesPromise = null;
+
+/** Seller names, loaded once and installed into lib/market for sellerLabel. */
+export function useNames() {
+  const [names, setNames] = useState({});
+
+  useEffect(() => {
+    let live = true;
+    namesPromise ??= fetchNames().catch(() => ({}));
+    namesPromise.then((map) => {
+      setSellerNames(map);
+      if (live) setNames(map || {});
+    });
+    return () => { live = false; };
+  }, []);
+
+  return names;
+}

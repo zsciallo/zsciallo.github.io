@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { ago, count, matches, SORTS } from '../lib/market';
-import { useFutures, useMarketIndex, useMarketItem, usePools } from '../hooks/useMarket';
+import { useFutures, useListings, useMarketIndex, useMarketItem, useNames, usePools } from '../hooks/useMarket';
 import { MarketList } from '../components/market/MarketList';
 import { ItemDetail } from '../components/market/ItemDetail';
+import { RecentListings } from '../components/market/RecentListings';
 import { PoolsPanel } from '../components/market/PoolsPanel';
 import { FuturesPanel } from '../components/market/FuturesPanel';
 import { Footer } from '../components/Footer';
@@ -16,15 +17,16 @@ const PAGE_SIZE = 40;
 // bet on either doing next.
 const TABS = [
   { id: 'items', label: 'ITEMS' },
+  { id: 'listings', label: 'RECENT LISTINGS' },
   { id: 'markets', label: 'MARKETS' },
   { id: 'futures', label: 'FUTURES' },
 ];
 
-/** Which tab is open, and which item or pool inside it, live in the query
- *  string, so any of them is linkable and the browser's back button does the
- *  obvious thing. An item link implies the tab that shows items. */
+/** Which tab is open, and which item, pool or seller inside it, live in the
+ *  query string, so any of them is linkable and the browser's back button does
+ *  the obvious thing. An item link implies the tab that shows items. */
 function readView() {
-  if (typeof window === 'undefined') return { tab: 'items', key: null, pool: null };
+  if (typeof window === 'undefined') return { tab: 'items', key: null, pool: null, player: null };
   const params = new URLSearchParams(window.location.search);
   const key = params.get('item');
   const named = TABS.find((tab) => tab.id === params.get('tab'));
@@ -32,13 +34,16 @@ function readView() {
     tab: key || !named ? 'items' : named.id,
     key,
     pool: params.get('pool'),
+    player: params.get('player'),
   };
 }
 
-const search = ({ tab, key, pool }) => {
+const search = ({ tab, key, pool, player }) => {
   if (key) return `?item=${encodeURIComponent(key)}`;
   if (tab === 'items') return '';
-  return pool ? `?tab=${tab}&pool=${encodeURIComponent(pool)}` : `?tab=${tab}`;
+  if (pool) return `?tab=${tab}&pool=${encodeURIComponent(pool)}`;
+  if (player) return `?tab=${tab}&player=${encodeURIComponent(player)}`;
+  return `?tab=${tab}`;
 };
 
 export function AuctionsPage() {
@@ -55,6 +60,9 @@ export function AuctionsPage() {
   // against the pool mids and chart them, so that tab needs both.
   const pools = usePools(view.tab === 'markets' || view.tab === 'futures');
   const futures = useFutures(view.tab === 'futures');
+  const listings = useListings(view.tab === 'listings');
+  // Seller names for every table on the page; loads once, in the background.
+  useNames();
 
   // Relative times are measured against when the data was pulled, not against
   // the newest row in it - otherwise a sale that closed just before the pull
@@ -73,8 +81,8 @@ export function AuctionsPage() {
     if (top) window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const open = (key) => go({ tab: 'items', key, pool: null }, { top: true });
-  const back = () => go({ tab: 'items', key: null, pool: null });
+  const open = (key) => go({ tab: 'items', key, pool: null, player: null }, { top: true });
+  const back = () => go({ tab: 'items', key: null, pool: null, player: null });
 
   const visible = useMemo(() => {
     const rank = (SORTS.find((s) => s.id === sort) ?? SORTS[0]).key;
@@ -121,7 +129,7 @@ export function AuctionsPage() {
               {TABS.map((tab) => (
                 <button key={tab.id} type="button" role="tab" aria-selected={view.tab === tab.id}
                   class={`market-tab${view.tab === tab.id ? ' active' : ''}`}
-                  onClick={() => go({ tab: tab.id, key: null, pool: null })}>
+                  onClick={() => go({ tab: tab.id, key: null, pool: null, player: null })}>
                   {tab.label}
                   {/* meta knows whether the desk is open without loading the
                       futures document, so the tab can say so up front. */}
@@ -132,9 +140,13 @@ export function AuctionsPage() {
               ))}
             </div>
 
+            {view.tab === 'listings' && (
+              <RecentListings {...listings} now={now} player={view.player} onOpen={open}
+                onPlayer={(player) => go({ tab: 'listings', key: null, pool: null, player: player || null })} />
+            )}
             {view.tab === 'markets' && (
               <PoolsPanel {...pools} now={now} openId={view.pool}
-                onOpen={(pool) => go({ tab: 'markets', key: null, pool })} />
+                onOpen={(pool) => go({ tab: 'markets', key: null, pool, player: null })} />
             )}
             {view.tab === 'futures' && <FuturesPanel {...futures} pools={pools} now={now} />}
 
