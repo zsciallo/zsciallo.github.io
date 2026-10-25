@@ -107,7 +107,6 @@ export function AuctionsPage() {
               <p class="section-eyebrow market-eyebrow">MARKET DATA</p>
               <h1 class="market-h1">
                 Auction <span class="accent">House</span>
-                <span class="beta-tag">BETA</span>
               </h1>
             </div>
             {meta && (
