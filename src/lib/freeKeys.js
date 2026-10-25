@@ -2,48 +2,41 @@ import { listPrice } from './price';
 
 // "Free Chroma Keys as you spend" promo.
 //
-// The keys are real basket lines made free by coupons that Tebex enforces
-// itself: FREEKEYn takes $0.99 off the Chroma Key package once per basket, and
-// Tebex re-checks every code whenever the basket changes, so nothing here has
-// to be trusted - the site only adds the keys, applies the codes, and shows
-// what stuck.
+// The promo is decided and enforced by the store backend (api.chromabit.us,
+// POST /store/basket/{ident}/freekeys): it reads the basket, works out the keys
+// earned from real spend in USD, adds them as real basket lines and makes them
+// free with a one-time coupon locked to the basket's player. Nothing in the
+// browser can grant a key - these helpers only *predict* what a quantity change
+// will earn, so a stepper can shout FREE KEY! before the round trip, and show
+// progress toward the next one.
 //
-// Each code's minimum is held against the basket total after *every* FREEKEY
-// discount, its own included - so it is the buyer's real spend, and FREEKEYn
-// needs the full minimum of it (US$10.99, not $10). Assuming $10 steps had the
-// site promising a key at $30.69 that Tebex then refused. `minimums` must
-// match the panel exactly.
-//
-// Those minimums are in the store's base currency, USD, but Tebex quotes every
-// price in the buyer's own currency. So spend is converted to USD before it is
-// held against them - otherwise CA$21 reads as two keys when it is about
-// US$15, and Tebex (rightly) refuses the second code.
-//
-// Spend is also counted before sales tax. Catalog prices include VAT where it
-// applies, but basket totals don't, so a tax-inclusive rate undercounts an EU
-// basket by the VAT - the cart said two keys where the cards said three.
-// Amounts shown to the buyer use the tax-inclusive rate, so they add up with
-// the prices on the cards.
-//
-// The coupons live in the Tebex panel. Adding a fourth key means creating
-// FREEKEY4 ($0.99 off Chroma Key, basket rule, minimum $40.99) first, then
-// adding its code and minimum below.
+// The numbers below are the defaults; `applyRules` overwrites them with what
+// the backend reports, so a threshold change on the server reaches the UI
+// without a deploy.
 
 export const FREE_KEY = {
   packageId: 7557969,
   name: 'Chroma Key',
   // USD list price, as set in the Tebex panel. Also the exchange-rate
-  // reference (see usdRate), so it must change if the panel price does.
+  // reference (see usdRate).
   price: 0.99,
-  // USD each FREEKEYn needs actually spent, in code order - the panel's
-  // "minimum basket value" for that coupon.
+  // USD of real spend each free key needs, in order.
   minimums: [10.99, 20.99, 30.99],
-  codes: ['FREEKEY1', 'FREEKEY2', 'FREEKEY3'],
+  max: 3,
 };
-FREE_KEY.max = FREE_KEY.codes.length;
 
-export function isFreeKeyCode(code) {
-  return FREE_KEY.codes.includes(String(code || '').toUpperCase());
+/** Overwrite the promo numbers with the backend's (`rules` from /store/offers or the sync response). */
+export function applyRules(rules) {
+  if (!rules?.minimumsUsd?.length) return;
+  FREE_KEY.packageId = Number(rules.packageId) || FREE_KEY.packageId;
+  FREE_KEY.price = Number(rules.priceUsd) || FREE_KEY.price;
+  FREE_KEY.minimums = rules.minimumsUsd.map(Number);
+  FREE_KEY.max = rules.max || FREE_KEY.minimums.length;
+}
+
+/** Coupon codes the backend mints for this promo; bookkeeping, never shown as a promo code. */
+export function isMintedFreeKeyCode(code) {
+  return /^CBK-/i.test(String(code || ''));
 }
 
 /** What a package adds to the basket total: its price less sales tax. */
@@ -69,7 +62,7 @@ export function usdRate(packagesById = {}) {
   return { rate: preTax / FREE_KEY.price, shownRate: shown / FREE_KEY.price };
 }
 
-/** Free keys earned by `spend` US dollars of real (non-free-key) basket value. */
+/** Free keys earned by `spend` US dollars of real (non-free-key) basket value. Prediction only. */
 export function freeKeysFor(spend) {
   // A hair of tolerance so $10.989999 of float drift still counts as $10.99.
   return FREE_KEY.minimums.filter((min) => spend + 1e-6 >= min).length;
@@ -79,7 +72,7 @@ export function freeKeysFor(spend) {
  * Where a buyer with `keys` free keys stands on the way to the next one:
  * USD still to spend (null once at the cap) and how far along the step is.
  * Counted from keys held rather than from spend, so it never runs ahead of
- * what Tebex actually granted.
+ * what the backend actually granted.
  */
 export function nextFreeKey(keys, spend) {
   if (keys >= FREE_KEY.max) return { left: null, progress: 1 };

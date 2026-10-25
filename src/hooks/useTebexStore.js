@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { fetchCategories } from '../lib/tebex';
+import { fetchOffers } from '../lib/storeApi';
+import { applyRules } from '../lib/freeKeys';
 
-const EMPTY = { loading: false, error: true, categories: [], packagesById: {}, salesById: {} };
+const EMPTY = { loading: false, error: true, categories: [], packagesById: {}, salesById: {}, offers: null };
 
 /**
  * Loads the webstore catalog (categories + packages) from the Tebex
- * Headless API. Returns { loading, error, categories, packagesById, salesById }
+ * Headless API. Returns { loading, error, categories, packagesById, salesById, offers }
  * where categories are sorted by their configured order and empty ones are
  * dropped. packagesById is a flat lookup, since basket entries carry only a
  * package id.
@@ -15,14 +17,16 @@ const EMPTY = { loading: false, error: true, categories: [], packagesById: {}, s
  * current catalog on screen rather than flipping back to the loading state -
  * only the very first load has nothing to show.
  *
- * salesById is the discount each package carries on the *anonymous* catalog,
- * which is fetched once and kept. Those are the storewide sales; the priced
- * catalog reports sales and upgrade credits through the same field and can't
- * tell them apart on its own (see lib/deal).
+ * salesById is what the store backend says is on sale (api.chromabit.us
+ * /store/offers). The priced catalog reports sales and upgrade credits through
+ * the same `discount` field and can't tell them apart on its own (see lib/deal);
+ * the backend reads the anonymous catalog, which only ever carries sales. With
+ * the API down there are simply no sale badges - prices stay right regardless,
+ * they come from Tebex.
  */
 export function useTebexStore(token, basketIdent) {
   const [state, setState] = useState({ ...EMPTY, loading: true, error: false });
-  const anonymous = useRef(null);
+  const offers = useRef(null);
 
   useEffect(() => {
     if (!token) {
@@ -30,13 +34,9 @@ export function useTebexStore(token, basketIdent) {
       return;
     }
     let cancelled = false;
-    // Without a basket the priced catalog *is* the anonymous one, so the first
-    // load costs one request, and a basket arriving later re-prices without
-    // asking for the anonymous prices again.
-    anonymous.current ??= fetchCategories(token);
-    const priced = basketIdent ? fetchCategories(token, basketIdent) : anonymous.current;
-    Promise.all([anonymous.current, priced])
-      .then(([plain, data]) => {
+    offers.current ??= fetchOffers();
+    Promise.all([fetchCategories(token, basketIdent), offers.current])
+      .then(([data, offer]) => {
         if (cancelled) return;
         const categories = data
           .filter((c) => c.packages && c.packages.length > 0)
@@ -45,14 +45,13 @@ export function useTebexStore(token, basketIdent) {
         const packagesById = {};
         categories.forEach((c) => c.packages.forEach((p) => { packagesById[p.id] = p; }));
         const salesById = {};
-        plain.forEach((c) => (c.packages || []).forEach((p) => { if (p.discount > 0) salesById[p.id] = p.discount; }));
-        setState({ loading: false, error: false, categories, packagesById, salesById });
+        Object.entries(offer?.sales || {}).forEach(([id, sale]) => { salesById[Number(id)] = sale.amount; });
+        if (offer?.freeKeys) applyRules(offer.freeKeys);
+        setState({ loading: false, error: false, categories, packagesById, salesById, offers: offer });
       })
       .catch(() => {
-        // Don't keep a failed anonymous fetch around for the next attempt.
-        anonymous.current = null;
         // A failed re-price shouldn't wipe a catalog that's already rendering;
-        // the buyer keeps the anonymous prices instead of an error page.
+        // the buyer keeps the previous prices instead of an error page.
         if (!cancelled) {
           setState((prev) => (prev.categories.length ? prev : EMPTY));
         }

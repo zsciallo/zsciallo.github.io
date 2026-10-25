@@ -2,8 +2,7 @@ import { useState, useEffect } from 'preact/hooks';
 import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { capture } from '../lib/funnel';
-import { loadUnavailable, markUnavailable, unmarkUnavailable, clearUnavailable } from '../lib/unavailable';
-import { inferOwnedPackages } from '../lib/inferOwned';
+import { fetchPlayer } from '../lib/storeApi';
 import { normalizeName, displayName, platformOf } from '../lib/minecraftName';
 import { resolveType } from '../lib/packageType';
 import { purchaseOptions, pairedSubscriptionIds, pairMembers } from '../lib/purchaseOptions';
@@ -77,9 +76,15 @@ export function StorePage() {
   const [retry, setRetry] = useState(null);
   const [retrying, setRetrying] = useState(false);
   const [purchaseComplete, setPurchaseComplete] = useState(false);
-  // Package ids Tebex has refused for the current player, inferred from failed
-  // basket adds and remembered across visits.
-  const [unavailable, setUnavailable] = useState([]);
+  // What the store backend says this player already holds (lib/storeApi
+  // fetchPlayer): { known, rank, owned }. null until it answers, or when it
+  // can't - then nothing is marked OWNED or LOCKED and Tebex's own refusal at
+  // add time is the only gate, which is exactly how the store behaved before.
+  const [player, setPlayer] = useState(null);
+  // Bumped whenever ownership may have changed (a purchase came back, Tebex
+  // refused an add) so the lookup runs again.
+  const [ownershipTick, setOwnershipTick] = useState(0);
+  const refreshOwnership = () => setOwnershipTick((n) => n + 1);
 
   useEffect(() => {
     const saved = localStorage.getItem(USERNAME_KEY) || '';
@@ -87,7 +92,8 @@ export function StorePage() {
     // Buyers saved before the platform toggle existed have no stored edition,
     // so read it back off the dot Geyser left on the name.
     setPlatform(localStorage.getItem(PLATFORM_KEY) || platformOf(saved));
-    setUnavailable(loadUnavailable(saved));
+    // Written by older builds that remembered refused adds in the browser.
+    localStorage.removeItem('chromabit_unavailable');
     // Funnel entry point. `returning` separates first-time browsers from
     // players who have already bought once and know the flow.
     capture('store_viewed', { returning: Boolean(saved) });
@@ -98,12 +104,27 @@ export function StorePage() {
       // confirmation page never get here. Tebex remains the source of truth
       // for revenue; this only gives the funnel its final step.
       capture('purchase_completed');
-      // What they own just changed, so anything learned before is stale.
-      clearUnavailable(saved);
       cart.clearBasket();
       history.replaceState(null, '', window.location.pathname);
+      // What they own just changed. Tebex's webhook reaches the backend within
+      // seconds of the payment; ask again once it has had a moment.
+      setTimeout(refreshOwnership, 4000);
     }
   }, []);
+
+  // Ownership comes from the backend's view of Tebex's payment history, keyed
+  // by the name the basket delivers to.
+  useEffect(() => {
+    if (!username) {
+      setPlayer(null);
+      return;
+    }
+    let cancelled = false;
+    fetchPlayer(username).then((p) => {
+      if (!cancelled) setPlayer(p);
+    });
+    return () => { cancelled = true; };
+  }, [username, ownershipTick]);
 
   // A basket is what ties catalog pricing to a player, so make sure one exists
   // as soon as we know who they are.
@@ -122,9 +143,6 @@ export function StorePage() {
       // different real player instead of failing. The platform is asked for up
       // front now, so the name we were given is the name we send.
       const basket = await cart.addItem(pkg, name, quantity, type);
-      // Succeeded, so any remembered refusal is stale - Battle Pass limits
-      // expire, and a rank may have been refunded.
-      if (unavailable.includes(pkg.id)) setUnavailable(unmarkUnavailable(name, pkg.id));
 
       capture(mode === 'buy' ? 'checkout_started' : 'add_to_cart', {
         package: pkg.name,
@@ -218,14 +236,13 @@ export function StorePage() {
         );
         setRetry({ pkg, mode, quantity, type });
       } else if (notPurchasable) {
-        // Remember the refusal so the card greys out from here on, rather than
-        // letting them hit the same wall on every visit. Only reached now for
-        // packages where being refused actually implies something durable: a
-        // capped package they may hold, or one gated behind a rank they lack.
-        setUnavailable(markUnavailable(name, pkg.id));
-        // The second sentence covers the case this can't rule out: nothing in the
-        // catalog reveals who holds MVP, so an existing MVP+ subscriber re-adding
-        // it lands here too. Naming both keeps the message true either way.
+        // Tebex knows something about this player's purchases that the backend
+        // hasn't shown yet (a purchase seconds old, or the API was unreachable
+        // when the page loaded) - ask it again so the card catches up.
+        refreshOwnership();
+        // The second sentence covers the case this can't rule out: an existing
+        // MVP+ subscriber re-adding it lands here too. Naming both keeps the
+        // message true either way.
         setCheckoutError(missing
           ? `${pkg.name} is an upgrade for ${missing.name} owners, so you'll need `
             + `${missing.name} on your account before you can buy it. If you're `
@@ -347,33 +364,25 @@ export function StorePage() {
   const cartQtyById = {};
   cart.items.forEach((i) => { cartQtyById[i.id] = i.in_basket?.quantity || 0; });
 
-  // Two sources, deliberately combined: upgrade credits in the priced catalog
-  // reveal the rank ladder for free, and rejected adds cover the standalone
-  // capped packages that no discount can betray.
-  //
-  // Remembered refusals are filtered to packages that can actually be held. A
-  // refusal on an uncapped package - the crate keys, claim blocks, the sell
-  // chest - never meant ownership, and browsers are still carrying entries
-  // written before this was checked. Ignoring them here rather than waiting out
-  // the 24h TTL means anyone currently staring at YOU ALREADY OWN THIS on a
-  // crate key gets their buttons back on the next page load.
+  // What the backend says this player holds, read from Tebex's payment history:
+  // ranks imply the ladder below them, refunds drop out, and limited packages
+  // (the Battle Pass) count for their own Tebex window. Only packages that can
+  // be held at all are marked - a refused crate key never meant ownership.
   const ownable = (id) => limitCount(store.packagesById[id]?.user_limit) > 0;
-  const ownedIds = new Set([
-    ...unavailable.filter(ownable),
-    ...inferOwnedPackages(store.categories, store.salesById),
-  ]);
+  const ownedIds = new Set((player?.owned || []).filter(ownable));
 
   // What a package can't be bought without - MVP+ only sells to MVP holders.
-  // Returns the required package when there's no sign the player has it, so a
-  // refusal can be blamed on the gate instead of on ownership.
+  // Returns the required package when the player doesn't hold it, so the card
+  // can say REQUIRES MVP up front and a refusal can be blamed on the gate
+  // instead of on ownership.
   const missingRequirement = (pkg) => {
     const required = requiredPackage(pkg, store.packagesById, config.packageRequires);
     return required && !ownedIds.has(required.id) ? required : null;
   };
-  // Only ever applied to a package Tebex has actually refused. The catalog
-  // can't reveal who holds MVP, so locking MVP+ on suspicion would hide it from
-  // the very players allowed to buy it.
-  const lockedOf = (pkg) => (unavailable.includes(pkg.id) ? missingRequirement(pkg) : null);
+  // Proactive only once the backend has answered for this player. Without an
+  // answer, locking MVP+ on suspicion would hide it from the very players
+  // allowed to buy it - so the card stays open and Tebex's refusal explains.
+  const lockedOf = (pkg) => (player ? missingRequirement(pkg) : null);
 
   // The cheaper subscription half of a pair is reached through its partner's
   // popup, so it must not also sit in the grid as a package of its own.

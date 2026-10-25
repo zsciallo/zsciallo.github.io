@@ -5,14 +5,14 @@ import {
   addToBasket,
   removeFromBasket,
   setBasketQuantity,
-  MAX_QUANTITY,
   applyCoupon,
   removeCoupon,
   applyGiftCard,
   removeGiftCard,
 } from '../lib/tebex';
 import { resolveType, isRecurring } from '../lib/packageType';
-import { FREE_KEY, isFreeKeyCode, freeKeysFor } from '../lib/freeKeys';
+import { FREE_KEY, isMintedFreeKeyCode } from '../lib/freeKeys';
+import { syncFreeKeys } from '../lib/storeApi';
 
 const BASKET_KEY = 'chromabit_basket';
 // A Tebex basket freezes the name it was created for - delivery uses that, not
@@ -27,10 +27,9 @@ const BASKET_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 // only knowable by remembering what we sent - and the cart has to be able to
 // tell the buyer that a line renews.
 const TYPES_KEY = 'chromabit_basket_types';
-// How many of the basket's Chroma Keys are the promo's free ones. Tebex sees
-// one Chroma Key line either way, so like the subscription flags this is only
-// knowable by remembering what we added - stamped with the basket ident.
-const FREE_KEYS_KEY = 'chromabit_basket_freekeys';
+// Written by builds before the free-key promo moved to the backend; cleared so
+// nothing stale lingers in the buyer's browser.
+const LEGACY_FREE_KEYS_KEY = 'chromabit_basket_freekeys';
 
 /**
  * Manages a persistent Tebex basket (the cart). The basket ident is kept in
@@ -39,6 +38,10 @@ const FREE_KEYS_KEY = 'chromabit_basket_freekeys';
  */
 export function useTebexBasket(token, username, rate = 1) {
   const [basket, setBasket] = useState(null);
+  // What the store backend last said about this basket's free keys:
+  // { ident, keys, spendUsd }. Stamped with the ident so a stale answer for a
+  // previous basket never dresses up the current one.
+  const [promo, setPromo] = useState(null);
   // Local currency per US dollar (see usdRate). The free-key minimums are in
   // USD, so spend is divided by this before it is counted. A ref so a reconcile
   // already queued uses the rate the catalog has since reported.
@@ -83,81 +86,30 @@ export function useTebexBasket(token, username, rate = 1) {
   }
 
   /**
-   * Bring the free keys in line with what the basket has earned: add or take
-   * away free Chroma Keys, apply or drop the FREEKEY codes, then re-read and
-   * believe only what Tebex kept - a code it refused means that key isn't free,
-   * so it comes back out rather than being charged for.
+   * Store a basket after letting the store backend bring its free keys in line
+   * with what it has earned (lib/storeApi.syncFreeKeys). The backend reads the
+   * basket, adds or removes the promo's Chroma Keys and applies a one-time
+   * coupon locked to this player; the basket it hands back is what we show.
    *
-   * Never throws. The promo failing is no reason to fail the add or quantity
-   * change that triggered it; the basket just stays as it was.
+   * Never throws. If the API is unreachable the basket is stored exactly as
+   * Tebex has it and the promo shows no keys - the cart must never announce a
+   * key the checkout won't honour, and a promo outage is no reason to fail the
+   * add or quantity change that triggered this.
    */
-  async function reconcileFreeKeys(b) {
-    if (!b?.ident || b.complete) return b;
-    const ident = b.ident;
-    const id = FREE_KEY.packageId;
-    const qtyIn = (basket) => basket?.packages?.find((p) => p.id === id)?.in_basket?.quantity ?? 0;
-    const codesIn = (basket) => (basket?.coupons || []).map((c) => String(c.code).toUpperCase()).filter(isFreeKeyCode);
-    try {
-      const qty = qtyIn(b);
-      const applied = codesIn(b);
-      // Each code on the basket is a free key in it, so that's the floor even
-      // if the stored count was lost.
-      const bonus = Math.min(Math.max(loadFreeKeys(ident), applied.length), qty);
-      const fx = rateRef.current;
-      const unit = b.packages?.find((p) => p.id === id)?.in_basket?.price ?? FREE_KEY.price * fx;
-      // Real spend: the total, less any free keys not (yet) covered by a code.
-      const spend = b.total_price - Math.max(0, bonus - applied.length) * unit;
-      // Only as many as still fit on the Chroma Key line beside the bought ones.
-      const target = Math.min(freeKeysFor(spend / fx), Math.max(0, MAX_QUANTITY - (qty - bonus)));
-      const want = FREE_KEY.codes.slice(0, target);
-      if (bonus === target && applied.length === want.length && want.every((c) => applied.includes(c))) {
-        saveFreeKeys(ident, bonus);
-        return b;
-      }
-
-      // Keys first: each code needs a Chroma Key to discount.
-      const nextQty = qty - bonus + target;
-      if (nextQty !== qty) {
-        if (nextQty <= 0) await removeFromBasket(ident, id);
-        else if (qty === 0) await addToBasket(ident, id, nextQty, 'single');
-        else await setBasketQuantity(ident, id, nextQty);
-      }
-      // Then the codes, lowest first: each one's minimum is checked against
-      // the total with every code on taken off, its own included.
-      for (const code of applied) {
-        if (!want.includes(code)) await removeCoupon(token, ident, code).catch(() => {});
-      }
-      for (const code of want) {
-        if (applied.includes(code)) continue;
-        try {
-          await applyCoupon(token, ident, code);
-        } catch {
-          break;
-        }
-      }
-
-      let settled = await getBasket(token, ident);
-      const kept = codesIn(settled).length;
-      if (kept < target) {
-        // Tebex turned a code down: take back the key it would have covered.
-        const q = qtyIn(settled) - (target - kept);
-        if (q <= 0) await removeFromBasket(ident, id);
-        else await setBasketQuantity(ident, id, q);
-        settled = await getBasket(token, ident);
-      }
-      const finalBonus = Math.min(kept, target);
-      saveFreeKeys(ident, finalBonus);
-      return settled;
-    } catch {
+  async function settle(b) {
+    if (!b?.ident || b.complete) {
+      store(b);
       return b;
     }
-  }
-
-  /** Store a basket after letting the free-key promo catch up with it. */
-  async function settle(b) {
-    const reconciled = await reconcileFreeKeys(b);
-    store(reconciled);
-    return reconciled;
+    const synced = await syncFreeKeys(b.ident);
+    if (synced?.basket?.ident === b.ident) {
+      setPromo({ ident: b.ident, keys: synced.keys, spendUsd: synced.spendUsd });
+      store(synced.basket);
+      return synced.basket;
+    }
+    setPromo(null);
+    store(b);
+    return b;
   }
 
   useEffect(() => {
@@ -190,6 +142,9 @@ export function useTebexBasket(token, username, rate = 1) {
         if (b && !b.complete && sameName(b.username, username)) {
           store(b);
           setRecurringIds(loadRecurring(saved.ident));
+          // The basket may have earned or lost keys since it was last seen
+          // (an old tab, a changed threshold); let the backend settle it.
+          void settle(b);
         } else {
           forgetBasket();
         }
@@ -369,13 +324,13 @@ export function useTebexBasket(token, username, rate = 1) {
   async function addCouponNow(code) {
     const current = basketRef.current;
     if (!current) throw new Error('Add something to your cart first.');
-    if (isFreeKeyCode(code)) {
+    if (isMintedFreeKeyCode(code)) {
       throw new Error('Free keys are added to your cart automatically - no code needed.');
     }
     // Promo codes are single-use per player and don't stack, so refuse a second
-    // one here rather than relying on the drawer to hide the input. The free
-    // key codes ride alongside and don't count.
-    if ((current.coupons || []).some((c) => !isFreeKeyCode(c.code))) {
+    // one here rather than relying on the drawer to hide the input. The promo's
+    // own coupon rides alongside and doesn't count.
+    if ((current.coupons || []).some((c) => !isMintedFreeKeyCode(c.code))) {
       throw new Error('Only one promo code can be used per order.');
     }
     await applyCoupon(token, current.ident, code);
@@ -428,17 +383,20 @@ export function useTebexBasket(token, username, rate = 1) {
 
   const items = basket?.packages || [];
   const count = items.reduce((n, p) => n + (p.in_basket?.quantity || 0), 0);
-  // The promo's own codes are bookkeeping, not something the buyer typed, so
-  // they stay out of the promo-code UI.
-  const coupons = (basket?.coupons || []).filter((c) => !isFreeKeyCode(c.code));
+  // The promo's minted coupon is bookkeeping, not something the buyer typed, so
+  // it stays out of the promo-code UI.
+  const coupons = (basket?.coupons || []).filter((c) => !isMintedFreeKeyCode(c.code));
   const giftcards = basket?.giftcards || [];
-  // Real spend toward the next free key, in USD. Once reconciled, each free
-  // key is netted out by its code, so the basket total is the spend.
-  const freeKeySpend = basket ? basket.total_price / rate : 0;
-  // Free keys in the basket: one per FREEKEY code Tebex is honouring, never
-  // more than the Chroma Keys actually there.
+  // The backend's answer for *this* basket, if it has one.
+  const settled = promo && basket && promo.ident === basket.ident ? promo : null;
+  // Real spend toward the next free key, in USD. The backend measures it; with
+  // the API down the total stands in (no free keys are in the basket then, so
+  // the total is the spend).
+  const freeKeySpend = settled ? settled.spendUsd : basket ? basket.total_price / rate : 0;
+  // Free keys in the basket: what the backend granted, never more than the
+  // Chroma Keys actually there.
   const chromaQty = items.find((p) => p.id === FREE_KEY.packageId)?.in_basket?.quantity ?? 0;
-  const bonusKeys = Math.min(chromaQty, (basket?.coupons || []).filter((c) => isFreeKeyCode(c.code)).length);
+  const bonusKeys = settled ? Math.min(chromaQty, settled.keys) : 0;
 
   return {
     basket, items, count, coupons, giftcards, recurringIds, basketError,
@@ -522,26 +480,7 @@ function loadSavedBasket() {
 function forgetBasket() {
   localStorage.removeItem(BASKET_KEY);
   localStorage.removeItem(TYPES_KEY);
-  localStorage.removeItem(FREE_KEYS_KEY);
-}
-
-/** Free keys recorded for `ident`; 0 for any other basket or bad data. */
-function loadFreeKeys(ident) {
-  try {
-    const saved = JSON.parse(localStorage.getItem(FREE_KEYS_KEY));
-    return saved?.ident === ident && Number.isInteger(saved.count) ? saved.count : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function saveFreeKeys(ident, count) {
-  try {
-    localStorage.setItem(FREE_KEYS_KEY, JSON.stringify({ ident, count }));
-  } catch {
-    // Without storage the count is lost on reload. The reconcile falls back
-    // to counting the FREEKEY codes on the basket, which says the same thing.
-  }
+  localStorage.removeItem(LEGACY_FREE_KEYS_KEY);
 }
 
 /**
