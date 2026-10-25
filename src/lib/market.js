@@ -9,32 +9,43 @@
 export const BASE = 'https://api.chromabit.us/market';
 export const FALLBACK_BASE = '/market';
 
-// Item keys are URL-safe by construction, but ':' and '#' are awkward as
-// filenames, so the generator flattens them. The plugin will serve the key
-// verbatim; this is the one place that difference lives.
-export const itemPath = (key) => `${BASE}/items/${key.replace(/:/g, '_').replace(/#/g, '__')}.json`;
+// Item keys are URL-safe by construction, but ':', '#' and '~' are awkward as
+// filenames, so the generator flattens them (`safe()` in build_market_data.py:
+// ':' -> '_', '#' -> '__', '~' -> '-'). This must mirror it exactly - spawner
+// variants like `minecraft:spawner~BLAZE#2db6…` 404 otherwise. Relative to the
+// market root; getJson picks the origin.
+export const itemPath = (key) => `/items/${key.replace(/:/g, '_').replace(/#/g, '__').replace(/~/g, '-')}.json`;
 
 // GitHub Pages serves these with a flat max-age=600 and no revalidation, so a
 // returning browser shows prices up to ten minutes stale straight from disk
 // cache while an incognito window looks correct. 'no-cache' still caches, it
 // just revalidates against the ETag first: unchanged data costs a 304 of a few
 // hundred bytes, and the page is never showing a floor that has already moved.
+class HttpError extends Error {
+  constructor(status, statusText) {
+    super(`${status} ${statusText}`);
+    this.status = status;
+  }
+}
+
 async function getJsonFrom(url) {
   const response = await fetch(url, { cache: 'no-cache', signal: AbortSignal.timeout(8000) });
-  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  if (!response.ok) throw new HttpError(response.status, response.statusText);
   return response.json();
 }
 
-// Once the API has failed in this session, stop paying a timeout per document
-// and go straight to the static copy.
+// Once the API has actually failed in this session (unreachable, timed out,
+// 5xx), stop paying a timeout per document and go straight to the static copy.
+// A 404 is the API answering "no such document" and says nothing about its
+// health - it must not switch the whole session over.
 let apiDown = false;
 
 async function getJson(path) {
   if (!apiDown) {
     try {
       return await getJsonFrom(`${BASE}${path}`);
-    } catch {
-      apiDown = true;
+    } catch (err) {
+      if (!(err instanceof HttpError) || err.status >= 500) apiDown = true;
     }
   }
   return getJsonFrom(`${FALLBACK_BASE}${path}`);
