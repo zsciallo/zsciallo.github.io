@@ -1485,34 +1485,264 @@
   background: var(--glow);
 }
 
-/* ─── Recent Listings tab ─── */
+/* ─── Recent Listings tab ───
+   Marketplace cards on wide screens; on a phone each card folds to one row
+   that expands in place (RecentListings.jsx switches at the same 560px). */
 
-.listings-table table { width: 100%; }
-.listings-table td.listing-item { max-width: 0; }
-.listing-open,
-.listing-seller {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 100%;
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listing-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.listing-card:hover {
+  border-color: var(--accent-deep);
+}
+
+.listing-head {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
   background: none;
   border: 0;
   padding: 0;
   color: inherit;
   font: inherit;
-  cursor: pointer;
   text-align: left;
+  cursor: pointer;
 }
-.listing-open span {
+
+.listing-head:focus-visible,
+.listing-seller:focus-visible,
+.listing-view:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.listing-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: radial-gradient(circle at 50% 45%, var(--glow), transparent 70%), var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+
+.listing-thumb .item-icon {
+  image-rendering: pixelated;
+}
+
+.listing-qty {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.35rem;
+  padding: 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--text);
+  background: rgba(12, 7, 24, 0.75);
+  border-radius: 4px;
+}
+
+.listing-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.65rem 0.8rem 0.2rem;
+}
+
+.listing-price {
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--positive);
+}
+
+.listing-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.listing-head:hover .listing-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.listing-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.2rem 0.8rem 0.75rem;
+  margin-top: auto;
+}
+
+.listing-seller {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
 }
-.listing-open:hover span,
+
 .listing-seller:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.listing-open .market-tag { flex: none; }
-.listing-seller { color: var(--accent, inherit); }
+
+.listing-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.9rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.listing-facts div {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.listing-facts dt {
+  opacity: 0.75;
+}
+
+.listing-facts dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.listing-view {
+  margin-top: 0.3rem;
+  padding: 0.5rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.listing-view:hover {
+  border-color: var(--accent-deep);
+}
+
+@media (max-width: 560px) {
+  .listing-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .listing-head {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .listing-thumb {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    aspect-ratio: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .listing-qty {
+    right: -0.35rem;
+    bottom: -0.35rem;
+    font-size: 0.8rem;
+    padding: 0 0.25rem;
+    border: 1px solid var(--border);
+  }
+
+  /* Name first, price under it: the row reads like a feed entry. */
+  .listing-body {
+    flex: 1 1 auto;
+    flex-direction: column-reverse;
+    padding: 0;
+  }
+
+  .listing-name {
+    -webkit-line-clamp: 1;
+    max-width: 100%;
+  }
+
+  .listing-price {
+    font-size: 1.25rem;
+  }
+
+  .listing-body .market-tag {
+    order: -1;
+  }
+
+  .listing-head:hover .listing-name {
+    text-decoration: none;
+  }
+
+  .listing-chevron {
+    flex: none;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.2rem;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: translateY(-25%) rotate(45deg);
+    transition: transform 0.15s;
+  }
+
+  .listing-card.open .listing-chevron {
+    transform: translateY(25%) rotate(225deg);
+  }
+
+  .listing-card.open {
+    border-color: var(--accent-deep);
+  }
+
+  .listing-meta {
+    padding: 0.6rem 0.75rem 0.75rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listing-card,
+  .listing-chevron {
+    transition: none;
+  }
+}
+
 .market-controls form.market-search { margin: 0; }

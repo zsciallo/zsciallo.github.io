@@ -4,6 +4,78 @@ import { ItemIcon } from './ItemIcon';
 
 const PAGE_SIZE = 40;
 
+// Phones get a list of collapsed entries instead of the card grid; this matches
+// the max-width: 560px block in market.css.
+const COMPACT_QUERY = '(max-width: 560px)';
+
+function useCompact() {
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(COMPACT_QUERY);
+    const sync = () => setCompact(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  return compact;
+}
+
+/**
+ * One listing as a marketplace card: the item tile and price up top, the
+ * seller and timing underneath. On a phone the card collapses to a single row
+ * (icon, name, price) and the head toggles the details instead of opening the
+ * item, which moves to its own button inside the expanded part.
+ */
+function ListingCard({ row, sold, now, compact, onPlayer, onOpen }) {
+  const [expanded, setExpanded] = useState(false);
+  const at = sold ? row.at : row.listedAt;
+  const item = { id: row.material, name: row.name, materialName: row.materialName, custom: row.custom };
+  const showMeta = !compact || expanded;
+
+  return (
+    <li class={`listing-card${compact ? ' listing-card--compact' : ''}${expanded ? ' open' : ''}`}>
+      <button type="button" class="listing-head"
+        aria-expanded={compact ? expanded : undefined}
+        onClick={() => (compact ? setExpanded((v) => !v) : onOpen(row.key))}>
+        <span class="listing-thumb">
+          <ItemIcon item={item} size={compact ? 32 : 56} />
+          {row.count > 1 && <span class="listing-qty">×{row.count}</span>}
+        </span>
+        <span class="listing-body">
+          <span class="listing-price">{money(row.totalPrice)}</span>
+          <span class="listing-name">{row.name}</span>
+          {row.variant ? <em class="market-tag">{row.variant}</em> : null}
+        </span>
+        {compact && <span class="listing-chevron" aria-hidden="true" />}
+      </button>
+
+      {showMeta && (
+        <div class="listing-meta">
+          <button type="button" class="listing-seller" title={row.seller}
+            onClick={() => onPlayer(sellerLabel(row.seller))}>
+            {sellerLabel(row.seller)}
+          </button>
+          <dl class="listing-facts">
+            {row.count > 1 && (
+              <div><dt>Each</dt><dd>{money(row.unitPrice, { compact: false })}</dd></div>
+            )}
+            <div>
+              <dt>{sold ? 'Sold' : 'Listed'}</dt>
+              <dd title={fullDate(at)}>{ago(at, now)}</dd>
+            </div>
+            {!sold && <div><dt>Ends in</dt><dd>{until(row.expiresAt, now)}</dd></div>}
+          </dl>
+          {compact && (
+            <button type="button" class="listing-view" onClick={() => onOpen(row.key)}>
+              View item prices
+            </button>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
 const STATUSES = [
   { id: 'active', label: 'For sale now' },
   { id: 'sold', label: 'Sold' },
@@ -23,6 +95,7 @@ export function RecentListings({ loading, error, data, now, player, onPlayer, on
   const [status, setStatus] = useState('active');
   const [draft, setDraft] = useState(player || '');
   const [limit, setLimit] = useState(PAGE_SIZE);
+  const compact = useCompact();
 
   // The URL is the source of truth for the filter (back button, shared links);
   // the box only mirrors it until the next keystroke.
@@ -79,47 +152,12 @@ export function RecentListings({ loading, error, data, now, player, onPlayer, on
             </p>
           ) : (
             <>
-              <section class="mini-table listings-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th class="num">Qty</th>
-                      <th class="num">Unit price</th>
-                      <th class="num">Total</th>
-                      <th>Seller</th>
-                      <th class="num">{status === 'sold' ? 'Sold' : 'Listed'}</th>
-                      {status !== 'sold' && <th class="num">Ends</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.slice(0, limit).map((row) => (
-                      <tr key={row.listingId}>
-                        <td class="listing-item">
-                          <button type="button" class="listing-open" onClick={() => onOpen(row.key)}>
-                            <ItemIcon item={{ id: row.material, name: row.name, materialName: row.materialName, custom: row.custom }} size={20} />
-                            <span>{row.name}</span>
-                            {row.variant ? <em class="market-tag">{row.variant}</em> : null}
-                          </button>
-                        </td>
-                        <td class="num">{row.count}</td>
-                        <td class="num mono">{money(row.unitPrice, { compact: false })}</td>
-                        <td class="num mono">{money(row.totalPrice)}</td>
-                        <td class="seller">
-                          <button type="button" class="listing-seller" title={row.seller}
-                            onClick={() => onPlayer(sellerLabel(row.seller))}>
-                            {sellerLabel(row.seller)}
-                          </button>
-                        </td>
-                        <td class="num" title={fullDate(status === 'sold' ? row.at : row.listedAt)}>
-                          {ago(status === 'sold' ? row.at : row.listedAt, now)}
-                        </td>
-                        {status !== 'sold' && <td class="num">{until(row.expiresAt, now)}</td>}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </section>
+              <ul class="listing-grid">
+                {rows.slice(0, limit).map((row) => (
+                  <ListingCard key={row.listingId} row={row} sold={status === 'sold'} now={now}
+                    compact={compact} onPlayer={onPlayer} onOpen={onOpen} />
+                ))}
+              </ul>
               {rows.length > limit && (
                 <button type="button" class="market-more" onClick={() => setLimit((n) => n + PAGE_SIZE)}>
                   Show {Math.min(PAGE_SIZE, rows.length - limit)} more
