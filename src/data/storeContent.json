@@ -2,7 +2,7 @@
   "source": {
     "repo": "mc-server",
     "ref": "origin/main",
-    "commit": "f868939eb28e9b99b3ae6a7c26f3fff395c27a8e"
+    "commit": "6b8953fea1898161001bd4ccd14bff8304e8c704"
   },
   "vanillaIcons": [
     "amethyst_cluster",
@@ -97,11 +97,11 @@
   "packages": {
     "7557969": {
       "kind": "crate_key",
-      "summary": "Opens the Chroma Crate: 62 possible rewards",
+      "summary": "Opens the Chroma Crate: 61 possible rewards",
       "blocks": [
         {
           "type": "text",
-          "text": "1x Chroma Key. Each key opens the Chroma Crate once and gives you one of the 62 rewards below."
+          "text": "1x Chroma Key. Each key opens the Chroma Crate once and gives you one of the 61 rewards below."
         },
         {
           "type": "rewards",
@@ -639,13 +639,6 @@
                 {
                   "icon": "mc:emerald_block",
                   "name": "$750,000"
-                },
-                {
-                  "icon": "mc:enchanted_book",
-                  "name": "Random Fabled Book",
-                  "lore": [
-                    "One random Fabled enchantment book."
-                  ]
                 },
                 {
                   "icon": "mc:enchanted_book",
@@ -2062,7 +2055,7 @@
               [],
               [
                 "1x StatTrak",
-                "1x Scroll of Binding"
+                "Shard of Embers (epic)"
               ]
             ],
             [
@@ -2071,7 +2064,7 @@
                 "3x Skeleton Spawner"
               ],
               [
-                "1x Random Fabled Book"
+                "1x Random Legendary Book"
               ]
             ],
             [
@@ -2928,7 +2921,7 @@
               [],
               [
                 "1x StatTrak",
-                "1x Scroll of Binding"
+                "Shard of Embers (epic)"
               ]
             ],
             [
@@ -2937,7 +2930,7 @@
                 "3x Skeleton Spawner"
               ],
               [
-                "1x Random Fabled Book"
+                "1x Random Legendary Book"
               ]
             ],
             [
@@ -3102,11 +3095,11 @@
     },
     "7709276": {
       "kind": "crate_key",
-      "summary": "Opens the Halloween Crate: 41 possible rewards",
+      "summary": "Opens the Halloween Crate: 40 possible rewards",
       "blocks": [
         {
           "type": "text",
-          "text": "1x Halloween Key. Each key opens the Halloween Crate once and gives you one of the 41 rewards below."
+          "text": "1x Halloween Key. Each key opens the Halloween Crate once and gives you one of the 40 rewards below."
         },
         {
           "type": "rewards",
@@ -3484,13 +3477,6 @@
                 {
                   "icon": "mc:emerald_block",
                   "name": "$1,250,000"
-                },
-                {
-                  "icon": "mc:enchanted_book",
-                  "name": "Random Fabled Book",
-                  "lore": [
-                    "One random Fabled enchantment book."
-                  ]
                 },
                 {
                   "icon": "mc:elytra",
