@@ -3,7 +3,7 @@
 // The live documents come from api.chromabit.us, where the staff bot regenerates
 // them every few minutes from the auction-house database (discord-bot repo,
 // web/market_refresh.py + market_tools/). CI downloads the same snapshot
-// (tools/fetch_market.py) into the static /market/ copy every half hour; that
+// (tools/fetch_market.py) into the static /market/ copy on each deploy; that
 // copy is the fallback whenever the API is down, so the auctions page degrades
 // to "a bit stale" rather than empty. The website itself has no database access.
 export const BASE = 'https://api.chromabit.us/market';

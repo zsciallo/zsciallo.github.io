@@ -3,10 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [source]
-  schedule:
-    # Every half hour. GitHub's scheduler is best-effort and can drift 5-30
-    # minutes under load, which is fine for floor prices.
-    - cron: '17,47 * * * *'
+  # No schedule (owner 2026-11-06): the browser reads live market data from
+  # api.chromabit.us, so the static /market/ fallback refreshes on each push.
   workflow_dispatch:
 
 permissions:
