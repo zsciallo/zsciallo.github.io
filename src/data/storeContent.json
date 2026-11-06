@@ -2,7 +2,7 @@
   "source": {
     "repo": "mc-server",
     "ref": "origin/main",
-    "commit": "0323be20f84bba7197b20331b52ca8ca7419e121"
+    "commit": "79ec03706b9bbc7b2300f3a100531c89b284e671"
   },
   "vanillaIcons": [
     "amethyst_cluster",
@@ -3098,11 +3098,11 @@
     },
     "7793665": {
       "kind": "crate_key",
-      "summary": "Opens the Living Prism Crate: 39 possible rewards",
+      "summary": "Opens the Living Prism Crate: 37 possible rewards",
       "blocks": [
         {
           "type": "text",
-          "text": "1x Living Prism Key. Each key opens the Living Prism Crate once and gives you one of the 39 rewards below."
+          "text": "1x Living Prism Key. Each key opens the Living Prism Crate once and gives you one of the 37 rewards below."
         },
         {
           "type": "rewards",
@@ -3294,7 +3294,7 @@
                 },
                 {
                   "icon": "mc:chest",
-                  "name": "3x Sell Chest",
+                  "name": "1x Sell Chest",
                   "lore": [
                     "Sells what you put in it, on its own."
                   ]
@@ -3340,13 +3340,6 @@
                   "name": "Rare Spawner",
                   "lore": [
                     "One random spawner: Iron Golem or Guardian."
-                  ]
-                },
-                {
-                  "icon": "mc:chest",
-                  "name": "2x Sell Chest",
-                  "lore": [
-                    "Sells what you put in it, on its own."
                   ]
                 },
                 {
@@ -3396,13 +3389,6 @@
                   "name": "Mid Spawner",
                   "lore": [
                     "One random spawner: Blaze, Enderman or Creeper."
-                  ]
-                },
-                {
-                  "icon": "mc:chest",
-                  "name": "1x Sell Chest",
-                  "lore": [
-                    "Sells what you put in it, on its own."
                   ]
                 },
                 {
