@@ -2,7 +2,7 @@
   "source": {
     "repo": "mc-server",
     "ref": "origin/main",
-    "commit": "6b8953fea1898161001bd4ccd14bff8304e8c704"
+    "commit": "0323be20f84bba7197b20331b52ca8ca7419e121"
   },
   "vanillaIcons": [
     "amethyst_cluster",
@@ -76,7 +76,6 @@
     "rib_armor_trim_smithing_template",
     "sentry_armor_trim_smithing_template",
     "shaper_armor_trim_smithing_template",
-    "shield",
     "shulker_spawn_egg",
     "silence_armor_trim_smithing_template",
     "slime_spawn_egg",
@@ -1662,13 +1661,13 @@
               "detail": "Across both tracks"
             },
             {
-              "icon": "mc:ominous_trial_key",
-              "text": "15x Halloween Key",
+              "icon": "mc:heart_of_the_sea",
+              "text": "20x Shard Key",
               "detail": "Across both tracks"
             },
             {
-              "icon": "mc:heart_of_the_sea",
-              "text": "20x Shard Key",
+              "icon": "mc:ominous_trial_key",
+              "text": "7x Living Prism Key",
               "detail": "Across both tracks"
             }
           ]
@@ -1706,13 +1705,13 @@
                 "Trim Pack - Rib + Spire"
               ],
               [
-                "1x Halloween Key"
+                "8x Prismatic Resin"
               ]
             ],
             [
               "4",
               [
-                "1x Halloween Key"
+                "12x Prismatic Resin"
               ],
               [
                 "Trim Pack - Coast + Sentry"
@@ -1786,7 +1785,7 @@
                 "Trim Pack - Eye + Vex"
               ],
               [
-                "1x Halloween Key"
+                "3x Living Prism"
               ]
             ],
             [
@@ -1810,7 +1809,7 @@
             [
               "15",
               [
-                "1x Halloween Key"
+                "3x Living Prism"
               ],
               [
                 "3x Spawner Key",
@@ -1856,7 +1855,7 @@
                 "1x Spawner Key"
               ],
               [
-                "Bobbing for Souls (fishing rod)",
+                "24x Prismatic Resin",
                 "1x Enderman Spawner"
               ]
             ],
@@ -1895,11 +1894,11 @@
             [
               "25",
               [
-                "1x Halloween Key",
+                "1x Living Prism Key",
                 "$250,000"
               ],
               [
-                "2x Halloween Key",
+                "1x Living Prism Key",
                 "+25% Points Booster (24h)",
                 "$250,000"
               ]
@@ -1961,7 +1960,7 @@
                 "Trim Pack - Shaper + Silence"
               ],
               [
-                "1x Halloween Key"
+                "16x Prismatic Resin"
               ]
             ],
             [
@@ -2029,7 +2028,7 @@
                 "2x Chroma Key"
               ],
               [
-                "Grave Digger (shovel)",
+                "9x Living Prism",
                 "1x Wither Skeleton Spawner"
               ]
             ],
@@ -2037,7 +2036,7 @@
               "41",
               [],
               [
-                "2x Halloween Key"
+                "6x Living Prism"
               ]
             ],
             [
@@ -2090,7 +2089,7 @@
               "47",
               [],
               [
-                "3x Halloween Key",
+                "1x Living Prism Key",
                 "3x Shard Key"
               ]
             ],
@@ -2117,13 +2116,15 @@
             [
               "50",
               [
-                "COFFIN LID (shield)",
-                "2x Halloween Key",
+                "1x Living Prism Key",
+                "6x Living Prism",
                 "3x Shard Key",
                 "Season Finale Celebration"
               ],
               [
-                "THE LAST HARVEST",
+                "3x Living Prism Key",
+                "12x Living Prism",
+                "40x Prismatic Resin",
                 "1x StatTrak",
                 "1x Warden Spawner",
                 "3x Chroma Key",
@@ -2528,13 +2529,13 @@
               "detail": "Across both tracks"
             },
             {
-              "icon": "mc:ominous_trial_key",
-              "text": "15x Halloween Key",
+              "icon": "mc:heart_of_the_sea",
+              "text": "20x Shard Key",
               "detail": "Across both tracks"
             },
             {
-              "icon": "mc:heart_of_the_sea",
-              "text": "20x Shard Key",
+              "icon": "mc:ominous_trial_key",
+              "text": "7x Living Prism Key",
               "detail": "Across both tracks"
             }
           ]
@@ -2572,13 +2573,13 @@
                 "Trim Pack - Rib + Spire"
               ],
               [
-                "1x Halloween Key"
+                "8x Prismatic Resin"
               ]
             ],
             [
               "4",
               [
-                "1x Halloween Key"
+                "12x Prismatic Resin"
               ],
               [
                 "Trim Pack - Coast + Sentry"
@@ -2652,7 +2653,7 @@
                 "Trim Pack - Eye + Vex"
               ],
               [
-                "1x Halloween Key"
+                "3x Living Prism"
               ]
             ],
             [
@@ -2676,7 +2677,7 @@
             [
               "15",
               [
-                "1x Halloween Key"
+                "3x Living Prism"
               ],
               [
                 "3x Spawner Key",
@@ -2722,7 +2723,7 @@
                 "1x Spawner Key"
               ],
               [
-                "Bobbing for Souls (fishing rod)",
+                "24x Prismatic Resin",
                 "1x Enderman Spawner"
               ]
             ],
@@ -2761,11 +2762,11 @@
             [
               "25",
               [
-                "1x Halloween Key",
+                "1x Living Prism Key",
                 "$250,000"
               ],
               [
-                "2x Halloween Key",
+                "1x Living Prism Key",
                 "+25% Points Booster (24h)",
                 "$250,000"
               ]
@@ -2827,7 +2828,7 @@
                 "Trim Pack - Shaper + Silence"
               ],
               [
-                "1x Halloween Key"
+                "16x Prismatic Resin"
               ]
             ],
             [
@@ -2895,7 +2896,7 @@
                 "2x Chroma Key"
               ],
               [
-                "Grave Digger (shovel)",
+                "9x Living Prism",
                 "1x Wither Skeleton Spawner"
               ]
             ],
@@ -2903,7 +2904,7 @@
               "41",
               [],
               [
-                "2x Halloween Key"
+                "6x Living Prism"
               ]
             ],
             [
@@ -2956,7 +2957,7 @@
               "47",
               [],
               [
-                "3x Halloween Key",
+                "1x Living Prism Key",
                 "3x Shard Key"
               ]
             ],
@@ -2983,13 +2984,15 @@
             [
               "50",
               [
-                "COFFIN LID (shield)",
-                "2x Halloween Key",
+                "1x Living Prism Key",
+                "6x Living Prism",
                 "3x Shard Key",
                 "Season Finale Celebration"
               ],
               [
-                "THE LAST HARVEST",
+                "3x Living Prism Key",
+                "12x Living Prism",
+                "40x Prismatic Resin",
                 "1x StatTrak",
                 "1x Warden Spawner",
                 "3x Chroma Key",
@@ -3093,376 +3096,181 @@
         ]
       }
     },
-    "7709276": {
+    "7793665": {
       "kind": "crate_key",
-      "summary": "Opens the Halloween Crate: 40 possible rewards",
+      "summary": "Opens the Living Prism Crate: 39 possible rewards",
       "blocks": [
         {
           "type": "text",
-          "text": "1x Halloween Key. Each key opens the Halloween Crate once and gives you one of the 40 rewards below."
+          "text": "1x Living Prism Key. Each key opens the Living Prism Crate once and gives you one of the 39 rewards below."
         },
         {
           "type": "rewards",
-          "title": "Halloween Crate rewards",
-          "note": "Reaper's Toll is limited to 1 for the whole server: once it has been pulled, it can no longer drop from this crate.",
+          "title": "Living Prism Crate rewards",
           "groups": [
             {
-              "rarity": "1 of 1",
-              "label": "1 of 1",
+              "rarity": "living prism",
+              "label": "Living Prism",
               "colors": [
-                "#ffa23a",
-                "#9b4ddb"
+                "#9dffb0",
+                "#c77dff"
               ],
-              "items": [
-                {
-                  "icon": "mc:netherite_sword",
-                  "name": "Reaper's Toll",
-                  "glow": true,
-                  "enchants": [
-                    "Sharpness XV",
-                    "Looting V",
-                    "Fire Aspect II",
-                    "Unbreaking X",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“There can only be one”",
-                    "",
-                    "✦ 1 OF 1 ✦",
-                    "",
-                    "* Every hit steals 1-3 health"
-                  ]
-                }
-              ]
-            },
-            {
-              "rarity": "hallowed",
-              "label": "Hallowed",
-              "colors": [
-                "#ffa23a",
-                "#9b4ddb"
-              ],
-              "items": [
-                {
-                  "icon": "mc:netherite_sword",
-                  "name": "The Count's Fang",
-                  "glow": true,
-                  "enchants": [
-                    "Sharpness VI",
-                    "Looting III",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“I vant to poke your blood.”",
-                    "",
-                    "* Swift strikes that sip a little health",
-                    "* Hits sometimes make your target bleed"
-                  ]
-                },
-                {
-                  "icon": "mc:netherite_sword",
-                  "name": "Trick or Stab",
-                  "glow": true,
-                  "enchants": [
-                    "Sharpness VII",
-                    "Looting III",
-                    "Unbreaking III",
-                    "Mending"
-                  ]
-                },
-                {
-                  "icon": "mc:netherite_sword",
-                  "name": "The Last Harvest",
-                  "glow": true,
-                  "enchants": [
-                    "Sharpness VII",
-                    "Sweeping Edge V",
-                    "Looting III",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“No refunds.”",
-                    "",
-                    "* Every strike cuts down everything nearby"
-                  ]
-                },
-                {
-                  "icon": "mc:netherite_spear",
-                  "name": "Stake Out",
-                  "glow": true,
-                  "enchants": [
-                    "Sharpness VII",
-                    "Smite V",
-                    "Lunge III",
-                    "Looting IV",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“Vampires hate this one simple trick.”",
-                    "",
-                    "* Bonus damage against the undead"
-                  ]
-                },
-                {
-                  "icon": "mc:mace",
-                  "name": "Pumpkin Smasher",
-                  "glow": true,
-                  "enchants": [
-                    "Density VI",
-                    "Breach IV",
-                    "Wind Burst III",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“Gourd-geous damage.”",
-                    "",
-                    "* Every strike blasts everything nearby away"
-                  ]
-                },
-                {
-                  "icon": "mc:bow",
-                  "name": "Nightmare Fuel",
-                  "glow": true,
-                  "enchants": [
-                    "Power VII",
-                    "Punch II",
-                    "Flame",
-                    "Infinity",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“Sleep is for the living.”",
-                    "",
-                    "* Arrows plunge targets into Darkness and slow them"
-                  ]
-                },
-                {
-                  "icon": "mc:crossbow",
-                  "name": "Stake Launcher",
-                  "glow": true,
-                  "enchants": [
-                    "Quick Charge V",
-                    "Piercing VII",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Arsenal",
-                    "“For vampires. And whoever took your diamonds.”",
-                    "",
-                    "* Piercing bolts that sometimes ignore armor"
-                  ]
-                }
-              ]
-            },
-            {
-              "rarity": "mythic",
-              "label": "Mythic",
               "items": [
                 {
                   "icon": "mc:netherite_helmet",
-                  "name": "Witch Hat",
+                  "name": "Living Prism Helmet",
+                  "glow": true
+                },
+                {
+                  "icon": "custom:living_prism/living_prism_chestplate",
+                  "name": "Living Prism Chestplate"
+                },
+                {
+                  "icon": "custom:living_prism/living_prism_leggings",
+                  "name": "Living Prism Leggings"
+                },
+                {
+                  "icon": "custom:living_prism/living_prism_boots",
+                  "name": "Living Prism Boots"
+                },
+                {
+                  "icon": "mc:netherite_sword",
+                  "name": "Living Prism Sword",
                   "glow": true,
-                  "enchants": [
-                    "Protection V",
-                    "Unbreaking III",
-                    "Mending",
-                    "Respiration III",
-                    "Aqua Affinity"
-                  ],
                   "lore": [
-                    "◈ Widow Set",
-                    "“Brim full of bad decisions.”",
+                    "◈ Living Prism Arsenal",
+                    "The Heartwood's sap still runs in the edge.",
                     "",
-                    "SET BONUS",
-                    "* Night Vision",
-                    "(Requires all 4 Widow pieces.)"
+                    "* Takes the head of every player you kill",
+                    "",
+                    "◈ It seems bound to you"
                   ]
                 },
-                {
-                  "icon": "custom:halloween/widow_chestplate",
-                  "name": "Widow's Carapace",
-                  "enchants": [
-                    "Protection V",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Widow Set",
-                    "",
-                    "SET BONUS",
-                    "* Night Vision",
-                    "(Requires all 4 Widow pieces.)"
-                  ]
-                },
-                {
-                  "icon": "custom:halloween/widow_leggings",
-                  "name": "Widow's Legwraps",
-                  "enchants": [
-                    "Protection V",
-                    "Unbreaking III",
-                    "Mending",
-                    "Swift Sneak III"
-                  ],
-                  "lore": [
-                    "◈ Widow Set",
-                    "",
-                    "SET BONUS",
-                    "* Night Vision",
-                    "(Requires all 4 Widow pieces.)"
-                  ]
-                },
-                {
-                  "icon": "custom:halloween/widow_boots",
-                  "name": "Widow's Creepers",
-                  "enchants": [
-                    "Protection V",
-                    "Unbreaking III",
-                    "Mending",
-                    "Feather Falling IV",
-                    "Depth Strider III"
-                  ],
-                  "lore": [
-                    "◈ Widow Set",
-                    "",
-                    "SET BONUS",
-                    "* Night Vision",
-                    "(Requires all 4 Widow pieces.)"
-                  ]
-                },
-                {
-                  "icon": "mc:ominous_trial_key",
-                  "name": "Halloween Key x3"
-                },
-                {
-                  "icon": "mc:emerald_block",
-                  "name": "$2,000,000"
-                }
-              ]
-            },
-            {
-              "rarity": "legendary",
-              "label": "Legendary",
-              "items": [
                 {
                   "icon": "mc:netherite_pickaxe",
-                  "name": "Grave Robber",
+                  "name": "Living Prism Pickaxe",
                   "glow": true,
-                  "enchants": [
-                    "Efficiency VI",
-                    "Fortune IV",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
                   "lore": [
-                    "◈ Halloween Tools",
-                    "“Six feet is just the first layer.”",
+                    "◈ Living Prism Tools",
+                    "Roots find the ore before you do.",
                     "",
-                    "* Mines an entire ore vein at once"
-                  ]
-                },
-                {
-                  "icon": "mc:netherite_shovel",
-                  "name": "Grave Digger",
-                  "glow": true,
-                  "enchants": [
-                    "Efficiency VI",
-                    "Fortune IV",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Tools",
-                    "“Every grave needs a good plot.”",
-                    "",
-                    "* Digs a 3x3 area"
-                  ]
-                },
-                {
-                  "icon": "mc:netherite_hoe",
-                  "name": "Grim Harvester",
-                  "glow": true,
-                  "enchants": [
-                    "Efficiency VI",
-                    "Fortune V",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
-                  "lore": [
-                    "◈ Halloween Tools",
-                    "“Reaping what you sow. Literally.”",
-                    "",
-                    "* Harvests a 3x3 of grown crops"
+                    "◈ It seems bound to you"
                   ]
                 },
                 {
                   "icon": "mc:netherite_axe",
-                  "name": "Headless Hatchet",
+                  "name": "Living Prism Axe",
                   "glow": true,
-                  "enchants": [
-                    "Sharpness VII",
-                    "Efficiency VI",
-                    "Looting III",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
                   "lore": [
-                    "◈ Halloween Tools",
-                    "“Lost its head over you.”",
+                    "◈ Living Prism Tools",
+                    "Old wood remembers the blade.",
                     "",
-                    "* Players drop their head, mobs sometimes do"
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_shovel",
+                  "name": "Living Prism Shovel",
+                  "glow": true,
+                  "lore": [
+                    "◈ Living Prism Tools",
+                    "The soil parts for living stone.",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_hoe",
+                  "name": "Living Prism Harvester",
+                  "glow": true,
+                  "lore": [
+                    "◈ Living Prism Tools",
+                    "Every harvest feeds the root.",
+                    "",
+                    "* Harvests a 3x3 of grown crops and replants them",
+                    "",
+                    "◈ It seems bound to you"
                   ]
                 },
                 {
                   "icon": "mc:fishing_rod",
-                  "name": "Bobbing for Souls",
+                  "name": "Living Prism Angler",
                   "glow": true,
-                  "enchants": [
-                    "Luck Of The Sea V",
-                    "Lure III",
-                    "Unbreaking III",
-                    "Mending"
-                  ],
                   "lore": [
-                    "◈ Halloween Tools",
-                    "“Apples were too easy.”",
+                    "◈ Living Prism Tools",
+                    "The line hums like a vine in the wind.",
                     "",
-                    "* Luck II while held -- better treasure"
+                    "* Lands a double catch every 15 seconds",
+                    "",
+                    "◈ It seems bound to you"
                   ]
                 },
                 {
-                  "icon": "mc:shield",
-                  "name": "Coffin Lid",
+                  "icon": "mc:bow",
+                  "name": "Living Prism Bow",
                   "glow": true,
-                  "enchants": [
-                    "Unbreaking X",
-                    "Mending"
-                  ],
                   "lore": [
-                    "◈ Halloween Arsenal",
-                    "“Looks sturdy(ish)”",
+                    "◈ Living Prism Arsenal",
+                    "Strung with living fibre.",
                     "",
-                    "* Blocking a hit knocks the attacker back"
+                    "* Marks what you hit and looses two more arrows after it",
+                    "",
+                    "◈ It seems bound to you"
                   ]
                 },
                 {
-                  "icon": "mc:ominous_trial_key",
-                  "name": "Halloween Key x2"
+                  "icon": "mc:crossbow",
+                  "name": "Living Prism Crossbow",
+                  "glow": true,
+                  "lore": [
+                    "◈ Living Prism Arsenal",
+                    "Wound tight as a seed pod.",
+                    "",
+                    "* Instant reload, every bolt that lands spits three more",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:netherite_spear",
+                  "name": "Living Prism Spear",
+                  "glow": true,
+                  "lore": [
+                    "◈ Living Prism Arsenal",
+                    "Sharpened from a single living branch.",
+                    "",
+                    "* Every thrust drinks a little life",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:mace",
+                  "name": "Living Prism Mace",
+                  "glow": true,
+                  "lore": [
+                    "◈ Living Prism Arsenal",
+                    "Heavy as heartwood, and harder.",
+                    "",
+                    "* Every strike shatters the ground around your target",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
+                },
+                {
+                  "icon": "mc:elytra",
+                  "name": "Living Prism Wings",
+                  "glow": true,
+                  "lore": [
+                    "◈ Living Prism Set",
+                    "Leaves that learned to fly.",
+                    "",
+                    "◈ It seems bound to you"
+                  ]
                 },
                 {
                   "icon": "mc:emerald_block",
-                  "name": "$1,500,000"
+                  "name": "$5,000,000"
                 }
               ]
             },
@@ -3471,16 +3279,33 @@
               "label": "Epic",
               "items": [
                 {
+                  "icon": "mc:enchanted_book",
+                  "name": "Random Legendary Book",
+                  "lore": [
+                    "One random Legendary enchantment book."
+                  ]
+                },
+                {
+                  "icon": "mc:spawner",
+                  "name": "Top Spawner",
+                  "lore": [
+                    "One random spawner: Wither Skeleton or Shulker."
+                  ]
+                },
+                {
+                  "icon": "mc:chest",
+                  "name": "3x Sell Chest",
+                  "lore": [
+                    "Sells what you put in it, on its own."
+                  ]
+                },
+                {
+                  "icon": "mc:trial_key",
+                  "name": "2x Chroma Key"
+                },
+                {
                   "icon": "mc:ominous_trial_key",
-                  "name": "Halloween Key"
-                },
-                {
-                  "icon": "mc:emerald_block",
-                  "name": "$1,250,000"
-                },
-                {
-                  "icon": "mc:elytra",
-                  "name": "Elytra"
+                  "name": "1x Living Prism Key"
                 }
               ]
             },
@@ -3489,27 +3314,48 @@
               "label": "Rare",
               "items": [
                 {
-                  "icon": "mc:emerald_block",
-                  "name": "$1,000,000"
+                  "icon": "custom:living_prism/living_prism",
+                  "name": "6x Living Prism",
+                  "lore": [
+                    "Heartwood material for the Living Prism upgrades."
+                  ]
+                },
+                {
+                  "icon": "custom:living_prism/living_prism",
+                  "name": "Heartwood Bundle",
+                  "lore": [
+                    "8x Prismatic Resin, 3x Living Prism",
+                    "and 2,500 Prism Shards."
+                  ]
                 },
                 {
                   "icon": "mc:enchanted_book",
-                  "name": "Random Legendary Book",
+                  "name": "Random Ultimate Book",
                   "lore": [
-                    "One random Legendary enchantment book."
+                    "One random Ultimate enchantment book."
                   ]
                 },
                 {
-                  "icon": "mc:netherite_ingot",
-                  "name": "Netherite Ingot",
-                  "qty": 2
+                  "icon": "mc:spawner",
+                  "name": "Rare Spawner",
+                  "lore": [
+                    "One random spawner: Iron Golem or Guardian."
+                  ]
                 },
                 {
-                  "icon": "mc:amethyst_shard",
-                  "name": "2,000 Prism Shards",
+                  "icon": "mc:chest",
+                  "name": "2x Sell Chest",
                   "lore": [
-                    "Spent at /craft."
+                    "Sells what you put in it, on its own."
                   ]
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$2,000,000"
+                },
+                {
+                  "icon": "mc:trial_key",
+                  "name": "1x Chroma Key"
                 }
               ]
             },
@@ -3518,14 +3364,24 @@
               "label": "Uncommon",
               "items": [
                 {
-                  "icon": "mc:emerald_block",
-                  "name": "$750,000"
+                  "icon": "custom:living_prism/prismatic_resin",
+                  "name": "12x Prismatic Resin",
+                  "lore": [
+                    "Heartwood material for the Living Prism upgrades."
+                  ]
                 },
                 {
-                  "icon": "mc:enchanted_book",
-                  "name": "Random Ultimate Book",
+                  "icon": "custom:living_prism/living_prism",
+                  "name": "3x Living Prism",
                   "lore": [
-                    "One random Ultimate enchantment book."
+                    "Heartwood material for the Living Prism upgrades."
+                  ]
+                },
+                {
+                  "icon": "mc:amethyst_shard",
+                  "name": "5,000 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
                   ]
                 },
                 {
@@ -3536,11 +3392,22 @@
                   ]
                 },
                 {
-                  "icon": "mc:amethyst_shard",
-                  "name": "1,500 Prism Shards",
+                  "icon": "mc:spawner",
+                  "name": "Mid Spawner",
                   "lore": [
-                    "Spent at /craft."
+                    "One random spawner: Blaze, Enderman or Creeper."
                   ]
+                },
+                {
+                  "icon": "mc:chest",
+                  "name": "1x Sell Chest",
+                  "lore": [
+                    "Sells what you put in it, on its own."
+                  ]
+                },
+                {
+                  "icon": "mc:emerald_block",
+                  "name": "$1,000,000"
                 }
               ]
             },
@@ -3549,79 +3416,31 @@
               "label": "Common",
               "items": [
                 {
-                  "icon": "mc:emerald_block",
-                  "name": "$500,000"
-                },
-                {
-                  "icon": "mc:golden_shovel",
-                  "name": "3,000 Claim Blocks",
+                  "icon": "custom:living_prism/prismatic_resin",
+                  "name": "4x Prismatic Resin",
                   "lore": [
-                    "Room to build."
+                    "Heartwood material for the Living Prism upgrades."
                   ]
                 },
                 {
-                  "icon": "mc:heavy_core",
-                  "name": "Heavy Core"
+                  "icon": "mc:amethyst_shard",
+                  "name": "2,000 Prism Shards",
+                  "lore": [
+                    "Spent at /craft."
+                  ]
                 },
                 {
-                  "icon": "mc:rib_armor_trim_smithing_template",
-                  "name": "Rib Armor Trim"
+                  "icon": "mc:spawner",
+                  "name": "Common Spawner",
+                  "lore": [
+                    "One random spawner: Zombie, Skeleton or Spider."
+                  ]
                 },
                 {
-                  "icon": "mc:vex_armor_trim_smithing_template",
-                  "name": "Vex Armor Trim"
-                },
-                {
-                  "icon": "mc:silence_armor_trim_smithing_template",
-                  "name": "Silence Armor Trim"
-                },
-                {
-                  "icon": "mc:ward_armor_trim_smithing_template",
-                  "name": "Ward Armor Trim"
+                  "icon": "mc:emerald_block",
+                  "name": "$500,000"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "type": "perks",
-          "title": "Guaranteed milestone rewards",
-          "note": "Earned by opening this crate, on top of what each key gives. The track restarts after the last milestone.",
-          "items": [
-            {
-              "icon": "mc:amethyst_shard",
-              "text": "1,500 Prism Shards",
-              "detail": "At 3 opens"
-            },
-            {
-              "icon": "mc:ominous_trial_key",
-              "text": "Halloween Key",
-              "detail": "At 6 opens"
-            },
-            {
-              "icon": "mc:emerald_block",
-              "text": "$1,250,000",
-              "detail": "At 13 opens"
-            },
-            {
-              "icon": "mc:ominous_trial_key",
-              "text": "Halloween Key x2",
-              "detail": "At 22 opens"
-            },
-            {
-              "icon": "mc:netherite_helmet",
-              "text": "Witch Hat",
-              "detail": "At 33 opens"
-            },
-            {
-              "icon": "mc:emerald_block",
-              "text": "$2,000,000",
-              "detail": "At 44 opens"
-            },
-            {
-              "icon": "mc:mace",
-              "text": "Pumpkin Smasher",
-              "detail": "At 55 opens"
             }
           ]
         }
