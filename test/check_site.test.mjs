@@ -80,6 +80,8 @@ const SMP_BODY =
   `</main>${FOOTER}`;
 // U4-copy: the privacy page's "Other services" section names mc-heads.net.
 const PRIVACY_OTHER = '<section class="other-services"><h2>Other services</h2><p>Player head images on the PVP pages load from mc-heads.net.</p></section>';
+// U8 round 3 (review F2b): the privacy page's last-updated date, wrapped in <time datetime> (inline: no text added).
+const PRIVACY_DATE = '<div class="reveal"><p class="section-eyebrow">LAST UPDATED</p><h2 class="section-title"><time datetime="2026-08-10">AUGUST 10, 2026</time></h2></div>';
 // U5: the /faq/ page renders the FAQ as FaqPage.jsx does (.faq-group >
 // .faq-section-label + .faq-item > .faq-question / .faq-answer), from a
 // faq.json-shaped model, and its FAQPage JSON-LD is generated from the same
@@ -273,22 +275,27 @@ function framed(html, nav = NAV) {
 // U8: WebSite gains url; Organization gains url, logo and sameAs placed before name, so the U2 cases'
 // substrings ('"WebSite","@id":...,"name":NET' and '"name":NET,"alternateName":"Chromabit"}]') still occur.
 const ORG_ID = 'https://chromabit.us/#organization';
+// U8 round 3: the VideoGame's @id (review F10: the WebSite names it in `about`, the GameServer points back with `game`),
+// and the Organization logo, a square PNG of at least 112 px used only by structured data (review F1).
+const GAME_ID = 'https://chromabit.us/#minecraft';
+const LOGO_FILE = 'logo-256.png';
+const LOGO_URL = `https://chromabit.us/${LOGO_FILE}`;
 const SITE_ID = 'https://chromabit.us/#website';
 const LD_HOME = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'WebSite', '@id': SITE_ID, name: NET, alternateName: 'Chromabit', url: 'https://chromabit.us/' },
-    { '@type': 'Organization', '@id': ORG_ID, url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD], name: NET, alternateName: 'Chromabit' },
+    { '@type': 'WebSite', '@id': SITE_ID, name: NET, alternateName: 'Chromabit', url: 'https://chromabit.us/', about: { '@id': GAME_ID } },
+    { '@type': 'Organization', '@id': ORG_ID, url: 'https://chromabit.us/', logo: LOGO_URL, sameAs: [DISCORD], name: NET, alternateName: 'Chromabit' },
   ],
 });
 // U8: the home VideoGame / GameServer node, in its own block.
 const LD_GAME = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'VideoGame',
-  '@id': 'https://chromabit.us/#minecraft',
+  '@id': GAME_ID,
   name: 'Minecraft',
   gamePlatform: ['Java Edition', 'Bedrock Edition'],
-  gameServer: { '@type': 'GameServer', name: 'Chromabit', url: 'https://chromabit.us/', identifier: 'play.chromabit.us' },
+  gameServer: { '@type': 'GameServer', name: 'Chromabit', url: 'https://chromabit.us/', identifier: 'play.chromabit.us', game: { '@id': GAME_ID } },
 });
 const crumbs = (route, name) => ({
   '@type': 'BreadcrumbList',
@@ -306,10 +313,16 @@ const ldSub = (route, name) =>
       crumbs(route, name),
     ],
   });
+// U8 round 3 (review F2a): the ranked ladder, composed only from words the /pvp/ page shows.
+const PVP_ABOUT = {
+  '@type': 'DefinedTermSet',
+  name: 'Seven tiers',
+  description: 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma. Play 10 placement matches before you get a rank; every ranked duel is best of three.',
+};
 const LD_PVP = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'WebPage', '@id': 'https://chromabit.us/pvp/#webpage', name: 'ChromaPVP', description: PVP_DESC, url: 'https://chromabit.us/pvp/', isPartOf: { '@id': SITE_ID }, publisher: { '@id': ORG_ID } },
+    { '@type': 'WebPage', '@id': 'https://chromabit.us/pvp/#webpage', name: 'ChromaPVP', description: PVP_DESC, url: 'https://chromabit.us/pvp/', isPartOf: { '@id': SITE_ID }, publisher: { '@id': ORG_ID }, about: PVP_ABOUT },
     { '@type': 'ItemList', itemListElement: MODE_ROWS.map(([t], i) => ({ '@type': 'ListItem', position: i + 1, name: t })) },
     crumbs('/pvp/', 'PVP'),
   ],
@@ -347,7 +360,8 @@ function u8Head(route, { canonical = true, description, ogDescription, twitterTi
 }
 /** U8: unique descriptions of 70-160 characters for the pages that had none in the fixture. */
 const DESC = {
-  smp: 'Survival with a player-run market on Chromabit: claims, custom spawners and a dungeon under one big tree.',
+  // U8 round 3 (review F6): only words /smp/ shows (was "Survival with a player-run market on Chromabit: claims, ...").
+  smp: 'Mine it, price it, trade it: survival with an auction house on Chromabit and four zones under one tree.',
   faq: 'Answers about the Chromabit network: the address, versions, ranks, the auction house, claims and rules.',
   store: 'The official Chromabit store. Buy ranks, crate keys and more; every purchase directly helps Chromabit.',
   auctions: 'Live auction house data for the Chromabit SMP: price history, floors, volume and listings for each item.',
@@ -408,7 +422,7 @@ function goodSite() {
     // U8: each framed page also gets an <h1> (one per page), outside the U2 cases' exact strings.
     'store/index.html': framed(htmlPage(headFor('Store | Chromabit', `${subHead('/store/', 'Store | Chromabit', DESC.store)}\n  ${ldTag(ldSub('/store/', 'Store'))}`), '<main><h1>STORE</h1>Every purchase directly supports Chromabit.</main>')),
     'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP', `${subHead('/auctions/', 'Auction House | Chromabit SMP', DESC.auctions)}\n  ${ldTag(ldSub('/auctions/', 'Auctions'))}`), '<main><h1>Auction House</h1>Chromabit SMP market</main>')),
-    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit', `${subHead('/privacy/', 'Privacy Policy | Chromabit', DESC.privacy)}\n  ${ldTag(ldSub('/privacy/', 'Privacy'))}`), `<main>Privacy</main><h1>PRIVACY POLICY</h1>${PRIVACY_OTHER}`)),
+    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit', `${subHead('/privacy/', 'Privacy Policy | Chromabit', DESC.privacy)}\n  ${ldTag(ldSub('/privacy/', 'Privacy'))}`), `<main>Privacy</main><h1>PRIVACY POLICY</h1>${PRIVACY_DATE}${PRIVACY_OTHER}`)),
     'pvp/index.html': htmlPage(
       headFor(
         PVP_TITLE,
@@ -422,6 +436,8 @@ function goodSite() {
     'og-preview.png': png(1200, 630),
     // U8: the hero logo (preloaded on /, the Organization logo), robots.txt and llms.txt.
     'server-icon.png': png(64, 64),
+    // U8 round 3: the structured-data logo (review F1).
+    [LOGO_FILE]: png(256, 256),
     'robots.txt': ROBOTS_TXT,
     'llms.txt': LLMS_TXT,
     // U9: a built stylesheet with the surface tokens and a card on them.
@@ -612,6 +628,9 @@ try {
       'card-no-frost',
       // U8 round 2 (U9 review L1)
       'css-has-isolated',
+      // U8 round 3 (U8 review r1 F1, F2b)
+      'seo-logo',
+      'time-datetime',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -1148,7 +1167,11 @@ ${r.out}`,
 
   // U4-AC4 pvp-tiers
   expectFail('U4-AC4 block missing', mutate(P, ' data-tiers>', '>'), 'pvp-tiers', '/pvp/ has 0 [data-tiers], want 1');
-  expectFail('U4-AC4 heading', mutate(P, '<h2>SEVEN TIERS</h2>', '<h2>TIERS</h2>'), 'pvp-tiers', '/pvp/ [data-tiers] has no heading "SEVEN TIERS"');
+  // Since U8 round 3 the /pvp/ WebPage about (review F2a) names the seven tiers, which the page then no longer shows (both, and only both).
+  expectFails('U4-AC4 heading', mutate(P, '<h2>SEVEN TIERS</h2>', '<h2>TIERS</h2>'), {
+    'pvp-tiers': '/pvp/ [data-tiers] has no heading "SEVEN TIERS"',
+    'seo-jsonld-visible-facts': '/pvp/ JSON-LD states what the page does not show: DefinedTermSet name "Seven tiers"; WebPage about.description uses ["seven"]',
+  });
   expectFail('U4-AC4 heading not a heading', mutate(P, '<h2>SEVEN TIERS</h2>', '<p>SEVEN TIERS</p>'), 'pvp-tiers', 'has no heading "SEVEN TIERS"');
   expectFail(
     'U4-AC4 order',
@@ -1501,6 +1524,8 @@ ${r.out}`);
     'img-attrs': '/pvp/player/ missing',
     'perf-hints': '/pvp/player/ missing',
     'pvp-referrer': '/pvp/player/ missing',
+    // U8 round 3: time-datetime reads every prerendered page too.
+    'time-datetime': '/pvp/player/ missing',
   });
   expectFail('U7 profile shell not prerendered', plMut(`<div id="app">${PLAYER_BODY}</div>`, `<div id="app"></div>${PLAYER_BODY}`), 'player-shell', '/pvp/player/ <div id="app"> is empty');
   expectFail('U7 profile title', plMut(`<title>${PLAYER_TITLE}</title>`, '<title>Player Profile | Chromabit</title>'), 'player-shell', '/pvp/player/ title is "Player Profile | Chromabit"');
@@ -1661,7 +1686,8 @@ ${r.out}`);
     const base = mutate(S, DESC.smp, `${DESC.smp} Join the grind at play.chromabit.us and trade with everyone on the market, every day of the week.`);
     let r = runOn(goodSite(), base);
     check('U8 frozen: a released (out-of-range) description may be rewritten', r.code === 0, `exit ${r.code}:\n${r.out}`);
-    r = runOn(mutate(S, DESC.smp, 'Survival with a player-run market on Chromabit: 500 players, claims, custom spawners and a dungeon.'), base);
+    // U8 round 3: "player-run" dropped from the planted text (seo-head now holds /smp/ words to the page, review F6); the number is still the defect.
+    r = runOn(mutate(S, DESC.smp, 'Survival on Chromabit: 500 players, claims, custom spawners and a dungeon under one tree.'), base);
     const fails = r.lines.filter((l) => l.startsWith('FAIL '));
     check('U8 frozen: a rewritten description may not state a number the page does not show', r.code === 1 && fails.length === 1 && fails[0].startsWith('FAIL seo-titles-frozen: /smp/ rewritten description states ["500"]'), `exit ${r.code}:\n${r.out}`);
   }
@@ -1712,9 +1738,17 @@ ${r.out}`);
     return mutate(P, LD_PVP, JSON.stringify(doc));
   };
   expectFail('U8 Organization sameAs without Discord', homeLd((g) => { g[1].sameAs = ['https://x.com/chromabit']; }), 'seo-jsonld', '/ Organization sameAs ["https://x.com/chromabit"] lacks the Discord URL');
-  expectFail('U8 Organization logo relative', homeLd((g) => { g[1].logo = '/server-icon.png'; }), 'seo-jsonld', '/ Organization logo "/server-icon.png" is not an absolute https://chromabit.us/ URL of a file in dist');
-  expectFail('U8 Organization logo missing from dist', homeLd((g) => { g[1].logo = 'https://chromabit.us/logo-512.png'; }), 'seo-jsonld', 'does not resolve to a file in dist');
-  passes('U8 Organization logo as an ImageObject passes', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', url: 'https://chromabit.us/server-icon.png', width: 64, height: 64 }; }));
+  // Since U8 round 3 seo-logo (review F1) reads the same logo: both, and only both.
+  expectFails('U8 Organization logo relative', homeLd((g) => { g[1].logo = '/server-icon.png'; }), {
+    'seo-jsonld': '/ Organization logo "/server-icon.png" is not an absolute https://chromabit.us/ URL of a file in dist',
+    'seo-logo': '/ Organization logo "/server-icon.png" is not an absolute https://chromabit.us/ URL',
+  });
+  expectFails('U8 Organization logo missing from dist', homeLd((g) => { g[1].logo = 'https://chromabit.us/logo-512.png'; }), {
+    'seo-jsonld': 'does not resolve to a file in dist',
+    'seo-logo': '/ Organization logo "https://chromabit.us/logo-512.png" is not a file in dist',
+  });
+  // U8 round 3: the ImageObject names the square logo (the 64x64 icon now fails seo-logo, see the seo-logo cases).
+  passes('U8 Organization logo as an ImageObject passes', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', url: LOGO_URL, width: 256, height: 256 }; }));
   expectFail('U8 Organization url wrong', homeLd((g) => { g[1].url = 'https://chromabit.us/store/'; }), 'seo-jsonld', '/ Organization url is "https://chromabit.us/store/"');
   expectFail('U8 WebSite url missing', homeLd((g) => { delete g[0].url; }), 'seo-jsonld', '/ WebSite url is null');
   expectFail('U8 no VideoGame on /', mutate(H, ldTag(LD_GAME), ''), 'seo-jsonld', '/ has 0 VideoGame nodes named Minecraft, want 1');
@@ -1728,9 +1762,9 @@ ${r.out}`);
   expectFail('U8 a volatile number', gameLd((d) => { d.numberOfPlayers = 50; }), 'seo-jsonld', '/ JSON-LD numberOfPlayers is the number 50');
   expectFail('U8 sub page without the Organization reference', subLd(ST, '/store/', 'Store', (g) => { delete g[0].publisher; }), 'seo-jsonld', "/store/ has no Organization node and no @id reference to the home page's Organization (https://chromabit.us/#organization)");
   expectFail('U8 sub page without the WebSite reference', subLd(AU, '/auctions/', 'Auctions', (g) => { delete g[0].isPartOf; }), 'seo-jsonld', "/auctions/ has no WebSite node and no @id reference to the home page's WebSite");
-  expectFail('U8 sub page with an inline Organization of another name', subLd(ST, '/store/', 'Store', (g) => { g[0].publisher = { '@type': 'Organization', name: 'Chromabit', url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD] }; }), 'seo-jsonld', '/store/ Organization name is "Chromabit", want "Chromabit Network"');
+  expectFail('U8 sub page with an inline Organization of another name', subLd(ST, '/store/', 'Store', (g) => { g[0].publisher = { '@type': 'Organization', name: 'Chromabit', url: 'https://chromabit.us/', logo: LOGO_URL, sameAs: [DISCORD] }; }), 'seo-jsonld', '/store/ Organization name is "Chromabit", want "Chromabit Network"');
   passes('U8 sub page with a valid inline Organization and WebSite passes', subLd(ST, '/store/', 'Store', (g) => {
-    g[0].publisher = { '@type': 'Organization', name: NET, url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD] };
+    g[0].publisher = { '@type': 'Organization', name: NET, url: 'https://chromabit.us/', logo: LOGO_URL, sameAs: [DISCORD] };
     g[0].isPartOf = { '@type': 'WebSite', name: NET, url: 'https://chromabit.us/' };
   }));
   expectFail('U8 no JSON-LD on /privacy/', mutate(PR, ldTag(ldSub('/privacy/', 'Privacy')), ''), 'seo-jsonld', '/privacy/ has no JSON-LD');
@@ -1927,6 +1961,138 @@ ${r.out}`);
   passes('U8r2 :has: a list where every selector needs :has() passes', cssAdd('.a:has(.b),.c:has(.d){color:red}'));
   passes('U8r2 :has: a mixed list inside @supports selector(:has(a)) passes (skipped whole without :has())', cssAdd(`@supports selector(:has(a)){${HAS_HOVER}}`));
   passes('U8r2 :has: a commented-out mixed rule is ignored', cssAdd(`/* ${HAS_HOVER} */`));
+
+  // ------------------------------------------------------ U8 round 3 --
+  // U8 review r1 rulings: F1 (seo-logo), F2a (/pvp/ about), F2b (time-datetime), F6/F7 (descriptions), F10 (VideoGame link).
+  {
+    const { parseVisibleDate, datetimeDate, datesIn } = await import(pathToFileURL(CHECKER).href);
+    const eq = (name, got, want) => check(name, JSON.stringify(got) === JSON.stringify(want), `got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
+    eq('U8r3 date: "AUGUST 10, 2026" is 2026-08-10', parseVisibleDate('AUGUST 10, 2026'), '2026-08-10');
+    eq('U8r3 date: "August 10 2026" is 2026-08-10', parseVisibleDate('August 10 2026'), '2026-08-10');
+    eq('U8r3 date: "10 August 2026" is 2026-08-10', parseVisibleDate('10 August 2026'), '2026-08-10');
+    eq('U8r3 date: "2026-08-10" is 2026-08-10', parseVisibleDate('2026-08-10'), '2026-08-10');
+    eq('U8r3 date: "February 30, 2026" is not a date', parseVisibleDate('February 30, 2026'), null);
+    eq('U8r3 date: "August 2026" has no day', parseVisibleDate('August 2026'), null);
+    eq('U8r3 date: "Updated August 10, 2026" is more than the date', parseVisibleDate('Updated August 10, 2026'), null);
+    eq('U8r3 datetime: 2026-08-10 is valid', datetimeDate('2026-08-10'), '2026-08-10');
+    eq('U8r3 datetime: with a time is not YYYY-MM-DD', datetimeDate('2026-08-10T00:00'), null);
+    eq('U8r3 datetime: 2026-8-10 is not YYYY-MM-DD', datetimeDate('2026-8-10'), null);
+    eq('U8r3 datetime: 2026-02-29 is not a real date', datetimeDate('2026-02-29'), null);
+    eq('U8r3 dates in text: the FAQ battle pass sentence', datesIn('runs from 1 October to 4 November 2026 and'), [{ text: '4 November 2026', iso: '2026-11-04' }]);
+  }
+
+  // seo-logo (F1)
+  const withLogo = (url, file, content) => ({ ...homeLd((g) => { g[1].logo = url; }), ...(file ? { [file]: content } : {}) });
+  expectFail('U8r3 logo: the 64x64 icon (as at ca6c1bd) fails', homeLd((g) => { g[1].logo = 'https://chromabit.us/server-icon.png'; }), 'seo-logo', '/ Organization logo "https://chromabit.us/server-icon.png" is 64x64, want a square of at least 112x112');
+  expectFail('U8r3 logo: 111x111 fails', withLogo('https://chromabit.us/logo-111.png', 'logo-111.png', png(111, 111)), 'seo-logo', 'is 111x111, want a square of at least 112x112');
+  passes('U8r3 logo: 112x112 passes', withLogo('https://chromabit.us/logo-112.png', 'logo-112.png', png(112, 112)));
+  passes('U8r3 logo: 512x512 (an 8x upscale of the icon) passes', withLogo('https://chromabit.us/logo-512.png', 'logo-512.png', png(512, 512)));
+  expectFail('U8r3 logo: non-square fails', withLogo('https://chromabit.us/logo-wide.png', 'logo-wide.png', png(512, 256)), 'seo-logo', '/ Organization logo "https://chromabit.us/logo-wide.png" is 512x256');
+  expectFail('U8r3 logo: not a PNG fails', withLogo('https://chromabit.us/logo.svg', 'logo.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"></svg>'), 'seo-logo', '/ Organization logo "https://chromabit.us/logo.svg" is not a PNG (bad signature)');
+  expectFails('U8r3 logo: an ImageObject whose url is missing from dist fails', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', '@id': 'https://chromabit.us/#logo', url: 'https://chromabit.us/logo-gone.png' }; }), {
+    'seo-jsonld': '/ JSON-LD url "https://chromabit.us/logo-gone.png" does not resolve to a file in dist',
+    'seo-logo': '/ Organization logo "https://chromabit.us/logo-gone.png" is not a file in dist',
+  });
+  expectFail('U8r3 logo: an ImageObject with only an @id fails', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', '@id': 'https://chromabit.us/#logo' }; }), 'seo-logo', '/ Organization logo null is not an absolute https://chromabit.us/ URL');
+  expectFails('U8r3 logo: on another host fails', homeLd((g) => { g[1].logo = 'https://cdn.example.com/logo.png'; }), {
+    'seo-jsonld': '/ Organization logo "https://cdn.example.com/logo.png" is not an absolute https://chromabit.us/ URL of a file in dist',
+    'seo-logo': '/ Organization logo "https://cdn.example.com/logo.png" is not an absolute https://chromabit.us/ URL',
+  });
+  expectFail('U8r3 logo: a directory URL fails', homeLd((g) => { g[1].logo = 'https://chromabit.us/store/'; }), 'seo-logo', '/ Organization logo "https://chromabit.us/store/" is not a file in dist');
+  expectFail('U8r3 logo: an ImageObject declaring another size fails', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', url: LOGO_URL, width: 512, height: 512 }; }), 'seo-logo', `/ Organization logo "${LOGO_URL}" declares width 512, the file is 256`);
+  passes('U8r3 logo: an ImageObject with contentUrl and the real size passes', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', '@id': 'https://chromabit.us/#logo', contentUrl: LOGO_URL, width: 256, height: '256' }; }));
+  expectFail('U8r3 logo: an inline sub-page Organization with the 64x64 icon fails', subLd(ST, '/store/', 'Store', (g) => {
+    g[0].publisher = { '@type': 'Organization', name: NET, url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD] };
+  }), 'seo-logo', '/store/ Organization logo "https://chromabit.us/server-icon.png" is 64x64');
+
+  // seo-jsonld + seo-jsonld-visible-facts: the /pvp/ WebPage about (F2a)
+  const aboutLd = (fn) => pvpLd((g) => { g[0].about = { ...PVP_ABOUT }; fn(g[0]); });
+  expectFail('U8r3 about: none on /pvp/ (as at ca6c1bd) fails', pvpLd((g) => { delete g[0].about; }), 'seo-jsonld', '/pvp/ WebPage about is "null", want one inline node describing the ranked ladder');
+  expectFail('U8r3 about: two nodes fail', aboutLd((w) => { w.about = [w.about, { ...PVP_ABOUT }]; }), 'seo-jsonld', '/pvp/ WebPage about is');
+  expectFail('U8r3 about: an @id reference only fails', aboutLd((w) => { w.about = { '@id': 'https://chromabit.us/pvp/#ladder' }; }), 'seo-jsonld', '/pvp/ WebPage about has no @type');
+  expectFail('U8r3 about: no name fails', aboutLd((w) => { delete w.about.name; }), 'seo-jsonld', '/pvp/ WebPage about has no name');
+  expectFail('U8r3 about: no description fails', aboutLd((w) => { delete w.about.description; }), 'seo-jsonld', '/pvp/ WebPage about has no description');
+  expectFail('U8r3 about: of a boilerplate @type fails', aboutLd((w) => { w.about['@type'] = 'WebSite'; }), 'seo-jsonld', '/pvp/ WebPage about is of @type ["WebSite"], whose strings are not fact-checked');
+  expectFail('U8r3 about: of an owned-elsewhere @type fails', aboutLd((w) => { w.about['@type'] = 'FAQPage'; }), 'seo-jsonld', '/pvp/ WebPage about is of @type ["FAQPage"], whose strings are not fact-checked');
+  expectFail('U8r3 about: without best of three fails', aboutLd((w) => { w.about.description = 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma. Play 10 placement matches before you get a rank.'; }), 'seo-jsonld', '/pvp/ WebPage about.description does not state ["best of three"]');
+  expectFail('U8r3 about: without the placement matches fails', aboutLd((w) => { w.about.description = 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma; every ranked duel is best of three.'; }), 'seo-jsonld', 'does not state ["10 placement matches"]');
+  expectFail('U8r3 about: without the tiers fails', aboutLd((w) => { w.about.description = 'Three divisions in every tier. Play 10 placement matches before you get a rank; every ranked duel is best of three.'; }), 'seo-jsonld', 'does not state ["seven tiers","Tin","Chroma"]');
+  expectFail('U8r3 about: a planted invented fact fails', aboutLd((w) => { w.about.description = `${PVP_ABOUT.description} The top 100 players win prizes.`; }), 'seo-jsonld-visible-facts', '/pvp/ JSON-LD states what the page does not show: WebPage about.description uses ["100","win","prizes"]');
+  expectFail('U8r3 about: an invented tier fails', aboutLd((w) => { w.about.description = PVP_ABOUT.description.replace('Tin to Chroma', 'Tin to Diamond to Chroma'); }), 'seo-jsonld-visible-facts', 'WebPage about.description uses ["diamond"]');
+  expectFails('U8r3 about: a wrong count fails', aboutLd((w) => { w.about.description = PVP_ABOUT.description.replace('three divisions', 'five divisions'); }), {
+    'seo-jsonld': 'does not state ["three divisions"]',
+    'seo-jsonld-visible-facts': 'WebPage about.description uses ["five"]',
+  });
+  expectFail('U8r3 about: the name keeps the whole-string rule', aboutLd((w) => { w.about.name = 'Ranked ladder'; }), 'seo-jsonld-visible-facts', '/pvp/ JSON-LD states what the page does not show: DefinedTermSet name "Ranked ladder"');
+  expectFail('U8r3 about: nested terms keep the whole-string rule', aboutLd((w) => { w.about.hasDefinedTerm = [{ '@type': 'DefinedTerm', name: 'Tin' }, { '@type': 'DefinedTerm', name: 'Diamond' }]; }), 'seo-jsonld-visible-facts', 'DefinedTerm name "Diamond"');
+  passes('U8r3 about: tiers as nested terms the page shows pass', aboutLd((w) => { w.about.hasDefinedTerm = TIER_ROWS.map(([t]) => ({ '@type': 'DefinedTerm', name: t })); }));
+  passes('U8r3 about: digits and words for the counts pass', aboutLd((w) => { w.about.description = 'Seven tiers, Tin to Chroma; 3 divisions below Chroma; 10 placement matches; best of three.'; }));
+  expectFail('U8r3 about: a composed description elsewhere keeps the whole-string rule', subLd(S, '/smp/', 'Economy SMP', (g) => {
+    g[0].about = { '@type': 'Thing', name: 'Economy SMP', description: 'Economy SMP with an auction house' };
+  }), 'seo-jsonld-visible-facts', '/smp/ JSON-LD states what the page does not show: Thing description "Economy SMP with an auction house"');
+
+  // seo-jsonld: the home VideoGame is linked (F10)
+  expectFail('U8r3 game: no @id on the VideoGame (as at ca6c1bd) fails', gameLd((d) => { delete d['@id']; delete d.gameServer.game; }), 'seo-jsonld', '/ VideoGame has no @id, so nothing can reference it');
+  expectFail('U8r3 game: orphan VideoGame fails', homeLd((g) => { delete g[0].about; }), 'seo-jsonld', '/ VideoGame "https://chromabit.us/#minecraft" is not referenced by @id from a WebPage or WebSite (mainEntity or about): orphan node');
+  expectFail('U8r3 game: a reference to another @id fails', homeLd((g) => { g[0].about = { '@id': 'https://chromabit.us/#game' }; }), 'seo-jsonld', 'orphan node');
+  expectFail('U8r3 game: a reference under another key fails', homeLd((g) => { delete g[0].about; g[0].mentions = { '@id': GAME_ID }; }), 'seo-jsonld', 'orphan node');
+  expectFail('U8r3 game: a reference from the Organization only fails', homeLd((g) => { delete g[0].about; g[1].mainEntityOfPage = { '@id': GAME_ID }; }), 'seo-jsonld', 'orphan node');
+  passes('U8r3 game: mainEntity from a home WebPage passes', homeLd((g) => {
+    delete g[0].about;
+    g.push({ '@type': 'WebPage', '@id': 'https://chromabit.us/#webpage', url: 'https://chromabit.us/', isPartOf: { '@id': SITE_ID }, mainEntity: { '@id': GAME_ID } });
+  }));
+  passes('U8r3 game: about as an array holding the reference passes', homeLd((g) => { g[0].about = [{ '@id': 'https://chromabit.us/#organization' }, { '@id': GAME_ID }]; }));
+  expectFail('U8r3 game: GameServer without game fails', gameLd((d) => { delete d.gameServer.game; }), 'seo-jsonld', '/ GameServer game is null, want {"@id": "https://chromabit.us/#minecraft"}');
+  expectFail('U8r3 game: GameServer game pointing elsewhere fails', gameLd((d) => { d.gameServer.game = { '@id': 'https://chromabit.us/#other' }; }), 'seo-jsonld', '/ GameServer game is {"@id":"https://chromabit.us/#other"}');
+  expectFail('U8r3 game: GameServer game as a plain name fails', gameLd((d) => { d.gameServer.game = 'Minecraft'; }), 'seo-jsonld', '/ GameServer game is "Minecraft"');
+  passes('U8r3 game: GameServer game as an array holding the @id passes', gameLd((d) => { d.gameServer.game = [{ '@id': GAME_ID }]; }));
+  expectFail('U8r3 game: GameServer with a url but not the address fails', gameLd((d) => { delete d.gameServer.identifier; }), 'seo-jsonld', '/ GameServer does not state the address "play.chromabit.us"');
+
+  // seo-head: /smp/ description from /smp/ facts (F6), /store/ wording (F7)
+  const smpDesc = (d) => mutate(S, DESC.smp, d);
+  expectFail('U8r3 smp: Java and Bedrock (not on /smp/) fail', smpDesc('Mine it, price it, trade it: survival for Java and Bedrock with an auction house on Chromabit.'), 'seo-head', `/smp/ description states ["Java","Bedrock"], which the page's visible text does not show`);
+  expectFail('U8r3 smp: player-run (not on /smp/) fails', smpDesc('Mine it, price it, trade it: a player-run market and an auction house on Chromabit, four zones under one tree.'), 'seo-head', '/smp/ description states ["player-run"]');
+  expectFail('U8r3 smp: Java at the start of a sentence still fails', smpDesc('Java survival: mine it, price it, trade it with an auction house on Chromabit, four zones under one tree.'), 'seo-head', '/smp/ description states ["Java"]');
+  expectFail('U8r3 smp: a capitalised name the page does not show fails', smpDesc('Mine it, price it, trade it: Minecraft survival with an auction house on Chromabit and four zones under one tree.'), 'seo-head', '/smp/ description states ["Minecraft"]');
+  expectFail('U8r3 smp: the ca6c1bd description fails', smpDesc('Chromabit Economy SMP: Minecraft survival for Java and Bedrock with a player-run market, an auction house and the Heartwood dungeon. Join at play.chromabit.us.'), 'seo-head', '/smp/ description states ["Java","Bedrock","player-run"');
+  passes('U8r3 smp: a sentence-initial word the page does not show passes', smpDesc('Grind it out. Mine it, price it, trade it with an auction house on Chromabit, four zones under one tree.'));
+  passes('U8r3 smp: names the page shows pass (any case)', smpDesc('Mine it, price it, trade it: survival on Chromabit with an auction house and Heartwood, four zones under one tree.'));
+  passes('U8r3 smp: Java passes once /smp/ shows it', edit(smpDesc('Mine it, price it, trade it: survival for Java and Bedrock with an auction house on Chromabit.'), S, '<a class="auctions-link"', '<p>Java and Bedrock</p><a class="auctions-link"'));
+  passes('U8r3 smp: the rule is /smp/ only (Java on /faq/ passes)', mutate(FQ, DESC.faq, 'Answers about the Chromabit network for Java and Bedrock: the address, versions, ranks, claims and rules.'));
+  expectFail('U8r3 store: "for Chromabit Network" (as at ca6c1bd) fails', mutate(ST, DESC.store, 'The official Chromabit store. Buy ranks, crate keys, and more for Chromabit Network. Every purchase directly supports Chromabit.'), 'seo-head', '/store/ description contains ["Network"] (the store wording is just "Chromabit")');
+  expectFail('U8r3 store: "the SMP" fails', mutate(ST, DESC.store, 'The official Chromabit store. Buy ranks, crate keys and more for the SMP; every purchase directly helps Chromabit.'), 'seo-head', '/store/ description contains ["SMP"]');
+  expectFail('U8r3 store: lower-case "network" fails', mutate(ST, DESC.store, 'The official Chromabit store. Buy ranks, crate keys and more across the network; every purchase helps Chromabit.'), 'seo-head', '/store/ description contains ["Network"]');
+
+  // time-datetime (F2b)
+  const PR_NO_TIME = '<div class="reveal"><p class="section-eyebrow">LAST UPDATED</p><h2 class="section-title">AUGUST 10, 2026</h2></div>';
+  const prDate = (html) => mutate(PR, PRIVACY_DATE, html);
+  expectFail('U8r3 time: the plain date (as at ca6c1bd) fails', prDate(PR_NO_TIME), 'time-datetime', '/privacy/ last-updated date "AUGUST 10, 2026" (<h2>) holds 0 <time>, want 1 wrapping the date; /privacy/ shows ["AUGUST 10, 2026"] outside a <time datetime>');
+  expectFail('U8r3 time: another day fails', prDate(PRIVACY_DATE.replace('2026-08-10', '2026-08-11')), 'time-datetime', '/privacy/ last-updated <time datetime="2026-08-11">, want "2026-08-10"');
+  expectFail('U8r3 time: datetime with a time of day fails', prDate(PRIVACY_DATE.replace('2026-08-10', '2026-08-10T00:00')), 'time-datetime', 'datetime is not a real YYYY-MM-DD date');
+  expectFail('U8r3 time: no datetime fails', prDate(PRIVACY_DATE.replace(' datetime="2026-08-10"', '')), 'time-datetime', '/privacy/ <time datetime=null> "AUGUST 10, 2026": datetime is not a real YYYY-MM-DD date');
+  expectFail('U8r3 time: a day that does not exist fails', prDate(PRIVACY_DATE.replace('2026-08-10', '2026-02-30').replace('AUGUST 10, 2026', 'FEBRUARY 30, 2026')), 'time-datetime', 'is not one calendar date');
+  expectFail('U8r3 time: wrapping part of the date fails', prDate(PRIVACY_DATE.replace('AUGUST 10, 2026</time>', 'AUGUST 10</time>, 2026')), 'time-datetime', '/privacy/ last-updated <time> text is "AUGUST 10", want the whole date text "AUGUST 10, 2026"');
+  expectFail('U8r3 time: two <time> in the date fail', prDate(PRIVACY_DATE.replace('AUGUST 10, 2026</time>', 'AUGUST 10, 2026</time><time datetime="2026-08-10"></time>')), 'time-datetime', 'holds 2 <time>');
+  expectFail('U8r3 time: the marker renamed fails', prDate(PRIVACY_DATE.replace('LAST UPDATED', 'UPDATED')), 'time-datetime', '/privacy/ has 0 .section-eyebrow reading "LAST UPDATED", want 1');
+  passes('U8r3 time: "10 August 2026" with its datetime passes', prDate(PRIVACY_DATE.replace('AUGUST 10, 2026', '10 August 2026')));
+  passes('U8r3 time: a <time> as the element after the eyebrow passes', prDate('<div class="reveal"><p class="section-eyebrow">Last updated</p><time class="section-title" datetime="2026-08-10">August 10, 2026</time></div>'));
+  expectFail('U8r3 time: a mismatched <time> on another page fails', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE</h1><time datetime="2026-01-01">August 10, 2026</time>'), 'time-datetime', '/store/ <time datetime="2026-01-01"> text "August 10, 2026" states 2026-08-10');
+  expectFail('U8r3 time: a <time> around a non-date fails', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE</h1><time datetime="2026-08-10">soon</time>'), 'time-datetime', '/store/ <time datetime="2026-08-10"> text "soon" is not one calendar date');
+  expectFail('U8r3 time: an unwrapped date on another page fails', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE</h1><p>Sale ends 4 November 2026.</p>'), 'time-datetime', '/store/ shows ["4 November 2026"] outside a <time datetime>');
+  passes('U8r3 time: a wrapped date on another page passes', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE</h1><p>Sale ends <time datetime="2026-11-04">4 November 2026</time>.</p>'));
+  expectFail('U8r3 time: an unwrapped ISO date fails', mutate(AU, 'Chromabit SMP market', 'Chromabit SMP market 2026-11-04'), 'time-datetime', '/auctions/ shows ["2026-11-04"] outside a <time datetime>');
+  {
+    // The exempt FAQ date (TIME.exempt) passes on /faq/ only (the /store/ case above is the same text failing).
+    const r = runOn(mutate(FQ, '<main>Everything you need to know about Chromabit.</main>', '<main>Everything you need to know about Chromabit. Season 3 runs from 1 October to 4 November 2026.</main>'));
+    const line = r.lines.find((l) => l.startsWith('FAIL time-datetime'));
+    check('U8r3 time: the exempt FAQ date passes on /faq/', r.lines.some((l) => l === 'PASS time-datetime') && !line, `got ${line}\n${r.out}`);
+  }
+  {
+    // visible-text-unchanged still passes when the date gains its <time> (inline: no text added).
+    const r = runOn(goodSite(), prDate(PR_NO_TIME));
+    const fails = r.lines.filter((l) => l.startsWith('FAIL '));
+    check('U8r3 time: the <time> wrapper adds no visible text (visible-text-unchanged passes against the plain-date base)', r.code === 0 && fails.length === 0, `exit ${r.code}:\n${r.out}`);
+  }
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

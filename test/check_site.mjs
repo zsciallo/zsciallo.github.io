@@ -1821,6 +1821,24 @@ export const SEO = {
   robotsTokens: ['index', 'follow', 'max-image-preview:large', 'max-snippet:-1'],
   /** Review finding: the store description says "the Chromabit Minecraft server"; it becomes Chromabit wording without "server". */
   store: { route: '/store/', oldPhrase: 'the Chromabit Minecraft server', forbid: /server/i, need: 'Chromabit' },
+  /**
+   * U8 round 3 (review F7, ruling): the owner's store wording is just "Chromabit", so the store
+   * description names neither the network nor the SMP. Whole words, any case.
+   */
+  storeForbidWords: ['Network', 'SMP'],
+  /**
+   * U8 round 3 (review F6, ruling): the /smp/ description is built only from facts /smp/ shows.
+   * Rule (seo-head): (a) each phrase in `mustBeVisible` that the description contains (whole
+   * words, any case) must also occur in the page's visible body text (whole words, any case),
+   * capitalised or not and wherever it stands in a sentence; (b) every capitalised word that
+   * does not start a sentence must occur as a whole word (any case) in the page's visible body
+   * text. Words are runs of ASCII letters; "capitalised" = first letter A-Z; a word starts a
+   * sentence when it is the first word or follows ". ", "! " or "? ". The visible body text is
+   * blockText(<body>) and textOf(<body>) (see the normalisation notes above). Numbers are not
+   * repeated here: seo-titles-frozen already holds every number in a released description to the
+   * page's text.
+   */
+  smpDesc: { route: '/smp/', mustBeVisible: ['Java', 'Bedrock', 'player-run'] },
   crawlers: ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended', 'Bingbot'],
   sitemapUrl: 'https://chromabit.us/sitemap.xml',
   /** JSON-LD keys whose numeric values are allowed (anything else is a volatile number). */
@@ -1833,6 +1851,26 @@ export const SEO = {
   /** Node types whose strings another check compares exactly (faq-jsonld-sync). */
   ldOwnedElsewhere: ['FAQPage'],
   gameAddress: 'play.chromabit.us',
+  /** U8 round 3 (F10): keys by which a WebPage/WebSite on / may reference the VideoGame's @id. */
+  gameLinkKeys: ['mainEntity', 'about'],
+  /**
+   * U8 round 3 (review F2a): the /pvp/ WebPage `about` describes the ranked ladder from facts the
+   * page shows. Each pattern is matched against the normalised, lower-cased about.description.
+   */
+  pvpAboutFacts: [
+    ['seven tiers', /\b(seven|7) tiers\b/],
+    ['Tin', /\btin\b/],
+    ['Chroma', /\bchroma\b/],
+    ['10 placement matches', /\b(10|ten) placement matches\b/],
+    ['best of three', /\bbest of (three|3)\b/],
+    ['three divisions', /\b(three|3) divisions\b/],
+  ],
+  /**
+   * Words a composed about.description may use although the page text lacks them (joining words
+   * only). Every other word (runs of a-z, or of 0-9) must occur as a whole word in the page's
+   * visible body text: see seo-jsonld-visible-facts.
+   */
+  aboutJoinWords: ['a', 'an', 'and', 'are', 'at', 'by', 'each', 'for', 'from', 'in', 'is', 'of', 'on', 'or', 'per', 'the', 'to', 'with'],
   /** Head requirements an earlier check pins on that route (see the list above). */
   pinned: { '/': ['description', 'twitter:title'], '/pvp/': ['description', 'twitter:title', 'canonical'] },
   /** Routes whose single <h1> an earlier check pins. */
@@ -1969,6 +2007,12 @@ function seoHead(dist) {
         if (d.includes(SEO.store.oldPhrase)) problems.push(`${r} description still says ${q(SEO.store.oldPhrase)}`);
         if (SEO.store.forbid.test(d)) problems.push(`${r} description contains "server": ${q(d)}`);
         if (!d.includes(SEO.store.need)) problems.push(`${r} description does not name ${q(SEO.store.need)}`);
+        const words = SEO.storeForbidWords.filter((w) => new RegExp(`\\b${w}\\b`, 'i').test(d));
+        if (words.length) problems.push(`${r} description contains ${q(words)} (the store wording is just "Chromabit"): ${q(d)}`);
+      }
+      if (r === SEO.smpDesc.route) {
+        const extra = descWordsNotVisible(d, bodyEl(p));
+        if (extra.length) problems.push(`${r} description states ${q(extra)}, which the page's visible text does not show: ${q(d)}`);
       }
     }
     const want = `${SITE}${r}`;
@@ -2013,6 +2057,51 @@ function seoHead(dist) {
 function numbersNotIn(text, visible) {
   const vis = new Set((visible.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, '')));
   return (text.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, '').replace(/\.$/, '')).filter((n) => !vis.has(n));
+}
+
+/**
+ * Lower-case whole words (runs of a-z, or of 0-9) of the visible text of `body`: of blockText and
+ * textOf, and of each text node on its own (so <span>Tin</span><span>START</span>, which reads
+ * "TinSTART", yields "tin" and "start" too). Text of script/style/template/svg is not visible.
+ */
+function visibleWords(body) {
+  const words = new Set();
+  const add = (t) => {
+    for (const w of norm(decode(t)).toLowerCase().match(/[a-z]+|[0-9]+/g) ?? []) words.add(w);
+  };
+  add(blockText(body));
+  add(textOf(body));
+  const walk = (n) => {
+    for (const c of n.children ?? []) {
+      if ('text' in c) add(c.text);
+      else if (!NO_TEXT.has(c.tag)) walk(c);
+    }
+  };
+  walk(body);
+  return words;
+}
+
+/**
+ * U8 round 3 (SEO.smpDesc): what a description states that the page's visible body text does not
+ * show: phrases of SEO.smpDesc.mustBeVisible absent from the text, then capitalised mid-sentence
+ * words absent as whole words. Empty when the description is built from the page.
+ */
+export function descWordsNotVisible(desc, body) {
+  const text = [blockText(body), textOf(body)].map((t) => t.toLowerCase());
+  const words = visibleWords(body);
+  const out = [];
+  for (const phrase of SEO.smpDesc.mustBeVisible) {
+    const re = new RegExp(`\\b${phrase.toLowerCase().replace(/[-]/g, '\\-')}\\b`);
+    if (re.test(norm(desc).toLowerCase()) && !text.some((t) => re.test(t))) out.push(phrase);
+  }
+  for (const m of norm(desc).matchAll(/[A-Za-z]+/g)) {
+    const w = m[0];
+    if (!/^[A-Z]/.test(w)) continue;
+    const before = norm(desc).slice(0, m.index);
+    if (!before.trim() || /[.!?]\s+$/.test(before)) continue;
+    if (!words.has(w.toLowerCase()) && !out.includes(w)) out.push(w);
+  }
+  return out;
 }
 
 /** U8-H: titles and approved descriptions stay byte-identical to the 762b268 snapshot. */
@@ -2159,6 +2248,7 @@ function seoJsonLd(dist) {
       if (games.length !== 1) problems.push(`/ has ${games.length} VideoGame nodes named Minecraft, want 1`);
       else {
         const [g] = games;
+        const gid = typeof g['@id'] === 'string' && g['@id'] ? g['@id'] : null;
         const platforms = [].concat(g.gamePlatform ?? []).join(' | ');
         if (!/java/i.test(platforms) || !/bedrock/i.test(platforms)) problems.push(`/ VideoGame gamePlatform is ${q(g.gamePlatform ?? null)}, want both Java and Bedrock editions`);
         const servers = [].concat(g.gameServer ?? []).filter((s) => s && types(s).includes('GameServer'));
@@ -2169,7 +2259,19 @@ function seoJsonLd(dist) {
           let names = false;
           walkLd(s, (k, v) => typeof v === 'string' && v.includes(SEO.gameAddress) && (names = true));
           if (!isAbsHttps(s.url) && !names) problems.push(`/ GameServer has neither a url nor the address ${q(SEO.gameAddress)}`);
+          // U8 round 3 (review F10): the GameServer states the address and points back at the game by @id.
+          else if (!names) problems.push(`/ GameServer does not state the address ${q(SEO.gameAddress)}`);
+          const back = [].concat(s.game ?? []).map((x) => (x && typeof x === 'object' ? x['@id'] ?? null : x));
+          if (!gid || !back.includes(gid)) problems.push(`/ GameServer game is ${q(s.game ?? null)}, want {"@id": ${gid ? q(gid) : "<the VideoGame's @id>"}}`);
         }
+        // U8 round 3 (review F10): the VideoGame is reachable from the page graph: a WebPage or
+        // WebSite node on / names it by @id in mainEntity or about.
+        const refs = nodes
+          .filter((n) => types(n).some((t) => t === 'WebPage' || t === 'WebSite'))
+          .flatMap((n) => SEO.gameLinkKeys.flatMap((k) => [].concat(n[k] ?? [])))
+          .map((x) => (x && typeof x === 'object' ? x['@id'] ?? null : null));
+        if (!gid) problems.push('/ VideoGame has no @id, so nothing can reference it');
+        else if (!refs.includes(gid)) problems.push(`/ VideoGame ${q(gid)} is not referenced by @id from a WebPage or WebSite (${SEO.gameLinkKeys.join(' or ')}): orphan node`);
       }
     } else {
       const crumbs = nodes.filter((n) => types(n).includes('BreadcrumbList'));
@@ -2189,6 +2291,22 @@ function seoJsonLd(dist) {
         if (typeof w.name !== 'string' || !w.name.trim()) problems.push('/pvp/ WebPage has no name');
         if (typeof w.description !== 'string' || !w.description.trim()) problems.push('/pvp/ WebPage has no description');
         if (w.url !== `${SITE}/pvp/`) problems.push(`/pvp/ WebPage url is ${q(w.url ?? null)}, want ${q(`${SITE}/pvp/`)}`);
+        // U8 round 3 (review F2a): `about` is one inline node describing the ranked ladder.
+        const about = Array.isArray(w.about) ? w.about : w.about === undefined ? [] : [w.about];
+        if (about.length !== 1 || !about[0] || typeof about[0] !== 'object') problems.push(`/pvp/ WebPage about is ${clip(q(w.about ?? null), 120)}, want one inline node describing the ranked ladder`);
+        else {
+          const [a] = about;
+          const at = types(a);
+          if (!at.length) problems.push('/pvp/ WebPage about has no @type');
+          else if (at.some((t) => SEO.ldBoilerplate.includes(t) || SEO.ldOwnedElsewhere.includes(t))) problems.push(`/pvp/ WebPage about is of @type ${q(at)}, whose strings are not fact-checked`);
+          if (typeof a.name !== 'string' || !a.name.trim()) problems.push('/pvp/ WebPage about has no name');
+          if (typeof a.description !== 'string' || !a.description.trim()) problems.push('/pvp/ WebPage about has no description');
+          else {
+            const d = norm(a.description).toLowerCase();
+            const missing = SEO.pvpAboutFacts.filter(([, re]) => !re.test(d)).map(([label]) => label);
+            if (missing.length) problems.push(`/pvp/ WebPage about.description does not state ${q(missing)}: ${clip(q(a.description), 160)}`);
+          }
+        }
       }
       // The six mode names visible on /pvp/, in page order (pvp-modes pins the page to PVP.modes).
       const lists = nodes.filter((n) => types(n).includes('ItemList'));
@@ -2219,12 +2337,31 @@ function seoJsonLdVisibleFacts(dist) {
     const hay = [textOf(body), blockText(body)].map((t) => t.toLowerCase());
     const meta = metaValues(p, 'description').map((d) => norm(d).toLowerCase());
     const bad = [];
-    walkLd(ldBlocks(p), (k, v, owner, ctx) => {
+    // U8 round 3 (review F2a): the /pvp/ WebPage about.description may be composed from several
+    // visible facts, so instead of the whole-string rule it passes when the whole string is
+    // visible / is the meta description, or when every word in it (runs of a-z, or of 0-9) occurs
+    // as a whole word in the page's visible body text, joining words (SEO.aboutJoinWords) aside.
+    // An invented fact needs a word or number the page does not show, so it fails. Every other
+    // string under `about` (name, nested nodes) keeps the whole-string rule.
+    const blocks = ldBlocks(p);
+    const aboutNodes = new Set();
+    if (route === PVP.route)
+      walkLd(blocks, (k, v, owner) => {
+        if (k === 'about' && types(owner).includes('WebPage')) for (const a of [].concat(v ?? [])) if (a && typeof a === 'object') aboutNodes.add(a);
+      });
+    const words = aboutNodes.size ? visibleWords(body) : null;
+    walkLd(blocks, (k, v, owner, ctx) => {
       if (!SEO.ldFactKeys.includes(k) || typeof v !== 'string') return;
       if (ctx.some((t) => SEO.ldBoilerplate.includes(t) || SEO.ldOwnedElsewhere.includes(t))) return;
       if (/^https?:\/\//.test(v.trim())) return;
       const n = norm(v).toLowerCase();
       if (!n || meta.includes(n) || hay.some((h) => h.includes(n))) return;
+      if (k === 'description' && aboutNodes.has(owner)) {
+        const unseen = [...new Set(n.match(/[a-z]+|[0-9]+/g) ?? [])].filter((w) => !words.has(w) && !SEO.aboutJoinWords.includes(w));
+        if (!unseen.length) return;
+        bad.push(`WebPage about.description uses ${q(unseen)}, which the page does not show: ${clip(norm(v), 100)}`);
+        return;
+      }
       bad.push(`${types(owner).join('/') || ctx.at(-1) || 'node'} ${k} ${clip(norm(v), 100)}`);
     });
     if (bad.length) problems.push(`${route} JSON-LD states what the page does not show: ${bad.slice(0, 4).join('; ')}${bad.length > 4 ? ` (+${bad.length - 4} more)` : ''}`);
@@ -2777,6 +2914,193 @@ function cssHasIsolated(dist) {
   return [...new Set(problems)];
 }
 
+// ========================================================= U8 round 3 ==
+// Review r1 findings F1, F2b (F2a, F6, F7 and F10 extend seo-jsonld,
+// seo-jsonld-visible-facts and seo-head above).
+
+/**
+ * U8 round 3 (review F1): Google ignores an Organization logo under 112x112, so the logo is a
+ * square PNG of at least LOGO.min pixels a side. The planned asset is an exact nearest-neighbour
+ * upscale of the 64x64 pixel icon, used only by structured data (no visible change: the pixel
+ * check owns that).
+ */
+export const LOGO = { min: 112 };
+
+/** The URL an Organization `logo` names: the string itself, or an ImageObject's url / contentUrl (not its @id). */
+const logoUrl = (logo) => (typeof logo === 'string' ? logo : logo && typeof logo === 'object' ? logo.url ?? logo.contentUrl ?? null : null);
+
+/**
+ * U8 round 3 (review F1): every Organization node on every indexable page (inline ones on sub
+ * pages too) has a logo that is an absolute https://chromabit.us/ URL of a file in dist (the
+ * file itself, not a directory index), the file is a PNG (signature + IHDR), width == height >=
+ * LOGO.min, and an ImageObject's width/height, when given, are the file's. A page without an
+ * Organization node is seo-jsonld's failure, not this one's.
+ */
+function seoLogo(dist) {
+  const problems = [];
+  for (const route of INDEXABLE) {
+    const p = page(route, dist);
+    if (!p) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    for (const n of ldTyped(p).filter((x) => types(x).includes('Organization'))) {
+      const url = logoUrl(n.logo);
+      const where = `${route} Organization logo ${q(url)}`;
+      if (typeof url !== 'string' || !isSiteUrl(url)) {
+        problems.push(`${where} is not an absolute ${SITE}/ URL`);
+        continue;
+      }
+      let path;
+      try {
+        path = decodeURIComponent(new URL(url).pathname);
+      } catch {
+        problems.push(`${where} does not parse`);
+        continue;
+      }
+      const file = join(dist, path);
+      if (path.endsWith('/') || !isFileIn(file)) {
+        problems.push(`${where} is not a file in dist`);
+        continue;
+      }
+      const size = pngSize(readFileSync(file));
+      if (typeof size === 'string') {
+        problems.push(`${where} is ${size}`);
+        continue;
+      }
+      if (size.width !== size.height || size.width < LOGO.min)
+        problems.push(`${where} is ${size.width}x${size.height}, want a square of at least ${LOGO.min}x${LOGO.min}`);
+      if (n.logo && typeof n.logo === 'object')
+        for (const dim of ['width', 'height'])
+          if (n.logo[dim] !== undefined && Number(n.logo[dim]) !== size[dim]) problems.push(`${where} declares ${dim} ${q(n.logo[dim])}, the file is ${size[dim]}`);
+    }
+  }
+  return [...new Set(problems)];
+}
+
+/**
+ * U8 round 3 (review F2b): a visible calendar date is a <time datetime="YYYY-MM-DD"> with the
+ * same visible text. A <time> is inline, so it adds no text (visible-text-unchanged still holds).
+ *
+ * Dates read in visible text (full English month names, any case):
+ *   "August 10, 2026" / "August 10 2026" / "10 August 2026" / "2026-08-10";
+ * a match counts only when it is a real calendar date (2026-02-30 is not).
+ */
+export const TIME = {
+  /** The privacy page's "last updated" date: the element right after the eyebrow with this text. */
+  privacy: { route: '/privacy/', eyebrowClass: 'section-eyebrow', eyebrow: 'LAST UPDATED' },
+  /**
+   * Visible dates not (yet) required to be wrapped, by route, with the reason. The FAQ answer text
+   * comes from src/data/faq.json and is mirrored byte for byte into the FAQPage JSON-LD
+   * (faq-jsonld-sync) and the FAQ snapshot (faq-unchanged), so wrapping it is a faq.json markup
+   * change outside U8: flagged to the orchestrator (U8 test-writer r3).
+   */
+  exempt: { '/faq/': { '4 November 2026': 'battle pass season end date inside a faq.json answer (see above)' } },
+};
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const MONTH_RE = MONTHS.join('|');
+const DATE_RES = [
+  [new RegExp(`\\b(${MONTH_RE}) (\\d{1,2}),? (\\d{4})\\b`, 'gi'), (m) => [m[3], MONTHS.indexOf(m[1].toLowerCase()) + 1, m[2]]],
+  [new RegExp(`\\b(\\d{1,2}) (${MONTH_RE}),? (\\d{4})\\b`, 'gi'), (m) => [m[3], MONTHS.indexOf(m[2].toLowerCase()) + 1, m[1]]],
+  [/\b(\d{4})-(\d{2})-(\d{2})\b/g, (m) => [m[1], m[2], m[3]]],
+];
+
+/** "YYYY-MM-DD" for a real calendar date, else null. */
+function isoDate(y, m, d) {
+  const [Y, M, D] = [Number(y), Number(m), Number(d)];
+  if (!Number.isInteger(Y) || !Number.isInteger(M) || !Number.isInteger(D) || Y < 1000 || Y > 9999) return null;
+  const t = new Date(Date.UTC(Y, M - 1, D));
+  if (t.getUTCFullYear() !== Y || t.getUTCMonth() !== M - 1 || t.getUTCDate() !== D) return null;
+  return `${String(Y).padStart(4, '0')}-${String(M).padStart(2, '0')}-${String(D).padStart(2, '0')}`;
+}
+
+/** Every real calendar date stated in `text`: [{ text, iso }], in order. */
+export function datesIn(text) {
+  const out = [];
+  for (const [re, parts] of DATE_RES)
+    for (const m of text.matchAll(re)) {
+      const iso = isoDate(...parts(m));
+      if (iso) out.push({ text: m[0], iso, at: m.index });
+    }
+  return out.sort((a, b) => a.at - b.at).map(({ text: t, iso }) => ({ text: t, iso }));
+}
+
+/** The ISO date a whole visible text states ("AUGUST 10, 2026" -> "2026-08-10"), or null if it is not exactly one date. */
+export function parseVisibleDate(text) {
+  const t = norm(text);
+  const found = datesIn(t);
+  return found.length === 1 && found[0].text === t ? found[0].iso : null;
+}
+
+/** A datetime attribute that is exactly a real "YYYY-MM-DD" date, else null. */
+export function datetimeDate(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? '');
+  return m ? isoDate(m[1], m[2], m[3]) : null;
+}
+
+/** The next element sibling of `el` (text between them ignored), or null. */
+function nextElement(el) {
+  const sibs = el.parent?.children ?? [];
+  for (let i = sibs.indexOf(el) + 1; i < sibs.length; i++) if (!('text' in sibs[i])) return sibs[i];
+  return null;
+}
+
+/**
+ * U8 round 3 (review F2b), on every prerendered page (SEMANTIC_ROUTES):
+ *  1. /privacy/: exactly one .section-eyebrow reads "LAST UPDATED" (textOf, any case); the next
+ *     element is a <time> or holds exactly one <time>; that <time>'s text is the element's whole
+ *     text; the text is exactly one calendar date; datetime is that date as YYYY-MM-DD.
+ *  2. every <time>: datetime is a real YYYY-MM-DD date and the <time>'s text states that same
+ *     date (and nothing else).
+ *  3. no calendar date stays in the visible body text outside a <time> (blockText of <body> with
+ *     <time> subtrees dropped), except TIME.exempt.
+ */
+function timeDatetime(dist) {
+  const problems = [];
+  const pr = TIME.privacy;
+  const p = page(pr.route, dist);
+  if (!p) problems.push(`${pr.route} missing (${fileOf(pr.route)})`);
+  else {
+    const marks = findAll(bodyEl(p), (el) => hasClass(pr.eyebrowClass)(el) && textOf(el).toUpperCase() === pr.eyebrow);
+    if (marks.length !== 1) problems.push(`${pr.route} has ${marks.length} .${pr.eyebrowClass} reading ${q(pr.eyebrow)}, want 1`);
+    else {
+      const el = nextElement(marks[0]);
+      if (!el) problems.push(`${pr.route} ${q(pr.eyebrow)} is not followed by an element holding the date`);
+      else {
+        const times = el.tag === 'time' ? [el] : findAll(el, isTag('time'));
+        const shown = textOf(el);
+        if (times.length !== 1) problems.push(`${pr.route} last-updated date ${q(shown)} (<${el.tag}>) holds ${times.length} <time>, want 1 wrapping the date`);
+        else {
+          const [t] = times;
+          const said = textOf(t);
+          const iso = parseVisibleDate(said);
+          if (said !== shown) problems.push(`${pr.route} last-updated <time> text is ${q(said)}, want the whole date text ${q(shown)}`);
+          if (!iso) problems.push(`${pr.route} last-updated <time> text ${q(said)} is not one calendar date`);
+          else if (t.attrs.datetime !== iso) problems.push(`${pr.route} last-updated <time datetime=${q(t.attrs.datetime ?? null)}>, want ${q(iso)} (the date its text ${q(said)} states)`);
+        }
+      }
+    }
+  }
+  for (const route of SEMANTIC_ROUTES) {
+    const pg = page(route, dist);
+    if (!pg) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    for (const t of findAll(dom(pg), isTag('time'))) {
+      const dt = datetimeDate(t.attrs.datetime);
+      const said = textOf(t);
+      const iso = parseVisibleDate(said);
+      if (!dt) problems.push(`${route} <time datetime=${q(t.attrs.datetime ?? null)}> ${q(said)}: datetime is not a real YYYY-MM-DD date`);
+      else if (iso !== dt) problems.push(`${route} <time datetime=${q(dt)}> text ${q(said)} ${iso ? `states ${iso}` : 'is not one calendar date'}`);
+    }
+    const exempt = TIME.exempt[route] ?? {};
+    const loose = datesIn(blockText(bodyEl(pg), isTag('time'))).filter((d) => !(d.text in exempt));
+    if (loose.length) problems.push(`${route} shows ${q(loose.map((d) => d.text))} outside a <time datetime>`);
+  }
+  return [...new Set(problems)];
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -2841,6 +3165,9 @@ export const CHECKS = [
   ['card-no-frost', cardNoFrost],
   // U8 round 2: carried over from the U9 review (L1)
   ['css-has-isolated', cssHasIsolated],
+  // U8 round 3: review r1 F1 and F2b
+  ['seo-logo', seoLogo],
+  ['time-datetime', timeDatetime],
 ];
 
 // -------------------------------------------------------------------- main --
