@@ -1111,8 +1111,12 @@
 }
 
 .pool-card:hover,
-.pool-card.selected {
+.pool-card:focus-visible {
   background-color: var(--surface-hover);
+}
+
+.pool-card.selected {
+  background-color: var(--surface-selected);
 }
 
 .pool-card:focus-visible {
@@ -1490,8 +1494,13 @@
 }
 
 .listing-card:hover,
-.listing-card.open {
+.listing-card:has(.listing-head:focus-visible) {
   background-color: var(--surface-hover);
+}
+
+.listing-card.open,
+.listing-card.open:has(.listing-head:focus-visible) {
+  background-color: var(--surface-selected);
 }
 
 .listing-head {
