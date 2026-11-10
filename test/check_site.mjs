@@ -2602,13 +2602,19 @@ function visibleTextUnchanged(dist) {
 // rendered half (computed styles on every page) is test/card_style_check.mjs,
 // whose CARDS list also decides here what counts as a card.
 
-/** The five tokens and their spec values (plan Amendment 4). */
+/**
+ * The surface tokens and their spec values (plan Amendment 4, amended by
+ * U9-states: --surface-hover #1a1330 -> #21193c, it was 1.044:1 against
+ * --surface; new --surface-selected; --divider pinned as well).
+ */
 export const CARD_TOKENS = {
   '--surface': '#150f27',
   '--surface-inset': '#0f0a1d',
-  '--surface-hover': '#1a1330',
+  '--surface-hover': '#21193c',
+  '--surface-selected': '#2c214f',
   '--radius-card': '10px',
   '--radius-inset': '6px',
+  '--divider': '#221838',
 };
 /** The frost gradient as index.css defines it, whitespace-free and with the minifier's short decimals. */
 const FROST_LITERAL = 'linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01))';
@@ -2713,7 +2719,7 @@ function cardSubject(selector) {
   return null;
 }
 
-/** U9: the built CSS defines the five surface tokens at :root with the spec values, and nowhere else with another value. */
+/** U9: the built CSS defines the surface tokens (CARD_TOKENS) at :root with the spec values, and nowhere else with another value. */
 function cardTokens(dist) {
   const css = builtCss(dist);
   if (css == null) return ['no built CSS under dist/assets'];

@@ -431,7 +431,7 @@ function goodSite() {
 
 /** U9: minified like Vite's output: the tokens at :root, the frost token still defined (it may stay for non-cards), cards on --surface. */
 const CARD_CSS =
-  ':root{--accent:#c77dff;--surface:#150f27;--surface-inset:#0f0a1d;--surface-hover:#1a1330;--radius-card:10px;--radius-inset:6px;' +
+  ':root{--accent:#c77dff;--surface:#150f27;--surface-inset:#0f0a1d;--surface-hover:#21193c;--surface-selected:#2c214f;--radius-card:10px;--radius-inset:6px;--divider:#221838;' +
   '--frost:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01))}' +
   '.card{background-color:var(--surface);border:0;border-radius:var(--radius-card);position:relative}' +
   '.mode-live{background-color:var(--surface-inset);border-radius:var(--radius-inset)}' +
@@ -1883,7 +1883,13 @@ ${r.out}`);
   passes('U9 tokens: two stylesheets, tokens in the second, pass', { ...goodSite(), 'assets/a-first.css': '.x{color:red}' });
   passes('U9 tokens: upper-case hex passes', cssMut('--surface:#150f27', '--surface:#150F27'));
   passes('U9 tokens: spaces and !important pass', cssMut('--radius-card:10px', '--radius-card: 10px !important'));
-  expectFail('U9 tokens: --surface-hover missing', cssMut('--surface-hover:#1a1330;', ''), 'card-tokens', '--surface-hover is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --surface-hover missing', cssMut('--surface-hover:#21193c;', ''), 'card-tokens', '--surface-hover is not declared in a top-level :root rule');
+  // Amendment U9-states: the round-1 hover value was imperceptible (1.044:1); a new selected token; the divider pinned.
+  expectFail('U9 tokens: --surface-hover at the round-1 value #1a1330', cssMut('--surface-hover:#21193c', '--surface-hover:#1a1330'), 'card-tokens', '--surface-hover is "#1a1330" in :root, want #21193c');
+  expectFail('U9 tokens: --surface-selected missing', cssMut('--surface-selected:#2c214f;', ''), 'card-tokens', '--surface-selected is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --surface-selected equal to the hover value', cssMut('--surface-selected:#2c214f', '--surface-selected:#21193c'), 'card-tokens', '--surface-selected is "#21193c" in :root, want #2c214f');
+  expectFail('U9 tokens: --divider missing', cssMut('--divider:#221838;', ''), 'card-tokens', '--divider is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --divider wrong value', cssMut('--divider:#221838', '--divider:#2a1e44'), 'card-tokens', '--divider is "#2a1e44" in :root, want #221838');
   expectFail('U9 tokens: --surface wrong value', cssMut('--surface:#150f27', '--surface:#16102a'), 'card-tokens', '--surface is "#16102a" in :root, want #150f27');
   expectFail('U9 tokens: --surface-inset wrong value', cssMut('--surface-inset:#0f0a1d', '--surface-inset:#0f0a1e'), 'card-tokens', '--surface-inset is "#0f0a1e"');
   expectFail('U9 tokens: --radius-card 12px', cssMut('--radius-card:10px', '--radius-card:12px'), 'card-tokens', '--radius-card is "12px" in :root, want 10px');

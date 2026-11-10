@@ -9,6 +9,13 @@
 //   node test/card_style_check.mjs --snapshot-guard [--dist <distDir>]
 //       write test/fixtures/card-style-guard.json (the UNCHANGED guard) from
 //       the current build. Taken once, before U9, from 979b66a.
+//   node test/card_style_check.mjs --snapshot-guard --add [--dist <distDir>]
+//       add only the GUARD entries the snapshot lacks (round 3: .type-option,
+//       .store-tooltip); every existing entry and probe is kept byte-identical.
+//   node test/card_style_check.mjs --self-test
+//       plant violations in real pages and prove each rule catches them.
+//   node test/card_style_check.mjs --allow-report
+//       the normal run, plus every element each ALLOW entry excused.
 //   node test/card_style_check.mjs --discover [--only ...]
 //       list every element the completeness heuristic flags, ignoring both
 //       lists (a maintenance aid; never part of the gate).
@@ -16,8 +23,14 @@
 //
 // What is checked, per page state and width (one PASS/FAIL line each):
 //   tokens        :root defines --surface #150f27, --surface-inset #0f0a1d,
-//                 --surface-hover #1a1330, --radius-card 10px, --radius-inset 6px
-//                 (spec values, compared case-insensitively after trimming).
+//                 --surface-hover #21193c, --surface-selected #2c214f,
+//                 --radius-card 10px, --radius-inset 6px, --divider #221838
+//                 (spec values, compared case-insensitively after trimming;
+//                 amendment U9-states: the round-1 hover #1a1330 was 1.044:1
+//                 against --surface, imperceptible).
+//   tokens-perceptible  (once) WCAG contrast between the :root token colours:
+//                 --surface-hover vs --surface >= 1.10, --surface-selected vs
+//                 --surface >= 1.22, --surface-selected vs --surface-hover >= 1.08.
 //   cards         every rendered element matching a CARDS entry (first matching
 //                 entry wins, so inset/state entries sit before general ones):
 //                 background-color = the token's rgb (read from :root, so the
@@ -27,11 +40,25 @@
 //                 (content none, or no fill/border/shadow, or zero size), all
 //                 four corner radii = the radius token.
 //                 kind 'card' -> --surface / --radius-card; 'inset' ->
-//                 --surface-inset / --radius-inset; fill 'hover' -> --surface-hover
-//                 (open/selected states).
+//                 --surface-inset / --radius-inset; 'tile' -> --surface /
+//                 --radius-inset (a tile that sits on an inset panel: the
+//                 rank kit's reward tiles); fill 'selected' -> --surface-selected
+//                 (selected / open / current states).
 //   hover         for every CARDS entry with hover: true, the first 2 rendered
 //                 matches are put in :hover with CDP CSS.forcePseudoState: the
 //                 same rules with background-color = --surface-hover.
+//   focus         the same first 2 matches: a Tab key press (keyboard modality),
+//                 then the entry's focus target (the card itself, or the
+//                 control inside it that takes focus) is focused and must
+//                 match :focus-visible; the target must draw an outline
+//                 (outline-style not none, width > 0: the existing focus ring)
+//                 AND the card's background-color must be --surface-hover
+//                 (spec: focus shows the ring and the hover fill).
+//   perceptible   per state, from the computed colours: every hovered card's
+//                 :hover fill vs its own resting fill >= 1.10; every
+//                 selected/open card's fill vs its kind's resting token
+//                 (--surface, or --surface-inset for inset tiles) >= 1.22 and
+//                 vs --surface-hover >= 1.08 (WCAG contrast ratio).
 //   dividers      inside every card, an element that is neither a card nor
 //                 in DIVIDER_SKIP (nor inside one) and has a border on 1-3
 //                 sides and is at least 24px wide or high (smaller is an icon
@@ -86,14 +113,21 @@ export const GUARD_FILE = join(ROOT, 'test', 'fixtures', 'card-style-guard.json'
 export const WIDTHS = [400, 1280];
 export const HEIGHT = 900;
 
-/** The spec (plan Amendment 4). */
+/**
+ * The spec (plan Amendment 4, amended by U9-states: --surface-hover #1a1330 ->
+ * #21193c, new --surface-selected, --divider pinned too).
+ */
 export const SPEC_TOKENS = {
   '--surface': '#150f27',
   '--surface-inset': '#0f0a1d',
-  '--surface-hover': '#1a1330',
+  '--surface-hover': '#21193c',
+  '--surface-selected': '#2c214f',
   '--radius-card': '10px',
   '--radius-inset': '6px',
+  '--divider': '#221838',
 };
+/** Perceptibility floors (amendment U9-states), WCAG contrast ratios between fills. */
+export const PERCEPT = { hoverVsRest: 1.1, selectedVsRest: 1.22, selectedVsHover: 1.08 };
 export const MIN_GAP = 10;
 export const MUTED_MIN = 4.5;
 export const TEXT_MIN = 7;
@@ -107,6 +141,23 @@ const clickText = (sel, text) => `(() => { const el = [...document.querySelector
 const type = (sel, text) => `(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return false; el.focus(); el.value = ${JSON.stringify(text)}; el.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`;
 /** Waits (up to 5 s) for a selector to render, then true; false if it never does. */
 const waitFor = (sel) => `(async () => { for (let i = 0; i < 50; i++) { const el = document.querySelector(${JSON.stringify(sel)}); if (el && el.getClientRects().length) return true; await new Promise((r) => setTimeout(r, 100)); } return false; })()`;
+/** Clicks the BUY (or cart) button of the package card whose name is exactly `name`. */
+const buyPackage = (name) => `(() => { const c = [...document.querySelectorAll('.pkg-card')].find((e) => e.querySelector('.pkg-name')?.textContent.trim() === ${JSON.stringify(name)}); if (!c) return false; c.scrollIntoView(); const b = c.querySelector('.pkg-buy, .pkg-cart-btn'); if (!b) return false; b.click(); return true; })()`;
+
+/**
+ * Round 3 (reviewer F5): a signed-in buyer with a saved Tebex basket (the
+ * ident the basket fixture answers for), written before the page runs.
+ */
+export const BASKET_IDENT = 'cardcheck1';
+const SEED_BASKET = `localStorage.setItem('chromabit_username', 'Steve'); localStorage.setItem('chromabit_platform', 'java'); localStorage.setItem('chromabit_basket', JSON.stringify({ ident: ${JSON.stringify(BASKET_IDENT)}, username: 'Steve', at: ${FROZEN_TIME} }));`;
+/** Before launch day (config.launchDate 2026-06-19): the join box and the FAQ show the LAUNCHING IN countdown. */
+export const PRE_LAUNCH_TIME = Date.UTC(2026, 5, 1, 12, 0, 0);
+/** An item with enchant chips, contents chips and lore (patched onto the totem fixture). */
+const CHIP_ITEM = {
+  enchants: [{ id: 'sharpness', level: 5 }, { id: 'unbreaking', level: 3 }, { id: 'mending', level: 1 }],
+  contents: [{ id: 'minecraft:diamond', count: 4, name: 'Diamond' }, { id: 'minecraft:golden_apple', count: 2, name: 'Golden Apple' }],
+  lore: ['A fixture lore line.'],
+};
 
 export const STATES = [
   { id: 'home', path: '/', ready: '.mode-card' },
@@ -136,6 +187,24 @@ export const STATES = [
   { id: 'auctions-futures-soon', path: '/auctions/?tab=futures', ready: '.futures-intro', patch: { 'futures.json': { live: false } } },
   { id: 'auctions-item', path: '/auctions/?item=minecraft:totem_of_undying', ready: '.stat-row' },
   { id: 'privacy', path: '/privacy/', ready: 'main' },
+  // Round 3 (reviewer F5): states no earlier round reached. Each must render
+  // what it is for, or it fails.
+  // Server down after launch day: the join box says UNDER MAINTENANCE; the FAQ shows the status card.
+  { id: 'home-offline', path: '/', ready: '.join-label--down', status: 'offline' },
+  { id: 'faq-offline', path: '/faq/', ready: '.card.info-card', status: 'offline' },
+  // Server down before launch day: the LAUNCHING IN countdowns.
+  { id: 'home-launching', path: '/', ready: '.join-label--down .join-count', status: 'offline', time: PRE_LAUNCH_TIME },
+  { id: 'faq-launching', path: '/faq/', ready: '.card.info-card .countdown-timer', status: 'offline', time: PRE_LAUNCH_TIME },
+  // The store's login modal, the key roll cabinet, the cart drawer with lines, the purchase-type modal.
+  { id: 'store-login', path: '/store/', ready: '.pkg-card', setup: [click('.store-login'), waitFor('.modal-card')] },
+  { id: 'store-roll', path: '/store/', ready: '.pkg-card', setup: [click('.store-tab--random'), waitFor('.slot-cabinet')] },
+  { id: 'store-cart', path: '/store/', ready: '.pkg-card', basket: true, init: SEED_BASKET, setup: [waitFor('.cart-fab-badge'), click('.cart-fab'), waitFor('.cart-drawer.open .cart-item')] },
+  // Chroma Pass offered as both one-time and subscription ("type": "both"): BUY opens the purchase-type modal.
+  { id: 'store-type', path: '/store/', ready: '.pkg-card', basket: true, both: 'Chroma Pass', init: SEED_BASKET, setup: [buyPackage('Chroma Pass'), waitFor('.type-modal .type-option')] },
+  // An auction item with enchant and contents chips and lore.
+  { id: 'auctions-item-chips', path: '/auctions/?item=minecraft:totem_of_undying', ready: '.detail-ench li', patch: { 'items/minecraft_totem_of_undying.json': CHIP_ITEM } },
+  // The phone nav sheet.
+  { id: 'nav-sheet', path: '/', ready: '.nav-toggle', widths: [400], setup: [click('.nav-toggle'), waitFor('.site-nav-links.open')] },
 ];
 
 // ----------------------------------------------------------------- lists --
@@ -148,8 +217,18 @@ export const STATES = [
 // one element (the coverage check); the rules apply wherever it matches.
 //   kind 'card'  -> fill --surface,       radius --radius-card
 //   kind 'inset' -> fill --surface-inset, radius --radius-inset (boxes inside a card or a modal)
-//   fill 'hover' -> fill --surface-hover  (open / selected states)
-//   hover: true  -> also checked in :hover, wanting --surface-hover
+//   kind 'tile'  -> fill --surface,       radius --radius-inset (a tile on an inset panel)
+//   fill 'selected' -> fill --surface-selected (selected / open / current states)
+//   hover: true  -> also checked in :hover, wanting --surface-hover (and the
+//                   perceptible line: hover vs rest >= 1.10)
+//   focus: sel   -> keyboard focus target (':scope' = the card itself); checked
+//                   with the hover matches: outline on the target AND the card on --surface-hover
+/**
+ * Modal frames that also carry the shared .card class (package modal, login /
+ * purchase modal, purchase-type modal, key-roll cabinet). They are chrome, not
+ * content cards: the catch-all excludes each by name and ALLOW excuses them.
+ */
+export const MODAL_CHROME_CARD = ['.pkg-modal', '.modal-card', '.type-modal', '.slot-cabinet'];
 export const CARDS = [
   // / (home)
   { sel: '.card.join-box', kind: 'card', states: ['home'], note: 'join box in the hero (IP, Discord, editions)' },
@@ -159,8 +238,10 @@ export const CARDS = [
   { sel: '.mode-live', kind: 'inset', states: ['home'], note: 'live block inside a mode card (top of the ladder, top movers)' },
   // /faq/
   { sel: '.card.ip-block', kind: 'card', states: ['faq-open'], note: 'IP block in the FAQ hero' },
-  { sel: '.faq-item[data-open]', kind: 'card', fill: 'hover', states: ['faq-open'], note: 'an open FAQ item: fill, not a pink border' },
-  { sel: '.faq-item', kind: 'card', hover: true, states: ['faq-open'], note: 'FAQ accordion items' },
+  { sel: '.faq-item[data-open]', kind: 'card', fill: 'selected', states: ['faq-open'], note: 'an open FAQ item: the selected fill, not a pink border' },
+  { sel: '.faq-item', kind: 'card', hover: true, focus: '.faq-question', states: ['faq-open'], note: 'FAQ accordion items (focus lands on the question button)' },
+  // Server offline (round 3): the status / countdown card on the FAQ.
+  { sel: '.card.info-card', kind: 'card', states: ['faq-offline', 'faq-launching'], note: 'the server-offline / LAUNCHING IN status card' },
   // /smp/
   { sel: '.card.fact:not(.pvp-fact)', kind: 'card', states: ['smp'], note: 'SMP fact tiles' },
   { sel: '.tape', kind: 'card', states: ['smp'], note: 'the market ticker tape' },
@@ -172,13 +253,19 @@ export const CARDS = [
   // /pvp/player/
   { sel: '.card.pvp-kit', kind: 'card', states: ['profile'], note: 'profile kit cards and the career card (.pvp-career)' },
   // /store/
-  { sel: '.pkg-card', kind: 'card', hover: true, states: ['store'], note: 'package cards' },
+  { sel: '.pkg-card', kind: 'card', hover: true, focus: ':scope', states: ['store'], note: 'package cards (role=button, tabindex 0)' },
   // Owner ruling (round 2): rarity colour is information. An opened reward tile keeps its rarity-coloured
   // border (guarded per rarity: rarity-borders line); fill, gradient, shadow, pseudo boxes and radius are still judged.
-  { sel: '.store-item.is-open', kind: 'inset', fill: 'inset|hover', borderGuarded: true, states: ['store-crate-open'], note: 'an opened reward tile in the package modal (border = rarity colour, guarded)' },
+  // Round 3 (amendment U9-states): an opened tile is an "open" state, so its fill is --surface-selected.
+  { sel: '.store-item.is-open', kind: 'inset', fill: 'selected', borderGuarded: true, states: ['store-crate-open'], note: 'an opened reward tile in the package modal (border = rarity colour, guarded)' },
+  // Round 3 (reviewer F6): the rank kit's reward tiles sit on the inset kit panel, so they take --surface to stay visible.
+  { sel: '.store-kit .store-item', kind: 'tile', states: ['store-rank'], note: 'reward tiles inside the rank modal\'s kit panel (surface on inset)' },
+  { sel: '.store-item.store-item--button', kind: 'inset', hover: true, focus: ':scope', states: ['store-crate'], note: 'clickable reward tiles in the package modal' },
   { sel: '.store-item', kind: 'inset', states: ['store-crate'], note: 'reward tiles in the package modal (a modal\'s inner card surfaces)' },
   { sel: '.store-kit', kind: 'inset', states: ['store-rank'], note: 'kit panels in the rank modal' },
   { sel: '.store-table-wrap', kind: 'inset', states: ['store-table'], note: 'table panel in the package modal' },
+  // Round 3: the free-key progress panel inside the cart drawer (a drawer's inner card surface, as in the package modals).
+  { sel: '.cart-keys', kind: 'inset', states: ['store-cart'], note: 'the free Chroma Key progress panel in the cart drawer' },
   // /auctions/
   { sel: '.market-table', kind: 'card', states: ['auctions'], note: 'the item table' },
   { sel: '.stat-row', kind: 'card', states: ['auctions-item', 'auctions-pool', 'auctions-markets', 'auctions-futures'], note: 'stat tile rows' },
@@ -186,13 +273,14 @@ export const CARDS = [
   { sel: '.mini-table', kind: 'card', states: ['auctions-item', 'auctions-pool', 'auctions-futures'], note: 'small tables (listings, sales, positions, markets)' },
   { sel: '.explainer', kind: 'card', states: ['auctions-markets'], note: 'the "how the markets work" panel' },
   { sel: '.futures-intro', kind: 'card', states: ['auctions-futures-soon'], note: 'futures desk intro (desk not open)' },
-  { sel: '.pool-card.selected', kind: 'card', fill: 'hover', states: ['auctions-pool'], note: 'the selected pool card' },
-  { sel: '.pool-card', kind: 'card', hover: true, states: ['auctions-markets'], note: 'pool cards' },
-  { sel: '.listing-card.open', kind: 'card', fill: 'hover', states: ['auctions-listing-open'], note: 'an expanded listing card (phone)' },
-  { sel: '.listing-card', kind: 'card', hover: true, states: ['auctions-listings'], note: 'listing cards' },
-  // anything else carrying the shared card class (the package modal is modal chrome)
+  { sel: '.pool-card.selected', kind: 'card', fill: 'selected', states: ['auctions-pool'], note: 'the selected pool card' },
+  { sel: '.pool-card', kind: 'card', hover: true, focus: ':scope', states: ['auctions-markets'], note: 'pool cards (<button>)' },
+  { sel: '.listing-card.open', kind: 'card', fill: 'selected', states: ['auctions-listing-open'], note: 'an expanded listing card (phone)' },
+  { sel: '.listing-card', kind: 'card', hover: true, focus: '.listing-head', states: ['auctions-listings'], note: 'listing cards (focus lands on the head button)' },
+  // anything else carrying the shared card class. Modal frames carry .card too
+  // but are modal chrome (ALLOW): every modal-chrome class is excluded by name.
   // Catch-all (states empty: exempt from coverage, since every card above has its own entry).
-  { sel: '.card:not(.pkg-modal)', kind: 'card', states: [], note: 'any other .card, e.g. a new one added later' },
+  { sel: MODAL_CHROME_CARD.reduce((s, c) => `${s}:not(${c})`, '.card'), kind: 'card', states: [], note: 'any other .card, e.g. a new one added later (modal frames excluded by class)' },
 ];
 
 /**
@@ -210,8 +298,24 @@ export const DEAD_CARD_CLASSES = ['feature-card', 'event-card'];
  * skipped by the heuristic itself.
  */
 export const ALLOW = [
-  { sel: 'button, .btn, [data-arcade]', note: 'controls: the arcade buttons (owner kept them), icon buttons (sound, menu, cart, close, copy), market toggles and back buttons, listing heads' },
+  // Round 3 (reviewer F5): controls are named by the site's button classes, not by the <button> tag, so a
+  // card built as a <button> (.pool-card, a reward tile, or a new one) is still judged.
+  {
+    sel: [
+      '.btn', '[data-arcade]', // arcade buttons (owner kept them): store tabs, BUY, copy IP, spin, checkout
+      '.sound-toggle', '.nav-toggle', '.cart-fab', '.cart-close', '.cart-item-remove', '.cart-coupon-apply', '.cart-coupon-hint', // icon and small buttons
+      '.pkg-modal-close', '.modal-close', '.lightbox-close', '.pkg-cart-btn', '.qty-btn', '.copy-btn', '.purchase-ip', '.platform-opt', '.store-user-change',
+      '.faq-question', '.detail-back', '.market-toggle', '.market-tab', '.market-more', '.range-tab', '.indicator-tab', // toggles, tabs, back buttons
+      '.listing-head', '.listing-seller', '.listing-view', '.carousel-slide-btn',
+    ].join(', '),
+    note: 'controls, by class: arcade buttons (owner kept them), icon buttons (sound, menu, cart, close, copy), steppers, platform choice, market toggles, tabs and back buttons, listing heads, carousel slides',
+  },
   { sel: 'input, select, textarea, .qty-field', note: 'form fields and the quantity stepper readout' },
+  { sel: '.type-option', note: 'purchase-type choices in the buy flow (ONE-TIME / SUBSCRIBE): controls, not cards (amendment U9-states); guarded unchanged' },
+  { sel: '.store-tooltip', note: 'the Minecraft-style item tooltip replica keeps its border (amendment U9-states); guarded unchanged' },
+  { sel: '.detail-ench li, .detail-contents li', note: 'enchant and contents chips on an auction item (owner: chips, not cards)' },
+  { sel: '.slot-window', note: 'the reel windows of the key-roll slot machine (machine art inside the cabinet chrome)' },
+  { sel: '.cart-keys-bar, .cart-keys-bar *', note: 'the free-key progress bar and its fill (a meter, not a box)' },
   { sel: '.beta-tag, .tier-chip, .pvp-ed, .pvp-tier, .status-badge, .store-rarity-count, .store-promo-tag, .store-cmd, .store-kit-command, .rank-step, .rank-tag, .market-tag, .futures-badge, .pkg-freekey-chip, .cart-fab-badge, .deal-badge', note: 'badges and chips (owner: chips, not cards)' },
   { sel: '.pvp-rung', note: 'tier rungs (owner kept)' },
   { sel: 'tr[data-top]', note: 'top-3 leaderboard row tints (owner kept)' },
@@ -219,7 +323,7 @@ export const ALLOW = [
   { sel: '.mode-banner, .pvp-art, .pvp-art *, .carousel-caption, .listing-thumb', note: 'banners and art: card banner art, the crossed swords, carousel captions over screenshots, item icon frames' },
   { sel: '.store-promo, .store-banner, .store-block-note--strong', note: 'store banners: the free-key and welcome offers, error/success banners, the amber "read this" note (callouts, not content cards)' },
   { sel: '.site-nav, .site-nav *, .nav-bar', note: 'the nav and its active-link bar' },
-  { sel: '.pkg-modal, .modal, .modal-overlay, .lightbox, .lightbox-caption, .cart-drawer, .slot-cabinet', note: 'modal, lightbox, drawer and key-roll chrome (they keep their own; their inner card surfaces are in CARDS)' },
+  { sel: [...MODAL_CHROME_CARD, '.modal', '.modal-overlay', '.lightbox', '.lightbox-caption', '.cart-drawer'].join(', '), note: 'modal, lightbox, drawer and key-roll chrome (they keep their own; their inner card surfaces are in CARDS)' },
   { sel: '.rule', note: 'the hero divider rule (a 2px line, not a box)' },
   { sel: '.pkg-modal--rank .store-perk', note: "rank perk rows keep their per-rank tint: information-carrying colour, owner's store (owner ruling, U9 round 2); guarded per rank by the rank-tints line" },
 ];
@@ -255,6 +359,10 @@ export const GUARD = [
   { sel: '.store-promo', states: ['store'], note: 'store offer banner' },
   { sel: 'body', states: ['home', 'auctions'], note: 'page background' },
   { sel: '.dither-bg', states: ['home'], note: 'dither canvas' },
+  // Round 3 (amendment U9-states): allowlisted, and kept as they are. Added to the snapshot with
+  // --snapshot-guard --add (existing entries untouched).
+  { sel: '.type-option', states: ['store-type'], note: 'purchase-type choice (a control: keeps its border, edge and fill)' },
+  { sel: '.store-tooltip', states: ['store-crate-open'], note: 'Minecraft-style item tooltip (keeps its border)' },
 ].map((g) => ({ ...g, props: GUARD_PROPS }));
 
 /**
@@ -306,13 +414,19 @@ function route(url, origin, state = {}) {
   if (host === 'fonts.googleapis.com' || host === 'fonts.gstatic.com') return 'pass';
   if (host === 'api.chromabit.us') {
     if ((state.block ?? []).some((b) => u.pathname.startsWith(b))) return json({ error: 'down' }, 503);
-    if (u.pathname === '/api/status') return fileOr404(join(FIX, 'status.json'));
+    if (u.pathname === '/api/status') return fileOr404(state.status === 'offline' ? join(CS_FIX, 'status-offline.json') : join(FIX, 'status.json'));
     if (u.pathname.startsWith('/pvp/')) return fileOr404(join(PVP_FIX, ...u.pathname.slice('/pvp/'.length).split('/')));
     if (u.pathname.startsWith('/market/')) return marketFile(u.pathname.slice('/market/'.length));
     return json({ error: 'not found' }, 404);
   }
   if (host === 'headless.tebex.io') {
-    if (/\/categories$/.test(u.pathname)) return fileOr404(join(CS_FIX, 'tebex-categories.json'));
+    if (/\/categories$/.test(u.pathname)) {
+      if (!state.both) return fileOr404(join(CS_FIX, 'tebex-categories.json'));
+      const body = JSON.parse(readFileSync(join(CS_FIX, 'tebex-categories.json'), 'utf-8'));
+      for (const c of body.data) for (const p of c.packages) if (p.name === state.both) p.type = 'both';
+      return json(body);
+    }
+    if (state.basket && u.pathname.endsWith(`/baskets/${BASKET_IDENT}`)) return fileOr404(join(CS_FIX, 'tebex-basket.json'));
     return json({ data: [] });
   }
   if (host === 'api.mcsrvstat.us') return fileOr404(join(FIX, 'mcsrvstat.json'));
@@ -378,19 +492,19 @@ const LIB = String.raw`(() => {
     if (w === 0 || h === 0) return null;
     return { position: ps.position, width: ps.width, height: ps.height, w, h, gradient: ps.backgroundImage.includes('gradient'), fill, border, shadow, bg: ps.backgroundImage !== 'none' ? ps.backgroundImage.slice(0, 50) : ps.backgroundColor };
   };
+  /** The resting fill of a kind: [rgb, token name]. 'inset' -> --surface-inset; 'card' and 'tile' -> --surface. */
+  const baseOf = (kind, tokens) => (kind === 'inset' ? [tokens.inset, '--surface-inset'] : [tokens.surface, '--surface']);
   /**
-   * Rule failures for a card element: kind 'card' | 'inset', fill 'surface' |
-   * 'hover' | 'inset|hover' (either token). borderGuarded: the border is not
-   * judged here (an opened reward tile keeps its rarity border; the
-   * rarity-borders line compares it with the snapshot).
+   * Rule failures for a card element: kind 'card' | 'inset' | 'tile', fill
+   * 'surface' (the kind's resting fill) | 'hover' | 'selected'. borderGuarded:
+   * the border is not judged here (an opened reward tile keeps its rarity
+   * border; the rarity-borders line compares it with the snapshot).
    */
   const cardProblems = (el, kind, fill, tokens, borderGuarded = false) => {
     const cs = getComputedStyle(el);
     const out = [];
-    const base = kind === 'inset' ? tokens.inset : tokens.surface;
-    const baseName = kind === 'inset' ? '--surface-inset' : '--surface';
-    const wants = fill === 'hover' ? [[tokens.hover, '--surface-hover']] : fill === 'inset|hover' ? [[base, baseName], [tokens.hover, '--surface-hover']] : [[base, baseName]];
-    const radius = kind === 'inset' ? tokens.radiusInset : tokens.radiusCard;
+    const wants = fill === 'hover' ? [[tokens.hover, '--surface-hover']] : fill === 'selected' ? [[tokens.selected, '--surface-selected']] : [baseOf(kind, tokens)];
+    const radius = kind === 'card' ? tokens.radiusCard : tokens.radiusInset;
     const bg = rgba(cs.backgroundColor);
     if (!bg || bg[3] !== 1 || !wants.some(([w]) => w && bg.slice(0, 3).join() === w.slice(0, 3).join())) out.push('background-color ' + rgbText(bg) + ', want ' + wants.map(([w, n]) => rgbText(w) + ' (' + n + ')').join(' or '));
     if (cs.backgroundImage !== 'none') out.push('background-image ' + cs.backgroundImage.slice(0, 70));
@@ -407,7 +521,7 @@ const LIB = String.raw`(() => {
   };
   const tokens = () => {
     const t = {};
-    for (const n of ['--surface', '--surface-inset', '--surface-hover', '--radius-card', '--radius-inset', '--muted', '--text', '--bg']) t[n] = rootVar(n);
+    for (const n of ['--surface', '--surface-inset', '--surface-hover', '--surface-selected', '--radius-card', '--radius-inset', '--divider', '--muted', '--text', '--bg']) t[n] = rootVar(n);
     return t;
   };
   const resolved = (spec) => {
@@ -415,7 +529,7 @@ const LIB = String.raw`(() => {
     const pick = (n) => hex(t[n]) || hex(spec[n]);
     return {
       raw: t,
-      surface: pick('--surface'), inset: pick('--surface-inset'), hover: pick('--surface-hover'),
+      surface: pick('--surface'), inset: pick('--surface-inset'), hover: pick('--surface-hover'), selected: pick('--surface-selected'),
       radiusCard: t['--radius-card'] || spec['--radius-card'], radiusInset: t['--radius-inset'] || spec['--radius-inset'],
       muted: hex(t['--muted']), text: hex(t['--text']), bg: hex(t['--bg']),
     };
@@ -436,7 +550,7 @@ const LIB = String.raw`(() => {
     }
     return why;
   };
-  return { rgba, hex, rgbText, contrast, over, rendered, label, path, cardProblems, tokens, resolved, entryOf, heuristic, SIDES, CORNERS };
+  return { rgba, hex, rgbText, contrast, over, rendered, label, path, baseOf, cardProblems, tokens, resolved, entryOf, heuristic, SIDES, CORNERS };
 })()`;
 
 /** The page-side inspection; returns plain data. */
@@ -445,7 +559,7 @@ const INSPECT = (cfg) => `(() => {
   const cfg = ${JSON.stringify(cfg)};
   const T = L.resolved(cfg.spec);
   const all = [...document.querySelectorAll('body *')].filter(L.rendered);
-  const out = { tokens: T.raw, cards: [], complete: [], excused: [], dividers: [], guard: {}, gaps: [], contrast: [], scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, matched: {} };
+  const out = { tokens: T.raw, cards: [], selected: [], complete: [], excused: [], dividers: [], guard: {}, gaps: [], contrast: [], scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, matched: {} };
   const cardEls = [];
   for (const el of all) {
     const e = L.entryOf(el, cfg.cards);
@@ -454,6 +568,13 @@ const INSPECT = (cfg) => `(() => {
       out.matched[e.sel] = (out.matched[e.sel] || 0) + 1;
       const p = L.cardProblems(el, e.kind, e.fill || 'surface', T, !!e.borderGuarded);
       if (p.length) out.cards.push({ sel: e.sel, path: L.path(el), problems: p });
+      if (e.fill === 'selected') {
+        // perceptible: the computed selected fill vs the kind's resting token and vs the hover token
+        let bg = L.rgba(getComputedStyle(el).backgroundColor) || [0, 0, 0, 0];
+        if (bg[3] < 1) bg = L.over(bg, T.bg || [0, 0, 0, 1]);
+        const [rest, restName] = L.baseOf(e.kind, T);
+        out.selected.push({ sel: e.sel, path: L.path(el), bg: L.rgbText(bg), restName, vsRest: +L.contrast(bg, rest).toFixed(3), vsHover: +L.contrast(bg, T.hover).toFixed(3) });
+      }
       continue;
     }
     const al = cfg.allow.find((a) => el.matches(a.sel));
@@ -677,7 +798,8 @@ async function openState(b, origin, state, width) {
     await s('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
     await s('Emulation.setTimezoneOverride', { timezoneId: 'UTC' });
     await s('Emulation.setLocaleOverride', { locale: 'en-US' });
-    await s('Page.addScriptToEvaluateOnNewDocument', { source: FREEZE(FROZEN_TIME) });
+    await s('Page.addScriptToEvaluateOnNewDocument', { source: FREEZE(state.time ?? FROZEN_TIME) });
+    if (state.init) await s('Page.addScriptToEvaluateOnNewDocument', { source: state.init });
     await s('Page.navigate', { url: `${origin}${state.path}` });
     for (let i = 0; i < 300 && loads === 0; i++) await sleep(100);
     if (!loads) throw new Error(`no load event in 30 s`);
@@ -703,28 +825,121 @@ async function openState(b, origin, state, width) {
   }
 }
 
-async function hoverProblems(page, width) {
+/** The computed background of the element, composited over --bg when translucent: 'r,g,b' text and the rgba array. */
+const BG_FN = 'function () { const L = window.__cards; const T = L.resolved(' + JSON.stringify(SPEC_TOKENS) + '); let c = L.rgba(getComputedStyle(this).backgroundColor) || [0, 0, 0, 0]; if (c[3] < 1) c = L.over(c, T.bg || [0, 0, 0, 1]); return c; }';
+/** Contrast between two rgba arrays (page-independent copy of the in-page formula). */
+export function contrastOf(a, b) {
+  const lum = (c) => {
+    const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+  };
+  const x = lum(a);
+  const y = lum(b);
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+}
+const hexRgb = (h) => {
+  const m = String(h ?? '').trim().match(/^#([0-9a-f]{6})$/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1];
+};
+/** Token-level perceptibility (amendment U9-states) for a { '--surface': '#..', ... } map. */
+export function tokenPerceptProblems(tok) {
+  const s = hexRgb(tok['--surface']);
+  const h = hexRgb(tok['--surface-hover']);
+  const sel = hexRgb(tok['--surface-selected']);
   const out = [];
+  for (const [n, c] of [['--surface', s], ['--surface-hover', h], ['--surface-selected', sel]]) if (!c) out.push(`${n} is ${JSON.stringify(tok[n] ?? '')}, not a #rrggbb colour`);
+  if (out.length) return out;
+  const r = (a, b) => contrastOf(a, b).toFixed(3);
+  if (contrastOf(h, s) < PERCEPT.hoverVsRest) out.push(`--surface-hover vs --surface ${r(h, s)}:1, want >= ${PERCEPT.hoverVsRest}`);
+  if (contrastOf(sel, s) < PERCEPT.selectedVsRest) out.push(`--surface-selected vs --surface ${r(sel, s)}:1, want >= ${PERCEPT.selectedVsRest}`);
+  if (contrastOf(sel, h) < PERCEPT.selectedVsHover) out.push(`--surface-selected vs --surface-hover ${r(sel, h)}:1, want >= ${PERCEPT.selectedVsHover}`);
+  return out;
+}
+
+/** Puts the page in keyboard modality (a real Tab key press), so a scripted focus() matches :focus-visible. */
+async function keyboardModality(page) {
+  for (const type of ['keyDown', 'keyUp']) await page.s('Input.dispatchKeyEvent', { type, key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+}
+const FOCUS_FN = `function (focusSel) {
+  const target = focusSel === ':scope' ? this : this.querySelector(focusSel);
+  if (!target) return { problems: ['focus target ' + focusSel + ' not found inside the card'] };
+  target.focus({ preventScroll: true });
+  return { pending: true };
+}`;
+const FOCUS_READ_FN = `function (focusSel, spec) {
+  const L = window.__cards;
+  const T = L.resolved(spec);
+  const target = focusSel === ':scope' ? this : this.querySelector(focusSel);
+  const out = [];
+  if (document.activeElement !== target) out.push('focus did not land on ' + L.label(target));
+  else if (!target.matches(':focus-visible')) out.push(L.label(target) + ' is focused but not :focus-visible');
+  const ts = getComputedStyle(target);
+  if (ts.outlineStyle === 'none' || !(parseFloat(ts.outlineWidth) > 0)) out.push('no focus ring: ' + L.label(target) + ' outline ' + ts.outlineStyle + ' ' + ts.outlineWidth);
+  const bg = L.rgba(getComputedStyle(this).backgroundColor);
+  if (!bg || bg[3] !== 1 || bg.slice(0, 3).join() !== T.hover.slice(0, 3).join()) out.push('background-color ' + L.rgbText(bg) + ' while focused, want ' + L.rgbText(T.hover) + ' (--surface-hover)');
+  target.blur();
+  return { problems: out };
+}`;
+
+/**
+ * hover: CARDS entries with hover: true, first 2 rendered matches decided by
+ * that entry, forced into :hover. Returns { hover, focus, percept } items
+ * ({ key, detail }).
+ */
+async function hoverProblems(page, width) {
+  const out = { hover: [], focus: [], percept: [] };
   const { root } = await page.s('DOM.getDocument', { depth: 0 });
   await page.s('CSS.enable');
+  let modal = false;
   for (const c of CARDS.filter((x) => x.hover)) {
     const { nodeIds } = await page.s('DOM.querySelectorAll', { nodeId: root.nodeId, selector: c.sel });
     let n = 0;
     for (const nodeId of nodeIds) {
       if (n >= 2) break;
       const { object } = await page.s('DOM.resolveNode', { nodeId });
-      const vis = await page.s('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: 'function () { return window.__cards.rendered(this) && window.__cards.entryOf(this, ' + JSON.stringify(CARDS) + ')?.sel === ' + JSON.stringify(c.sel) + '; }', returnByValue: true });
-      if (!vis.result.value) continue;
+      const call = async (functionDeclaration, args = []) => (await page.s('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration, arguments: args.map((value) => ({ value })), returnByValue: true, awaitPromise: true })).result.value;
+      const vis = await call('function () { return window.__cards.rendered(this) && window.__cards.entryOf(this, ' + JSON.stringify(CARDS) + ')?.sel === ' + JSON.stringify(c.sel) + '; }');
+      if (!vis) continue;
       n++;
+      const rest = await call(BG_FN);
       await page.s('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['hover'] });
       await page.ev(FREEZE_ANIMATIONS);
       await sleep(30);
       await page.ev(FREEZE_ANIMATIONS);
-      const r = await page.s('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: HOVER_FN, arguments: [{ value: c.kind }, { value: SPEC_TOKENS }], returnByValue: true });
-      const p = await page.s('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: PATH_FN, returnByValue: true });
+      const probs = await call(HOVER_FN, [c.kind, SPEC_TOKENS]);
+      const hov = await call(BG_FN);
       await page.s('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
-      for (const prob of r.result.value ?? []) out.push({ key: `${c.sel}:hover`, detail: prob, path: p.result.value, width });
+      await page.ev(FREEZE_ANIMATIONS);
+      for (const prob of probs ?? []) out.hover.push({ key: `${c.sel}:hover`, detail: prob });
+      const ratio = contrastOf(hov, rest);
+      if (ratio < PERCEPT.hoverVsRest) out.percept.push({ key: `${c.sel}:hover`, detail: `hover fill rgb(${hov.slice(0, 3).join(', ')}) vs resting rgb(${rest.slice(0, 3).join(', ')}) ${ratio.toFixed(3)}:1, want >= ${PERCEPT.hoverVsRest}` });
+      if (c.focus) {
+        if (!modal) {
+          await keyboardModality(page);
+          modal = true;
+        }
+        const f = await call(FOCUS_FN, [c.focus]);
+        if (f?.pending) {
+          await page.ev(FREEZE_ANIMATIONS);
+          await sleep(30);
+          await page.ev(FREEZE_ANIMATIONS);
+          const r = await call(FOCUS_READ_FN, [c.focus, SPEC_TOKENS]);
+          for (const prob of r?.problems ?? []) out.focus.push({ key: `${c.sel} focus ${c.focus}`, detail: prob });
+        } else for (const prob of f?.problems ?? []) out.focus.push({ key: `${c.sel} focus ${c.focus}`, detail: prob });
+      }
     }
+  }
+  return out;
+}
+
+/** perceptible items for the selected/open cards INSPECT measured. */
+function selectedPercept(r) {
+  const out = [];
+  for (const s of r.selected) {
+    if (s.vsRest < PERCEPT.selectedVsRest) out.push({ key: s.sel, detail: `selected fill ${s.bg} vs ${s.restName} ${s.vsRest}:1, want >= ${PERCEPT.selectedVsRest}` });
+    if (s.vsHover < PERCEPT.selectedVsHover) out.push({ key: s.sel, detail: `selected fill ${s.bg} vs --surface-hover ${s.vsHover}:1, want >= ${PERCEPT.selectedVsHover}` });
   }
   return out;
 }
@@ -769,6 +984,7 @@ async function runChecks(dist, args) {
   const guardBase = existsSync(GUARD_FILE) ? JSON.parse(readFileSync(GUARD_FILE, 'utf-8')) : null;
   const matched = new Map(); // sel -> Set(stateId)
   const tokenProblems = new Set();
+  let lastTokens = null;
   const report = args.includes('--allow-report');
   const excused = new Map(); // 'allow <- element label' -> Set(state@width)
   const states = selectedStates(args);
@@ -800,7 +1016,10 @@ async function runChecks(dist, args) {
           }
           check(`${id} cards`, grouped(r.cards.flatMap((c) => c.problems.map((p) => ({ key: c.sel, detail: p })))));
           const hov = await hoverProblems(page, width);
-          check(`${id} hover`, grouped(hov.map((h) => ({ key: h.key, detail: h.detail }))));
+          check(`${id} hover`, grouped(hov.hover));
+          check(`${id} focus`, grouped(hov.focus));
+          check(`${id} perceptible`, grouped([...hov.percept, ...selectedPercept(r)]));
+          lastTokens = r.tokens;
           check(`${id} dividers`, grouped(r.dividers.map((d) => ({ key: d.path.split(' > ').slice(-2).join(' > '), detail: `${d.detail}, want ${DIVIDER.width} ${DIVIDER.style} ${DIVIDER.color}` }))));
           check(`${id} completeness`, grouped(r.complete.map((c) => ({ key: c.path, detail: c.why.join(', ') }))).map((l) => `${l} (not in CARDS or ALLOW)`));
           const gp = [];
@@ -832,6 +1051,7 @@ async function runChecks(dist, args) {
       }
   });
   check('tokens', [...tokenProblems]);
+  check('tokens-perceptible', lastTokens ? tokenPerceptProblems(lastTokens) : ['no page state was read']);
   if (states.length === STATES.length) {
     const cov = [];
     for (const c of CARDS) if (c.states.length && !c.states.some((st) => matched.get(c.sel)?.has(st))) cov.push(`CARDS ${c.sel} matched nothing on ${c.states.join(', ')}`);
@@ -844,7 +1064,43 @@ async function runChecks(dist, args) {
   }
 }
 
+/**
+ * --snapshot-guard --add: adds the GUARD entries the snapshot does not have
+ * yet and leaves every existing entry and probe exactly as it is (the file is
+ * re-serialised with the same JSON.stringify(_, null, 2), so untouched entries
+ * stay byte-identical). The added keys are listed under "added".
+ */
+async function snapshotGuardAdd(dist) {
+  const base = JSON.parse(readFileSync(GUARD_FILE, 'utf-8'));
+  const missing = GUARD.flatMap((g) => g.states.flatMap((st) => WIDTHS.filter((w) => !STATES.find((x) => x.id === st).widths || STATES.find((x) => x.id === st).widths.includes(w)).map((w) => ({ g, st, w, key: `${st}@${w} ${g.sel}` })))).filter((m) => !(m.key in base.entries));
+  const got = {};
+  await withBrowser(dist, async (b, origin) => {
+    for (const st of [...new Set(missing.map((m) => m.st))]) {
+      const state = STATES.find((x) => x.id === st);
+      for (const w of [...new Set(missing.filter((m) => m.st === st).map((m) => m.w))]) {
+        const page = await openState(b, origin, state, w);
+        try {
+          const r = await page.ev(INSPECT(cfgFor(w)));
+          for (const m of missing.filter((x) => x.st === st && x.w === w)) {
+            const v = r.guard[m.g.sel];
+            check(`snapshot add ${m.key}`, v ? [] : ['not rendered']);
+            if (v) got[m.key] = v;
+          }
+        } finally {
+          await page.close();
+        }
+      }
+    }
+  });
+  if (failed) return console.log('not written: an added entry did not render');
+  const rev = (await import('node:child_process')).spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf-8' }).stdout.trim();
+  const out = { ...base, entries: { ...base.entries, ...got }, added: [...(base.added ?? []), { capturedFrom: rev, keys: Object.keys(got) }] };
+  writeFileSync(GUARD_FILE, `${JSON.stringify(out, null, 2)}\n`);
+  console.log(`added ${Object.keys(got).length} entries to ${GUARD_FILE}`);
+}
+
 async function snapshotGuard(dist, args) {
+  if (args.includes('--add')) return snapshotGuardAdd(dist);
   const entries = {};
   const probeEntries = {};
   await withBrowser(dist, async (b, origin) => {
@@ -911,7 +1167,12 @@ async function selfTest(dist) {
     add('<div class="planted-sharp" style="border:1px solid #2a1e44;border-radius:4px;padding:20px">radius 4</div>');
     add('<div class="planted-in-band" style="border:1px solid #2a1e44;border-radius:12px;background:linear-gradient(#1d1636,#16102a)">in band</div>', document.querySelector('.claim-band'));
     add('<div class="planted-in-banner" style="border:1px solid #2a1e44;border-radius:12px">in banner</div>', document.querySelector('.mode-banner'));
+    // Round 3: controls are allowed by class; a bare <button> shaped like a card is judged.
+    add('<button class="pkg-modal-close planted-control" style="border:1px solid #2a1e44;border-radius:12px;background:linear-gradient(#1d1636,#16102a)">control</button>');
     add('<button class="planted-button" style="border:1px solid #2a1e44;border-radius:12px;background:linear-gradient(#1d1636,#16102a)">button</button>');
+    add('<button class="planted-card-button" style="border:0;border-radius:10px;background:linear-gradient(#1d1636,#16102a);padding:20px">card-shaped button</button>');
+    // Modal frames carry .card but are chrome: neither judged as cards nor flagged.
+    for (const c of ['modal-card', 'type-modal', 'slot-cabinet', 'pkg-modal']) add('<div class="' + c + ' card planted-frame-' + c + '" style="display:block;position:relative;inset:auto;transform:none;opacity:1;visibility:visible;width:200px;height:60px;background:linear-gradient(#1d1636,#16102a);border:1px solid #2a1e44;border-radius:12px">frame</div>');
     add('<div class="card planted-good" style="background:#150f27;border:0;border-radius:10px;box-shadow:none;margin:20px 0;color:#f3ecff">good card<div class="planted-div-ok" style="border-bottom:1px solid #221838">row</div><div class="planted-div-bad" style="border-bottom:1px solid #2a1e44">row</div></div>');
     add('<div class="card planted-bad" style="background:linear-gradient(#1d1636,#16102a);border:1px solid #2a1e44;border-radius:12px;box-shadow:0 0 8px #000;margin:0;position:relative">bad card</div>');
     add('<div class="card planted-lowc" style="background:#9a93a8;border:0;border-radius:10px;margin:0">low contrast</div>');
@@ -934,7 +1195,19 @@ async function selfTest(dist) {
         check(`self ${w} completeness ignores radius 4px (documented threshold)`, flagged('planted-sharp') ? ['flagged'] : []);
         check(`self ${w} the claim-band allowance does not cover a box inside it`, flagged('planted-in-band') ? [] : ['swallowed by ALLOW']);
         check(`self ${w} the banner allowance does not cover a box inside it`, flagged('planted-in-banner') ? [] : ['swallowed by ALLOW']);
-        check(`self ${w} a control styled like a card is excused (ALLOW button)`, !flagged('planted-button') && r.excused.some((e) => e.label.includes('planted-button')) ? [] : ['not excused as a control']);
+        // Round 3 (reviewer F5): the blanket `button` allowance is gone. Was: "a control styled like a card is
+        // excused (ALLOW button)" with a bare <button>; now only the site's control classes are excused.
+        check(`self ${w} a control (site button class) styled like a card is excused`, !flagged('planted-control') && r.excused.some((e) => e.label.includes('planted-control')) ? [] : ['not excused as a control']);
+        check(`self ${w} a bare <button> with a border and gradient is flagged (no blanket button allowance)`, flagged('planted-button') ? [] : ['not flagged']);
+        check(`self ${w} a card-shaped <button> with a gradient is flagged`, r.complete.some((c) => c.label.includes('planted-card-button') && c.why.includes('gradient background')) ? [] : ['not flagged']);
+        for (const c of ['modal-card', 'type-modal', 'slot-cabinet', 'pkg-modal']) {
+          const cls = 'planted-frame-' + c;
+          check(`self ${w} a .${c}.card modal frame is chrome: not judged as a card, excused`, [
+            r.cards.some((x) => x.path.split(' > ').pop().includes(cls)) ? 'judged as a card' : null,
+            flagged(cls) ? 'flagged by completeness' : null,
+            r.excused.some((e) => e.label.includes(cls)) ? null : 'not in the allow report (not rendered?)',
+          ]);
+        }
         check(`self ${w} a compliant .card has no card problems`, cardProb('planted-good').length ? cardProb('planted-good') : []);
         const bad = cardProb('planted-bad').join(' | ');
         check(`self ${w} a frosted .card fails every rule`, ['background-color', 'background-image', 'border top 1px', 'box-shadow', '::before draws a box', 'radius 12px'].filter((n) => !bad.includes(n)).map((n) => `missing "${n}" in ${bad}`));
@@ -963,7 +1236,7 @@ async function selfTest(dist) {
         await page.ev(FREEZE_ANIMATIONS);
         const r = await page.ev(INSPECT(cfgFor(1280)));
         const open = r.cards.filter((c) => c.sel === '.store-item.is-open').flatMap((c) => c.problems).join(' | ');
-        const shut = r.cards.filter((c) => c.sel === '.store-item').flatMap((c) => c.problems).join(' | ');
+        const shut = r.cards.filter((c) => c.sel === '.store-item' || c.sel === '.store-item.store-item--button').flatMap((c) => c.problems).join(' | ');
         check('self an opened reward tile still fails gradient and shadow (border not judged there)', open.includes('background-image') && open.includes('box-shadow') && !open.includes('border ') ? [] : [`opened tile problems: ${open}`]);
         check('self a closed reward tile with a border still fails cards', shut.includes('border top 1px') ? [] : [`closed tile problems: ${shut}`]);
       } finally {
@@ -983,7 +1256,66 @@ async function selfTest(dist) {
         await page.close();
       }
     }
+    // Round 3 (amendment U9-states): perceptibility and focus. Each block first
+    // plants a compliant version (so it holds on any build), then breaks one thing.
+    const items = (list, key) => list.filter((x) => x.key.startsWith(key)).map((x) => x.detail);
+    {
+      const page = await openState(b, origin, st('store'), 1280);
+      try {
+        await page.ev(addStyle(':root{--surface:#150f27!important;--surface-hover:#21193c!important;--surface-selected:#2c214f!important}.pkg-card{background:#150f27!important;transition:none!important}.pkg-card:hover,.pkg-card:focus-visible{background:#21193c!important}.pkg-card:focus-visible{outline:2px solid #c77dff!important}'));
+        let h = await hoverProblems(page, 1280);
+        check('self store: a compliant hover and focus on .pkg-card pass', [...items(h.hover, '.pkg-card'), ...items(h.percept, '.pkg-card'), ...items(h.focus, '.pkg-card')]);
+        // hover too faint: the token itself is the round-1 value, so the fill rule (which follows :root) is satisfied
+        await page.ev(addStyle(':root{--surface-hover:#1a1330!important}.pkg-card:hover,.pkg-card:focus-visible{background:#1a1330!important}'));
+        h = await hoverProblems(page, 1280);
+        const faint = items(h.percept, '.pkg-card');
+        check('self store: a hover fill too faint (1.044:1) fails perceptible, not the fill rule', faint.length && faint.every((x) => x.includes('want >= 1.1')) && !items(h.hover, '.pkg-card').length ? [] : [`percept: ${faint.join(' | ') || 'none'}; hover: ${items(h.hover, '.pkg-card').join(' | ')}`]);
+        await page.ev(addStyle(':root{--surface-hover:#21193c!important}.pkg-card:hover,.pkg-card:focus-visible{background:#21193c!important}.pkg-card:focus-visible{outline:none!important}'));
+        h = await hoverProblems(page, 1280);
+        check('self store: focus without a ring fails focus', items(h.focus, '.pkg-card').some((x) => x.startsWith('no focus ring')) ? [] : [`focus: ${items(h.focus, '.pkg-card').join(' | ') || 'none'}`]);
+        await page.ev(addStyle('.pkg-card:focus-visible{outline:2px solid #c77dff!important;background:#150f27!important}'));
+        h = await hoverProblems(page, 1280);
+        const nofill = items(h.focus, '.pkg-card');
+        check('self store: focus with the ring but no hover fill fails focus', nofill.length && nofill.every((x) => x.startsWith('background-color')) ? [] : [`focus: ${nofill.join(' | ') || 'none'}`]);
+      } finally {
+        await page.close();
+      }
+    }
+    {
+      // A card whose focus lands on a control inside it (the FAQ question) can satisfy the rule.
+      const page = await openState(b, origin, st('faq-open'), 1280);
+      try {
+        await page.ev(addStyle(':root{--surface-hover:#21193c!important}.faq-item{background:#150f27!important;transition:none!important}.faq-item:hover,.faq-item:has(.faq-question:focus-visible){background:#21193c!important}.faq-question:focus-visible{outline:2px solid #c77dff!important}'));
+        let h = await hoverProblems(page, 1280);
+        check('self faq: focus on the question with a ring and the item on the hover fill passes', items(h.focus, '.faq-item'));
+        await page.ev(addStyle('.faq-item:has(.faq-question:focus-visible){background:#150f27!important}'));
+        h = await hoverProblems(page, 1280);
+        check('self faq: the item without the hover fill while its question is focused fails focus', items(h.focus, '.faq-item').some((x) => x.startsWith('background-color')) ? [] : [`focus: ${items(h.focus, '.faq-item').join(' | ') || 'none'}`]);
+      } finally {
+        await page.close();
+      }
+    }
+    {
+      const page = await openState(b, origin, st('auctions-pool'), 1280);
+      try {
+        await page.ev(addStyle(':root{--surface:#150f27!important;--surface-hover:#21193c!important;--surface-selected:#2c214f!important}.pool-card.selected{background:var(--surface-selected)!important}'));
+        let r = await page.ev(INSPECT(cfgFor(1280)));
+        check('self pool: a compliant selected card passes perceptible', [r.selected.some((x) => x.sel === '.pool-card.selected') ? null : 'selected card not measured', ...items(selectedPercept(r), '.pool-card.selected')]);
+        await page.ev(addStyle(':root{--surface-selected:#21193c!important}'));
+        r = await page.ev(INSPECT(cfgFor(1280)));
+        const same = items(selectedPercept(r), '.pool-card.selected');
+        check('self pool: selected equal to hover fails perceptible (vs --surface-hover)', same.some((x) => x.includes('vs --surface-hover 1:1')) && !r.cards.some((c) => c.sel === '.pool-card.selected') ? [] : [`percept: ${same.join(' | ') || 'none'}; cards: ${JSON.stringify(r.cards.filter((c) => c.sel === '.pool-card.selected'))}`]);
+      } finally {
+        await page.close();
+      }
+    }
   });
+  // Pure: the token-level floors.
+  check('self tokens-perceptible: the spec tokens pass', tokenPerceptProblems(SPEC_TOKENS));
+  const tp = (o) => tokenPerceptProblems({ ...SPEC_TOKENS, ...o });
+  check('self tokens-perceptible: the round-1 hover #1a1330 fails', tp({ '--surface-hover': '#1a1330' }).some((x) => x.startsWith('--surface-hover vs --surface 1.044')) ? [] : [JSON.stringify(tp({ '--surface-hover': '#1a1330' }))]);
+  check('self tokens-perceptible: selected equal to hover fails', tp({ '--surface-selected': '#21193c' }).some((x) => x.startsWith('--surface-selected vs --surface-hover 1.000')) ? [] : [JSON.stringify(tp({ '--surface-selected': '#21193c' }))]);
+  check('self tokens-perceptible: a missing token fails', tp({ '--surface-selected': '' }).length ? [] : ['passed']);
 }
 
 async function main() {

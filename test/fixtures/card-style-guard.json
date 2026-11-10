@@ -833,6 +833,70 @@
       "text-shadow": "none",
       "filter": "none",
       "opacity": "1"
+    },
+    "store-type@400 .type-option": {
+      "background-color": "rgba(12, 7, 24, 0.4)",
+      "background-image": "none",
+      "box-shadow": "rgb(46, 33, 80) 0px 4px 0px 0px",
+      "border-top-width": "1px",
+      "border-top-style": "solid",
+      "border-top-color": "rgb(42, 30, 68)",
+      "border-right-width": "1px",
+      "border-bottom-width": "1px",
+      "border-left-width": "1px",
+      "border-top-left-radius": "9px",
+      "color": "rgb(243, 236, 255)",
+      "text-shadow": "none",
+      "filter": "none",
+      "opacity": "1"
+    },
+    "store-type@1280 .type-option": {
+      "background-color": "rgba(12, 7, 24, 0.4)",
+      "background-image": "none",
+      "box-shadow": "rgb(46, 33, 80) 0px 4px 0px 0px",
+      "border-top-width": "1px",
+      "border-top-style": "solid",
+      "border-top-color": "rgb(42, 30, 68)",
+      "border-right-width": "1px",
+      "border-bottom-width": "1px",
+      "border-left-width": "1px",
+      "border-top-left-radius": "9px",
+      "color": "rgb(243, 236, 255)",
+      "text-shadow": "none",
+      "filter": "none",
+      "opacity": "1"
+    },
+    "store-crate-open@400 .store-tooltip": {
+      "background-color": "rgb(18, 5, 31)",
+      "background-image": "none",
+      "box-shadow": "rgb(26, 7, 48) 0px 0px 0px 1px inset",
+      "border-top-width": "2px",
+      "border-top-style": "solid",
+      "border-top-color": "rgb(59, 15, 122)",
+      "border-right-width": "2px",
+      "border-bottom-width": "2px",
+      "border-left-width": "2px",
+      "border-top-left-radius": "4px",
+      "color": "rgb(243, 236, 255)",
+      "text-shadow": "none",
+      "filter": "none",
+      "opacity": "1"
+    },
+    "store-crate-open@1280 .store-tooltip": {
+      "background-color": "rgb(18, 5, 31)",
+      "background-image": "none",
+      "box-shadow": "rgb(26, 7, 48) 0px 0px 0px 1px inset",
+      "border-top-width": "2px",
+      "border-top-style": "solid",
+      "border-top-color": "rgb(59, 15, 122)",
+      "border-right-width": "2px",
+      "border-bottom-width": "2px",
+      "border-left-width": "2px",
+      "border-top-left-radius": "4px",
+      "color": "rgb(243, 236, 255)",
+      "text-shadow": "none",
+      "filter": "none",
+      "opacity": "1"
     }
   },
   "probes": {
@@ -1750,5 +1814,16 @@
       "border-left-color": "rgb(207, 200, 222)",
       "border-image-source": "none"
     }
-  }
+  },
+  "added": [
+    {
+      "capturedFrom": "0721cd9",
+      "keys": [
+        "store-type@400 .type-option",
+        "store-type@1280 .type-option",
+        "store-crate-open@400 .store-tooltip",
+        "store-crate-open@1280 .store-tooltip"
+      ]
+    }
+  ]
 }
