@@ -1493,12 +1493,19 @@
   transition: background-color 0.15s;
 }
 
-.listing-card:hover,
+/* One rule per :has() selector (see .faq-item in index.css). */
+.listing-card:hover {
+  background-color: var(--surface-hover);
+}
+
 .listing-card:has(.listing-head:focus-visible) {
   background-color: var(--surface-hover);
 }
 
-.listing-card.open,
+.listing-card.open {
+  background-color: var(--surface-selected);
+}
+
 .listing-card.open:has(.listing-head:focus-visible) {
   background-color: var(--surface-selected);
 }

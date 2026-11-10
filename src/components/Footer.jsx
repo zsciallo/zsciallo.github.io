@@ -3,7 +3,7 @@ import config from '../config.json';
 export function Footer() {
   return (
     <footer>
-      <nav class="footer-nav">
+      <nav class="footer-nav" aria-label="Footer">
         <a href="/">HOME</a>
         <a href="/pvp/">PVP</a>
         <a href="/smp/">ECONOMY SMP</a>

@@ -8,6 +8,7 @@ import { Leaderboard } from '../components/pvp/Leaderboard';
 import { SeasonStrip } from '../components/pvp/SeasonStrip';
 import { TierLadder } from '../components/pvp/TierLadder';
 import { MotionRoot } from '../lib/motion';
+import { PVP_MODES } from '../data/pvpModes';
 
 // From the arena's own config (chromatic-arena: ranked placement, best of
 // three, divisions, the level gate). Re-check them when ranked changes.
@@ -18,14 +19,7 @@ const FACTS = [
   ['LVL 2', 'ranked opens at level 2'],
 ];
 
-const MODES = [
-  ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
-  ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
-  ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
-  ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
-  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
-  ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
-];
+const MODES = PVP_MODES;
 
 export function PvpPage() {
   const { boards, season, now } = usePvpFeed();

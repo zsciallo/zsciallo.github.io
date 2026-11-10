@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { useReducedMotion } from 'motion/react';
+import sizes from 'virtual:image-sizes';
 
 // Every image dropped into src/assets/serverImages is picked up
 // automatically at build time. Captions come from any .json file in the same
@@ -18,7 +19,7 @@ const images = Object.entries(
 )
   .map(([path, src]) => ({ name: path.split('/').pop(), src }))
   .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name))
-  .map(({ name, src }) => ({ src, desc: descriptions[name] || '' }));
+  .map(({ name, src }) => ({ src, desc: descriptions[name] || '', size: sizes[name] ?? null }));
 
 function ZoomIcon() {
   return (
@@ -84,7 +85,7 @@ export function ServerCarousel() {
       }}
     >
       <div class="carousel-track" style={{ transform: `translateX(-${index * 100}%)` }}>
-        {images.map(({ src, desc }, i) => (
+        {images.map(({ src, desc, size }, i) => (
           <button
             key={src}
             type="button"
@@ -103,7 +104,10 @@ export function ServerCarousel() {
               class="carousel-slide"
               src={src}
               alt={desc || `Chromabit screenshot ${i + 1}`}
-              loading={i === 0 ? 'eager' : 'lazy'}
+              width={size?.[0]}
+              height={size?.[1]}
+              loading="lazy"
+              decoding="async"
             />
             {desc && <span class="carousel-caption">{desc}</span>}
           </button>

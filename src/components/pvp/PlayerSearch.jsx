@@ -90,6 +90,11 @@ export function PlayerSearch({ index }) {
           );
         })}
       </ul>
+      {/* Screen readers hear how many players match; the visible no-match
+          line below announces itself. Empty (and boxless) until a search. */}
+      <p class="pvp-search-count" role="status" aria-live="polite">
+        {meaningful(query) && results.length ? `${results.length} ${results.length === 1 ? 'player' : 'players'} found` : ''}
+      </p>
       {meaningful(query) && !results.length && (
         <p class="pvp-search-none" role="status">No ranked player by that name.</p>
       )}

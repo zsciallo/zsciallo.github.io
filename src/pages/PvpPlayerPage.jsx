@@ -76,7 +76,7 @@ function KitCard({ kit }) {
   return (
     <article class="card pvp-kit" data-kit={kit.key}>
       <div class="pvp-kit-top">
-        <h3 class="pvp-kit-title">{kit.label}</h3>
+        <h2 class="pvp-kit-title">{kit.label}</h2>
         {rank && <span class="pvp-kit-rank">{rank}</span>}
       </div>
       {kit.placed ? (
@@ -97,7 +97,7 @@ function CareerCard({ career }) {
   return (
     <article class="card pvp-kit pvp-career" data-career>
       <div class="pvp-kit-top">
-        <h3 class="pvp-kit-title">Career</h3>
+        <h2 class="pvp-kit-title">Career</h2>
       </div>
       <ul class="pvp-kit-lines">
         {career.lines.map((line) => (

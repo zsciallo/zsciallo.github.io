@@ -1157,12 +1157,20 @@ footer {
   transition: background-color 0.2s;
 }
 
-.faq-item:hover,
+/* One rule per :has() selector: a browser without :has() drops a whole
+   selector list that contains one, and would lose the hover and open fills. */
+.faq-item:hover {
+  background-color: var(--surface-hover);
+}
+
 .faq-item:has(.faq-question:focus-visible) {
   background-color: var(--surface-hover);
 }
 
-.faq-item[data-open],
+.faq-item[data-open] {
+  background-color: var(--surface-selected);
+}
+
 .faq-item[data-open]:has(.faq-question:focus-visible) {
   background-color: var(--surface-selected);
 }
@@ -2365,7 +2373,10 @@ footer {
   background: var(--glow);
 }
 
-.qty-input:disabled,
+.qty-input:disabled {
+  opacity: 0.55;
+}
+
 .qty-fx:has(.qty-input:disabled) .qty-num {
   opacity: 0.55;
 }
@@ -3590,6 +3601,9 @@ html:not(.js) .sound-toggle {
 
 .carousel-slide {
   width: 100%;
+  /* The width/height attributes only give the browser the image's ratio
+     early; the box stays the 16:9 one set here. */
+  height: auto;
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;

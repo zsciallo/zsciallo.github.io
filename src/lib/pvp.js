@@ -360,9 +360,12 @@ export function profileView(doc, ladder) {
   };
 
   const kitLabel = (key) => kitDocs.find((k) => k.key === key)?.label ?? String(key ?? '');
+  // A kit still in placement has a hidden rating, so its rows show no change
+  // either (defence in depth: the feed should not send one).
+  const kitPlaced = (key) => kitDocs.some((k) => k.key === key && k.placed === true);
   const recent = (Array.isArray(doc.recent) ? doc.recent.filter(isObject) : []).map((r) => {
     const opp = isObject(r.opponent) ? r.opponent : {};
-    const change = r.ratingChange;
+    const change = kitPlaced(r.kit) ? r.ratingChange : null;
     return {
       result: RESULTS[r.result] ?? 'DRAW',
       kit: kitLabel(r.kit),

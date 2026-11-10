@@ -1,8 +1,10 @@
 import { createServer } from 'vite';
 import render from 'preact-render-to-string';
+import { execFileSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { h } from 'preact';
+import { indexablePages, llmsTxt, robotsTxt, sitemapXml } from './src/data/seo.js';
 
 // The auctions page fetches these at runtime, so a build with them missing
 // succeeds and then shows an empty market on the deployed site. Fail here
@@ -42,6 +44,26 @@ for (const { module, export: exportName, dist } of pages) {
 }
 
 await server.close();
+
+// Crawl files, from the same page list as every page's head (src/data/seo.js).
+// A page's <lastmod> is the date of the last commit that touched its sources.
+// Without git (or with the paths untracked) it falls back to the build date.
+// A shallow clone (actions/checkout's default depth of 1) sees one commit, so
+// every page gets that commit's date: still a real, recent date.
+const today = new Date().toISOString().slice(0, 10);
+function lastCommitDay(paths) {
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', ...paths], { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return /^\d{4}-\d{2}-\d{2}/.test(out) ? out.slice(0, 10) : today;
+  } catch {
+    return today;
+  }
+}
+const lastmods = Object.fromEntries(indexablePages().map((p) => [p.route, lastCommitDay(p.sources)]));
+writeFileSync(resolve('dist/sitemap.xml'), sitemapXml(lastmods));
+writeFileSync(resolve('dist/robots.txt'), robotsTxt());
+writeFileSync(resolve('dist/llms.txt'), llmsTxt());
+console.log(`[ssg] dist/sitemap.xml, dist/robots.txt, dist/llms.txt (lastmod ${JSON.stringify(lastmods)})`);
 
 const missing = required.filter((file) => !existsSync(resolve(file)));
 if (missing.length) {

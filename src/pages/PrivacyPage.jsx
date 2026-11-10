@@ -19,7 +19,7 @@ export function PrivacyPage() {
       <main>
         <section class="page-hero container" aria-label="Chromabit privacy policy">
           <a href="/" class="logo-link" aria-label="Back to Chromabit home">
-            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit" />
+            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit" width="96" height="96" />
           </a>
 
           <p class="section-eyebrow">LEGAL</p>

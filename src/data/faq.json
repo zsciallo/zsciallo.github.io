@@ -1,5 +1,5 @@
 {
-  "note": "Hand-authored. Every answer traces to a file in mc-server on main (see CLAUDE.md). Markdown-lite: **bold**, `code`, [text](href). Feeds the FAQ page and its JSON-LD via tools/build_faq_ld.py.",
+  "note": "Hand-authored. Every answer traces to a file in mc-server on main (see CLAUDE.md). Markdown-lite: **bold**, `code`, [text](href). Feeds the FAQ page and, at build time, its FAQPage JSON-LD (src/data/seo.js).",
   "groups": [
     {
       "id": "joining",

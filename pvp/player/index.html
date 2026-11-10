@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Player heads load from mc-heads.net: send it no referrer. -->
+  <meta name="referrer" content="no-referrer">
   <script>
     // The nav bar is the first text painted - hero content is still faded out
     // at that point - so a webfont swapping in under it reads as a flicker on
@@ -27,23 +29,10 @@
   <link rel="preconnect" href="https://api.chromabit.us" crossorigin>
   <link rel="dns-prefetch" href="https://mc-heads.net">
 
-  <title>Player | Chromabit</title>
-  <meta name="description"
-    content="A ChromaPVP ranked player's season: tier and rating per kit, career totals and recent ranked matches.">
-  <!-- One page serves every player (?name=), so it stays out of search results and the sitemap. -->
-  <meta name="robots" content="noindex, follow">
-  <meta name="author" content="Chromabit Network">
-  <link rel="canonical" href="https://chromabit.us/pvp/">
+  <!--seo-head-->
 
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Chromabit Network">
-  <meta property="og:url" content="https://chromabit.us/pvp/">
-  <meta property="og:title" content="Player | Chromabit">
-  <meta property="og:description"
-    content="Ranked kit PVP for Java and Bedrock on one ladder. Join at play.chromabit.us">
-  <meta property="og:image" content="https://chromabit.us/og-preview.png">
-  <meta name="twitter:card" content="summary_large_image">
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Jersey+10&family=VT323&display=swap"
     rel="stylesheet">

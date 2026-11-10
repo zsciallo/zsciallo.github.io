@@ -13,7 +13,7 @@ import faq from '../data/faq.json';
 
 // Answers in faq.json use a tiny markdown: **bold**, `code` and [text](href).
 // Anything else is plain text, which keeps the JSON readable and lets
-// tools/build_faq_ld.py strip it the same way for the page's JSON-LD.
+// plainAnswer() in src/data/seo.js strip it the same way for the page's JSON-LD.
 const TOKEN = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
 
 function rich(text) {

@@ -3,7 +3,7 @@ export function Logo() {
   return (
     <div class="logo-wrap">
         <a href="/" class="logo-link" aria-label="Back to Chromabit home">
-            <img class="logo" src={logoSrc} alt="Chromabit" />
+            <img class="logo" src={logoSrc} alt="Chromabit" width="192" height="192" fetchpriority="high" />
           </a>
     </div>
   );
