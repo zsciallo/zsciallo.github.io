@@ -29,7 +29,9 @@ const OG_IMAGE = {
   height: 630,
   alt: 'The Chromabit logo above the words CHROMABIT NETWORK, Ranked PVP + Economy SMP for Java + Bedrock, and play.chromabit.us',
 };
-const LOGO = `${SITE}/server-icon-old-2.png`;
+// An exact 8x nearest-neighbour upscale of the 64x64 server icon (tools/make_logo.py):
+// Google ignores Organization logos under 112x112. Only the structured data uses it.
+const LOGO = { url: `${SITE}/logo-512.png`, width: 512, height: 512 };
 
 /**
  * Every page, in sitemap order. `indexable: false` keeps a page out of the
@@ -67,9 +69,9 @@ export const PAGES = [
     route: '/smp/',
     entry: 'smp/index.html',
     title: 'Economy SMP | Chromabit',
-    // Rewritten for U8 (was 173 characters): the facts /smp/ shows.
+    // Rewritten for U8 (was 173 characters): only what /smp/ itself shows.
     description:
-      'Chromabit Economy SMP: Minecraft survival for Java and Bedrock with a player-run market, an auction house and the Heartwood dungeon. Join at play.chromabit.us.',
+      "Chromabit Economy SMP: survival with an auction house, the market's top movers and the Season 4 Heartwood dungeon, 9 zones each with its own boss.",
     keywords: 'Economy SMP, Economy SMP Minecraft, Economy SMP server, Minecraft economy server, Minecraft server prizes, Chromabit',
     ogDescription: 'A player-run economy SMP for Java and Bedrock with an auction house and server events. Join Chromabit.',
     twitterDescription: 'Trade, build and compete on the Chromabit Economy SMP. play.chromabit.us',
@@ -91,8 +93,8 @@ export const PAGES = [
     route: '/store/',
     entry: 'store/index.html',
     title: 'Store | Chromabit',
-    // U8: Chromabit wording (was "...for the Chromabit Minecraft server. Every purchase supports the server.").
-    description: 'The official Chromabit store. Buy ranks, crate keys, and more for Chromabit Network. Every purchase directly supports Chromabit.',
+    // U8: Chromabit wording only (was "...for the Chromabit Minecraft server. Every purchase supports the server.").
+    description: 'The official Chromabit store. Buy ranks, crate keys, and more. Every purchase directly supports Chromabit.',
     keywords: 'Chromabit store, Minecraft server store, Economy SMP ranks, crate keys, Chromabit shop',
     social: 'Buy ranks, crate keys, and more. Every purchase supports Chromabit.',
     crumb: 'Store',
@@ -136,12 +138,15 @@ export const PAGES = [
 ];
 
 export const pageFor = (route) => PAGES.find((p) => p.route === route) ?? null;
+/** The page whose index.html is `file` (relative to the repo root, e.g. 'pvp/index.html'), or null. */
+export const pageForEntry = (file) => PAGES.find((p) => p.entry === file) ?? null;
 export const indexablePages = () => PAGES.filter((p) => p.indexable !== false);
 const abs = (route) => `${SITE}${route}`;
 
 // ----------------------------------------------------------- JSON-LD --
 
 const ORG_ID = `${SITE}/#organization`;
+const GAME_ID = `${SITE}/#minecraft`;
 const WEBSITE_ID = `${SITE}/#website`;
 const HOME = PAGES[0];
 
@@ -153,7 +158,7 @@ export function organizationNode(config) {
     name: NETWORK,
     alternateName: 'Chromabit',
     url: `${SITE}/`,
-    logo: { '@type': 'ImageObject', url: LOGO, width: 64, height: 64 },
+    logo: { '@type': 'ImageObject', url: LOGO.url, width: LOGO.width, height: LOGO.height },
     sameAs: [config.discord],
   };
 }
@@ -223,13 +228,30 @@ function faqNode(page, faq) {
 function videoGameNode() {
   return {
     '@type': 'VideoGame',
+    '@id': GAME_ID,
     name: 'Minecraft',
     gamePlatform: ['Minecraft: Java Edition', 'Minecraft: Bedrock Edition'],
     gameServer: {
       '@type': 'GameServer',
+      '@id': `${SITE}/#server`,
       name: GAME_ADDRESS,
       url: `${SITE}/`,
+      game: { '@id': GAME_ID },
     },
+  };
+}
+
+/**
+ * What /pvp/ is about: the ranked ladder, in words the page shows (its SEVEN
+ * TIERS ladder and its four facts). check_site holds every word of the
+ * description to the page's visible text.
+ */
+function pvpLadderNode() {
+  return {
+    '@type': 'Thing',
+    name: 'Seven tiers',
+    description:
+      'Seven tiers from Tin to Chroma. Play 10 placement matches before you get a rank. Every ranked duel is best of three. Three divisions in every tier below Chroma. Ranked opens at level 2.',
   };
 }
 
@@ -248,8 +270,9 @@ export function jsonLdFor(route, { faq, config }) {
   const page = pageFor(route);
   if (!page || page.indexable === false) return null;
   const graph = [organizationNode(config), websiteNode()];
-  if (route === '/') graph.push(webPageNode(page), videoGameNode());
+  if (route === '/') graph.push({ ...webPageNode(page), about: { '@id': GAME_ID } }, videoGameNode());
   else if (route === '/faq/') graph.push(faqNode(page, faq), breadcrumbNode(page));
+  else if (route === '/pvp/') graph.push({ ...webPageNode(page), about: pvpLadderNode() }, breadcrumbNode(page));
   else graph.push(webPageNode(page), breadcrumbNode(page));
   if (route === '/pvp/') graph.push(pvpModesNode());
   return { '@context': 'https://schema.org', '@graph': graph };

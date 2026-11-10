@@ -8,6 +8,14 @@ import { MotionRoot } from '../lib/motion';
 // Bump whenever the substance of the policy changes - not for typo fixes.
 const LAST_UPDATED = 'August 10, 2026';
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** 'August 10, 2026' -> '2026-08-10', for the <time datetime> around it. */
+function isoDate(text) {
+  const [, month, day, year] = /^(\w+) (\d{1,2}), (\d{4})$/.exec(text);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${year}-${pad(MONTHS.indexOf(month) + 1)}-${pad(day)}`;
+}
+
 export function PrivacyPage() {
   // SectionHeader renders a `.reveal` element, which CSS pins at opacity 0
   // until the observer marks it visible.
@@ -33,7 +41,10 @@ export function PrivacyPage() {
 
         <section class="legal-section" aria-label="Privacy policy">
           <div class="container">
-            <SectionHeader eyebrow="LAST UPDATED" title={LAST_UPDATED.toUpperCase()} />
+            <SectionHeader
+              eyebrow="LAST UPDATED"
+              title={<time datetime={isoDate(LAST_UPDATED)}>{LAST_UPDATED.toUpperCase()}</time>}
+            />
 
             <div class="legal">
               <p>

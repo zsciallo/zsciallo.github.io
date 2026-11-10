@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync } from 'fs';
 import { imageSizes } from './tools/vite-image-sizes.js';
-import { headFor, pageFor } from './src/data/seo.js';
+import { headFor, pageForEntry } from './src/data/seo.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const MARKER = '<!--seo-head-->';
@@ -22,10 +22,13 @@ function seoHead() {
     transformIndexHtml: {
       order: 'pre',
       handler(html, ctx) {
-        const route = ctx.path.replace(/index\.html$/, '').replace(/\/?$/, '/');
+        // Only the site's page entries get (and must have) a generated head;
+        // any other HTML file (e.g. the palette swatch sheet) passes through.
+        const file = ctx.path.replace(/[?#].*$/, '').replace(/^\//, '').replace(/(^|\/)$/, '$1index.html');
+        const page = pageForEntry(file);
+        if (!page) return html;
         if (!html.includes(MARKER)) throw new Error(`seo: ${ctx.path} has no ${MARKER} marker`);
-        if (!pageFor(route)) throw new Error(`seo: ${ctx.path} (${route}) is not a page in src/data/seo.js`);
-        return html.replace(MARKER, headFor(route, { faq: json('src/data/faq.json'), config: json('src/config.json') }));
+        return html.replace(MARKER, headFor(page.route, { faq: json('src/data/faq.json'), config: json('src/config.json') }));
       },
     },
   };
