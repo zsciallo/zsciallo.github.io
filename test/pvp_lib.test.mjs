@@ -70,6 +70,14 @@
 //     >= 1 day   -> `${d}d ${h}h`     e.g. '12d 4h', '1d 0h'
 //     >= 1 hour  -> `${h}h ${m}m`     e.g. '3h 20m', '1h 0m'
 //     otherwise  -> `${m}m`           e.g. '45m', '0m' (under a minute left)
+//
+// boardQuery(doc, requested) -> string   (U4 review F6)
+//   The query string the address bar should carry after load, so the page can
+//   history.replaceState a bad `?board=` away. With key = selectBoardKey(doc,
+//   requested): '' when key is 'overall' (the default, and so also for unknown,
+//   soon, null, undefined or '' requests); otherwise
+//   '?board=' + encodeURIComponent(key), e.g. '?board=sword'.
+//   Pure: never mutates `doc`.
 
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -193,6 +201,30 @@ test('selectBoardKey: unknown, empty, null, undefined fall back to overall', () 
 test('selectBoardKey: feed down uses the default tabs', () =>
   eq(['sword', 'tournament', 'axe', 'nope'].map((k) => selectBoardKey(null, k)), ['sword', 'tournament', 'overall', 'overall']));
 test('selectBoardKey: a key the feed does not have falls back', () => eq(selectBoardKey({ boards: [{ key: 'overall', rows: [] }] }, 'sword'), 'overall'));
+
+// -------------------------------------------------------------- boardQuery --
+// U4 review F6: a bad ?board= (unknown or soon) is replaced away on load.
+
+const { boardQuery } = lib;
+check('exports boardQuery()', typeof boardQuery === 'function', `typeof boardQuery is ${typeof boardQuery}`);
+test('boardQuery: valid non-default keys -> ?board=<key>', () =>
+  eq(['sword', 'mace', 'tournament'].map((k) => boardQuery(frozen(), k)), ['?board=sword', '?board=mace', '?board=tournament']));
+test('boardQuery: overall (the default) -> ""', () => eq(boardQuery(frozen(), 'overall'), ''));
+test('boardQuery: soon keys -> ""', () => eq(['axe', 'chaos'].map((k) => boardQuery(frozen(), k)), ['', '']));
+test('boardQuery: unknown, wrong case, empty, null, undefined -> ""', () =>
+  eq(['nope', 'SWORD', ' sword', '', null, undefined, '__proto__'].map((k) => boardQuery(frozen(), k)), Array(7).fill('')));
+test('boardQuery: feed down uses the default tabs', () =>
+  eq(['sword', 'tournament', 'axe', 'nope'].map((k) => boardQuery(null, k)), ['?board=sword', '?board=tournament', '', '']));
+test('boardQuery: a key the feed does not have -> ""', () => eq(boardQuery({ boards: [{ key: 'overall', rows: [] }] }, 'sword'), ''));
+test('boardQuery: the key is URL-encoded', () => eq(boardQuery({ boards: [{ key: 'overall', rows: [] }, { key: 'a&b c', rows: [] }] }, 'a&b c'), '?board=a%26b%20c'));
+test('boardQuery: agrees with selectBoardKey on every request', () => {
+  const doc = frozen();
+  const bad = ['overall', 'sword', 'mace', 'axe', 'chaos', 'tournament', 'nope', '', null].filter((k) => {
+    const key = selectBoardKey(doc, k);
+    return boardQuery(doc, k) !== (key === 'overall' ? '' : `?board=${key}`);
+  });
+  return bad.length === 0 || `disagrees for ${q(bad)}`;
+});
 
 // --------------------------------------------------------------- boardView --
 

@@ -929,11 +929,14 @@ export const PVP = {
   modes: [
     ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
     ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
-    ['Prismatic Arena', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'],
+    // Spec amendment U4-copy (2026-11-10): the arena has no fixed round count, and 2v2v2 takes teams of two.
+    ['Prismatic Arena', 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.'],
     ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
-    ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 together.'],
+    ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
     ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
   ],
+  /** U4-copy: texts that must appear nowhere on /pvp/ (raw HTML or visible text). */
+  modesForbidden: ['Ten rounds'],
   join: 'Connect to play.chromabit.us and pick Kit PVP in the hub.',
   /** Production must not ship sample data or a fixture build. */
   sampleMarker: 'Sample_',
@@ -1136,6 +1139,10 @@ function pvpModes(dist) {
       if (!titles.includes(title)) problems.push(`/pvp/ mode ${i + 1} has no heading ${q(title)} (headings: ${q(titles)})`);
       if (!findAll(c, (el) => textOf(el) === desc).length) problems.push(`/pvp/ mode ${q(title)} has no description ${q(desc)}`);
     });
+    for (const gone of PVP.modesForbidden) {
+      const hit = occurrence(p.html, app(p), gone);
+      if (hit) problems.push(`/pvp/ mentions ${q(gone)}: ${hit}`);
+    }
     return problems;
   });
 }
@@ -1256,6 +1263,16 @@ function homeJoinRel(dist) {
   );
 }
 
+/** U4-copy (review F4): the privacy page names mc-heads.net (player head images on the PVP pages). */
+export const PRIVACY_MC_HEADS = 'mc-heads.net';
+function privacyMcHeads(dist) {
+  return eachPage(
+    ['/privacy/'],
+    (p) => (textOf(app(p)).includes(PRIVACY_MC_HEADS) ? [] : [`/privacy/ prerendered body does not mention ${q(PRIVACY_MC_HEADS)}`]),
+    dist,
+  );
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -1286,6 +1303,7 @@ export const CHECKS = [
   ['sitemap-pvp', sitemapPvp],
   ['internal-links', internalLinks],
   ['home-join-rel', homeJoinRel],
+  ['privacy-mc-heads', privacyMcHeads],
 ];
 
 // -------------------------------------------------------------------- main --

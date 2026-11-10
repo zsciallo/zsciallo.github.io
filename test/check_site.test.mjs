@@ -73,6 +73,8 @@ const SMP_BODY =
   '<li data-fact>Four zones under one tree</li><li data-fact>Bosses with phases</li><li data-fact>Zone armour sets</li></ul></section>' +
   '<a class="auctions-link" href="/auctions/">OPEN THE AUCTION HOUSE</a>' +
   `</main>${FOOTER}`;
+// U4-copy: the privacy page's "Other services" section names mc-heads.net.
+const PRIVACY_OTHER = '<section class="other-services"><h2>Other services</h2><p>Player head images on the PVP pages load from mc-heads.net.</p></section>';
 const LD_FAQ = '{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]}';
 
 // U4: /pvp/ as the spec describes it (prerendered: empty board, hidden season strip).
@@ -111,9 +113,10 @@ const PVP_FACTS = `<ul class="facts" data-facts>${FACT_ROWS.map(([v, l]) => `<li
 const MODE_ROWS = [
   ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
   ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
-  ['Prismatic Arena', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'],
+  // Spec amendment U4-copy (2026-11-10): no fixed round count; 2v2v2 takes teams of two.
+  ['Prismatic Arena', 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.'],
   ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
-  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 together.'],
+  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
   ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
 ];
 const PVP_MODES =
@@ -175,7 +178,7 @@ function goodSite() {
     )),
     'store/index.html': framed(htmlPage(headFor('Store | Chromabit'), '<main>Every purchase directly supports Chromabit.</main>')),
     'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP'), '<main>Chromabit SMP market</main>')),
-    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit'), '<main>Privacy</main>')),
+    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit'), `<main>Privacy</main>${PRIVACY_OTHER}`)),
     'pvp/index.html': htmlPage(
       headFor(PVP_TITLE, `<meta name="description" content="${PVP_DESC}">\n  <meta name="twitter:title" content="${PVP_TITLE}">\n  ${PVP_CANON}`),
       PVP_BODY,
@@ -302,6 +305,8 @@ try {
       'sitemap-pvp',
       'internal-links',
       'home-join-rel',
+      // U4-copy
+      'privacy-mc-heads',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -866,7 +871,18 @@ ${r.out}`,
   expectFail('U4-AC6 title case', mutate(P, '<h3>Duels</h3>', '<h3>DUELS</h3>'), 'pvp-modes', '/pvp/ mode 1 has no heading "Duels"');
   expectFail('U4-AC6 title not a heading', mutate(P, '<h3>Parties</h3>', '<p>Parties</p>'), 'pvp-modes', '/pvp/ mode 5 has no heading "Parties"');
   expectFail('U4-AC6 description off by one char', mutate(P, 'and the Champion title.', 'and the Champion title!'), 'pvp-modes', '/pvp/ mode "Tournaments" has no description');
-  expectFail('U4-AC6 description split', mutate(P, '<p>Bring up to three friends. Queue Arena 2v2v2 together.</p>', '<p>Bring up to three friends.</p><p>Queue Arena 2v2v2 together.</p>'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  expectFail('U4-AC6 description split', mutate(P, '<p>Bring up to three friends. Queue Arena 2v2v2 as a pair.</p>', '<p>Bring up to three friends.</p><p>Queue Arena 2v2v2 as a pair.</p>'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  // U4-copy: the old (factually wrong) copy fails, and "Ten rounds" anywhere on /pvp/ fails.
+  expectFail('U4-copy old Parties copy', mutate(P, 'Queue Arena 2v2v2 as a pair.', 'Queue Arena 2v2v2 together.'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  expectFail(
+    'U4-copy old Prismatic Arena copy',
+    mutate(P, 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'),
+    'pvp-modes',
+    '/pvp/ mode "Prismatic Arena" has no description',
+  );
+  expectFail('U4-copy Ten rounds elsewhere in the body', mutate(P, '</main>', '<p>Ten rounds of glory.</p></main>'), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
+  expectFail('U4-copy Ten rounds in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="Ten rounds">`), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
+  expectFail('U4-copy Ten rounds split by markup', mutate(P, '</main>', '<p>Ten <b>rounds</b></p></main>'), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
   expectFail(
     'U4-AC6 order',
     edit(mutate(P, '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article>', ''), P, '</section><section class="pvp-join">', '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article></section><section class="pvp-join">'),
@@ -940,6 +956,11 @@ ${r.out}`,
     const r = runOn(mutate(H, 'target="_blank" rel="noopener">JOIN', 'target="_blank" rel="noreferrer noopener">JOIN'));
     check('U4-AC11 rel with more tokens passes', r.code === 0, `exit ${r.code}:\n${r.out}`);
   }
+
+  // U4-copy privacy-mc-heads
+  expectFail('U4-copy privacy without mc-heads.net', mutate('privacy/index.html', 'load from mc-heads.net.', 'load from a head service.'), 'privacy-mc-heads', '/privacy/ prerendered body does not mention "mc-heads.net"');
+  expectFail('U4-copy mc-heads.net only outside #app', edit(mutate('privacy/index.html', 'load from mc-heads.net.', 'load from a head service.'), 'privacy/index.html', '<meta charset="UTF-8">', '<meta charset="UTF-8"><link rel="preconnect" href="https://mc-heads.net">'), 'privacy-mc-heads', '/privacy/ prerendered body does not mention "mc-heads.net"');
+  expectFail('U4-copy privacy says mc-heads.com', mutate('privacy/index.html', 'load from mc-heads.net.', 'load from mc-heads.com.'), 'privacy-mc-heads', 'does not mention "mc-heads.net"');
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

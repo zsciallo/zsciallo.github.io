@@ -239,6 +239,20 @@ function xssProblems(root) {
   return problems;
 }
 
+/**
+ * U4 review F3: every Java head (an <img> whose src is on mc-heads.net) has
+ * referrerpolicy="no-referrer", so the page origin is not sent to mc-heads.
+ * Vacuous pass is not allowed: the fixture rows always include Java heads.
+ */
+function referrerProblems(root) {
+  const heads = findAll(root, (el) => el.tag === 'img' && /^https:\/\/mc-heads\.net\//.test(el.attrs.src ?? ''));
+  if (!heads.length) return ['no Java head <img> (src on https://mc-heads.net/) in the DOM'];
+  const bad = heads.filter((im) => im.attrs.referrerpolicy !== 'no-referrer');
+  return bad.length
+    ? [`${bad.length} of ${heads.length} Java head <img> lack referrerpolicy="no-referrer" (first: src ${q(bad[0].attrs.src)}, referrerpolicy ${q(bad[0].attrs.referrerpolicy ?? null)})`]
+    : [];
+}
+
 // -------------------------------------------------------------------- run --
 
 function findChrome() {
@@ -384,6 +398,7 @@ async function main() {
       check(`${label}: empty state hidden`, emptyHidden(root));
       check(`${label}: season strip`, seasonProblems(root));
       if (key === 'overall') check(`${label}: hostile name rendered as text`, xssProblems(root));
+      check(`${label}: Java heads have referrerpolicy="no-referrer"`, referrerProblems(root));
     }
   } finally {
     preview.kill();
