@@ -240,10 +240,9 @@
 /* ─── item table ─── */
 
 .market-table {
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   overflow: hidden;
-  background: var(--bg2);
+  background: var(--surface);
 }
 
 .market-row {
@@ -260,7 +259,7 @@
   color: var(--text);
   background: none;
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--divider);
   cursor: pointer;
   transition: background 0.12s;
 }
@@ -270,7 +269,7 @@
 }
 
 .market-row:hover {
-  background: var(--bg3);
+  background: var(--surface-hover);
 }
 
 .market-row:focus-visible {
@@ -569,9 +568,8 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1px;
   margin-bottom: 1.25rem;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow: hidden;
 }
 
@@ -579,9 +577,11 @@
   margin-bottom: 1rem;
 }
 
+/* The 1px gaps between tiles are the dividers: each tile's ring fills the
+   gap around it, and the row clips the rings at its outer edge. */
 .stat {
   padding: 0.8rem 0.95rem;
-  background: var(--bg2);
+  box-shadow: 0 0 0 1px var(--divider);
 }
 
 .stat-label {
@@ -614,9 +614,8 @@
 
 .chart-card {
   padding: 1rem 1.1rem 0.75rem;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   margin-bottom: 1.25rem;
 }
 
@@ -896,9 +895,8 @@
 
 .mini-table {
   padding: 0.9rem 1rem 0.6rem;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow-x: auto;
 }
 
@@ -918,13 +916,13 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
   white-space: nowrap;
 }
 
 .mini-table td {
   padding: 0.38rem 0.4rem;
-  border-bottom: 1px solid rgba(42, 30, 68, 0.5);
+  border-bottom: 1px solid var(--divider);
   color: var(--text);
   white-space: nowrap;
 }
@@ -983,9 +981,8 @@
 
 .explainer {
   margin-bottom: 1rem;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
 }
 
 .explainer > summary {
@@ -1025,7 +1022,7 @@
 .explainer > summary:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
 }
 
 .explainer-title {
@@ -1050,7 +1047,7 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem 1.75rem;
   padding: 0.25rem 1rem 1.1rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--divider);
   margin-top: 0.1rem;
   padding-top: 1rem;
 }
@@ -1106,21 +1103,16 @@
   font-family: var(--font-body);
   font-size-adjust: cap-height 0.7;
   color: var(--text);
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius-card);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: background-color 0.15s;
 }
 
-.pool-card:hover {
-  background: var(--bg3);
-  border-color: var(--accent-deep);
-}
-
+.pool-card:hover,
 .pool-card.selected {
-  border-color: var(--accent);
-  background: var(--bg3);
+  background-color: var(--surface-hover);
 }
 
 .pool-card:focus-visible {
@@ -1268,9 +1260,8 @@
 .futures-intro {
   padding: 1.5rem 1.6rem;
   margin-bottom: 1.25rem;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   max-width: 62ch;
 }
 
@@ -1415,10 +1406,10 @@
    Same rules as the press layer in index.css: individual translate / scale
    properties with an overshooting curve, so nothing fights a transform. */
 
-/* Raised controls sit on a hard edge and press flat. */
+/* Raised controls sit on a hard edge and press flat. (Pool cards are flat
+   surfaces: their hover and selected states change the fill only.) */
 .market-toggle,
-.market-more,
-.pool-card {
+.market-more {
   box-shadow: 0 3px 0 var(--edge-raised);
   transition:
     translate 0.3s var(--ease-spring),
@@ -1434,18 +1425,8 @@
   box-shadow: 0 5px 0 var(--edge-lit);
 }
 
-.pool-card:hover {
-  translate: 0 -3px;
-  box-shadow: 0 6px 0 var(--edge-lit), 0 12px 30px rgba(199, 125, 255, 0.14);
-}
-
-.pool-card.selected {
-  box-shadow: 0 3px 0 var(--edge-lit);
-}
-
 .market-toggle:active,
-.market-more:active,
-.pool-card:active {
+.market-more:active {
   translate: 0 3px;
   box-shadow: 0 0 0 var(--edge-lit);
   transition-duration: 0.06s;
@@ -1502,15 +1483,15 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: background-color 0.15s;
 }
 
-.listing-card:hover {
-  border-color: var(--accent-deep);
+.listing-card:hover,
+.listing-card.open {
+  background-color: var(--surface-hover);
 }
 
 .listing-head {
@@ -1541,7 +1522,7 @@
   place-items: center;
   aspect-ratio: 4 / 3;
   background: radial-gradient(circle at 50% 45%, var(--glow), transparent 70%), var(--bg3);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
 }
 
 .listing-thumb .item-icon {
@@ -1659,9 +1640,10 @@
 }
 
 @media (max-width: 560px) {
+  /* 12px apart: borderless cards need the gap to read as separate rows. */
   .listing-grid {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .listing-head {
@@ -1727,14 +1709,10 @@
     transform: translateY(25%) rotate(225deg);
   }
 
-  .listing-card.open {
-    border-color: var(--accent-deep);
-  }
-
   .listing-meta {
     padding: 0.6rem 0.75rem 0.75rem;
-    border-top: 1px solid var(--border);
-    background: var(--bg3);
+    border-top: 1px solid var(--divider);
+    background: var(--surface-inset);
   }
 }
 

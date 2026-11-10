@@ -107,7 +107,7 @@
 
 .pvp-table th {
   padding: 0.35rem 0.7rem 0.45rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
   font-family: var(--font-hud);
   font-size-adjust: none;
   font-size: 0.95rem;
@@ -120,7 +120,7 @@
 
 .pvp-table td {
   padding: 0.42rem 0.7rem;
-  border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  border-bottom: 1px solid var(--divider);
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -342,9 +342,8 @@
 .pvp-search-results {
   list-style: none;
   padding: 0.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg2);
+  border-radius: var(--radius-card);
+  background: var(--surface);
 }
 
 .pvp-search-results[hidden] {
@@ -408,7 +407,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.7rem;
-  border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  border-bottom: 1px solid var(--divider);
   font-family: var(--font-mono);
   font-size-adjust: none;
   font-size: 1.3rem;
@@ -731,7 +730,7 @@
 
 .pvp-recent th {
   padding: 0.35rem 0.7rem 0.45rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
   font-family: var(--font-hud);
   font-size-adjust: none;
   font-size: 0.95rem;
@@ -744,7 +743,7 @@
 
 .pvp-recent td {
   padding: 0.42rem 0.7rem;
-  border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  border-bottom: 1px solid var(--divider);
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -840,15 +839,11 @@
     column-gap: 0.5rem;
     row-gap: 0.1rem;
     padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+    border-bottom: 1px solid var(--divider);
   }
 
   .pvp-table--count tr {
     grid-template-columns: 1.7rem minmax(0, 1fr) auto;
-  }
-
-  .pvp-table thead tr {
-    border-bottom-color: var(--border);
   }
 
   .pvp-table tbody tr:last-child {

@@ -32,7 +32,19 @@
 
   --grad-cta: linear-gradient(100deg, #9a4dff 0%, #c77dff 45%, #ff7de1 100%);
   --grad-text: linear-gradient(135deg, #c77dff, #ff7de1);
+  /* Frosted panel: modal, drawer and caption chrome only (cards are flat). */
   --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+
+  /* Card surfaces ("C · Surface", U9): a soft solid fill, no border, no
+     gradient, no shadow. Inset is a box nested inside a card or a modal;
+     hover is also the open / selected fill. Dividers inside a card use
+     --divider. */
+  --surface: #150f27;
+  --surface-inset: #0f0a1d;
+  --surface-hover: #1a1330;
+  --divider: #221838;
+  --radius-card: 10px;
+  --radius-inset: 6px;
 
   /* Type: pixel fonts everywhere except the flickering hero titles (Teko).
      Jersey 10 for labels, buttons, headings and reading text; VT323 for
@@ -53,7 +65,7 @@
        primary  under the gradient buttons: a deeper magenta than any part
                 of their face, bright enough to show on a card
        raised   under secondary buttons and small controls at rest
-       dark     under cards at rest, against the page background
+       dark     under the purchase-type options at rest
        lit      any edge on hover */
   --edge-primary: #9a2fb0;
   --edge-raised: #54408a;
@@ -229,18 +241,16 @@ body::after {
   max-width: 940px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow: hidden;
 }
 
 .tape-row {
   display: flex;
   align-items: stretch;
-  background: rgba(12, 7, 24, 0.72);
   min-height: 34px;
+  border-top: 1px solid var(--divider);
 }
 
 .tape-head {
@@ -249,7 +259,6 @@ body::after {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.45rem 0.8rem;
-  background: rgba(12, 7, 24, 0.72);
 }
 
 .tape-title {
@@ -282,7 +291,7 @@ body::after {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.14em;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--divider);
 }
 
 .tape-row--up .tape-label {
@@ -344,7 +353,7 @@ body::after {
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--divider);
   transition: color 0.15s, background 0.15s;
 }
 
@@ -520,16 +529,34 @@ body::after {
   opacity: 0.85;
 }
 
-/* ─── SHARED CARD BASE ─── */
+/* ─── SHARED CARD BASE ───
+   Every content card is a flat surface: one solid fill, no border, no
+   gradient, no shadow, no hairline. Components that are not .card (FAQ items,
+   package cards, the auction panels) set the same three tokens at their own
+   rule. Boxes nested in a card or a modal use the inset fill and radius. */
 .card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius-card);
   position: relative;
   overflow: hidden;
 }
 
-.card::before {
+/* Modal chrome keeps its frosted panel and top hairline (it also carries
+   .card for the shared positioning and clipping). */
+.pkg-modal,
+.modal-card,
+.type-modal,
+.slot-cabinet {
+  background: var(--frost), var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.pkg-modal::before,
+.modal-card::before,
+.type-modal::before,
+.slot-cabinet::before {
   content: '';
   position: absolute;
   top: 0;
@@ -872,16 +899,7 @@ body::after {
   background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
 
-/* ─── EVENTS SECTION ─── */
-.events-section {
-  position: relative;
-  z-index: 1;
-}
-
-.events-section .container {
-  max-width: calc(480px * 2 + 1.25rem);
-}
-
+/* ─── SECTION HEADINGS ─── */
 .section-eyebrow {
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
@@ -913,176 +931,9 @@ body::after {
   margin: 0 auto 3.5rem;
   line-height: 1.7;
 }
-
-.events-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 480px);
-  gap: 1.25rem;
-  max-width: calc(480px * 2 + 1.25rem);
-  margin: 0 auto;
-  justify-content: center;
-}
-
-.event-card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 2rem 1.75rem;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s;
-  width: 100%;
-}
-
-.event-card:hover {
-  border-color: rgba(199, 125, 255, 0.5);
-}
-
-.event-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.6;
-}
-
-.event-card.pink-card {
-  border-color: var(--border-pink);
-}
-
-.event-card.pink-card::before {
-  background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
-}
-
-.event-card.pink-card:hover {
-  border-color: rgba(255, 125, 225, 0.55);
-}
-
-.event-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  margin-bottom: 1rem;
-}
-
-.badge-weekly {
-  background: rgba(255, 125, 225, 0.12);
-  border: 1px solid rgba(255, 125, 225, 0.3);
-  color: var(--accent-2);
-}
-
-.badge-monthly {
-  background: rgba(199, 125, 255, 0.12);
-  border: 1px solid rgba(199, 125, 255, 0.3);
-  color: var(--accent);
-}
 h3 {
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
-}
-
-.event-card h3 {
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-  line-height: 1.1;
-}
-
-.event-prize {
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  margin-bottom: 0.85rem;
-}
-
-.prize-pink {
-  color: var(--accent-2);
-}
-
-.prize-lilac {
-  color: var(--accent);
-}
-
-.event-card p {
-  font-size: 0.92rem;
-  color: var(--muted);
-  line-height: 1.65;
-}
-
-.event-card ul {
-  list-style: none;
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.event-card ul li {
-  font-size: 0.88rem;
-  color: var(--muted);
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  line-height: 1.5;
-}
-
-.event-card ul li ul {
-  flex-direction: column;
-  margin-top: 0.5rem;
-  padding-left: 0;
-}
-
-.reward-row {
-  display: flex !important;
-  align-items: center;
-  gap: 8px;
-}
-
-.reward-row::before {
-  display: none !important;
-}
-
-.reward-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: rgba(255, 125, 225, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-}
-
-.event-card ul li a {
-  display: inline;
-  color: var(--accent-2);
-  text-decoration: underline;
-}
-
-.event-card ul li::before {
-  content: '▸';
-  color: var(--accent);
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.event-card.pink-card ul li::before {
-  color: var(--accent-2);
 }
 
 /* ─── LIGHTBOX ─── */
@@ -1232,18 +1083,6 @@ footer {
     padding: 0.7rem 1.4rem;
     font-size: 1rem;
   }
-
-  .events-grid {
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .events-section {
-    padding: 0 1.25rem 4rem;
-  }
 }
 
 /* ─── PAGE HERO (interior pages) ─── */
@@ -1281,77 +1120,6 @@ footer {
   display: block;
 }
 
-/* ─── FEATURES SECTION ─── */
-.features-section {
-  position: relative;
-  z-index: 1;
-  padding: 0 2rem 4rem;
-}
-
-.features-section .container {
-  max-width: 900px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
-  margin-top: 2.5rem;
-}
-
-.feature-card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.75rem 1.5rem;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
-}
-
-.feature-card:hover {
-  border-color: rgba(199, 125, 255, 0.45);
-}
-
-.feature-icon {
-  font-size: 1.8rem;
-  margin-bottom: 0.9rem;
-  display: block;
-}
-
-.feature-icon-img {
-  width: 2.2rem;
-  height: 2.2rem;
-  object-fit: contain;
-  image-rendering: pixelated;
-}
-
-.feature-title {
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 1.3rem;
-  letter-spacing: 0.06em;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-
-.feature-desc {
-  font-size: 0.88rem;
-  color: var(--muted);
-  line-height: 1.65;
-}
-
 /* ─── FAQ SECTION ─── */
 .faq-section {
   position: relative;
@@ -1381,21 +1149,15 @@ footer {
 }
 
 .faq-item {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: 0 3px 0 var(--edge-dark);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s;
 }
 
-.faq-item:hover {
-  border-color: rgba(199, 125, 255, 0.4);
-}
-
+.faq-item:hover,
 .faq-item[data-open] {
-  border-color: rgba(255, 125, 225, 0.4);
-  box-shadow: 0 3px 0 var(--edge-lit), 0 10px 28px rgba(199, 125, 255, 0.12);
+  background-color: var(--surface-hover);
 }
 
 .faq-heading {
@@ -1458,7 +1220,7 @@ footer {
   font-size: 0.92rem;
   color: var(--muted);
   line-height: 1.75;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--divider);
 }
 
 .faq-answer a {
@@ -1514,13 +1276,6 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .features-section {
-    padding: 0 1.25rem 3rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
 
   .faq-section {
     padding: 0 1.25rem 4rem;
@@ -1607,36 +1362,18 @@ footer {
 }
 
 .pkg-card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.pkg-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
-}
-
-.pkg-card {
   cursor: pointer;
+  transition: background-color 0.18s;
 }
 
 .pkg-card:hover {
-  border-color: rgba(255, 125, 225, 0.5);
-  box-shadow:
-    0 0 24px rgba(255, 125, 225, 0.18),
-    0 0 60px rgba(199, 125, 255, 0.12);
+  background-color: var(--surface-hover);
 }
 
 .pkg-card:focus-visible {
@@ -1650,7 +1387,7 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
 }
 
 .pkg-image {
@@ -2001,9 +1738,9 @@ footer {
   gap: 0.55rem;
   min-width: 0;
   padding: 0.4rem 0.55rem;
-  background: rgba(12, 7, 24, 0.45);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface-inset);
+  border: 0;
+  border-radius: var(--radius-inset);
   font: inherit;
   color: var(--text);
   text-align: left;
@@ -2011,13 +1748,19 @@ footer {
 
 .store-item--button {
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: background-color 0.15s;
 }
 
 .store-item--button:hover,
 .store-item--button.is-open {
-  border-color: var(--rarity, var(--accent));
-  background: rgba(199, 125, 255, 0.08);
+  background-color: var(--surface-hover);
+}
+
+/* The opened tile keeps its rarity-coloured edge: the colour is information.
+   The padding gives back the border's pixel so the tile does not shift. */
+.store-item--button.is-open {
+  padding: calc(0.4rem - 1px) calc(0.55rem - 1px);
+  border: 1px solid var(--rarity, var(--accent));
 }
 
 .store-item--button:focus-visible {
@@ -2108,9 +1851,8 @@ footer {
 
 .store-kit {
   padding: 0.85rem;
-  background: rgba(12, 7, 24, 0.35);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-inset);
 }
 
 .store-kit-head {
@@ -2161,8 +1903,8 @@ footer {
 
 .store-table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-inset);
 }
 
 .store-table {
@@ -2177,7 +1919,7 @@ footer {
   padding: 0.45rem 0.7rem;
   text-align: left;
   vertical-align: top;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
 }
 
 .store-table tbody tr:last-child th,
@@ -2421,13 +2163,6 @@ footer {
 
 .pkg-modal--rank .store-block-title {
   border-bottom-color: color-mix(in srgb, var(--rank-a) 45%, var(--border));
-}
-
-.pkg-modal--rank .store-kit {
-  border-color: color-mix(in srgb, var(--rank-a) 45%, var(--border));
-  background:
-    linear-gradient(100deg, color-mix(in srgb, var(--rank-a) 10%, transparent), transparent 70%),
-    rgba(12, 7, 24, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4808,7 +4543,6 @@ html:not(.js) .nav-toggle {
   }
 }
 
-
 /* Form controls don't inherit the page font by default. */
 input,
 select,
@@ -4829,23 +4563,18 @@ button {
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Cards sit on a hard edge, rise off it on hover and settle when pressed. */
-/* Revealed cards keep the entrance transitions from html.js .reveal, which
-   would otherwise outrank the card's own and make the hover snap. */
-html.js .pkg-card.reveal,
-html.js .feature-card.reveal,
-html.js .event-card.reveal {
+/* Package cards are flat surfaces (U9): no edge, no lift; hover changes the
+   fill only. Revealed cards keep the entrance transitions from html.js
+   .reveal, which would otherwise outrank the card's own fill transition. */
+html.js .pkg-card.reveal {
   transition:
     opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
-    translate 0.35s var(--ease-spring),
-    box-shadow 0.2s ease,
-    border-color 0.2s;
+    background-color 0.18s;
 }
 
-.pkg-card,
-.feature-card,
-.event-card,
+/* Purchase-type options sit on a hard edge, rise off it on hover and settle
+   when pressed. */
 .type-option {
   box-shadow: 0 4px 0 var(--edge-dark);
   transition:
@@ -4855,23 +4584,12 @@ html.js .event-card.reveal {
     background 0.18s;
 }
 
-.pkg-card:hover,
-.feature-card:hover,
-.event-card:hover {
-  translate: 0 -4px;
-  box-shadow:
-    0 6px 0 var(--edge-lit),
-    0 14px 36px rgba(199, 125, 255, 0.16);
-}
-
 .type-option:hover,
 .type-option:focus-visible {
   translate: 0 -2px;
   box-shadow: 0 5px 0 var(--edge-lit);
 }
 
-/* A press on the card itself, not on its buy row or quantity stepper. */
-.pkg-card:active:not(:has(.pkg-actions:active, .pkg-qty:active)),
 .type-option:active {
   translate: 0 2px;
   box-shadow: 0 1px 0 var(--edge-lit);
@@ -5129,7 +4847,6 @@ html.js .event-card.reveal {
   }
 }
 
-
 /* ─── RANDOM? (hidden slot machine) ─── */
 /* The tab is meant to look switched off, so it reads as a secret. ArcadeButton
    sets --edge inline, so the flat look overrides the shadow itself. */
@@ -5291,7 +5008,6 @@ html.js .event-card.reveal {
   color: var(--muted);
 }
 
-
 /* A reel at rest settles a shade brighter. */
 .slot-window.is-locked {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -5438,7 +5154,6 @@ html.js .event-card.reveal {
   }
 }
 
-
 /* ═══ NETWORK SITE (run 20261109-network-site, U3) ══════════════════════════
    The landing page's join box, claim band and two mode cards, and the short
    /smp/ page. Built from the existing tokens, cards and arcade buttons. Any
@@ -5497,7 +5212,7 @@ html.js .event-card.reveal {
 }
 
 .join-row + .join-row {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--divider);
   padding-top: 0.7rem;
 }
 
@@ -5637,22 +5352,12 @@ html.js .event-card.reveal {
   min-width: 0;
 }
 
-.mode-card--pvp {
-  border-color: var(--border-pink);
-}
-
-.mode-card--pvp::before {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
-  z-index: 1;
-}
-
 .mode-banner {
   position: relative;
   aspect-ratio: 16 / 8;
   overflow: hidden;
   background: var(--bg3);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
 }
 
 /* A real screenshot dropped in as the banner's only child. */
@@ -5803,9 +5508,8 @@ html.js .event-card.reveal {
   flex-direction: column;
   gap: 0.1rem;
   padding: 0.5rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: rgba(12, 7, 24, 0.55);
+  border-radius: var(--radius-inset);
+  background: var(--surface-inset);
 }
 
 .mode-live[hidden] {

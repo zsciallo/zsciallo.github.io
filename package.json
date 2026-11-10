@@ -10,7 +10,8 @@
     "market": "python tools/fetch_market.py && python tools/fetch_icons.py",
     "check": "node test/check_site.mjs",
     "test:lib": "node test/pvp_lib.test.mjs",
-    "test:browser": "node test/browser_check.mjs"
+    "test:browser": "node test/browser_check.mjs",
+    "test:cards": "node test/card_style_check.mjs"
   },
   "dependencies": {
     "dompurify": "^3.4.16",
