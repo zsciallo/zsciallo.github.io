@@ -21,25 +21,48 @@ function useOnce(load) {
  * newer than this page, so until it answers with rows the block stays an empty
  * container, the way MarketTicker removes itself rather than show a broken tape.
  */
+const TIER_NAMES = ['tin', 'bronze', 'silver', 'gold', 'emerald', 'mithril', 'chroma'];
+
+/**
+ * What the slot shows while the ladder has no rows (and in the prerendered
+ * page): the seven tiers, from the ladder config, so the card keeps its shape
+ * and nothing jumps when the feed answers. Hidden as soon as there are rows.
+ */
+function LadderIdle({ hidden }) {
+  return (
+    <div class="mode-live mode-live--idle" data-ladder-idle hidden={hidden}>
+      <p class="mode-live-head">SEVEN TIERS</p>
+      <ul class="tier-chips">
+        {TIER_NAMES.map((t) => (
+          <li key={t} class="tier-chip" style={{ color: `var(--tier-${t})` }}>{t.toUpperCase()}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function LadderTop() {
   const doc = useOnce(fetchBoards);
   const rows = boardRows(doc, 'overall').slice(0, 3);
   return (
-    <div class="mode-live" data-live="ladder" hidden={rows.length === 0}>
-      {rows.length > 0 && (
-        <>
-          <h4 class="mode-live-head">TOP OF THE LADDER</h4>
-          <ol class="mode-live-rows">
-            {rows.map((row) => (
-              <li key={row.uuid ?? row.name} class="mode-live-row">
-                <span class="mode-live-name"><span class="mode-live-rank">#{row.rank}</span> {row.name}</span>
-                <span class="mode-live-tier" style={{ color: tierColour(row.tier, doc) ?? undefined }}>{tierLabel(row)}</span>
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
-    </div>
+    <>
+      <LadderIdle hidden={rows.length > 0} />
+      <div class="mode-live" data-live="ladder" hidden={rows.length === 0}>
+        {rows.length > 0 && (
+          <>
+            <h4 class="mode-live-head">TOP OF THE LADDER</h4>
+            <ol class="mode-live-rows">
+              {rows.map((row) => (
+                <li key={row.uuid ?? row.name} class="mode-live-row">
+                  <span class="mode-live-name"><span class="mode-live-rank">#{row.rank}</span> {row.name}</span>
+                  <span class="mode-live-tier" style={{ color: tierColour(row.tier, doc) ?? undefined }}>{tierLabel(row)}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -82,7 +105,7 @@ function PvpArt() {
       <span class="pvp-art-sword pvp-art-sword--a" />
       <span class="pvp-art-sword pvp-art-sword--b" />
       <span class="pvp-art-tiers">
-        {['tin', 'bronze', 'silver', 'gold', 'emerald', 'mithril', 'chroma'].map((t) => (
+        {TIER_NAMES.map((t) => (
           <i key={t} style={{ background: `var(--tier-${t})` }} />
         ))}
       </span>

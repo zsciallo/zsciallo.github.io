@@ -5677,6 +5677,13 @@ html.js .event-card.reveal {
   height: 100%;
 }
 
+/* Tabbing to the banner shows the same pink ring as the buttons, drawn inside
+   the frame because the banner clips anything outside it. */
+.carousel--banner .carousel-slide-btn:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -4px;
+}
+
 .carousel--banner .carousel-slide {
   height: 100%;
   aspect-ratio: auto;
@@ -5863,6 +5870,38 @@ html.js .event-card.reveal {
 .mode-live-tier,
 .mode-live-change {
   flex: none;
+}
+
+/* The ladder slot with no rows yet: the seven tiers as chips, the same box as
+   the live block and about its height, so nothing jumps when rows arrive. */
+.mode-live--idle {
+  min-height: 6.9rem;
+}
+
+.mode-live--idle[hidden] {
+  display: none;
+}
+
+.tier-chips {
+  flex: 1;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.35rem 0.4rem;
+  padding-top: 0.25rem;
+}
+
+.tier-chip {
+  padding: 0 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
 }
 
 .mode-live-change--up {
