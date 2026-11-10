@@ -1,0 +1,18 @@
+{
+  "data": {
+    "ident": "cardcheck1",
+    "complete": false,
+    "username": "Steve",
+    "currency": "USD",
+    "base_price": 22.97,
+    "total_price": 22.97,
+    "sales_tax": 0,
+    "packages": [
+      { "id": 7564223, "name": "VIP", "image": null, "in_basket": { "quantity": 1, "price": 9.99 } },
+      { "id": 7557969, "name": "Chroma Key", "image": null, "in_basket": { "quantity": 2, "price": 6.49 } }
+    ],
+    "coupons": [],
+    "giftcards": [],
+    "links": { "checkout": "https://example.invalid/checkout" }
+  }
+}

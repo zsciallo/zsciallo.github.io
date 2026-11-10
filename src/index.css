@@ -32,7 +32,21 @@
 
   --grad-cta: linear-gradient(100deg, #9a4dff 0%, #c77dff 45%, #ff7de1 100%);
   --grad-text: linear-gradient(135deg, #c77dff, #ff7de1);
+  /* Frosted panel: modal, drawer and caption chrome only (cards are flat). */
   --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+
+  /* Card surfaces ("C · Surface", U9): a soft solid fill, no border, no
+     gradient, no shadow. Inset is a box nested inside a card or a modal.
+     Hover (also keyboard focus) and selected (an open or chosen card) are
+     two steps lighter; each must read at a glance. Dividers inside a card
+     use --divider. */
+  --surface: #150f27;
+  --surface-inset: #0f0a1d;
+  --surface-hover: #21193c;
+  --surface-selected: #2c214f;
+  --divider: #221838;
+  --radius-card: 10px;
+  --radius-inset: 6px;
 
   /* Type: pixel fonts everywhere except the flickering hero titles (Teko).
      Jersey 10 for labels, buttons, headings and reading text; VT323 for
@@ -53,7 +67,7 @@
        primary  under the gradient buttons: a deeper magenta than any part
                 of their face, bright enough to show on a card
        raised   under secondary buttons and small controls at rest
-       dark     under cards at rest, against the page background
+       dark     under the purchase-type options at rest
        lit      any edge on hover */
   --edge-primary: #9a2fb0;
   --edge-raised: #54408a;
@@ -229,18 +243,16 @@ body::after {
   max-width: 940px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow: hidden;
 }
 
 .tape-row {
   display: flex;
   align-items: stretch;
-  background: rgba(12, 7, 24, 0.72);
   min-height: 34px;
+  border-top: 1px solid var(--divider);
 }
 
 .tape-head {
@@ -249,7 +261,6 @@ body::after {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.45rem 0.8rem;
-  background: rgba(12, 7, 24, 0.72);
 }
 
 .tape-title {
@@ -282,7 +293,7 @@ body::after {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.14em;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--divider);
 }
 
 .tape-row--up .tape-label {
@@ -344,7 +355,7 @@ body::after {
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--divider);
   transition: color 0.15s, background 0.15s;
 }
 
@@ -520,16 +531,34 @@ body::after {
   opacity: 0.85;
 }
 
-/* ─── SHARED CARD BASE ─── */
+/* ─── SHARED CARD BASE ───
+   Every content card is a flat surface: one solid fill, no border, no
+   gradient, no shadow, no hairline. Components that are not .card (FAQ items,
+   package cards, the auction panels) set the same three tokens at their own
+   rule. Boxes nested in a card or a modal use the inset fill and radius. */
 .card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius-card);
   position: relative;
   overflow: hidden;
 }
 
-.card::before {
+/* Modal chrome keeps its frosted panel and top hairline (it also carries
+   .card for the shared positioning and clipping). */
+.pkg-modal,
+.modal-card,
+.type-modal,
+.slot-cabinet {
+  background: var(--frost), var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.pkg-modal::before,
+.modal-card::before,
+.type-modal::before,
+.slot-cabinet::before {
   content: '';
   position: absolute;
   top: 0;
@@ -872,16 +901,7 @@ body::after {
   background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
 
-/* ─── EVENTS SECTION ─── */
-.events-section {
-  position: relative;
-  z-index: 1;
-}
-
-.events-section .container {
-  max-width: calc(480px * 2 + 1.25rem);
-}
-
+/* ─── SECTION HEADINGS ─── */
 .section-eyebrow {
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
@@ -913,176 +933,9 @@ body::after {
   margin: 0 auto 3.5rem;
   line-height: 1.7;
 }
-
-.events-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 480px);
-  gap: 1.25rem;
-  max-width: calc(480px * 2 + 1.25rem);
-  margin: 0 auto;
-  justify-content: center;
-}
-
-.event-card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 2rem 1.75rem;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s;
-  width: 100%;
-}
-
-.event-card:hover {
-  border-color: rgba(199, 125, 255, 0.5);
-}
-
-.event-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.6;
-}
-
-.event-card.pink-card {
-  border-color: var(--border-pink);
-}
-
-.event-card.pink-card::before {
-  background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
-}
-
-.event-card.pink-card:hover {
-  border-color: rgba(255, 125, 225, 0.55);
-}
-
-.event-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  margin-bottom: 1rem;
-}
-
-.badge-weekly {
-  background: rgba(255, 125, 225, 0.12);
-  border: 1px solid rgba(255, 125, 225, 0.3);
-  color: var(--accent-2);
-}
-
-.badge-monthly {
-  background: rgba(199, 125, 255, 0.12);
-  border: 1px solid rgba(199, 125, 255, 0.3);
-  color: var(--accent);
-}
 h3 {
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
-}
-
-.event-card h3 {
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-  line-height: 1.1;
-}
-
-.event-prize {
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  margin-bottom: 0.85rem;
-}
-
-.prize-pink {
-  color: var(--accent-2);
-}
-
-.prize-lilac {
-  color: var(--accent);
-}
-
-.event-card p {
-  font-size: 0.92rem;
-  color: var(--muted);
-  line-height: 1.65;
-}
-
-.event-card ul {
-  list-style: none;
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.event-card ul li {
-  font-size: 0.88rem;
-  color: var(--muted);
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  line-height: 1.5;
-}
-
-.event-card ul li ul {
-  flex-direction: column;
-  margin-top: 0.5rem;
-  padding-left: 0;
-}
-
-.reward-row {
-  display: flex !important;
-  align-items: center;
-  gap: 8px;
-}
-
-.reward-row::before {
-  display: none !important;
-}
-
-.reward-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: rgba(255, 125, 225, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-}
-
-.event-card ul li a {
-  display: inline;
-  color: var(--accent-2);
-  text-decoration: underline;
-}
-
-.event-card ul li::before {
-  content: '▸';
-  color: var(--accent);
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.event-card.pink-card ul li::before {
-  color: var(--accent-2);
 }
 
 /* ─── LIGHTBOX ─── */
@@ -1232,18 +1085,6 @@ footer {
     padding: 0.7rem 1.4rem;
     font-size: 1rem;
   }
-
-  .events-grid {
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .events-section {
-    padding: 0 1.25rem 4rem;
-  }
 }
 
 /* ─── PAGE HERO (interior pages) ─── */
@@ -1281,77 +1122,6 @@ footer {
   display: block;
 }
 
-/* ─── FEATURES SECTION ─── */
-.features-section {
-  position: relative;
-  z-index: 1;
-  padding: 0 2rem 4rem;
-}
-
-.features-section .container {
-  max-width: 900px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
-  margin-top: 2.5rem;
-}
-
-.feature-card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.75rem 1.5rem;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
-}
-
-.feature-card:hover {
-  border-color: rgba(199, 125, 255, 0.45);
-}
-
-.feature-icon {
-  font-size: 1.8rem;
-  margin-bottom: 0.9rem;
-  display: block;
-}
-
-.feature-icon-img {
-  width: 2.2rem;
-  height: 2.2rem;
-  object-fit: contain;
-  image-rendering: pixelated;
-}
-
-.feature-title {
-  font-family: var(--font-hud);
-  font-size-adjust: cap-height 0.63;
-  font-size: 1.3rem;
-  letter-spacing: 0.06em;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-
-.feature-desc {
-  font-size: 0.88rem;
-  color: var(--muted);
-  line-height: 1.65;
-}
-
 /* ─── FAQ SECTION ─── */
 .faq-section {
   position: relative;
@@ -1381,21 +1151,28 @@ footer {
 }
 
 .faq-item {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: 0 3px 0 var(--edge-dark);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s;
 }
 
+/* One rule per :has() selector: a browser without :has() drops a whole
+   selector list that contains one, and would lose the hover and open fills. */
 .faq-item:hover {
-  border-color: rgba(199, 125, 255, 0.4);
+  background-color: var(--surface-hover);
+}
+
+.faq-item:has(.faq-question:focus-visible) {
+  background-color: var(--surface-hover);
 }
 
 .faq-item[data-open] {
-  border-color: rgba(255, 125, 225, 0.4);
-  box-shadow: 0 3px 0 var(--edge-lit), 0 10px 28px rgba(199, 125, 255, 0.12);
+  background-color: var(--surface-selected);
+}
+
+.faq-item[data-open]:has(.faq-question:focus-visible) {
+  background-color: var(--surface-selected);
 }
 
 .faq-heading {
@@ -1458,7 +1235,7 @@ footer {
   font-size: 0.92rem;
   color: var(--muted);
   line-height: 1.75;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--divider);
 }
 
 .faq-answer a {
@@ -1514,13 +1291,6 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .features-section {
-    padding: 0 1.25rem 3rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
 
   .faq-section {
     padding: 0 1.25rem 4rem;
@@ -1607,36 +1377,19 @@ footer {
 }
 
 .pkg-card {
-  background: var(--frost), var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.pkg-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
-}
-
-.pkg-card {
   cursor: pointer;
+  transition: background-color 0.18s;
 }
 
-.pkg-card:hover {
-  border-color: rgba(255, 125, 225, 0.5);
-  box-shadow:
-    0 0 24px rgba(255, 125, 225, 0.18),
-    0 0 60px rgba(199, 125, 255, 0.12);
+.pkg-card:hover,
+.pkg-card:focus-visible {
+  background-color: var(--surface-hover);
 }
 
 .pkg-card:focus-visible {
@@ -1650,7 +1403,7 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
 }
 
 .pkg-image {
@@ -2001,9 +1754,9 @@ footer {
   gap: 0.55rem;
   min-width: 0;
   padding: 0.4rem 0.55rem;
-  background: rgba(12, 7, 24, 0.45);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface-inset);
+  border: 0;
+  border-radius: var(--radius-inset);
   font: inherit;
   color: var(--text);
   text-align: left;
@@ -2011,13 +1764,26 @@ footer {
 
 .store-item--button {
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: background-color 0.15s;
+}
+
+/* Tiles in the rank kit sit on the inset kit panel, so they take the card
+   fill to stay visible. */
+.store-kit .store-item {
+  background: var(--surface);
 }
 
 .store-item--button:hover,
+.store-item--button:focus-visible {
+  background-color: var(--surface-hover);
+}
+
+/* The opened tile keeps its rarity-coloured edge: the colour is information.
+   The padding gives back the border's pixel so the tile does not shift. */
 .store-item--button.is-open {
-  border-color: var(--rarity, var(--accent));
-  background: rgba(199, 125, 255, 0.08);
+  background-color: var(--surface-selected);
+  padding: calc(0.4rem - 1px) calc(0.55rem - 1px);
+  border: 1px solid var(--rarity, var(--accent));
 }
 
 .store-item--button:focus-visible {
@@ -2108,9 +1874,8 @@ footer {
 
 .store-kit {
   padding: 0.85rem;
-  background: rgba(12, 7, 24, 0.35);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-inset);
 }
 
 .store-kit-head {
@@ -2161,8 +1926,8 @@ footer {
 
 .store-table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-inset);
 }
 
 .store-table {
@@ -2177,7 +1942,7 @@ footer {
   padding: 0.45rem 0.7rem;
   text-align: left;
   vertical-align: top;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
 }
 
 .store-table tbody tr:last-child th,
@@ -2423,13 +2188,6 @@ footer {
   border-bottom-color: color-mix(in srgb, var(--rank-a) 45%, var(--border));
 }
 
-.pkg-modal--rank .store-kit {
-  border-color: color-mix(in srgb, var(--rank-a) 45%, var(--border));
-  background:
-    linear-gradient(100deg, color-mix(in srgb, var(--rank-a) 10%, transparent), transparent 70%),
-    rgba(12, 7, 24, 0.35);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pkg-modal--rank .store-perk {
     transition: none;
@@ -2615,7 +2373,10 @@ footer {
   background: var(--glow);
 }
 
-.qty-input:disabled,
+.qty-input:disabled {
+  opacity: 0.55;
+}
+
 .qty-fx:has(.qty-input:disabled) .qty-num {
   opacity: 0.55;
 }
@@ -3840,6 +3601,9 @@ html:not(.js) .sound-toggle {
 
 .carousel-slide {
   width: 100%;
+  /* The width/height attributes only give the browser the image's ratio
+     early; the box stays the 16:9 one set here. */
+  height: auto;
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
@@ -4808,7 +4572,6 @@ html:not(.js) .nav-toggle {
   }
 }
 
-
 /* Form controls don't inherit the page font by default. */
 input,
 select,
@@ -4829,23 +4592,18 @@ button {
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Cards sit on a hard edge, rise off it on hover and settle when pressed. */
-/* Revealed cards keep the entrance transitions from html.js .reveal, which
-   would otherwise outrank the card's own and make the hover snap. */
-html.js .pkg-card.reveal,
-html.js .feature-card.reveal,
-html.js .event-card.reveal {
+/* Package cards are flat surfaces (U9): no edge, no lift; hover changes the
+   fill only. Revealed cards keep the entrance transitions from html.js
+   .reveal, which would otherwise outrank the card's own fill transition. */
+html.js .pkg-card.reveal {
   transition:
     opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
-    translate 0.35s var(--ease-spring),
-    box-shadow 0.2s ease,
-    border-color 0.2s;
+    background-color 0.18s;
 }
 
-.pkg-card,
-.feature-card,
-.event-card,
+/* Purchase-type options sit on a hard edge, rise off it on hover and settle
+   when pressed. */
 .type-option {
   box-shadow: 0 4px 0 var(--edge-dark);
   transition:
@@ -4855,23 +4613,12 @@ html.js .event-card.reveal {
     background 0.18s;
 }
 
-.pkg-card:hover,
-.feature-card:hover,
-.event-card:hover {
-  translate: 0 -4px;
-  box-shadow:
-    0 6px 0 var(--edge-lit),
-    0 14px 36px rgba(199, 125, 255, 0.16);
-}
-
 .type-option:hover,
 .type-option:focus-visible {
   translate: 0 -2px;
   box-shadow: 0 5px 0 var(--edge-lit);
 }
 
-/* A press on the card itself, not on its buy row or quantity stepper. */
-.pkg-card:active:not(:has(.pkg-actions:active, .pkg-qty:active)),
 .type-option:active {
   translate: 0 2px;
   box-shadow: 0 1px 0 var(--edge-lit);
@@ -5129,7 +4876,6 @@ html.js .event-card.reveal {
   }
 }
 
-
 /* ─── RANDOM? (hidden slot machine) ─── */
 /* The tab is meant to look switched off, so it reads as a secret. ArcadeButton
    sets --edge inline, so the flat look overrides the shadow itself. */
@@ -5291,7 +5037,6 @@ html.js .event-card.reveal {
   color: var(--muted);
 }
 
-
 /* A reel at rest settles a shade brighter. */
 .slot-window.is-locked {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -5435,5 +5180,542 @@ html.js .event-card.reveal {
   .store-tab--random.btn:hover:not(:disabled),
   .store-tab--random.btn:focus-visible {
     animation: none;
+  }
+}
+
+/* ═══ NETWORK SITE (run 20261109-network-site, U3) ══════════════════════════
+   The landing page's join box, claim band and two mode cards, and the short
+   /smp/ page. Built from the existing tokens, cards and arcade buttons. Any
+   hover or press on something that is not an ArcadeButton would use the
+   individual translate / scale properties (see the press layer); nothing here
+   moves on its own except the reveal and the banner carousel. */
+:root {
+  /* The ladder's seven tiers (pvp_tools/ladder.json). */
+  --tier-tin: #8A8F98;
+  --tier-bronze: #CD7F32;
+  --tier-silver: #C0C0C0;
+  --tier-gold: #FFD700;
+  --tier-emerald: #50C878;
+  --tier-mithril: #FF77E9;
+  --tier-chroma: #B24BF3;
+}
+
+/* Small amber HUD tag. The text fill is set too, so it stays amber inside a
+   gradient (.accent) heading. */
+.beta-tag {
+  display: inline-block;
+  padding: 0 0.4rem;
+  border: 1px solid rgba(212, 184, 74, 0.55);
+  border-radius: 4px;
+  background: rgba(212, 184, 74, 0.1);
+  color: #d4b84a;
+  -webkit-text-fill-color: #d4b84a;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  vertical-align: middle;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+/* ─── join box: see the IP, copy it; see the Discord, join it ─── */
+.join-box {
+  width: min(100%, 31rem);
+  padding: 0.9rem 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  text-align: left;
+}
+
+.join-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 0.9rem;
+  /* Room for the button's edge and its press travel. */
+  padding-bottom: 7px;
+}
+
+.join-row + .join-row {
+  border-top: 1px solid var(--divider);
+  padding-top: 0.7rem;
+}
+
+.join-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.join-label {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.join-count {
+  font-weight: 400;
+  color: var(--positive);
+}
+
+.join-label--discord {
+  color: var(--accent);
+}
+
+.join-label--down {
+  color: #d4b84a;
+}
+
+.join-label--down .join-count {
+  color: var(--text);
+}
+
+.join-addr {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.join-members {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.join-foot {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.1rem;
+  line-height: 1.2;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.join-ed {
+  white-space: nowrap;
+}
+
+/* CHROMABIT NETWORK stays on one line on a desktop, as CHROMABIT SMP did. */
+.home-hero .hero-title {
+  font-size: clamp(3rem, 10vw, 5.25rem);
+}
+
+/* No lone "ladder." on its own line at phone width. */
+.home-hero .hero-tagline {
+  text-wrap: balance;
+}
+
+/* COPY IP, wherever it sits: the label swaps to COPIED! and the button goes
+   mint for two seconds. */
+.copy-ip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn.copy-ip.is-copied {
+  --btn-edge: rgba(91, 227, 160, 0.45);
+  background: rgba(91, 227, 160, 0.16);
+  color: var(--positive);
+  text-shadow: none;
+}
+
+/* ─── the claim, alone between two thin pink rules ─── */
+.claim-band {
+  padding: 1.6rem 0.5rem;
+  border-block: 1px solid var(--border-pink);
+  background: linear-gradient(90deg, transparent, rgba(255, 125, 225, 0.07), transparent);
+  text-align: center;
+}
+
+.claim-title {
+  font-family: var(--font-display);
+  font-size-adjust: none;
+  font-size: clamp(1.9rem, 6vw, 3.3rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  color: var(--text);
+  text-shadow: 0 0 30px rgba(255, 125, 225, 0.3), 0 2px 0 rgba(0, 0, 0, 0.8);
+  text-wrap: balance;
+}
+
+/* ─── the two mode cards ─── */
+.network-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 0 2rem 4rem;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 700px) {
+  .mode-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mode-banner {
+  position: relative;
+  aspect-ratio: 16 / 8;
+  overflow: hidden;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--divider);
+}
+
+/* A real screenshot dropped in as the banner's only child. */
+.mode-banner > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The player-build carousel at card size: the banner is its frame. */
+.carousel--banner {
+  height: 100%;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.carousel--banner .carousel-track,
+.carousel--banner .carousel-slide-btn {
+  height: 100%;
+}
+
+/* Tabbing to the banner shows the same pink ring as the buttons, drawn inside
+   the frame because the banner clips anything outside it. */
+.carousel--banner .carousel-slide-btn:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -4px;
+}
+
+.carousel--banner .carousel-slide {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.carousel--banner .carousel-caption {
+  left: 0.6rem;
+  bottom: 0.6rem;
+  max-width: calc(100% - 1.2rem);
+  padding: 2px 12px 1px 10px;
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel--banner .carousel-track {
+    transition: none;
+  }
+}
+
+/* The PVP banner until a screenshot exists: dark gradient, the site's dither,
+   two faint crossed swords and the seven tier colours along the bottom. */
+.mode-banner--pvp {
+  background:
+    radial-gradient(90% 120% at 50% 115%, rgba(255, 125, 225, 0.22), transparent 62%),
+    radial-gradient(60% 80% at 50% 45%, rgba(154, 77, 255, 0.18), transparent 70%),
+    linear-gradient(160deg, var(--bg3) 0%, #120b22 55%, var(--bg) 100%);
+}
+
+.pvp-art,
+.pvp-art::before {
+  position: absolute;
+  inset: 0;
+}
+
+.pvp-art::before {
+  content: '';
+  opacity: 0.4;
+  background-image: radial-gradient(#c14dff 1.2px, transparent 1.3px);
+  background-size: 6px 6px;
+  -webkit-mask-image: linear-gradient(transparent 15%, #000);
+  mask-image: linear-gradient(transparent 15%, #000);
+}
+
+/* A pixel sword pointing up (tip, blade, guard, grip, pommel as stacked
+   background layers), turned 45 degrees each way. Static art, so `transform`
+   rather than the press layer's translate / rotate, which reduced motion
+   switches off. */
+.pvp-art-sword {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3rem;
+  height: 78%;
+  opacity: 0.55;
+  background:
+    linear-gradient(var(--tier-silver), var(--tier-silver)) 50% 0 / 14% 6% no-repeat,
+    linear-gradient(90deg, #8A8F98, #f3ecff 50%, #a9adb6) 50% 5.5% / 26% 64% no-repeat,
+    linear-gradient(var(--accent-2), var(--accent-2)) 50% 70% / 100% 7% no-repeat,
+    linear-gradient(var(--accent-deep), var(--accent-deep)) 50% 88% / 18% 18% no-repeat,
+    linear-gradient(var(--accent-2), var(--accent-2)) 50% 100% / 30% 7% no-repeat;
+  filter: drop-shadow(0 0 14px rgba(255, 125, 225, 0.45));
+}
+
+.pvp-art-sword--a {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.pvp-art-sword--b {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.pvp-art-tiers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  height: 5px;
+  opacity: 0.85;
+}
+
+.pvp-art-tiers i {
+  flex: 1;
+}
+
+.mode-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.2rem 1.3rem 1.4rem;
+}
+
+.mode-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.mode-desc {
+  font-size-adjust: none;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.mode-live {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-inset);
+  background: var(--surface-inset);
+}
+
+.mode-live[hidden] {
+  display: none;
+}
+
+.mode-live-head {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+.mode-live-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-live-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.8rem;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.mode-live-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mode-live-rank {
+  color: var(--muted);
+}
+
+.mode-live-tier,
+.mode-live-change {
+  flex: none;
+}
+
+/* The ladder slot with no rows yet: the seven tiers as chips, the same box as
+   the live block and about its height, so nothing jumps when rows arrive. */
+.mode-live--idle {
+  min-height: 6.9rem;
+}
+
+.mode-live--idle[hidden] {
+  display: none;
+}
+
+.tier-chips {
+  flex: 1;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.35rem 0.4rem;
+  padding-top: 0.25rem;
+}
+
+.tier-chip {
+  padding: 0 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+}
+
+.mode-live-change--up {
+  color: var(--positive);
+}
+
+.mode-live-change--down {
+  color: #ff8a8a;
+}
+
+.mode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 0.7rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  padding-bottom: 7px;
+}
+
+/* ─── /smp/ ─── */
+.page-hero.smp-hero {
+  padding-bottom: 1.5rem;
+}
+
+.smp-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 0 2rem 4rem;
+}
+
+.dungeon {
+  width: 100%;
+  text-align: center;
+}
+
+.dungeon .section-title {
+  margin-bottom: 1.25rem;
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1.1rem;
+  text-align: left;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem 1.2rem 1.2rem;
+}
+
+.fact-figure {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 2.6rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--accent-2);
+}
+
+.fact-line {
+  font-size-adjust: none;
+  font-size: 1.12rem;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+.smp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding-bottom: 7px;
+}
+
+/* Phones: the home hero, the cards and the SMP page use more of the width. */
+@media (max-width: 480px) {
+  .page-hero.home-hero {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .network-modes,
+  .smp-body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .join-box {
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+
+  .mode-body {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
   }
 }

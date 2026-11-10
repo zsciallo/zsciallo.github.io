@@ -1,0 +1,82 @@
+import { useScrollReveal } from '../hooks/useScrollReveal';
+import { usePvpFeed } from '../hooks/usePvpFeed';
+import { usePlayerIndex } from '../hooks/usePlayerIndex';
+import { CopyIpButton } from '../components/CopyIpButton';
+import { Footer } from '../components/Footer';
+import { NavBar } from '../components/NavBar';
+import { Leaderboard } from '../components/pvp/Leaderboard';
+import { SeasonStrip } from '../components/pvp/SeasonStrip';
+import { TierLadder } from '../components/pvp/TierLadder';
+import { MotionRoot } from '../lib/motion';
+import { PVP_MODES } from '../data/pvpModes';
+
+// From the arena's own config (chromatic-arena: ranked placement, best of
+// three, divisions, the level gate). Re-check them when ranked changes.
+const FACTS = [
+  ['10', 'placement matches before you get a rank'],
+  ['BO3', 'every ranked duel is best of three'],
+  ['III · II · I', 'three divisions in every tier below Chroma'],
+  ['LVL 2', 'ranked opens at level 2'],
+];
+
+const MODES = PVP_MODES;
+
+export function PvpPage() {
+  const { boards, season, now } = usePvpFeed();
+  const index = usePlayerIndex();
+  useScrollReveal();
+
+  return (
+    <MotionRoot>
+      <NavBar current="pvp" />
+      <main>
+        <section class="page-hero container pvp-hero" aria-label="ChromaPVP">
+          <p class="section-eyebrow">
+            CHROMAPVP · RANKED KIT PVP <span class="beta-tag">BETA</span>
+          </p>
+          <h1 class="hero-title hero-title--inline">
+            {/* No-break spaces keep the second sentence whole when the line wraps. */}
+            RANKED. <span class="accent">ON&nbsp;BOTH&nbsp;EDITIONS.</span>
+          </h1>
+          <p class="hero-sub pvp-sub">The only ranked competitive PVP for Java and Bedrock.</p>
+          <SeasonStrip season={season} boards={boards} now={now} />
+        </section>
+
+        <div class="pvp-body container">
+          <Leaderboard doc={boards} index={index} />
+
+          <TierLadder doc={boards} />
+
+          <section class="pvp-section reveal" aria-label="How ranked works">
+            <div class="pvp-facts" data-facts>
+              {FACTS.map(([figure, line]) => (
+                <div key={line} class="card fact pvp-fact" data-fact>
+                  <b class={`fact-figure${figure.length > 6 ? ' fact-figure--long' : ''}`}>{figure}</b>
+                  <span class="fact-line">{line}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section class="pvp-section reveal" data-modes aria-labelledby="pvp-modes-title">
+            <h2 class="section-title" id="pvp-modes-title">WHAT YOU CAN PLAY</h2>
+            <div class="pvp-modes">
+              {MODES.map(([title, desc]) => (
+                <article key={title} class="card pvp-mode" data-mode>
+                  <h3 class="pvp-mode-title">{title}</h3>
+                  <p class="pvp-mode-desc">{desc}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section class="claim-band pvp-join reveal" aria-label="Join">
+            <p class="pvp-join-line">Connect to play.chromabit.us and pick Kit PVP in the hub.</p>
+            <CopyIpButton variant="primary" size="md" />
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </MotionRoot>
+  );
+}

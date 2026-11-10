@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "key": "b-sample_02",
+  "name": ".Sample_02",
+  "edition": "bedrock",
+  "uuid": null,
+  "best": {"tier": "Mithril", "division": "I", "rating": 1912, "overallRank": 2},
+  "kits": [
+    {"key": "sword", "label": "Sword", "placed": true, "rating": 1912, "tier": "Mithril", "division": "I", "peak": 1930, "wins": 21, "losses": 9, "streak": 3, "rank": 1},
+    {"key": "mace", "label": "Mace", "placed": false, "games": 4, "placementMatches": 10, "wins": 2, "losses": 2}
+  ],
+  "career": {"kills": 56, "deaths": 40, "bestStreak": 7, "tournamentWins": 1},
+  "recent": [
+    {"at": "2026-11-09T22:50:00.000Z", "kit": "sword", "result": "loss", "ratingChange": -11, "opponent": {"name": "Sample_01", "edition": "java", "key": "sample_01"}},
+    {"at": "2026-11-09T22:45:00.000Z", "kit": "mace", "result": "win", "ratingChange": null, "opponent": {"name": "<img src=x onerror=alert(1)>", "edition": "java", "key": "-img-src-x-onerror-alert-1--"}}
+  ]
+}

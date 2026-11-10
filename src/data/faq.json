@@ -1,5 +1,5 @@
 {
-  "note": "Hand-authored. Every answer traces to a file in mc-server on main (see CLAUDE.md). Markdown-lite: **bold**, `code`, [text](href). Feeds the FAQ page and its JSON-LD via tools/build_faq_ld.py.",
+  "note": "Hand-authored. Every answer traces to a file in mc-server on main (see CLAUDE.md). Markdown-lite: **bold**, `code`, [text](href). Feeds the FAQ page and, at build time, its FAQPage JSON-LD (src/data/seo.js).",
   "groups": [
     {
       "id": "joining",
@@ -25,13 +25,44 @@
       ]
     },
     {
+      "id": "pvp",
+      "title": "PVP",
+      "sub": "ChromaPVP, ranked duels and seasons.",
+      "items": [
+        {
+          "q": "What is ChromaPVP?",
+          "a": "ChromaPVP is the network's kit PVP server. Join play.chromabit.us and pick Kit PVP in the hub. It has ranked and unranked duels, the FFA pit, the Prismatic Arena and tournaments."
+        },
+        {
+          "q": "How does ranked work?",
+          "a": "Play 10 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2."
+        },
+        {
+          "q": "Can Bedrock players play ranked?",
+          "a": "Yes. Java and Bedrock players queue into the same matches and share one ladder."
+        },
+        {
+          "q": "Which kits are ranked?",
+          "a": "Sword and Mace."
+        },
+        {
+          "q": "Where are the leaderboards?",
+          "a": "On the [PVP page](/pvp/) of this site, and in game with `/leaderboard`."
+        },
+        {
+          "q": "What happens when a season ends?",
+          "a": "Each season has its own ladder. When a new season starts, everyone plays placement matches again."
+        }
+      ]
+    },
+    {
       "id": "gameplay",
       "title": "Gameplay",
       "sub": "How the server plays day to day.",
       "items": [
         {
           "q": "What kind of server is Chromabit?",
-          "a": "A survival server with a player-run economy. The difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank."
+          "a": "Chromabit is a network with two servers behind one address: a survival server with a player-run economy, and ChromaPVP, a ranked kit PVP server. On the SMP, the difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank."
         },
         {
           "q": "What should I do first?",
@@ -47,7 +78,7 @@
         },
         {
           "q": "Is PvP on?",
-          "a": "On in the overworld, the Nether and the End, and in the KOTH arena. Off at spawn, inside claims and in the dungeon. A 15-second combat tag blocks `/home`, `/spawn` and teleports while you are fighting."
+          "a": "On the SMP, PvP is on in the overworld, the Nether and the End, and in the KOTH arena. Off at spawn, inside claims and in the dungeon. A 15-second combat tag blocks `/home`, `/spawn` and teleports while you are fighting."
         }
       ]
     },

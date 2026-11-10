@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { useReducedMotion } from 'motion/react';
+import sizes from 'virtual:image-sizes';
 
 // Every image dropped into src/assets/serverImages is picked up
 // automatically at build time. Captions come from any .json file in the same
@@ -17,7 +19,7 @@ const images = Object.entries(
 )
   .map(([path, src]) => ({ name: path.split('/').pop(), src }))
   .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name))
-  .map(({ name, src }) => ({ src, desc: descriptions[name] || '' }));
+  .map(({ name, src }) => ({ src, desc: descriptions[name] || '', size: sizes[name] ?? null }));
 
 function ZoomIcon() {
   return (
@@ -28,7 +30,14 @@ function ZoomIcon() {
   );
 }
 
+/**
+ * Player builds, rotating: the SMP card's picture on the landing page. Card
+ * size, so no arrows or dots; it advances on its own (not for visitors who
+ * asked for less motion), pauses under the pointer, swipes on touch, and a
+ * click opens the lightbox.
+ */
 export function ServerCarousel() {
+  const still = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [zoomed, setZoomed] = useState(false);
@@ -37,10 +46,10 @@ export function ServerCarousel() {
   const dialogRef = useRef(null);
 
   useEffect(() => {
-    if (paused || zoomed || images.length < 2) return;
+    if (still || paused || zoomed || images.length < 2) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % images.length), 5000);
     return () => clearInterval(id);
-  }, [paused, zoomed]);
+  }, [still, paused, zoomed]);
 
   // showModal() puts the lightbox in the browser's top layer, above any
   // ancestor transforms that would otherwise trap a position:fixed overlay.
@@ -61,7 +70,7 @@ export function ServerCarousel() {
 
   return (
     <div
-      class="carousel reveal"
+      class="carousel carousel--banner"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
@@ -76,7 +85,7 @@ export function ServerCarousel() {
       }}
     >
       <div class="carousel-track" style={{ transform: `translateX(-${index * 100}%)` }}>
-        {images.map(({ src, desc }, i) => (
+        {images.map(({ src, desc, size }, i) => (
           <button
             key={src}
             type="button"
@@ -89,13 +98,16 @@ export function ServerCarousel() {
               }
               setZoomed(true);
             }}
-            aria-label={`Enlarge Chromabit SMP screenshot ${i + 1}`}
+            aria-label={`Enlarge Chromabit screenshot ${i + 1}`}
           >
             <img
               class="carousel-slide"
               src={src}
-              alt={desc || `Chromabit SMP screenshot ${i + 1}`}
-              loading={i === 0 ? 'eager' : 'lazy'}
+              alt={desc || `Chromabit screenshot ${i + 1}`}
+              width={size?.[0]}
+              height={size?.[1]}
+              loading="lazy"
+              decoding="async"
             />
             {desc && <span class="carousel-caption">{desc}</span>}
           </button>
@@ -104,28 +116,12 @@ export function ServerCarousel() {
 
       <span class="carousel-zoom-hint"><ZoomIcon /> Click to enlarge</span>
 
-      {images.length > 1 && (
-        <>
-          <button class="carousel-arrow prev" onClick={() => go(-1)} aria-label="Previous image">‹</button>
-          <button class="carousel-arrow next" onClick={() => go(1)} aria-label="Next image">›</button>
-          <div class="carousel-dots">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                class={`carousel-dot${i === index ? ' active' : ''}`}
-                onClick={() => setIndex(i)}
-                aria-label={`Go to image ${i + 1}`}
-              />
-            ))}
-          </div>
-        </>
-      )}
 
       {zoomed && (
         <dialog
           ref={dialogRef}
           class="lightbox"
-          aria-label={`Chromabit SMP screenshot ${index + 1}`}
+          aria-label={`Chromabit screenshot ${index + 1}`}
           onClose={() => setZoomed(false)}
           onClick={(e) => { if (e.target === e.currentTarget) setZoomed(false); }}
         >
@@ -134,7 +130,7 @@ export function ServerCarousel() {
             <img
               class="lightbox-img"
               src={images[index].src}
-              alt={images[index].desc || `Chromabit SMP screenshot ${index + 1}`}
+              alt={images[index].desc || `Chromabit screenshot ${index + 1}`}
             />
             {images[index].desc && <span class="lightbox-caption">{images[index].desc}</span>}
           </figure>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Player heads load from mc-heads.net: send it no referrer. -->
+  <meta name="referrer" content="no-referrer">
+  <script>
+    // The nav bar is the first text painted - hero content is still faded out
+    // at that point - so a webfont swapping in under it reads as a flicker on
+    // every navigation. Reveal it once Teko, Jersey 10 and VT323 have loaded, or after
+    // 1.5s if the font never arrives.
+    (function () {
+      var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
+      el.classList.add('js');
+      if (!document.fonts || !document.fonts.load) return ready();
+      // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
+      // no webfont face to wait on, and the request would resolve instantly.
+      addEventListener('DOMContentLoaded', function () {
+        Promise.all([document.fonts.load('700 1rem Teko'), document.fonts.load('400 1rem "Jersey 10"'), document.fonts.load('400 1rem VT323')]).then(ready, ready);
+      });
+      setTimeout(ready, 1500);
+    })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/server-icon-old-2.png">
+
+  <link rel="preconnect" href="https://api.chromabit.us" crossorigin>
+  <link rel="dns-prefetch" href="https://mc-heads.net">
+
+  <!--seo-head-->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Jersey+10&family=VT323&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/pvpPlayer.jsx"></script>
+</body>
+
+</html>

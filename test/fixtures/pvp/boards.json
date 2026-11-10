@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "rankedPlayers": 777,
+  "ladder": {
+    "divisions": 3,
+    "placementMatches": 10,
+    "tiers": [
+      {"name": "Tin", "min": 0, "colour": "#8A8F98"},
+      {"name": "Bronze", "min": 1350, "colour": "#CD7F32"},
+      {"name": "Silver", "min": 1500, "colour": "#C0C0C0"},
+      {"name": "Gold", "min": 1600, "colour": "#FFD700"},
+      {"name": "Emerald", "min": 1700, "colour": "#50C878"},
+      {"name": "Mithril", "min": 1800, "colour": "#FF77E9"},
+      {"name": "Chroma", "min": 1950, "colour": "#B24BF3"}
+    ],
+    "kits": [
+      {"key": "sword", "label": "Sword"},
+      {"key": "mace", "label": "Mace"},
+      {"key": "axe", "label": "Axe", "soon": true},
+      {"key": "chaos", "label": "Chaos", "soon": true}
+    ]
+  },
+  "boards": [
+    {"key": "overall", "label": "Overall", "kind": "rating", "rows": [
+      {"rank": 1, "name": "Sample_01", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000001", "rating": 1987, "tier": "Chroma", "division": null, "wins": 40, "losses": 12},
+      {"rank": 2, "name": ".Sample_02", "edition": "bedrock", "uuid": null, "rating": 1912, "tier": "Mithril", "division": "I", "wins": 33, "losses": 15},
+      {"rank": 3, "name": "Sample_03", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000003", "rating": 1861, "tier": "Mithril", "division": "II", "wins": 29, "losses": 18},
+      {"rank": 4, "name": "<img src=x onerror=alert(1)>", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000004", "rating": 1745, "tier": "Emerald", "division": "II", "wins": 20, "losses": 20},
+      {"rank": 5, "name": ".Sample_05", "edition": "bedrock", "uuid": null, "rating": 1640, "tier": "Gold", "division": "II", "wins": 41, "losses": 16},
+      {"rank": 6, "name": "Sample_06", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000006", "rating": 1640, "tier": "Gold", "division": "II", "wins": 10, "losses": 30},
+      {"rank": 7, "name": "Sample_07", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000007", "rating": 1520, "tier": "Silver", "division": "III", "wins": 1, "losses": 7},
+      {"rank": 8, "name": "Sample_08", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000008", "rating": 1400, "tier": "Bronze", "division": "II", "wins": 0, "losses": 0},
+      {"rank": 9, "name": ".Sample_09", "edition": "bedrock", "uuid": null, "rating": 1200, "tier": "Tin", "division": "I", "wins": 5, "losses": 9}
+    ]},
+    {"key": "sword", "label": "Sword", "kind": "rating", "rows": [
+      {"rank": 1, "name": ".Sample_02", "edition": "bedrock", "uuid": null, "rating": 1912, "tier": "Mithril", "division": "I", "wins": 21, "losses": 9},
+      {"rank": 2, "name": "Sample_06", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000006", "rating": 1640, "tier": "Gold", "division": "II", "wins": 10, "losses": 30}
+    ]},
+    {"key": "mace", "label": "Mace", "kind": "rating", "rows": [
+      {"rank": 1, "name": "Sample_03", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000003", "rating": 1861, "tier": "Mithril", "division": "II", "wins": 29, "losses": 18}
+    ]},
+    {"key": "axe", "label": "Axe", "kind": "rating", "soon": true, "rows": []},
+    {"key": "chaos", "label": "Chaos", "kind": "rating", "soon": true, "rows": []},
+    {"key": "tournament", "label": "Tournament Wins", "kind": "count", "rows": [
+      {"rank": 1, "name": "Sample_01", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000001", "value": 3},
+      {"rank": 2, "name": ".Sample_09", "edition": "bedrock", "uuid": null, "value": 1}
+    ]}
+  ]
+}

@@ -8,6 +8,14 @@ import { MotionRoot } from '../lib/motion';
 // Bump whenever the substance of the policy changes - not for typo fixes.
 const LAST_UPDATED = 'August 10, 2026';
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** 'August 10, 2026' -> '2026-08-10', for the <time datetime> around it. */
+function isoDate(text) {
+  const [, month, day, year] = /^(\w+) (\d{1,2}), (\d{4})$/.exec(text);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${year}-${pad(MONTHS.indexOf(month) + 1)}-${pad(day)}`;
+}
+
 export function PrivacyPage() {
   // SectionHeader renders a `.reveal` element, which CSS pins at opacity 0
   // until the observer marks it visible.
@@ -17,9 +25,9 @@ export function PrivacyPage() {
     <MotionRoot>
       <NavBar />
       <main>
-        <section class="page-hero container" aria-label="Chromabit SMP privacy policy">
-          <a href="/" class="logo-link" aria-label="Back to Chromabit SMP home">
-            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit SMP" />
+        <section class="page-hero container" aria-label="Chromabit privacy policy">
+          <a href="/" class="logo-link" aria-label="Back to Chromabit home">
+            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit" width="96" height="96" />
           </a>
 
           <p class="section-eyebrow">LEGAL</p>
@@ -33,7 +41,10 @@ export function PrivacyPage() {
 
         <section class="legal-section" aria-label="Privacy policy">
           <div class="container">
-            <SectionHeader eyebrow="LAST UPDATED" title={LAST_UPDATED.toUpperCase()} />
+            <SectionHeader
+              eyebrow="LAST UPDATED"
+              title={<time datetime={isoDate(LAST_UPDATED)}>{LAST_UPDATED.toUpperCase()}</time>}
+            />
 
             <div class="legal">
               <p>
@@ -116,6 +127,7 @@ export function PrivacyPage() {
                 <li><strong>Google Fonts</strong> serves the fonts used on these pages.</li>
                 <li><strong>mcsrvstat.us</strong> supplies the live player count.</li>
                 <li><strong>Discord</strong> supplies our community member count.</li>
+                <li><strong>mc-heads.net</strong> serves the player head images on the PVP pages. It receives a Java player's public UUID in the image address and your IP address like any image host; no Bedrock identifier is sent.</li>
               </ul>
               <p>
                 Each of these receives your IP address as a normal part of serving you the

@@ -13,7 +13,7 @@ import faq from '../data/faq.json';
 
 // Answers in faq.json use a tiny markdown: **bold**, `code` and [text](href).
 // Anything else is plain text, which keeps the JSON readable and lets
-// tools/build_faq_ld.py strip it the same way for the page's JSON-LD.
+// plainAnswer() in src/data/seo.js strip it the same way for the page's JSON-LD.
 const TOKEN = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
 
 function rich(text) {
@@ -38,12 +38,12 @@ export function FaqPage() {
     <MotionRoot>
       <NavBar current="faq" />
       <main>
-        <section class="page-hero container" aria-label="Chromabit SMP FAQ">
+        <section class="page-hero container" aria-label="Chromabit FAQ">
           <p class="section-eyebrow">HELP CENTER</p>
           <h1 class="hero-title">
             HAVE<span class="accent">QUESTIONS?</span>
           </h1>
-          <p class="hero-sub">Everything you need to know about Chromabit Economy SMP.</p>
+          <p class="hero-sub">Everything you need to know about Chromabit.</p>
 
           <StatusBadge status={status} />
 

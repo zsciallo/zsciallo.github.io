@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "players": [
+    {"key": "b-sample_02", "name": ".Sample_02", "edition": "bedrock", "bestTier": "Mithril", "bestDivision": "I"},
+    {"key": "b-sample_05", "name": ".Sample_05", "edition": "bedrock", "bestTier": "Gold", "bestDivision": "II"},
+    {"key": "b-sample_09", "name": ".Sample_09", "edition": "bedrock", "bestTier": "Tin", "bestDivision": "I"},
+    {"key": "b-sample_16_chars", "name": ".Sample_16_chars", "edition": "bedrock", "bestTier": "Bronze", "bestDivision": "II"},
+    {"key": "sample_04", "name": "Sample_04", "edition": "java", "bestTier": "Emerald", "bestDivision": "II"},
+    {"key": "sample_01", "name": "Sample_01", "edition": "java", "bestTier": "Chroma", "bestDivision": null},
+    {"key": "sample_03", "name": "Sample_03", "edition": "java", "bestTier": "Mithril", "bestDivision": "II"},
+    {"key": "sample_06-2", "name": "Sample_06", "edition": "java", "bestTier": "Gold", "bestDivision": "II"},
+    {"key": "sample_10", "name": "Sample_10", "edition": "java", "bestTier": null, "bestDivision": null},
+    {"key": "sample_11", "name": "Sample_11", "edition": "java", "bestTier": "Silver", "bestDivision": "III"}
+  ]
+}

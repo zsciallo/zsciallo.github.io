@@ -6,6 +6,7 @@ import { click } from '../lib/sound';
 
 const LINKS = [
   { id: 'home', href: '/', label: 'HOME' },
+  { id: 'pvp', href: '/pvp/', label: 'PVP' },
   { id: 'store', href: '/store/', label: 'STORE' },
   { id: 'auctions', href: '/auctions/', label: 'AUCTIONS' },
   { id: 'faq', href: '/faq/', label: 'FAQ' },

@@ -1,0 +1,48 @@
+{
+  "capturedFrom": "dc46510",
+  "note": "Titles always frozen; a description is frozen unless \"released\" says why it may change.",
+  "pages": {
+    "/": {
+      "title": "Chromabit Network | Ranked PVP and Economy SMP for Java + Bedrock",
+      "description": "Chromabit is a Minecraft network for Java and Bedrock: ranked kit PVP on one shared ladder, and a survival server with a player-run economy. Join at play.chromabit.us.",
+      "descriptionFrozen": true
+    },
+    "/pvp/": {
+      "title": "Ranked PVP Leaderboards | Chromabit",
+      "description": "ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.",
+      "descriptionFrozen": true
+    },
+    "/smp/": {
+      "title": "Economy SMP | Chromabit",
+      "description": "Chromabit Economy SMP is a Minecraft survival server for Java and Bedrock with a player-run economy, an auction house and server events. Join the grind at play.chromabit.us.",
+      "descriptionFrozen": false,
+      "released": "173 characters, outside 70-160"
+    },
+    "/faq/": {
+      "title": "FAQ | Chromabit",
+      "description": "Server address for Java and Bedrock, versions, ranks, the auction house, events, claims and rules. Every answer checked against the server config.",
+      "descriptionFrozen": true
+    },
+    "/store/": {
+      "title": "Store | Chromabit",
+      "description": "The official Chromabit store. Buy ranks, crate keys, and more for the Chromabit Minecraft server. Every purchase supports the server.",
+      "descriptionFrozen": false,
+      "released": "store wording: \"the Chromabit Minecraft server\" becomes Chromabit wording without \"server\""
+    },
+    "/auctions/": {
+      "title": "Auction House | Chromabit SMP",
+      "description": "Live auction house market data for Chromabit Economy SMP. Price history, current floors, trade volume and active listings for every item traded on the server.",
+      "descriptionFrozen": true
+    },
+    "/privacy/": {
+      "title": "Privacy Policy | Chromabit",
+      "description": "How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments, and your choices.",
+      "descriptionFrozen": true
+    },
+    "/pvp/player/": {
+      "title": "Player | Chromabit",
+      "description": "A ChromaPVP ranked player's season: tier and rating per kit, career totals and recent ranked matches.",
+      "descriptionFrozen": true
+    }
+  }
+}
