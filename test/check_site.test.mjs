@@ -114,7 +114,8 @@ const MODE_ROWS = [
   ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
   ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
   // Spec amendment U4-copy (2026-11-10): no fixed round count; 2v2v2 takes teams of two.
-  ['Prismatic Arena', 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.'],
+  // U4-copy-2: augments only in rounds 1-10, so not "each round".
+  ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
   ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
   ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
   ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
@@ -876,12 +877,17 @@ ${r.out}`,
   expectFail('U4-copy old Parties copy', mutate(P, 'Queue Arena 2v2v2 as a pair.', 'Queue Arena 2v2v2 together.'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
   expectFail(
     'U4-copy old Prismatic Arena copy',
-    mutate(P, 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'),
+    mutate(P, 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'),
     'pvp-modes',
     '/pvp/ mode "Prismatic Arena" has no description',
   );
   expectFail('U4-copy Ten rounds elsewhere in the body', mutate(P, '</main>', '<p>Ten rounds of glory.</p></main>'), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
   expectFail('U4-copy Ten rounds in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="Ten rounds">`), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
+  // U4-copy-2: the round-2 copy fails, and "each round" anywhere on /pvp/ fails.
+  expectFail('U4-copy-2 round-2 Prismatic Arena copy', mutate(P, 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.', 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.'), 'pvp-modes', '/pvp/ mentions "each round"');
+  expectFail('U4-copy-2 each round elsewhere in the body', mutate(P, '</main>', '<p>New loot each round.</p></main>'), 'pvp-modes', '/pvp/ mentions "each round"');
+  expectFail('U4-copy-2 each round in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="augment each round">`), 'pvp-modes', '/pvp/ mentions "each round"');
+  expectFail('U4-copy-2 each round split by markup', mutate(P, '</main>', '<p>each <i>round</i></p></main>'), 'pvp-modes', '/pvp/ mentions "each round"');
   expectFail('U4-copy Ten rounds split by markup', mutate(P, '</main>', '<p>Ten <b>rounds</b></p></main>'), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
   expectFail(
     'U4-AC6 order',

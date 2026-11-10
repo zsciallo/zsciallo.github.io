@@ -930,13 +930,14 @@ export const PVP = {
     ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
     ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
     // Spec amendment U4-copy (2026-11-10): the arena has no fixed round count, and 2v2v2 takes teams of two.
-    ['Prismatic Arena', 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.'],
+    // U4-copy-2: augments are offered in rounds 1-10 only, so not "each round".
+    ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
     ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
     ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
     ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
   ],
-  /** U4-copy: texts that must appear nowhere on /pvp/ (raw HTML or visible text). */
-  modesForbidden: ['Ten rounds'],
+  /** U4-copy, U4-copy-2: texts that must appear nowhere on /pvp/ (raw HTML or visible text). */
+  modesForbidden: ['Ten rounds', 'each round'],
   join: 'Connect to play.chromabit.us and pick Kit PVP in the hub.',
   /** Production must not ship sample data or a fixture build. */
   sampleMarker: 'Sample_',
