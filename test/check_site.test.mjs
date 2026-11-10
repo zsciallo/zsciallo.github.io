@@ -12,7 +12,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CHECKER = [join(ROOT, 'tools', 'check_site.mjs'), join(ROOT, 'test', 'check_site.mjs')].find(existsSync);
@@ -32,10 +32,12 @@ const DISCORD = JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8
 // links /pvp/ (the U3 navs had HOME STORE AUCTIONS and HOME STORE; the U3 cases
 // still find their strings). Owner ruling 2026-11-10: no BETA marker in the nav
 // (the earlier fixture had a [data-beta] span in the PVP link).
-const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
+const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png" width="30" height="30"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
 const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/store/">STORE</a><a href="/auctions/">AUCTIONS</a><a href="/faq/">FAQ</a></header>';
+// U8: every <img> has width and height (the hero logo is above the first screen, so not lazy).
+const HERO_LOGO = '<img class="logo" src="/server-icon.png" alt="Chromabit logo" width="64" height="64">';
 const HERO_HEAD =
-  '<div class="logo-wrap"><a href="/" aria-label="Back to Chromabit home"><img class="logo" src="/server-icon.png" alt="Chromabit logo"></a></div>' +
+  `<div class="logo-wrap"><a href="/" aria-label="Back to Chromabit home">${HERO_LOGO}</a></div>` +
   '<p class="section-eyebrow">MINECRAFT NETWORK &middot; JAVA + BEDROCK</p>' +
   '<h1 class="hero-title">CHROMABIT <span class="accent">NETWORK</span></h1>' +
   '<p class="hero-tagline">Grind the market. <span class="accent">Climb the ladder.</span></p>';
@@ -54,9 +56,11 @@ const PVP_CARD =
   '<div class="mode-live" data-live="ladder"><h3>TOP OF THE LADDER</h3></div>' +
   '<a class="mode-enter" href="/pvp/">ENTER PVP</a><button type="button" class="pvp-copy" data-copy-ip>COPY IP</button>' +
   '</article>';
+// U8: below the first screen, so also lazy and async.
+const SMP_SHOT = '<img src="/assets/build.png" alt="Smuk_&#39;s Baddies" width="640" height="360" loading="lazy" decoding="async">';
 const SMP_CARD =
   '<article class="mode-card" data-mode-card="smp">' +
-  '<figure class="mode-banner" data-banner="smp"><img src="/assets/build.png" alt="Smuk_&#39;s Baddies"><figcaption>Smuk_\'s Baddies</figcaption></figure>' +
+  '<figure class="mode-banner" data-banner="smp">' + SMP_SHOT + '<figcaption>Smuk_\'s Baddies</figcaption></figure>' +
   '<h2 class="mode-title">ECONOMY SMP</h2>' +
   '<p class="mode-desc">Survival with a player-run market. Claims, custom spawners, King of the Hill.</p>' +
   '<div class="mode-live" data-live="movers"></div>' +
@@ -132,7 +136,8 @@ function richHtml(md) {
 let faqIds = 0;
 function faqHtml(groups) {
   return (
-    '<section aria-label="Frequently asked questions" class="faq-section"><div class="faq-list">' +
+    // U8: one <h1> per page and no skipped heading level (the items are h3).
+    '<section aria-label="Frequently asked questions" class="faq-section"><h1>HAVE QUESTIONS?</h1><h2>FAQ</h2><div class="faq-list">' +
     groups
       .map(
         (g) =>
@@ -210,12 +215,12 @@ const PVP_MODES =
   MODE_ROWS.map(([t, d]) => `<article class="mode" data-mode><h3>${t}</h3><p>${d}</p></article>`).join('') +
   '</section>';
 const PVP_JOIN =
-  '<section class="pvp-join"><p>Connect to <span class="accent">play.chromabit.us</span> and pick Kit PVP in the hub.</p>' +
+  '<section class="pvp-join" aria-label="Join"><p>Connect to <span class="accent">play.chromabit.us</span> and pick Kit PVP in the hub.</p>' +
   '<button type="button" class="pvp-copy" data-copy-ip>COPY IP</button></section>';
 // U7: the player search block, hidden in the prerender, above the board table.
 const PVP_SEARCH =
   '<div class="player-search" data-player-search hidden><label for="player-q">FIND A PLAYER</label>' +
-  '<input id="player-q" type="search" autocomplete="off" maxlength="20"><ul class="search-results" data-search-results></ul></div>';
+  '<input id="player-q" type="search" autocomplete="off" maxlength="20"><ul class="search-results" data-search-results></ul><p class="search-count" aria-live="polite"></p></div>';
 // U7: the search block sits inside the board section, above the tabs (so the U4 mutation strings stay unchanged).
 const PVP_BOARD = `<section class="board" data-board>${PVP_SEARCH}${PVP_TABS}${PVP_EMPTY}${PVP_NOTE}</section>`;
 const PVP_BODY = `${PVP_NAV}<main>${PVP_MAST}${PVP_BOARD}${PVP_TIERS}${PVP_FACTS}${PVP_MODES}${PVP_JOIN}</main>${FOOTER}`;
@@ -231,22 +236,124 @@ const PLAYER_MAST =
   `<div class="profile-name"><img class="profile-head" src="/assets/pvp-default-head.svg" alt="" width="64" height="64">${PLAYER_H1}</div>` +
   `<p class="profile-best" data-profile-best hidden></p>${PLAYER_BACK}</section>`;
 const PLAYER_BODY = `${PVP_NAV}<main>${PLAYER_MAST}${PLAYER_STATE}</main>${FOOTER}`;
+// U8: the sitemap lists exactly the seven indexable pages, each with a lastmod (was / and /pvp/ only, no lastmod).
+const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/'];
+const sitemapLine = (route) => `  <url><loc>https://chromabit.us${route}</loc><lastmod>2026-11-10</lastmod></url>\n`;
 const SITEMAP =
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  '  <url><loc>https://chromabit.us/</loc></url>\n  <url><loc>https://chromabit.us/pvp/</loc></url>\n</urlset>\n';
+  INDEXABLE.map(sitemapLine).join('') +
+  '</urlset>\n';
+const SITEMAP_PVP_LINE = sitemapLine('/pvp/');
+const ROBOTS_TXT =
+  'User-agent: *\nAllow: /\n\n' +
+  ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended', 'Bingbot'].map((b) => `User-agent: ${b}\nAllow: /\n`).join('\n') +
+  '\nSitemap: https://chromabit.us/sitemap.xml\n';
+const LLMS_TXT = `# Chromabit Network
+
+> A Minecraft network for Java and Bedrock: ChromaPVP, ranked kit PVP on one ladder, and an economy SMP with a player-run market.
+
+Join at play.chromabit.us. Bedrock uses the same address with port 19132. Java works on any version up to 26.3.
+
+## Pages
+
+- [Home](https://chromabit.us/): the network and how to join.
+- [PVP](https://chromabit.us/pvp/): ranked leaderboards. 10 placement matches, seven tiers, best of three, ranked from level 2.
+- [Economy SMP](https://chromabit.us/smp/): survival with a player-run market.
+- [FAQ](https://chromabit.us/faq/): answers about the network.
+- [Store](https://chromabit.us/store/): ranks and crate keys.
+- [Auctions](https://chromabit.us/auctions/): live market data.
+- [Privacy](https://chromabit.us/privacy/): how data is handled.
+`;
 
 /** U4: give a page the site nav and footer (around #app, so the U2 cases keep their exact #app strings). */
 function framed(html, nav = NAV) {
   return html.replace('<body>\n', `<body>\n${nav}\n`).replace('\n</body>', `\n${FOOTER}\n</body>`);
 }
 
+// U8: WebSite gains url; Organization gains url, logo and sameAs placed before name, so the U2 cases'
+// substrings ('"WebSite","@id":...,"name":NET' and '"name":NET,"alternateName":"Chromabit"}]') still occur.
+const ORG_ID = 'https://chromabit.us/#organization';
+const SITE_ID = 'https://chromabit.us/#website';
 const LD_HOME = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'WebSite', '@id': 'https://chromabit.us/#website', name: NET, alternateName: 'Chromabit' },
-    { '@type': 'Organization', '@id': 'https://chromabit.us/#organization', name: NET, alternateName: 'Chromabit' },
+    { '@type': 'WebSite', '@id': SITE_ID, name: NET, alternateName: 'Chromabit', url: 'https://chromabit.us/' },
+    { '@type': 'Organization', '@id': ORG_ID, url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD], name: NET, alternateName: 'Chromabit' },
   ],
 });
+// U8: the home VideoGame / GameServer node, in its own block.
+const LD_GAME = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  '@id': 'https://chromabit.us/#minecraft',
+  name: 'Minecraft',
+  gamePlatform: ['Java Edition', 'Bedrock Edition'],
+  gameServer: { '@type': 'GameServer', name: 'Chromabit', url: 'https://chromabit.us/', identifier: 'play.chromabit.us' },
+});
+const crumbs = (route, name) => ({
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://chromabit.us/' },
+    { '@type': 'ListItem', position: 2, name, item: `https://chromabit.us${route}` },
+  ],
+});
+/** U8: a sub-page's JSON-LD: a WebPage that references the home WebSite and Organization by @id, and its breadcrumb. */
+const ldSub = (route, name) =>
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', '@id': `https://chromabit.us${route}#webpage`, url: `https://chromabit.us${route}`, isPartOf: { '@id': SITE_ID }, publisher: { '@id': ORG_ID } },
+      crumbs(route, name),
+    ],
+  });
+const LD_PVP = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'WebPage', '@id': 'https://chromabit.us/pvp/#webpage', name: 'ChromaPVP', description: PVP_DESC, url: 'https://chromabit.us/pvp/', isPartOf: { '@id': SITE_ID }, publisher: { '@id': ORG_ID } },
+    { '@type': 'ItemList', itemListElement: MODE_ROWS.map(([t], i) => ({ '@type': 'ListItem', position: i + 1, name: t })) },
+    crumbs('/pvp/', 'PVP'),
+  ],
+});
+const ldTag = (ld) => `<script type="application/ld+json">${ld}</script>`;
+
+// U8 head tags. The font-ready inline script is the one blocking head script the checker allows.
+const FONT_READY = "<script>(function(){var el=document.documentElement;el.classList.add('js');if(!document.fonts){el.classList.add('fonts-ready');return}document.fonts.ready.then(function(){el.classList.add('fonts-ready')})})()</script>";
+const FONT_HINTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+const ROBOTS_META = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">';
+const REFERRER_META = '<meta name="referrer" content="no-referrer">';
+const HERO_PRELOAD = '<link rel="preload" as="image" href="/server-icon.png" fetchpriority="high">';
+/** U8: the SEO head tags of an indexable page; each option adds a tag the page does not already carry. */
+function u8Head(route, { canonical = true, description, ogDescription, twitterTitle, twitterDescription } = {}) {
+  const url = `https://chromabit.us${route}`;
+  return [
+    canonical && `<link rel="canonical" href="${url}">`,
+    description && `<meta name="description" content="${description}">`,
+    '<meta property="og:type" content="website">',
+    `<meta property="og:url" content="${url}">`,
+    '<meta property="og:locale" content="en_US">',
+    ogDescription && `<meta property="og:description" content="${ogDescription}">`,
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
+    '<meta property="og:image:alt" content="Chromabit Network">',
+    '<meta name="twitter:card" content="summary_large_image">',
+    twitterTitle && `<meta name="twitter:title" content="${twitterTitle}">`,
+    twitterDescription && `<meta name="twitter:description" content="${twitterDescription}">`,
+    `<meta name="twitter:image" content="${OG}">`,
+    ROBOTS_META,
+    '<meta name="theme-color" content="#0b0614">',
+  ]
+    .filter(Boolean)
+    .join('\n  ');
+}
+/** U8: unique descriptions of 70-160 characters for the pages that had none in the fixture. */
+const DESC = {
+  smp: 'Survival with a player-run market on Chromabit: claims, custom spawners and a dungeon under one big tree.',
+  faq: 'Answers about the Chromabit network: the address, versions, ranks, the auction house, claims and rules.',
+  store: 'The official Chromabit store. Buy ranks, crate keys and more; every purchase directly helps Chromabit.',
+  auctions: 'Live auction house data for the Chromabit SMP: price history, floors, volume and listings for each item.',
+  privacy: 'How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments and your choices.',
+};
+const subHead = (route, title, desc) => u8Head(route, { description: desc, ogDescription: desc, twitterTitle: title, twitterDescription: desc });
 
 function headFor(title, extra = '') {
   return `<title>${title}</title>
@@ -254,6 +361,8 @@ function headFor(title, extra = '') {
   <meta property="og:site_name" content="${NET}">
   <meta property="og:title" content="${title}">
   <meta property="og:image" content="${OG}">
+  ${FONT_READY}
+  ${FONT_HINTS}
   ${extra}`;
 }
 
@@ -264,7 +373,7 @@ function htmlPage(head, body) {
 /** U5: the /faq/ page for a FAQ model (default: the spec'd one) and its JSON-LD (default: generated from the model). */
 function faqPage(groups = goodFaq(), ld = faqLd(groups)) {
   return framed(htmlPage(
-    headFor('FAQ | Chromabit', `<script type="application/ld+json">${ld}</script>`),
+    headFor('FAQ | Chromabit', `<script type="application/ld+json">${ld}</script>\n  ${subHead('/faq/', 'FAQ | Chromabit', DESC.faq)}\n  ${ldTag(ldSub('/faq/', 'FAQ'))}`),
     '<main>Everything you need to know about Chromabit.</main>',
   )).replace(`\n${FOOTER}\n</body>`, `\n${faqHtml(groups)}\n${FOOTER}\n</body>`);
 }
@@ -287,22 +396,34 @@ function goodSite() {
   <meta property="og:description" content="${SOCIAL_DESC}">
   <meta name="twitter:title" content="${HOME_TITLE}">
   <meta name="twitter:description" content="${SOCIAL_DESC}">
-  <script type="application/ld+json">${LD_HOME}</script>`,
+  <script type="application/ld+json">${LD_HOME}</script>
+  ${u8Head('/')}
+  ${HERO_PRELOAD}
+  ${ldTag(LD_GAME)}`,
       ),
       HOME_BODY,
     ),
-    'smp/index.html': htmlPage(headFor('Economy SMP | Chromabit'), SMP_BODY),
+    'smp/index.html': htmlPage(headFor('Economy SMP | Chromabit', `${subHead('/smp/', 'Economy SMP | Chromabit', DESC.smp)}\n  ${ldTag(ldSub('/smp/', 'Economy SMP'))}`), SMP_BODY),
     'faq/index.html': faqPage(goodFaq(), LD_FAQ),
-    'store/index.html': framed(htmlPage(headFor('Store | Chromabit'), '<main>Every purchase directly supports Chromabit.</main>')),
-    'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP'), '<main>Chromabit SMP market</main>')),
-    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit'), `<main>Privacy</main>${PRIVACY_OTHER}`)),
+    // U8: each framed page also gets an <h1> (one per page), outside the U2 cases' exact strings.
+    'store/index.html': framed(htmlPage(headFor('Store | Chromabit', `${subHead('/store/', 'Store | Chromabit', DESC.store)}\n  ${ldTag(ldSub('/store/', 'Store'))}`), '<main><h1>STORE</h1>Every purchase directly supports Chromabit.</main>')),
+    'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP', `${subHead('/auctions/', 'Auction House | Chromabit SMP', DESC.auctions)}\n  ${ldTag(ldSub('/auctions/', 'Auctions'))}`), '<main><h1>Auction House</h1>Chromabit SMP market</main>')),
+    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit', `${subHead('/privacy/', 'Privacy Policy | Chromabit', DESC.privacy)}\n  ${ldTag(ldSub('/privacy/', 'Privacy'))}`), `<main>Privacy</main><h1>PRIVACY POLICY</h1>${PRIVACY_OTHER}`)),
     'pvp/index.html': htmlPage(
-      headFor(PVP_TITLE, `<meta name="description" content="${PVP_DESC}">\n  <meta name="twitter:title" content="${PVP_TITLE}">\n  ${PVP_CANON}`),
+      headFor(
+        PVP_TITLE,
+        `<meta name="description" content="${PVP_DESC}">\n  <meta name="twitter:title" content="${PVP_TITLE}">\n  ${PVP_CANON}\n  ` +
+          `${u8Head('/pvp/', { canonical: false, ogDescription: 'Ranked kit PVP for Java and Bedrock on one ladder.', twitterDescription: 'ChromaPVP ranked leaderboards for Java and Bedrock.' })}\n  ${REFERRER_META}\n  ${ldTag(LD_PVP)}`,
+      ),
       PVP_BODY,
     ),
-    'pvp/player/index.html': htmlPage(headFor(PLAYER_TITLE, `${PLAYER_ROBOTS}\n  ${PVP_CANON}`), PLAYER_BODY),
+    'pvp/player/index.html': htmlPage(headFor(PLAYER_TITLE, `${PLAYER_ROBOTS}\n  ${PVP_CANON}\n  ${REFERRER_META}`), PLAYER_BODY),
     'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
+    // U8: the hero logo (preloaded on /, the Organization logo), robots.txt and llms.txt.
+    'server-icon.png': png(64, 64),
+    'robots.txt': ROBOTS_TXT,
+    'llms.txt': LLMS_TXT,
   };
 }
 
@@ -320,8 +441,10 @@ function png(width, height) {
 
 const tmpRoot = mkdtempSync(join(tmpdir(), 'check-site-'));
 let n = 0;
+// U8: the checker's snapshot() writes the two frozen-baseline fixtures (titles/descriptions, visible text).
+const { snapshot } = await import(pathToFileURL(CHECKER).href);
 
-function runOn(files) {
+function writeDist(files) {
   const dist = join(tmpRoot, `dist${n++}`);
   for (const [rel, content] of Object.entries(files)) {
     if (content === null) continue;
@@ -330,7 +453,24 @@ function runOn(files) {
     writeFileSync(file, content);
   }
   mkdirSync(dist, { recursive: true });
-  const r = spawnSync(process.execPath, [CHECKER, dist], { encoding: 'utf-8' });
+  return dist;
+}
+
+/**
+ * Run the checker on `files`. U8: the frozen-baseline fixtures (seo-head-base,
+ * visible-text-base) are a snapshot of `base`, by default of `files` itself, so
+ * every pre-U8 case is judged against its own site and only the U8 freeze
+ * cases pass a different base (the good site) to plant a change.
+ */
+function runOn(files, base = files) {
+  const dist = writeDist(files);
+  const baseDist = base === files ? dist : writeDist(base);
+  const fixtures = `${dist}-fixtures`;
+  mkdirSync(fixtures, { recursive: true });
+  const snap = snapshot(baseDist, 'self-test');
+  writeFileSync(join(fixtures, 'seo-head-base.json'), JSON.stringify(snap.heads));
+  writeFileSync(join(fixtures, 'visible-text-base.json'), JSON.stringify(snap.text));
+  const r = spawnSync(process.execPath, [CHECKER, dist], { encoding: 'utf-8', env: { ...process.env, CHECK_SITE_FIXTURES: fixtures } });
   return { code: r.status, out: r.stdout + r.stderr, lines: r.stdout.trim().split(/\r?\n/) };
 }
 
@@ -438,6 +578,22 @@ try {
       'player-nav',
       'player-internal-links',
       'pvp-search-shell',
+      // U8
+      'seo-head',
+      'seo-titles-frozen',
+      'seo-jsonld',
+      'seo-jsonld-visible-facts',
+      'seo-sitemap',
+      'seo-robots',
+      'seo-llms',
+      'seo-404',
+      'a11y-headings',
+      'a11y-landmarks',
+      'a11y-names',
+      'img-attrs',
+      'perf-hints',
+      'pvp-referrer',
+      'visible-text-unchanged',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -510,12 +666,11 @@ ${r.out}`);
     'home-head',
     '/ JSON-LD Organization alternateName is undefined',
   );
-  expectFail(
-    'AC2 JSON-LD missing',
-    mutate('index.html', `<script type="application/ld+json">${LD_HOME}</script>`, ''),
-    'home-head',
-    '/ has 0 JSON-LD WebSite nodes',
-  );
+  // Since U8 seo-jsonld needs the home Organization and WebSite too (both, and only both).
+  expectFails('AC2 JSON-LD missing', mutate('index.html', `<script type="application/ld+json">${LD_HOME}</script>`, ''), {
+    'home-head': '/ has 0 JSON-LD WebSite nodes',
+    'seo-jsonld': "/ has no Organization node and no @id reference to the home page's Organization",
+  });
 
   // AC3
   expectFail(
@@ -564,12 +719,13 @@ ${r.out}`);
     'smp-name-allowlist',
     'faq/index.html contains "Chromabit SMP"',
   );
-  expectFail(
-    'AC5 JSON-LD on /privacy/',
-    mutate('privacy/index.html', '<main>Privacy</main>', '<main>Privacy</main><script type="application/ld+json">{"name":"Chromabit SMP"}</script>'),
-    'smp-name-allowlist',
-    'privacy/index.html contains "Chromabit SMP"',
-  );
+  // Since U8 the planted block also lacks @context/@type (seo-jsonld) and states a name the page does not show
+  // (seo-jsonld-visible-facts): all three, and only those. (U8 adds a head block, so the planted one is block 2.)
+  expectFails('AC5 JSON-LD on /privacy/', mutate('privacy/index.html', '<main>Privacy</main>', '<main>Privacy</main><script type="application/ld+json">{"name":"Chromabit SMP"}</script>'), {
+    'smp-name-allowlist': 'privacy/index.html contains "Chromabit SMP"',
+    'seo-jsonld': '/privacy/ JSON-LD block 2 @context is null',
+    'seo-jsonld-visible-facts': '/privacy/ JSON-LD states what the page does not show: node name "Chromabit SMP"',
+  });
   {
     const r = runOn(mutate('index.html', 'Welcome', 'chromabit smp Chromabit Smp'));
     check('AC5 is case-sensitive', r.code === 0, `exit ${r.code}:\n${r.out}`);
@@ -585,12 +741,11 @@ ${r.out}`);
     'og-preview-image',
     '/privacy/ has no og:image',
   );
-  expectFail(
-    'AC6 og:image wrong url on /store/',
-    mutate('store/index.html', `content="${OG}"`, 'content="/og-preview.png"'),
-    'og-preview-image',
-    '/store/ og:image is "/og-preview.png"',
-  );
+  // The mutation rewrites every content="<og url>"; since U8 that includes twitter:image (seo-head): both, and only both.
+  expectFails('AC6 og:image wrong url on /store/', mutate('store/index.html', `content="${OG}"`, 'content="/og-preview.png"'), {
+    'og-preview-image': '/store/ og:image is "/og-preview.png"',
+    'seo-head': '/store/ twitter:image is "/og-preview.png"',
+  });
 
   // AC7
   {
@@ -635,13 +790,13 @@ ${r.out}`);
     'home-hero',
     'Mine it. Price it. Trade it.',
   );
-  expectFail('U3-AC1 logo missing', mutate(H, '<img class="logo" src="/server-icon.png" alt="Chromabit logo">', ''), 'home-hero', '/ hero has no logo');
-  expectFail(
-    'U3-AC1 logo after the h1',
-    edit(mutate(H, '<img class="logo" src="/server-icon.png" alt="Chromabit logo">', ''), H, '</h1>', '</h1><img class="logo" src="/l.png" alt="">'),
-    'home-hero',
-    '/ hero logo comes after the <h1>',
-  );
+  // U8: the hero logo string is HERO_LOGO now (it gained width and height); same defects planted.
+  expectFail('U3-AC1 logo missing', mutate(H, HERO_LOGO, ''), 'home-hero', '/ hero has no logo');
+  // Since U8 the / image preload must be the hero logo the page uses, and the planted logo is another file (perf-hints): both, and only both.
+  expectFails('U3-AC1 logo after the h1', edit(mutate(H, HERO_LOGO, ''), H, '</h1>', '</h1><img class="logo" src="/l.png" alt="" width="64" height="64">'), {
+    'home-hero': '/ hero logo comes after the <h1>',
+    'perf-hints': '/ image preload ["/server-icon.png"] is not the hero logo "/l.png"',
+  });
   expectFail('U3-AC1 extra section between nav and footer', mutate(H, '</main>', '<section class="features-section"><h2>HOW IT WORKS</h2></section></main>'), 'home-hero', 'HOW IT WORKS');
   expectFail(
     'U3-AC1 old status block in the hero',
@@ -732,7 +887,8 @@ ${r.out}`,
   expectFail('U3-AC4 pvp description', mutate(H, 'Prismatic Arena and tournaments.', 'Prismatic Arena and more.'), 'home-mode-cards', '/ pvp card has no description');
   expectFail('U3-AC4 smp description', mutate(H, 'King of the Hill.', 'KOTH.'), 'home-mode-cards', '/ smp card has no description');
   expectFail('U3-AC4 pvp banner', mutate(H, 'data-banner="pvp"', 'data-banner="arena"'), 'home-mode-cards', '/ pvp card has 0 [data-banner="pvp"], want 1');
-  expectFail('U3-AC4 smp banner without screenshot', mutate(H, '<img src="/assets/build.png" alt="Smuk_&#39;s Baddies">', ''), 'home-mode-cards', '/ smp card banner has no screenshot <img src>');
+  // U8: the screenshot string is SMP_SHOT now (it gained width, height, loading and decoding); same defects planted.
+  expectFail('U3-AC4 smp banner without screenshot', mutate(H, SMP_SHOT, ''),'home-mode-cards', '/ smp card banner has no screenshot <img src>');
   expectFail('U3-AC4 smp banner without caption', mutate(H, "<figcaption>Smuk_'s Baddies</figcaption>", ''), 'home-mode-cards', '/ smp card banner has no caption text');
   expectFail('U3-AC4 ladder container missing', mutate(H, 'data-live="ladder"', 'data-live="top"'), 'home-mode-cards', '/ pvp card has 0 [data-live="ladder"], want 1');
   expectFail(
@@ -760,7 +916,7 @@ ${r.out}`,
   expectFail('U3-AC4 section label as an attribute', mutate(H, '<section class="modes">', '<section class="modes" aria-label="Pick a mode. ONE ADDRESS.">'), 'home-mode-cards', '/ mentions "ONE ADDRESS"');
   {
     const r = runOn(
-      mutate(H, '<img src="/assets/build.png" alt="Smuk_&#39;s Baddies">', '<div class="carousel"><img src="/assets/build.png" alt="Smuk_&#39;s Baddies"></div>'),
+      mutate(H, SMP_SHOT, `<div class="carousel">${SMP_SHOT}</div>`),
     );
     check('U3-AC4 a carousel inside the smp banner is allowed', r.code === 0, `exit ${r.code}:\n${r.out}`);
   }
@@ -786,12 +942,11 @@ ${r.out}`,
   );
   expectFail('U3-AC6 store credit across a line break', mutate(H, 'Welcome', 'Win 100 store\n   credit'), 'home-removed', '/ body mentions "store credit"');
   expectFail('U3-AC6 store credit across tags', mutate(H, 'Welcome', 'Win 100 store <strong>credit</strong>'), 'home-removed', '/ body mentions "store credit"');
-  expectFail(
-    'U3-AC6 standalone carousel',
-    mutate(H, '<nav class="footer-nav">', '<div class="carousel reveal"><img src="/a.png" alt=""></div><nav class="footer-nav">'),
-    'home-removed',
-    '/ has 1 .carousel outside the smp card',
-  );
+  // Since U8 the planted below-the-fold <img> also lacks width/height/lazy/async (img-attrs): both, and only both.
+  expectFails('U3-AC6 standalone carousel', mutate(H, '<nav class="footer-nav">', '<div class="carousel reveal"><img src="/a.png" alt=""></div><nav class="footer-nav">'), {
+    'home-removed': '/ has 1 .carousel outside the smp card',
+    'img-attrs': '/ <img src="/a.png"> width is null',
+  });
   {
     const r = runOn(mutate(H, 'Welcome', 'player economy, grief prevention'));
     check('U3-AC6 removed titles are case-sensitive', r.code === 0, `exit ${r.code}:\n${r.out}`);
@@ -868,12 +1023,13 @@ ${r.out}`,
     'ld-json-parses': '/faq/ JSON-LD block 1 does not parse',
     'faq-jsonld-sync': '/faq/ JSON-LD block 1 does not parse',
   });
-  expectFail('U3-AC8 broken block on /smp/', mutate(S, '</main>', '</main><script type="application/ld+json">{"@type": "WebPage"</script>'), 'ld-json-parses', '/smp/ JSON-LD block 1 does not parse');
+  // U8 gives /smp/ and /privacy/ a JSON-LD block in the head, so the planted body block is block 2 (was block 1).
+  expectFail('U3-AC8 broken block on /smp/', mutate(S, '</main>', '</main><script type="application/ld+json">{"@type": "WebPage"</script>'), 'ld-json-parses', '/smp/ JSON-LD block 2 does not parse');
   expectFail(
     'U3-AC8 broken block in a /privacy/ body',
     mutate('privacy/index.html', '<main>Privacy</main>', `<main>Privacy</main><script type='application/ld+json'>{name: "x"}</script>`),
     'ld-json-parses',
-    '/privacy/ JSON-LD block 1 does not parse',
+    '/privacy/ JSON-LD block 2 does not parse',
   );
 
   // ------------------------------------------------------------------ U4 --
@@ -889,7 +1045,11 @@ ${r.out}`,
   expectFail('U4-AC1 empty app div', mutate(P, '<div id="app">', '<div id="app"></div><div>'), 'pvp-page', '/pvp/ <div id="app"> is empty');
   expectFail('U4-AC1 title', mutate(P, `<title>${PVP_TITLE}</title>`, '<title>Leaderboards | Chromabit</title>'), 'pvp-page', '/pvp/ title is "Leaderboards | Chromabit"');
   expectFail('U4-AC1 description off by one char', mutate(P, 'Mace ladders, tournaments.', 'Mace ladders, tournaments!'), 'pvp-page', '/pvp/ description is');
-  expectFail('U4-AC1 description missing', mutate(P, `<meta name="description" content="${PVP_DESC}">`, ''), 'pvp-page', '/pvp/ has no description');
+  // Since U8 the /pvp/ WebPage JSON-LD description is the meta description; without the meta it states text the page does not show (both, and only both).
+  expectFails('U4-AC1 description missing', mutate(P, `<meta name="description" content="${PVP_DESC}">`, ''), {
+    'pvp-page': '/pvp/ has no description',
+    'seo-jsonld-visible-facts': '/pvp/ JSON-LD states what the page does not show: WebPage description',
+  });
   expectFail('U4-AC1 og:title', mutate(P, `<meta property="og:title" content="${PVP_TITLE}">`, '<meta property="og:title" content="PVP">'), 'pvp-page', '/pvp/ og:title is "PVP"');
   expectFail('U4-AC1 twitter:title missing', mutate(P, `<meta name="twitter:title" content="${PVP_TITLE}">`, ''), 'pvp-page', '/pvp/ has no twitter:title');
   expectFail('U4-AC1 og:site_name', mutate(P, `<meta property="og:site_name" content="${NET}">`, '<meta property="og:site_name" content="Chromabit">'), 'pvp-page', '/pvp/ og:site_name is "Chromabit"');
@@ -904,7 +1064,8 @@ ${r.out}`,
     'pvp-page',
     '/pvp/ has 2 <h1>, want 1',
   );
-  expectFail('U4-AC1 broken JSON-LD', mutate(P, '</main>', '</main><script type="application/ld+json">{"@type":}</script>'), 'pvp-page', '/pvp/ JSON-LD block 1 does not parse');
+  // U8 gives /pvp/ a JSON-LD block in the head, so the planted body block is block 2 (was block 1).
+  expectFail('U4-AC1 broken JSON-LD', mutate(P, '</main>', '</main><script type="application/ld+json">{"@type":}</script>'), 'pvp-page', '/pvp/ JSON-LD block 2 does not parse');
 
   // U4-AC2 pvp-masthead
   expectFail('U4-AC2 h1 text', mutate(P, 'RANKED. <span class="accent">ON BOTH EDITIONS.</span>', 'RANKED.<span class="accent">ON BOTH EDITIONS.</span>'), 'pvp-masthead', '/pvp/ <h1> text is "RANKED.ON BOTH EDITIONS."');
@@ -1000,7 +1161,11 @@ ${r.out}`,
   expectFail('U4-AC6 block missing', mutate(P, ' data-modes>', '>'), 'pvp-modes', '/pvp/ has 0 [data-modes], want 1');
   expectFail('U4-AC6 heading', mutate(P, '<h2>WHAT YOU CAN PLAY</h2>', '<h2>MODES</h2>'), 'pvp-modes', '/pvp/ [data-modes] has no heading "WHAT YOU CAN PLAY"');
   expectFail('U4-AC6 five cards', mutate(P, '<article class="mode" data-mode><h3>Cosmetics</h3>', '<article class="mode"><h3>Cosmetics</h3>'), 'pvp-modes', '/pvp/ [data-modes] has 5 [data-mode], want 6');
-  expectFail('U4-AC6 title', mutate(P, '<h3>FFA Pit</h3>', '<h3>FFA</h3>'), 'pvp-modes', '/pvp/ mode 2 has no heading "FFA Pit"');
+  // Since U8 the ItemList in the /pvp/ JSON-LD names "FFA Pit", which the page then no longer shows (both, and only both).
+  expectFails('U4-AC6 title', mutate(P, '<h3>FFA Pit</h3>', '<h3>FFA</h3>'), {
+    'pvp-modes': '/pvp/ mode 2 has no heading "FFA Pit"',
+    'seo-jsonld-visible-facts': '/pvp/ JSON-LD states what the page does not show: ListItem name "FFA Pit"',
+  });
   expectFail('U4-AC6 title case', mutate(P, '<h3>Duels</h3>', '<h3>DUELS</h3>'), 'pvp-modes', '/pvp/ mode 1 has no heading "Duels"');
   expectFail('U4-AC6 title not a heading', mutate(P, '<h3>Parties</h3>', '<p>Parties</p>'), 'pvp-modes', '/pvp/ mode 5 has no heading "Parties"');
   expectFail('U4-AC6 description off by one char', mutate(P, 'and the Champion title.', 'and the Champion title!'), 'pvp-modes', '/pvp/ mode "Tournaments" has no description');
@@ -1023,7 +1188,7 @@ ${r.out}`,
   expectFail('U4-copy Ten rounds split by markup', mutate(P, '</main>', '<p>Ten <b>rounds</b></p></main>'), 'pvp-modes', '/pvp/ mentions "Ten rounds"');
   expectFail(
     'U4-AC6 order',
-    edit(mutate(P, '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article>', ''), P, '</section><section class="pvp-join">', '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article></section><section class="pvp-join">'),
+    edit(mutate(P, '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article>', ''), P, '</section><section class="pvp-join" aria-label="Join">', '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article></section><section class="pvp-join" aria-label="Join">'),
     'pvp-modes',
     '/pvp/ mode 1 has no heading "Duels"',
   );
@@ -1031,7 +1196,7 @@ ${r.out}`,
   // Owner ruling 2026-11-10: the /pvp/ section labels are gone (pvp-labels-removed only; the headings stay required).
   expectFail('U4-owner THE CLIMB above the tiers', mutate(P, '<section class="tiers" data-tiers><h2>', '<section class="tiers" data-tiers><p class="section-eyebrow">THE CLIMB</p><h2>'), 'pvp-labels-removed', '/pvp/ mentions "THE CLIMB"');
   expectFail('U4-owner MORE THAN DUELS above the modes', mutate(P, '<section class="modes" data-modes><h2>', '<section class="modes" data-modes><p class="section-eyebrow">MORE THAN DUELS</p><h2>'), 'pvp-labels-removed', '/pvp/ mentions "MORE THAN DUELS"');
-  expectFail('U4-owner JOIN AND PLACE in the join section', mutate(P, '<section class="pvp-join"><p>', '<section class="pvp-join"><p class="section-eyebrow">JOIN AND PLACE</p><p>'), 'pvp-labels-removed', '/pvp/ mentions "JOIN AND PLACE"');
+  expectFail('U4-owner JOIN AND PLACE in the join section', mutate(P, '<section class="pvp-join" aria-label="Join"><p>', '<section class="pvp-join" aria-label="Join"><p class="section-eyebrow">JOIN AND PLACE</p><p>'), 'pvp-labels-removed', '/pvp/ mentions "JOIN AND PLACE"');
   expectFail('U4-owner a label split by markup', mutate(P, '</main>', '<p>THE <b>CLIMB</b></p></main>'), 'pvp-labels-removed', '/pvp/ mentions "THE CLIMB"');
   expectFail('U4-owner a label in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="JOIN AND PLACE">`), 'pvp-labels-removed', '/pvp/ mentions "JOIN AND PLACE"');
   {
@@ -1086,8 +1251,16 @@ ${r.out}`);
 
   // U4-AC9 sitemap-pvp
   expectFail('U4-AC9 sitemap missing', { ...goodSite(), 'sitemap.xml': null }, 'sitemap-pvp', 'dist/sitemap.xml missing');
-  expectFail('U4-AC9 no /pvp/ in the sitemap', mutate('sitemap.xml', '  <url><loc>https://chromabit.us/pvp/</loc></url>\n', ''), 'sitemap-pvp', 'lists https://chromabit.us/pvp/ 0 times, want 1');
-  expectFail('U4-AC9 /pvp without slash', mutate('sitemap.xml', 'https://chromabit.us/pvp/', 'https://chromabit.us/pvp'), 'sitemap-pvp', '0 times');
+  // U8: the /pvp/ entry now carries a lastmod (SITEMAP_PVP_LINE); and since U8 seo-sitemap requires all seven pages, so it fails with sitemap-pvp (both, and only both).
+  expectFails('U4-AC9 no /pvp/ in the sitemap', mutate('sitemap.xml', SITEMAP_PVP_LINE, ''), {
+    'sitemap-pvp': 'lists https://chromabit.us/pvp/ 0 times, want 1',
+    'seo-sitemap': 'dist/sitemap.xml lacks ["https://chromabit.us/pvp/"]',
+  });
+  // Since U8 seo-sitemap requires exactly the seven indexable URLs (both, and only both).
+  expectFails('U4-AC9 /pvp without slash', mutate('sitemap.xml', 'https://chromabit.us/pvp/', 'https://chromabit.us/pvp'), {
+    'sitemap-pvp': '0 times',
+    'seo-sitemap': 'dist/sitemap.xml lacks ["https://chromabit.us/pvp/"]',
+  });
 
   // U4-AC10 internal-links
   expectFail('U4-AC10 a broken link on /faq/', mutate('faq/index.html', 'Everything you need', '<a href="/rules/">Rules</a> Everything you need'), 'internal-links', '/faq/ <a href="/rules/"> does not resolve');
@@ -1303,6 +1476,13 @@ ${r.out}`);
     'player-shell': '/pvp/player/ missing (pvp/player/index.html)',
     'player-nav': '/pvp/player/ missing',
     'player-internal-links': '/pvp/player/ missing',
+    // U8: the semantics and hint checks cover the profile page too.
+    'a11y-headings': '/pvp/player/ missing',
+    'a11y-landmarks': '/pvp/player/ missing',
+    'a11y-names': '/pvp/player/ missing',
+    'img-attrs': '/pvp/player/ missing',
+    'perf-hints': '/pvp/player/ missing',
+    'pvp-referrer': '/pvp/player/ missing',
   });
   expectFail('U7 profile shell not prerendered', plMut(`<div id="app">${PLAYER_BODY}</div>`, `<div id="app"></div>${PLAYER_BODY}`), 'player-shell', '/pvp/player/ <div id="app"> is empty');
   expectFail('U7 profile title', plMut(`<title>${PLAYER_TITLE}</title>`, '<title>Player Profile | Chromabit</title>'), 'player-shell', '/pvp/player/ title is "Player Profile | Chromabit"');
@@ -1346,7 +1526,8 @@ ${r.out}`);
     'player-nav': '/pvp/player/ footer has 2 links to /pvp/',
   });
   for (const [attr, html] of [
-    ['data-kit', '<article data-kit="sword"><h3>Sword</h3></article>'],
+    // U8: the planted kit card's heading is an h2 (was h3), so it does not also skip a level after the h1 (a11y-headings); intent unchanged.
+    ['data-kit', '<article data-kit="sword"><h2>Sword</h2></article>'],
     ['data-career', '<section data-career><p>0 kills</p></section>'],
     ['data-recent', '<section data-recent><h2>RECENT RANKED</h2></section>'],
     ['data-recent-row', '<table><tbody><tr data-recent-row><td>WIN</td></tr></tbody></table>'],
@@ -1402,6 +1583,280 @@ ${r.out}`);
   expectFail('U7 search prerendered with a result', svMut('data-search-results></ul>', 'data-search-results><li><a data-search-result href="/pvp/player/?name=x">x</a></li></ul>'), 'pvp-search-shell', '/pvp/ prerendered HTML has 1 [data-search-result], want 0');
   expectFail('U7 search prerendered with a plain link', svMut('data-search-results></ul>', 'data-search-results><li><a href="/pvp/">x</a></li></ul>'), 'pvp-search-shell', 'prerendered [data-search-results] contains links');
   expectFail('U7 no-match text shown with an empty query', svMut(PVP_SEARCH, `${PVP_SEARCH}<p>No ranked player by that name.</p>`), 'pvp-search-shell', 'shows "No ranked player by that name." with an empty query');
+
+  // ===================================================================== U8 ==
+  const ST = 'store/index.html';
+  const FQ = 'faq/index.html';
+  const AU = 'auctions/index.html';
+  const PR = 'privacy/index.html';
+  const meta = (attr, key, content) => `<meta ${attr}="${key}" content="${content}">`;
+  const withFile = (rel, content) => ({ ...goodSite(), [rel]: content });
+  const desc = (n) => `Chromabit ${'x'.repeat(n - 10)}`;
+
+  // seo-head
+  expectFail('U8 og:locale missing on /smp/', mutate(S, meta('property', 'og:locale', 'en_US'), ''), 'seo-head', '/smp/ has no og:locale');
+  expectFail('U8 og:locale en_GB on /faq/', mutate(FQ, meta('property', 'og:locale', 'en_US'), meta('property', 'og:locale', 'en_GB')), 'seo-head', '/faq/ og:locale is "en_GB", want "en_US"');
+  expectFail('U8 og:url is not the canonical on /store/', mutate(ST, meta('property', 'og:url', 'https://chromabit.us/store/'), meta('property', 'og:url', 'https://chromabit.us/store')), 'seo-head', '/store/ og:url is "https://chromabit.us/store"');
+  expectFail('U8 canonical missing on /auctions/', mutate(AU, '<link rel="canonical" href="https://chromabit.us/auctions/">', ''), 'seo-head', '/auctions/ has 0 <link rel="canonical">, want 1');
+  expectFail('U8 canonical http on /privacy/', mutate(PR, '<link rel="canonical" href="https://chromabit.us/privacy/">', '<link rel="canonical" href="http://chromabit.us/privacy/">'), 'seo-head', '/privacy/ canonical is "http://chromabit.us/privacy/"');
+  expectFail('U8 two canonicals on /smp/', mutate(S, '<link rel="canonical" href="https://chromabit.us/smp/">', '<link rel="canonical" href="https://chromabit.us/smp/"><link rel="canonical" href="https://chromabit.us/">'), 'seo-head', '/smp/ has 2 <link rel="canonical">');
+  expectFail('U8 og:image:width 1201 on /', mutate(H, meta('property', 'og:image:width', '1200'), meta('property', 'og:image:width', '1201')), 'seo-head', '/ og:image:width is "1201", want "1200"');
+  expectFail('U8 og:image:height missing on /pvp/', mutate(P, meta('property', 'og:image:height', '630'), ''), 'seo-head', '/pvp/ has no og:image:height');
+  expectFail('U8 og:image:alt empty on /smp/', mutate(S, meta('property', 'og:image:alt', 'Chromabit Network'), meta('property', 'og:image:alt', ' ')), 'seo-head', '/smp/ og:image:alt is empty');
+  expectFail('U8 og:type missing on /privacy/', mutate(PR, meta('property', 'og:type', 'website'), ''), 'seo-head', '/privacy/ has 0 og:type, want 1');
+  expectFail('U8 twitter:card summary on /faq/', mutate(FQ, meta('name', 'twitter:card', 'summary_large_image'), meta('name', 'twitter:card', 'summary')), 'seo-head', '/faq/ twitter:card is "summary"');
+  expectFail('U8 twitter:image another file on /store/', mutate(ST, meta('name', 'twitter:image', OG), meta('name', 'twitter:image', 'https://chromabit.us/server-icon.png')), 'seo-head', '/store/ twitter:image is "https://chromabit.us/server-icon.png"');
+  expectFail('U8 twitter:description missing on /smp/', mutate(S, meta('name', 'twitter:description', DESC.smp), ''), 'seo-head', '/smp/ has 0 twitter:description, want 1');
+  expectFail('U8 twitter:title missing on /auctions/', mutate(AU, meta('name', 'twitter:title', 'Auction House | Chromabit SMP'), ''), 'seo-head', '/auctions/ has 0 twitter:title');
+  expectFail('U8 theme-color missing on /auctions/', mutate(AU, '<meta name="theme-color" content="#0b0614">', ''), 'seo-head', '/auctions/ has 0 theme-color, want 1');
+  expectFail('U8 robots without the snippet tokens on /faq/', mutate(FQ, ROBOTS_META, '<meta name="robots" content="index, follow">'), 'seo-head', '/faq/ robots is "index, follow"');
+  expectFail('U8 robots noindex on /privacy/ (as at 762b268)', mutate(PR, ROBOTS_META, '<meta name="robots" content="noindex, follow, max-image-preview:large, max-snippet:-1">'), 'seo-head', '/privacy/ robots is "noindex, follow');
+  expectFail('U8 robots missing on /store/', mutate(ST, ROBOTS_META, ''), 'seo-head', '/store/ has 0 robots metas, want 1');
+  expectFail('U8 <html lang> en-US on /store/', mutate(ST, '<html lang="en">', '<html lang="en-US">'), 'seo-head', '/store/ <html lang> is "en-US", want "en"');
+  expectFail('U8 description 161 characters on /smp/', mutate(S, DESC.smp, desc(161)), 'seo-head', '/smp/ description is 161 characters, want 70-160');
+  expectFail('U8 description 69 characters on /auctions/', mutate(AU, DESC.auctions, desc(69)), 'seo-head', '/auctions/ description is 69 characters');
+  passes('U8 descriptions of exactly 70 and 160 characters pass', edit(mutate(S, DESC.smp, desc(160)), AU, DESC.auctions, desc(70)));
+  passes('U8 the home description (167 characters, pinned by home-head) is exempt from the range', goodSite());
+  expectFail('U8 two pages share a description', mutate(FQ, DESC.faq, DESC.smp), 'seo-head', '/smp/ and /faq/ share the description');
+  expectFail('U8 two descriptions on /faq/', mutate(FQ, meta('name', 'description', DESC.faq), `${meta('name', 'description', DESC.faq)}${meta('name', 'description', DESC.faq)}`), 'seo-head', '/faq/ has 2 meta descriptions, want 1');
+  expectFails('U8 two pages share a title (subpage-titles pins it too)', mutate(ST, '<title>Store | Chromabit</title>', '<title>FAQ | Chromabit</title>'), {
+    'subpage-titles': '/store/ title is "FAQ | Chromabit"',
+    'seo-head': '/faq/ and /store/ share the title',
+  });
+  expectFail('U8 store description says "the Chromabit Minecraft server" (762b268 wording)', mutate(ST, DESC.store, 'The official Chromabit store. Buy ranks, crate keys, and more for the Chromabit Minecraft server. Every purchase supports the server.'), 'seo-head', '/store/ description still says "the Chromabit Minecraft server"');
+  expectFail('U8 store description with "Server" in another phrase', mutate(ST, DESC.store, 'The official Chromabit store. Buy ranks, crate keys and more; every purchase keeps the Server running.'), 'seo-head', '/store/ description contains "server"');
+  expectFail('U8 store description without "Chromabit"', mutate(ST, DESC.store, 'The official store. Buy ranks, crate keys and more; every purchase directly helps the network grow.'), 'seo-head', '/store/ description does not name "Chromabit"');
+
+  // seo-titles-frozen: the base fixture is a snapshot of the good site; the site under test differs.
+  {
+    const r = runOn(goodSite(), mutate(FQ, '<title>FAQ | Chromabit</title>', '<title>FAQ | Chromabit Network</title>'));
+    const fails = r.lines.filter((l) => l.startsWith('FAIL '));
+    check('U8 frozen: a title that differs from the fixture fails seo-titles-frozen alone', r.code === 1 && fails.length === 1 && fails[0].startsWith('FAIL seo-titles-frozen: /faq/ title is "FAQ | Chromabit", frozen at "FAQ | Chromabit Network"'), `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    const r = runOn(mutate(FQ, DESC.faq, 'Answers about the Chromabit network: the server address, versions, ranks, the auction house, claims and rules.'), goodSite());
+    const fails = r.lines.filter((l) => l.startsWith('FAIL '));
+    check('U8 frozen: an approved description reworded fails seo-titles-frozen alone', r.code === 1 && fails.length === 1 && fails[0].startsWith('FAIL seo-titles-frozen: /faq/ description is'), `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    // /smp/ was out of range in the base, so it is released: a rewrite passes, a rewrite with a number the page does not show fails.
+    const base = mutate(S, DESC.smp, `${DESC.smp} Join the grind at play.chromabit.us and trade with everyone on the market, every day of the week.`);
+    let r = runOn(goodSite(), base);
+    check('U8 frozen: a released (out-of-range) description may be rewritten', r.code === 0, `exit ${r.code}:\n${r.out}`);
+    r = runOn(mutate(S, DESC.smp, 'Survival with a player-run market on Chromabit: 500 players, claims, custom spawners and a dungeon.'), base);
+    const fails = r.lines.filter((l) => l.startsWith('FAIL '));
+    check('U8 frozen: a rewritten description may not state a number the page does not show', r.code === 1 && fails.length === 1 && fails[0].startsWith('FAIL seo-titles-frozen: /smp/ rewritten description states ["500"]'), `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    // The store description is always released (wording change); a different, rule-abiding one passes.
+    const r = runOn(mutate(ST, DESC.store, 'Ranks, crate keys and more from the official Chromabit store. Every purchase directly helps Chromabit.'), goodSite());
+    check('U8 frozen: the store description is released', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+
+  // visible-text-unchanged: the base fixture is a snapshot of the good site.
+  {
+    const vis = (name, site, ok, needle = '') => {
+      const r = runOn(site, goodSite());
+      const fails = r.lines.filter((l) => l.startsWith('FAIL '));
+      const good = ok ? r.code === 0 : r.code === 1 && fails.length === 1 && fails[0].startsWith('FAIL visible-text-unchanged:') && fails[0].includes(needle);
+      check(name, good, `exit ${r.code}:\n${r.out}`);
+    };
+    vis('U8 visible: a word changed fails', mutate(PR, '<main>Privacy</main>', '<main>Privacy policy</main>'), false, '/privacy/ visible text differs at character');
+    vis('U8 visible: visually hidden text added fails (needs sign-off and a fixture update)', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE<span class="visually-hidden"> for Chromabit ranks</span></h1>'), false, '/store/ visible text differs');
+    vis('U8 visible: text reordered fails', mutate(AU, '<main><h1>Auction House</h1>Chromabit SMP market</main>', '<main>Chromabit SMP market<h1>Auction House</h1></main>'), false, '/auctions/ visible text differs');
+    vis('U8 visible: text hidden with the hidden attribute still counts (fails)', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE</h1><p hidden>Also on Bedrock.</p>'), false, '/store/ visible text differs');
+    vis('U8 visible: an empty live region adds no text (passes)', mutate(ST, '<main><h1>STORE</h1>', '<main><h1>STORE</h1><p class="sr-only" role="status" aria-live="polite"></p>'), true);
+    vis('U8 visible: attributes (aria-label, width/height, loading) add no text (passes)', mutate(ST, '<main><h1>STORE</h1>', '<main aria-label="Store"><h1 id="store-title">STORE</h1>'), true);
+    vis('U8 visible: whitespace and entity spelling are normalised (passes)', mutate(AU, 'Chromabit SMP market', 'Chromabit&nbsp;SMP\n   market'), true);
+    vis('U8 visible: head-only changes are not visible text (passes)', mutate(ST, ROBOTS_META, `${ROBOTS_META}<meta name="keywords" content="ranks">`), true);
+  }
+
+  // seo-jsonld
+  const homeLd = (fn) => {
+    const doc = JSON.parse(LD_HOME);
+    fn(doc['@graph']);
+    return mutate(H, LD_HOME, JSON.stringify(doc));
+  };
+  const gameLd = (fn) => {
+    const doc = JSON.parse(LD_GAME);
+    fn(doc);
+    return mutate(H, LD_GAME, JSON.stringify(doc));
+  };
+  const subLd = (rel, route, name, fn) => {
+    const src = ldSub(route, name);
+    const doc = JSON.parse(src);
+    fn(doc['@graph']);
+    return mutate(rel, src, JSON.stringify(doc));
+  };
+  const pvpLd = (fn) => {
+    const doc = JSON.parse(LD_PVP);
+    fn(doc['@graph']);
+    return mutate(P, LD_PVP, JSON.stringify(doc));
+  };
+  expectFail('U8 Organization sameAs without Discord', homeLd((g) => { g[1].sameAs = ['https://x.com/chromabit']; }), 'seo-jsonld', '/ Organization sameAs ["https://x.com/chromabit"] lacks the Discord URL');
+  expectFail('U8 Organization logo relative', homeLd((g) => { g[1].logo = '/server-icon.png'; }), 'seo-jsonld', '/ Organization logo "/server-icon.png" is not an absolute https://chromabit.us/ URL of a file in dist');
+  expectFail('U8 Organization logo missing from dist', homeLd((g) => { g[1].logo = 'https://chromabit.us/logo-512.png'; }), 'seo-jsonld', 'does not resolve to a file in dist');
+  passes('U8 Organization logo as an ImageObject passes', homeLd((g) => { g[1].logo = { '@type': 'ImageObject', url: 'https://chromabit.us/server-icon.png', width: 64, height: 64 }; }));
+  expectFail('U8 Organization url wrong', homeLd((g) => { g[1].url = 'https://chromabit.us/store/'; }), 'seo-jsonld', '/ Organization url is "https://chromabit.us/store/"');
+  expectFail('U8 WebSite url missing', homeLd((g) => { delete g[0].url; }), 'seo-jsonld', '/ WebSite url is null');
+  expectFail('U8 no VideoGame on /', mutate(H, ldTag(LD_GAME), ''), 'seo-jsonld', '/ has 0 VideoGame nodes named Minecraft, want 1');
+  expectFail('U8 gamePlatform without Bedrock', gameLd((d) => { d.gamePlatform = 'Java Edition'; }), 'seo-jsonld', '/ VideoGame gamePlatform is "Java Edition", want both Java and Bedrock editions');
+  expectFail('U8 gameServer not a GameServer', gameLd((d) => { d.gameServer['@type'] = 'Place'; }), 'seo-jsonld', '/ VideoGame has 0 gameServer nodes of @type GameServer, want 1');
+  expectFail('U8 GameServer without a name', gameLd((d) => { delete d.gameServer.name; }), 'seo-jsonld', '/ GameServer has no name');
+  expectFail('U8 GameServer without url or address', gameLd((d) => { delete d.gameServer.url; delete d.gameServer.identifier; }), 'seo-jsonld', '/ GameServer has neither a url nor the address "play.chromabit.us"');
+  passes('U8 GameServer with only the address passes', gameLd((d) => { delete d.gameServer.url; }));
+  expectFail('U8 playersOnline in the GameServer', gameLd((d) => { d.gameServer.playersOnline = 'many'; }), 'seo-jsonld', '/ JSON-LD has playersOnline (volatile)');
+  expectFail('U8 serverStatus in the GameServer', gameLd((d) => { d.gameServer.serverStatus = 'OnlineServerStatus'; }), 'seo-jsonld', '/ JSON-LD has serverStatus (volatile)');
+  expectFail('U8 a volatile number', gameLd((d) => { d.numberOfPlayers = 50; }), 'seo-jsonld', '/ JSON-LD numberOfPlayers is the number 50');
+  expectFail('U8 sub page without the Organization reference', subLd(ST, '/store/', 'Store', (g) => { delete g[0].publisher; }), 'seo-jsonld', "/store/ has no Organization node and no @id reference to the home page's Organization (https://chromabit.us/#organization)");
+  expectFail('U8 sub page without the WebSite reference', subLd(AU, '/auctions/', 'Auctions', (g) => { delete g[0].isPartOf; }), 'seo-jsonld', "/auctions/ has no WebSite node and no @id reference to the home page's WebSite");
+  expectFail('U8 sub page with an inline Organization of another name', subLd(ST, '/store/', 'Store', (g) => { g[0].publisher = { '@type': 'Organization', name: 'Chromabit', url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD] }; }), 'seo-jsonld', '/store/ Organization name is "Chromabit", want "Chromabit Network"');
+  passes('U8 sub page with a valid inline Organization and WebSite passes', subLd(ST, '/store/', 'Store', (g) => {
+    g[0].publisher = { '@type': 'Organization', name: NET, url: 'https://chromabit.us/', logo: 'https://chromabit.us/server-icon.png', sameAs: [DISCORD] };
+    g[0].isPartOf = { '@type': 'WebSite', name: NET, url: 'https://chromabit.us/' };
+  }));
+  expectFail('U8 no JSON-LD on /privacy/', mutate(PR, ldTag(ldSub('/privacy/', 'Privacy')), ''), 'seo-jsonld', '/privacy/ has no JSON-LD');
+  expectFail('U8 BreadcrumbList missing on /smp/', subLd(S, '/smp/', 'Economy SMP', (g) => g.pop()), 'seo-jsonld', '/smp/ has 0 BreadcrumbList nodes, want 1');
+  expectFail('U8 breadcrumb item relative', subLd(FQ, '/faq/', 'FAQ', (g) => { g[1].itemListElement[1].item = '/faq/'; }), 'seo-jsonld', '/faq/ JSON-LD item "/faq/" is not an absolute https URL');
+  expectFail('U8 breadcrumb points at another page', subLd(FQ, '/faq/', 'FAQ', (g) => { g[1].itemListElement[1].item = 'https://chromabit.us/store/'; }), 'seo-jsonld', '/faq/ BreadcrumbList is');
+  expectFail('U8 breadcrumb without Home', subLd(AU, '/auctions/', 'Auctions', (g) => { g[1].itemListElement.shift(); }), 'seo-jsonld', '/auctions/ BreadcrumbList is');
+  passes('U8 breadcrumb items as {@id} objects pass', subLd(AU, '/auctions/', 'Auctions', (g) => { g[1].itemListElement.forEach((it) => { it.item = { '@id': it.item }; }); }));
+  expectFail('U8 @context http://schema.org', mutate(S, ldTag(ldSub('/smp/', 'Economy SMP')), ldTag(ldSub('/smp/', 'Economy SMP').replace('"https://schema.org"', '"http://schema.org"'))), 'seo-jsonld', '/smp/ JSON-LD block 1 @context is "http://schema.org"');
+  expectFail('U8 a node without @type', subLd(PR, '/privacy/', 'Privacy', (g) => { delete g[0]['@type']; }), 'seo-jsonld', '/privacy/ JSON-LD block 1 has a node without @type');
+  expectFail('U8 a relative @id', subLd(PR, '/privacy/', 'Privacy', (g) => { g[0]['@id'] = '#webpage'; }), 'seo-jsonld', '/privacy/ JSON-LD @id "#webpage" is not an absolute https://chromabit.us/ URL');
+  expectFail('U8 a url to a page that does not exist', subLd(PR, '/privacy/', 'Privacy', (g) => { g[0].url = 'https://chromabit.us/rules/'; }), 'seo-jsonld', '/privacy/ JSON-LD url "https://chromabit.us/rules/" does not resolve to a file in dist');
+  expectFail('U8 /pvp/ WebPage url wrong', pvpLd((g) => { g[0].url = 'https://chromabit.us/pvp'; }), 'seo-jsonld', '/pvp/ WebPage url is "https://chromabit.us/pvp"');
+  expectFail('U8 /pvp/ WebPage without description', pvpLd((g) => { delete g[0].description; }), 'seo-jsonld', '/pvp/ WebPage has no description');
+  expectFail('U8 /pvp/ ItemList order', pvpLd((g) => { g[1].itemListElement.reverse(); }), 'seo-jsonld', '/pvp/ ItemList names are ["Cosmetics"');
+  expectFail('U8 /pvp/ ItemList five modes', pvpLd((g) => { g[1].itemListElement.pop(); }), 'seo-jsonld', '/pvp/ ItemList names are');
+  expectFail('U8 /pvp/ ItemList positions from 0', pvpLd((g) => { g[1].itemListElement.forEach((it, i) => { it.position = i; }); }), 'seo-jsonld', '/pvp/ ItemList positions are [0,1,2,3,4,5]');
+  expectFail('U8 /pvp/ no ItemList', pvpLd((g) => { g.splice(1, 1); }), 'seo-jsonld', '/pvp/ has 0 ItemList nodes, want 1');
+
+  // seo-jsonld-visible-facts
+  expectFail('U8 facts: an invented GameServer description', gameLd((d) => { d.gameServer.description = 'The biggest Minecraft server, with 500 players online.'; }), 'seo-jsonld-visible-facts', '/ JSON-LD states what the page does not show: GameServer description "The biggest Minecraft server, with 500 players online."');
+  expectFail('U8 facts: an invented breadcrumb name', subLd(ST, '/store/', 'Store', (g) => { g[1].itemListElement[1].name = 'Gem Shop'; }), 'seo-jsonld-visible-facts', '/store/ JSON-LD states what the page does not show: ListItem name "Gem Shop"');
+  expectFail('U8 facts: an invented WebPage headline', subLd(AU, '/auctions/', 'Auctions', (g) => { g[0].headline = 'Live prices for 4000 items'; }), 'seo-jsonld-visible-facts', '/auctions/ JSON-LD states what the page does not show: WebPage headline');
+  passes('U8 facts: Organization/WebSite boilerplate is not fact-checked', homeLd((g) => { g[1].description = 'A Minecraft network.'; g[0].description = 'Ranked PVP and an economy SMP.'; }));
+  passes('U8 facts: case and whitespace are normalised', subLd(S, '/smp/', 'Economy SMP', (g) => { g[1].itemListElement[1].name = 'economy   smp'; }));
+  passes('U8 facts: a string equal to the meta description passes', subLd(S, '/smp/', 'Economy SMP', (g) => { g[0].description = DESC.smp; }));
+
+  // seo-sitemap
+  const sm = (from, to) => mutate('sitemap.xml', from, to);
+  expectFail('U8 sitemap: /privacy/ missing', sm(sitemapLine('/privacy/'), ''), 'seo-sitemap', 'dist/sitemap.xml lacks ["https://chromabit.us/privacy/"]');
+  expectFail('U8 sitemap: an extra URL', sm('</urlset>', '  <url><loc>https://chromabit.us/rules/</loc><lastmod>2026-11-10</lastmod></url>\n</urlset>'), 'seo-sitemap', 'lists ["https://chromabit.us/rules/"], which are not indexable pages');
+  expectFail('U8 sitemap: a URL twice', sm('</urlset>', `${sitemapLine('/faq/')}</urlset>`), 'seo-sitemap', 'lists ["https://chromabit.us/faq/"] more than once');
+  expectFail('U8 sitemap: lastmod missing', sm('https://chromabit.us/faq/</loc><lastmod>2026-11-10</lastmod>', 'https://chromabit.us/faq/</loc>'), 'seo-sitemap', 'https://chromabit.us/faq/ lastmod is [], want one YYYY-MM-DD date');
+  expectFail('U8 sitemap: lastmod with a time', sm('https://chromabit.us/smp/</loc><lastmod>2026-11-10</lastmod>', 'https://chromabit.us/smp/</loc><lastmod>2026-11-10T00:00:00Z</lastmod>'), 'seo-sitemap', 'https://chromabit.us/smp/ lastmod is ["2026-11-10T00:00:00Z"]');
+  expectFail('U8 sitemap: lastmod not a date', sm('https://chromabit.us/store/</loc><lastmod>2026-11-10</lastmod>', 'https://chromabit.us/store/</loc><lastmod>2026-13-40</lastmod>'), 'seo-sitemap', 'https://chromabit.us/store/ lastmod is ["2026-13-40"]');
+  expectFail('U8 sitemap: not well-formed', sm(`${sitemapLine('/auctions/')}`, '  <url><loc>https://chromabit.us/auctions/</loc><lastmod>2026-11-10</lastmod>\n'), 'seo-sitemap', 'dist/sitemap.xml is not well-formed');
+  expectFail('U8 sitemap: a bare ampersand', sm('https://chromabit.us/auctions/</loc>', 'https://chromabit.us/auctions/?a=1&b=2</loc>'), 'seo-sitemap', 'dist/sitemap.xml is not well-formed: bad entity "&b=2"');
+  expectFail('U8 sitemap: wrong namespace', sm('http://www.sitemaps.org/schemas/sitemap/0.9', 'http://www.google.com/schemas/sitemap/0.84'), 'seo-sitemap', 'root is not <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+  passes('U8 sitemap: extra changefreq/priority and an XML comment pass', sm('<lastmod>2026-11-10</lastmod></url>\n</urlset>', '<lastmod>2026-11-10</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>\n<!-- generated -->\n</urlset>'));
+
+  // seo-robots
+  const rb = (from, to) => mutate('robots.txt', from, to);
+  expectFail('U8 robots: Disallow: / for everyone', rb('User-agent: *\nAllow: /\n', 'User-agent: *\nDisallow: /\n'), 'seo-robots', 'dist/robots.txt has "Disallow: /" for ["*"]');
+  expectFail('U8 robots: GPTBot group missing', rb('User-agent: GPTBot\nAllow: /\n', ''), 'seo-robots', 'dist/robots.txt has no explicit group for GPTBot');
+  expectFail('U8 robots: Google-Extended disallowed', rb('User-agent: Google-Extended\nAllow: /\n', 'User-agent: Google-Extended\nDisallow: /\n'), 'seo-robots', 'dist/robots.txt has "Disallow: /" for ["google-extended"]');
+  expectFail('U8 robots: ClaudeBot group without Allow: /', rb('User-agent: ClaudeBot\nAllow: /\n', 'User-agent: ClaudeBot\nCrawl-delay: 5\n'), 'seo-robots', 'dist/robots.txt group for ClaudeBot has no "Allow: /"');
+  expectFail('U8 robots: an indexable page disallowed', rb('User-agent: *\nAllow: /\n', 'User-agent: *\nAllow: /\nDisallow: /pvp/\n'), 'seo-robots', '"Disallow: /pvp/" for ["*"] blocks ["/pvp/"]');
+  expectFail('U8 robots: Sitemap line missing', rb('\nSitemap: https://chromabit.us/sitemap.xml\n', '\n'), 'seo-robots', 'dist/robots.txt has no "Sitemap: https://chromabit.us/sitemap.xml" line');
+  expectFail('U8 robots: no User-agent: * group', rb('User-agent: *\nAllow: /\n\n', ''), 'seo-robots', 'dist/robots.txt has no "User-agent: *" group');
+  expectFail('U8 robots: robots.txt missing', withFile('robots.txt', null), 'seo-robots', 'dist/robots.txt missing');
+  passes('U8 robots: Disallow /pvp/player/ (not indexable), comments and a shared group pass', rb('User-agent: *\nAllow: /\n', '# all crawlers\nUser-agent: *\nAllow: /\nDisallow: /pvp/player/\n'));
+  passes('U8 robots: bots listed together in one group pass', withFile('robots.txt', 'User-agent: *\nAllow: /\n\nUser-agent: GPTBot\nUser-agent: OAI-SearchBot\nUser-agent: ClaudeBot\nUser-agent: PerplexityBot\nUser-agent: Google-Extended\nUser-agent: Bingbot\nAllow: /\n\nSitemap: https://chromabit.us/sitemap.xml\n'));
+
+  // seo-llms
+  const ll = (from, to) => mutate('llms.txt', from, to);
+  expectFail('U8 llms: missing', withFile('llms.txt', null), 'seo-llms', 'dist/llms.txt missing');
+  expectFail('U8 llms: title line without Chromabit', ll('# Chromabit Network', '# A Minecraft network'), 'seo-llms', 'first line is "# A Minecraft network"');
+  expectFail('U8 llms: title not a "# " line', ll('# Chromabit Network\n', 'Chromabit Network\n'), 'seo-llms', 'first line is "Chromabit Network"');
+  expectFail('U8 llms: no Bedrock port', ll('with port 19132', 'with its own port'), 'seo-llms', 'does not contain "19132"');
+  expectFail('U8 llms: no Java version', ll('up to 26.3', 'up to the latest'), 'seo-llms', 'does not contain "26.3"');
+  expectFail('U8 llms: no "ranked"', edit(edit(ll('ranked kit PVP on one ladder', 'kit PVP on one ladder'), 'llms.txt', 'ranked leaderboards', 'leaderboards'), 'llms.txt', 'ranked from level 2', 'open from level 2'), 'seo-llms', 'does not contain "ranked"');
+  expectFail('U8 llms: "store credit" (any case)', ll('ranks and crate keys', 'ranks, crate keys and Store Credit'), 'seo-llms', 'contains "store credit"');
+  expectFail('U8 llms: "Ten rounds"', ll('survival with a player-run market', 'survival with a player-run market. Arena: ten rounds'), 'seo-llms', 'contains "ten rounds"');
+  expectFail('U8 llms: "each round"', ll('survival with a player-run market', 'survival with a player-run market. New augment each round'), 'seo-llms', 'contains "each round"');
+  expectFail('U8 llms: a number that is not a site fact (6)', ll('ranked leaderboards.', 'ranked leaderboards across 6 modes.'), 'seo-llms', 'states numbers that are not site facts: ["6"]');
+  expectFail('U8 llms: a number word that is not a site fact (six)', ll('ranked leaderboards.', 'ranked leaderboards across six modes.'), 'seo-llms', '"six (6)"');
+  expectFail('U8 llms: "1v1" states a 1', ll('ranked leaderboards.', 'ranked leaderboards, 1v1 duels.'), 'seo-llms', 'states numbers that are not site facts: ["1"]');
+  expectFail('U8 llms: a year', ll('ranked leaderboards.', 'ranked leaderboards since 2026.'), 'seo-llms', '["2026"]');
+  passes('U8 llms: allowlisted numbers pass (1000, 500 and 250 Tokens; 9 zones, 4 difficulties, 3 phases; best of three; 1,000)', ll('ranked leaderboards.', 'ranked leaderboards. Tournaments pay 1000, 500 and 250 Tokens (1,000 for first). Heartwood: 9 zones, 4 difficulties, 3 phases.'));
+  passes('U8 llms: 80,000 passes while the built FAQ states it', ll('survival with a player-run market.', 'survival with a player-run market. You start with $80,000.'));
+  expectFails('U8 llms: 80,000 fails once the FAQ no longer states it', edit(faqSite((gs) => {
+    // Both FAQ answers that state 80,000 (starting money, the claim-block cap).
+    for (const q of ['How much money do I start with?', 'How do I protect my land?']) faqItem(gs, q).a = faqItem(gs, q).a.replace(/\$?80,000/, 'plenty');
+  }), 'llms.txt', 'survival with a player-run market.', 'survival with a player-run market. You start with $80,000.'), {
+    'faq-unchanged': '/faq/ answer to "How much money do I start with?" changed',
+    'seo-llms': 'states numbers that are not site facts: ["80000"]',
+  });
+  passes('U8 llms: digits inside URLs are not numbers', ll('## Pages', `Discord: ${DISCORD}\n\n## Pages`));
+  expectFail('U8 llms: a link to a page missing from dist', ll('- [Privacy]', '- [Rules](https://chromabit.us/rules/): the rules.\n- [Privacy]'), 'seo-llms', 'links "https://chromabit.us/rules/", which is missing from dist');
+  expectFail('U8 llms: an indexable page not linked', ll('- [Privacy](https://chromabit.us/privacy/): how data is handled.\n', ''), 'seo-llms', 'does not link ["https://chromabit.us/privacy/"]');
+  expectFail('U8 llms: a relative link', ll('- [Store](https://chromabit.us/store/)', '- [Store](/store/)'), 'seo-llms', 'has relative links ["/store/"]');
+  expectFail('U8 llms: an http link', ll('(https://chromabit.us/faq/)', '(http://chromabit.us/faq/)'), 'seo-llms', 'links "http://chromabit.us/faq/" (want https://chromabit.us/...)');
+
+  // seo-404
+  passes('U8 404: a noindex 404.html passes', withFile('404.html', '<!DOCTYPE html><html lang="en"><head><meta name="robots" content="noindex"></head><body>Not found</body></html>'));
+  expectFail('U8 404: a 404.html without noindex', withFile('404.html', '<!DOCTYPE html><html lang="en"><head><meta name="robots" content="index, follow"></head><body>Not found</body></html>'), 'seo-404', 'dist/404.html has no robots noindex');
+
+  // a11y-headings
+  expectFail('U8 headings: /store/ without an h1', mutate(ST, '<h1>STORE</h1>', '<h2>STORE</h2>'), 'a11y-headings', '/store/ has 0 <h1>, want 1');
+  expectFail('U8 headings: two h1 on /auctions/', mutate(AU, 'Chromabit SMP market</main>', 'Chromabit SMP market<h1>Prices</h1></main>'), 'a11y-headings', '/auctions/ has 2 <h1>, want 1');
+  expectFail('U8 headings: h1 -> h3 on /faq/', mutate(FQ, '<h2>FAQ</h2>', ''), 'a11y-headings', '/faq/ <h1> "HAVE QUESTIONS?" is followed by <h3>');
+  expectFail('U8 headings: h2 -> h4 on /pvp/', mutate(P, '<h3>Duels</h3>', '<h4>Duels</h4>'), 'a11y-headings', '/pvp/ <h2> "WHAT YOU CAN PLAY" is followed by <h4> "Duels"');
+  expectFail('U8 headings: h1 -> h3 on /pvp/player/', plMut(PLAYER_STATE, `${PLAYER_STATE}<h3>Sword</h3>`), 'a11y-headings', '/pvp/player/ <h1> "PLAYER" is followed by <h3> "Sword"');
+  passes('U8 headings: going back up a level passes', mutate(P, '<h2>WHAT YOU CAN PLAY</h2>', '<h2>WHAT YOU CAN PLAY</h2><h3>Pick one</h3>'));
+
+  // a11y-landmarks
+  expectFail('U8 landmarks: two <main> on /privacy/', mutate(PR, '<main>Privacy</main>', '<main>Privacy</main><main>Again</main>'), 'a11y-landmarks', '/privacy/ has 2 <main>, want 1');
+  expectFail('U8 landmarks: no <main> on /pvp/player/', edit(plMut('<main>', '<div class="m">'), PL, '</main>', '</div>'), 'a11y-landmarks', '/pvp/player/ has 0 <main>, want 1');
+  expectFail('U8 landmarks: two unnamed <nav>', mutate(ST, '<main><h1>STORE</h1>', '<nav class="crumbs"><a href="/">Home</a></nav><main><h1>STORE</h1>'), 'a11y-landmarks', '/store/ <nav class="crumbs"> has no aria-label');
+  passes('U8 landmarks: two named <nav> pass', edit(mutate(ST, '<main><h1>STORE</h1>', '<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a></nav><main><h1>STORE</h1>'), ST, '<nav class="footer-nav">', '<nav class="footer-nav" aria-labelledby="fn"><span id="fn" hidden>Footer</span>'));
+  expectFail('U8 landmarks: aria-labelledby that resolves to nothing', edit(mutate(ST, '<main><h1>STORE</h1>', '<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a></nav><main><h1>STORE</h1>'), ST, '<nav class="footer-nav">', '<nav class="footer-nav" aria-labelledby="nope">'), 'a11y-landmarks', '/store/ <nav class="footer-nav"> has no aria-label or resolvable aria-labelledby');
+
+  // a11y-names
+  expectFail('U8 names: an icon-only button', mutate(S, '</main>', '<button type="button" class="sound-toggle"><svg><path d="M0 0"></path></svg></button></main>'), 'a11y-names', '/smp/ <button class="sound-toggle"> has no accessible name');
+  expectFail('U8 names: a link whose only text is aria-hidden', mutate(S, '</main>', '<a href="/" class="x"><span aria-hidden="true">+</span></a></main>'), 'a11y-names', '/smp/ <a class="x" href="/"> has no accessible name');
+  passes('U8 names: aria-label, aria-labelledby, img alt and title all name a control', mutate(S, '</main>', '<button type="button" aria-label="Mute"><svg></svg></button><span id="lb">Menu</span><button type="button" aria-labelledby="lb"></button><a href="/"><img src="/logo.png" alt="Home" width="1" height="1" loading="lazy" decoding="async"></a><button type="button" title="Copy"></button></main>'));
+  expectFail('U8 names: /pvp/ join section unlabelled', mutate(P, '<section class="pvp-join" aria-label="Join">', '<section class="pvp-join">'), 'a11y-names', '/pvp/ join section (.pvp-join) has no aria-label or resolvable aria-labelledby');
+  passes('U8 names: /pvp/ join section labelled by a heading id passes', mutate(P, '<section class="pvp-join" aria-label="Join"><p>', '<section class="pvp-join" aria-labelledby="join-copy"><p id="join-copy">'));
+  expectFail('U8 names: /pvp/ join aria-labelledby to a missing id', mutate(P, '<section class="pvp-join" aria-label="Join">', '<section class="pvp-join" aria-labelledby="nope">'), 'a11y-names', '/pvp/ join section (.pvp-join) has no aria-label');
+  expectFail('U8 names: search count not announced', mutate(P, '<p class="search-count" aria-live="polite"></p>', '<p class="search-count"></p>'), 'a11y-names', '/pvp/ [data-player-search] has no polite live region');
+  expectFail('U8 names: assertive is not polite', mutate(P, '<p class="search-count" aria-live="polite"></p>', '<p class="search-count" aria-live="assertive"></p>'), 'a11y-names', 'has no polite live region');
+  passes('U8 names: role="status" counts as the polite live region', mutate(P, '<p class="search-count" aria-live="polite"></p>', '<p class="search-count" role="status"></p>'));
+  expectFail('U8 names: live region outside the search block', mutate(P, '<p class="search-count" aria-live="polite"></p></div>', '</div><p class="search-count" aria-live="polite"></p>'), 'a11y-names', 'has no polite live region');
+
+  // img-attrs
+  expectFail('U8 img: no alt', mutate(H, SMP_SHOT, SMP_SHOT.replace(' alt="Smuk_&#39;s Baddies"', '')), 'img-attrs', '/ <img src="/assets/build.png"> has no alt');
+  passes('U8 img: an empty alt (decorative) passes', mutate(H, SMP_SHOT, SMP_SHOT.replace('alt="Smuk_&#39;s Baddies"', 'alt=""')));
+  expectFail('U8 img: no width', mutate(H, SMP_SHOT, SMP_SHOT.replace(' width="640"', '')), 'img-attrs', '/ <img src="/assets/build.png"> width is null, want a positive integer');
+  expectFail('U8 img: height "auto"', mutate(H, SMP_SHOT, SMP_SHOT.replace('height="360"', 'height="auto"')), 'img-attrs', 'height is "auto"');
+  expectFail('U8 img: below the fold, eager', mutate(H, SMP_SHOT, SMP_SHOT.replace('loading="lazy"', 'loading="eager"')), 'img-attrs', 'is below the first screen with loading="eager" decoding="async"');
+  expectFail('U8 img: below the fold, no decoding', mutate(H, SMP_SHOT, SMP_SHOT.replace(' decoding="async"', '')), 'img-attrs', 'decoding=null, want "lazy" and "async"');
+  expectFail('U8 img: the hero logo without width and height', mutate(H, HERO_LOGO, '<img class="logo" src="/server-icon.png" alt="Chromabit logo">'), 'img-attrs', '/ <img src="/server-icon.png"> width is null');
+  passes('U8 img: hero and nav images need no lazy/async', goodSite());
+  expectFail('U8 img: the profile head without height', plMut('alt="" width="64" height="64"', 'alt="" width="64"'), 'img-attrs', '/pvp/player/ <img src="/assets/pvp-default-head.svg"> height is null');
+
+  // perf-hints
+  expectFail('U8 hints: gstatic preconnect without crossorigin', mutate(ST, '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>', '<link rel="preconnect" href="https://fonts.gstatic.com">'), 'perf-hints', '/store/ fonts.gstatic.com preconnect has no crossorigin');
+  expectFail('U8 hints: googleapis preconnect missing on /pvp/player/', plMut('<link rel="preconnect" href="https://fonts.googleapis.com">', ''), 'perf-hints', '/pvp/player/ has no <link rel="preconnect" href="https://fonts.googleapis.com">');
+  expectFail('U8 hints: gstatic preconnect missing on /faq/', mutate(FQ, '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>', ''), 'perf-hints', '/faq/ has no <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>');
+  expectFail('U8 hints: no hero preload on /', mutate(H, HERO_PRELOAD, ''), 'perf-hints', '/ has no <link rel="preload" as="image" fetchpriority="high">');
+  expectFail('U8 hints: hero preload without fetchpriority', mutate(H, HERO_PRELOAD, '<link rel="preload" as="image" href="/server-icon.png">'), 'perf-hints', '/ has no <link rel="preload" as="image" fetchpriority="high">');
+  expectFail('U8 hints: preload of another image', mutate(H, HERO_PRELOAD, '<link rel="preload" as="image" href="/og-preview.png" fetchpriority="high">'), 'perf-hints', '/ image preload ["/og-preview.png"] is not the hero logo "/server-icon.png"');
+  passes('U8 hints: an absolute preload href of the same file passes', mutate(H, HERO_PRELOAD, '<link rel="preload" as="image" href="https://chromabit.us/server-icon.png" fetchpriority="high">'));
+  expectFail('U8 hints: a blocking external script in the head', mutate(AU, FONT_HINTS, `${FONT_HINTS}<script src="https://cdn.example/x.js"></script>`), 'perf-hints', '/auctions/ head has a render-blocking <script src="https://cdn.example/x.js">');
+  passes('U8 hints: defer, async and module scripts pass', mutate(AU, FONT_HINTS, `${FONT_HINTS}<script defer src="https://cdn.example/a.js"></script><script async src="https://cdn.example/b.js"></script><script type="module" src="https://cdn.example/c.js"></script>`));
+  expectFail('U8 hints: another inline script', mutate(PR, FONT_HINTS, `${FONT_HINTS}<script>window.x = 1;</script>`), 'perf-hints', '/privacy/ head has a render-blocking <script (inline, 13 chars)>');
+  expectFail('U8 hints: a second font-ready script', mutate(PR, FONT_HINTS, `${FONT_HINTS}${FONT_READY}`), 'perf-hints', '/privacy/ head has a render-blocking <script (inline');
+  expectFail('U8 hints: a font-ready script over 2000 characters', mutate(PR, FONT_READY, FONT_READY.replace('(function(){', `(function(){/*${'x'.repeat(2000)}*/`)), 'perf-hints', '/privacy/ head has a render-blocking <script (inline');
+  passes('U8 hints: a blocking script in the body is not a head hint', mutate(PR, '<main>Privacy</main>', '<main>Privacy</main><script>window.y = 2;</script>'));
+
+  // pvp-referrer
+  expectFail('U8 referrer: /pvp/ without no-referrer', mutate(P, REFERRER_META, ''), 'pvp-referrer', '/pvp/ referrer metas are [], want ["no-referrer"]');
+  expectFail('U8 referrer: /pvp/player/ with origin', plMut(REFERRER_META, '<meta name="referrer" content="origin">'), 'pvp-referrer', '/pvp/player/ referrer metas are ["origin"]');
+  expectFail('U8 referrer: /store/ changes referrer behaviour', mutate(ST, ROBOTS_META, `${ROBOTS_META}${REFERRER_META}`), 'pvp-referrer', '/store/ has a referrer meta ["no-referrer"]');
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

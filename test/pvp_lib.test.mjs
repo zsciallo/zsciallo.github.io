@@ -151,6 +151,12 @@
 //              'bedrock', else 'java'); href: profileHref(opponent.key), or
 //              null when the key is null }, rating: '+11' | '-13' | '0', or ''
 //              when ratingChange is null }
+//            U8 (defence in depth for the hidden placement rating): rating is
+//            also '' whenever the doc.kits entry with that row's kit key is not
+//            placed === true (unplaced, placed missing or not the boolean true,
+//            or no such kit entry), even when ratingChange is a number.
+//   U8 singulars: '1 win', '1 loss' in kit lines (placed and unplaced) and
+//            '1 kill', '1 death' in career lines; 0 and 2+ stay plural.
 //   empty    recent.length === 0
 //   Pure: never mutates its input (tests pass deep-frozen docs).
 
@@ -684,6 +690,50 @@ test('profileView: does not mutate (deep-frozen input) and is repeatable', () =>
   const a = profileView(PROFILE('sample_01'), LADDER_DOC());
   const b = profileView(PROFILE('sample_01'), LADDER_DOC());
   return (a !== null && same(a, b)) || `two calls differ or null: ${q(a)}`;
+});
+
+// ------------------------------------------------------------- U8 (review findings) --
+
+// Defence in depth: a recent row on a kit that is not placed never shows a rating change,
+// even when the feed sends one (the placement rating is hidden until the kit is placed).
+const recentDoc = (kits, rows) =>
+  deepFreeze({
+    name: 'A', edition: 'java', uuid: null, best: null, kits,
+    career: { kills: 0, deaths: 0, bestStreak: 0, tournamentWins: 0 },
+    recent: rows.map(([kit, ratingChange]) => ({ at: '2026-11-09T00:00:00Z', kit, result: 'win', ratingChange, opponent: { name: 'X', edition: 'java', key: 'x' } })),
+  });
+const KIT = (key, placed, extra = {}) => ({ key, label: key[0].toUpperCase() + key.slice(1), games: 3, placementMatches: 10, wins: 2, losses: 1, ...(placed === undefined ? {} : { placed }), ...extra });
+test('U8 profileView: an unplaced kit\'s recent rows have rating "" even when ratingChange is a number', () => {
+  const doc = deepFreeze({ ...clone(fixtureJson('players', 'sample_10.json')), recent: fixtureJson('players', 'sample_10.json').recent.map((r, i) => ({ ...r, ratingChange: i ? -9 : 14 })) });
+  return eq(profileView(doc, LADDER_DOC())?.recent?.map((r) => r.rating), ['', '']);
+});
+test('U8 profileView: placed missing, "true" (string) or 1 counts as unplaced for recent ratings', () =>
+  eq(profileView(recentDoc([KIT('sword'), KIT('mace', 'true'), KIT('axe', 1)], [['sword', 12], ['mace', -4], ['axe', 7]]), LADDER_DOC())?.recent?.map((r) => r.rating), ['', '', '']));
+test('U8 profileView: a recent row whose kit has no entry in kits has rating ""', () =>
+  eq(profileView(recentDoc([KIT('sword', true, { rating: 1500, peak: 1500, rank: 9, tier: 'Silver', division: 'III' })], [['chaos', 20], ['sword', 20]]), LADDER_DOC())?.recent?.map((r) => r.rating), ['', '+20']));
+test('U8 profileView: mixed kits: only the placed kit\'s rows keep their rating change', () =>
+  eq(profileView(deepFreeze({ ...clone(fixtureJson('players', 'b-sample_02.json')), recent: [
+    { at: '2026-11-09T00:00:00Z', kit: 'sword', result: 'win', ratingChange: 9, opponent: { name: 'X', edition: 'java', key: 'x' } },
+    { at: '2026-11-09T00:00:00Z', kit: 'mace', result: 'loss', ratingChange: -6, opponent: { name: 'Y', edition: 'java', key: 'y' } },
+    { at: '2026-11-09T00:00:00Z', kit: 'sword', result: 'draw', ratingChange: 0, opponent: { name: 'Z', edition: 'java', key: 'z' } },
+  ] }), LADDER_DOC())?.recent?.map((r) => r.rating), ['+9', '', '0']));
+
+// Singulars (review findings): 1 win, 1 loss, 1 kill, 1 death.
+test('U8 profileView: "1 win, 1 loss" on an unplaced kit', () =>
+  eq(profileView(recentDoc([KIT('sword', false, { wins: 1, losses: 1, games: 2 })], []), LADDER_DOC())?.kits?.[0]?.lines, ['Placing 2/10', '1 win, 1 loss']));
+test('U8 profileView: "1 win, 0 losses" and "0 wins, 1 loss" on placed kits', () => {
+  const placed = (wins, losses) => KIT('sword', true, { wins, losses, rating: 1500, peak: 1500, rank: 9, streak: 0, tier: 'Silver', division: 'III' });
+  const a = profileView(recentDoc([placed(1, 0)], []), LADDER_DOC())?.kits?.[0]?.lines?.[2];
+  const b = profileView(recentDoc([placed(0, 1)], []), LADDER_DOC())?.kits?.[0]?.lines?.[2];
+  return eq([a, b], ['1 win, 0 losses', '0 wins, 1 loss']);
+});
+test('U8 profileView: "1 kill", "1 death" in the career lines', () => {
+  const doc = deepFreeze({ ...clone(fixtureJson('players', 'sample_10.json')), career: { kills: 1, deaths: 1, bestStreak: 1, tournamentWins: 1 } });
+  return eq(profileView(doc, LADDER_DOC())?.career?.lines, ['1 kill', '1 death', 'Best streak 1', '1 tournament won']);
+});
+test('U8 profileView: 0 and 2 stay plural ("0 kills", "2 deaths")', () => {
+  const doc = deepFreeze({ ...clone(fixtureJson('players', 'sample_10.json')), career: { kills: 0, deaths: 2, bestStreak: 0, tournamentWins: 2 } });
+  return eq(profileView(doc, LADDER_DOC())?.career?.lines, ['0 kills', '2 deaths', 'Best streak 0', '2 tournaments won']);
 });
 
 console.log(failed ? `RESULT: FAIL ${failed} of ${passed + failed}` : `RESULT: PASS ${passed} checks`);

@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "key": "sample_10",
+  "name": "Sample_10",
+  "edition": "java",
+  "uuid": "00000000-0000-4000-8000-000000000010",
+  "best": null,
+  "kits": [
+    {"key": "sword", "label": "Sword", "placed": false, "games": 6, "placementMatches": 10, "wins": 3, "losses": 3},
+    {"key": "mace", "label": "Mace", "placed": false, "games": 2, "placementMatches": 10, "wins": 0, "losses": 2}
+  ],
+  "career": {"kills": 14, "deaths": 9, "bestStreak": 2, "tournamentWins": 0},
+  "recent": [
+    {"at": "2026-11-09T22:10:00.000Z", "kit": "sword", "result": "loss", "ratingChange": null, "opponent": {"name": ".Sample_05", "edition": "bedrock", "key": "b-sample_05"}},
+    {"at": "2026-11-09T22:00:00.000Z", "kit": "mace", "result": "win", "ratingChange": null, "opponent": {"name": "Sample_07", "edition": "java", "key": "sample_07"}}
+  ]
+}

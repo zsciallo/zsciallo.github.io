@@ -19,7 +19,7 @@
 // Plain Node ESM, no dependencies: HTML is read with a few narrow regexes, the
 // PNG size from its IHDR chunk.
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -1760,6 +1760,843 @@ function pvpSearchShell(dist) {
   });
 }
 
+// ======================================== U8: SEO / AEO, semantics, hints ==
+//
+// U8 changes nothing a visitor can see. These checks pin the head tags,
+// structured data, crawl files, markup semantics and load hints, and two
+// regression guards hold the visible page to the 762b268 build:
+//   seo-titles-frozen        titles and approved descriptions byte-identical
+//                            to test/fixtures/seo-head-base.json
+//   visible-text-unchanged   blockText(#app) of every page identical to
+//                            test/fixtures/visible-text-base.json
+// (pixel identity is test/visual_check.mjs).
+//
+// Scope: "indexable" = INDEXABLE below (seven routes). /pvp/player/ is not
+// indexable (noindex, canonical /pvp/, not in the sitemap: player-shell and
+// player-not-in-sitemap keep asserting that); the semantics and hint checks
+// cover it too (SEMANTIC_ROUTES).
+//
+// Normalisation: as every earlier check. Head values via metaValues()
+// (entities decoded, whitespace collapsed, trimmed); page text via textOf() /
+// blockText() (entities decoded, curly quotes straightened, whitespace incl.
+// nbsp collapsed, trimmed). The fixture directory is test/fixtures, or the
+// directory in env CHECK_SITE_FIXTURES (the self-test points it at a snapshot
+// of its own fake site). `node test/check_site.mjs --snapshot <dist> [outDir]`
+// writes both fixtures from a build (run once by the U8 test writer on the
+// production build of 762b268; regenerating them is a test change).
+//
+// Not repeated here because an earlier check already pins it, with the same or
+// a stricter expectation (so a defect fails the check that owns it, once):
+//   og:site_name, og:image      site-name-author, og-preview-image (PAGES), pvp-page (/pvp/)
+//   description, twitter:title  exact on / (home-head) and /pvp/ (pvp-page); still counted for uniqueness
+//   canonical on /pvp/          pvp-page (exact)
+//   one <h1>                    home-hero (/), smp-page (/smp/), pvp-page (/pvp/), player-shell (/pvp/player/)
+//   a <footer>                  nav-links (the seven indexable pages), player-nav (/pvp/player/)
+//   JSON-LD parse errors        ld-json-parses, pvp-page (unparsable blocks are skipped here)
+//   the FAQPage node and its    faq-jsonld-sync (one to one with the visible FAQ, stricter than
+//   question/answer texts       the visible-facts rule, so FAQPage subtrees are skipped there)
+//   a missing sitemap, and      sitemap-pvp; player-not-in-sitemap (seo-sitemap ignores
+//   profile URLs in it          <loc>s containing /pvp/player)
+//   the profile page's robots/canonical  player-shell
+//   the search block, the hero logo      pvp-search-shell, home-hero
+
+export const SITE = 'https://chromabit.us';
+export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/'];
+export const SEMANTIC_ROUTES = [...INDEXABLE, '/pvp/player/'];
+const FIXTURE_DIR = process.env.CHECK_SITE_FIXTURES ? resolve(process.env.CHECK_SITE_FIXTURES) : join(ROOT, 'test', 'fixtures');
+
+export const SEO = {
+  descMin: 70,
+  descMax: 160,
+  /**
+   * Routes whose description is exempt from the 70-160 range. '/' is 167
+   * characters at 762b268 and home-head (U2) pins it byte for byte, so U8
+   * cannot shorten it without a test change: flagged to the orchestrator.
+   */
+  descRangeExempt: { '/': 'pinned byte-exact by home-head (U2); 167 characters at 762b268' },
+  locale: 'en_US',
+  imageWidth: '1200',
+  imageHeight: '630',
+  twitterCard: 'summary_large_image',
+  robotsTokens: ['index', 'follow', 'max-image-preview:large', 'max-snippet:-1'],
+  /** Review finding: the store description says "the Chromabit Minecraft server"; it becomes Chromabit wording without "server". */
+  store: { route: '/store/', oldPhrase: 'the Chromabit Minecraft server', forbid: /server/i, need: 'Chromabit' },
+  crawlers: ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended', 'Bingbot'],
+  sitemapUrl: 'https://chromabit.us/sitemap.xml',
+  /** JSON-LD keys whose numeric values are allowed (anything else is a volatile number). */
+  ldNumberKeys: ['position', 'width', 'height'],
+  ldForbiddenKeys: ['playersOnline', 'serverStatus', 'interactionStatistic', 'userInteractionCount', 'aggregateRating'],
+  /** JSON-LD string keys that must state only facts visible on the page (or the meta description). */
+  ldFactKeys: ['name', 'text', 'description', 'headline'],
+  /** Node types whose strings are boilerplate (not fact-checked). */
+  ldBoilerplate: ['Organization', 'WebSite'],
+  /** Node types whose strings another check compares exactly (faq-jsonld-sync). */
+  ldOwnedElsewhere: ['FAQPage'],
+  gameAddress: 'play.chromabit.us',
+  /** Head requirements an earlier check pins on that route (see the list above). */
+  pinned: { '/': ['description', 'twitter:title'], '/pvp/': ['description', 'twitter:title', 'canonical'] },
+  /** Routes whose single <h1> an earlier check pins. */
+  h1Pinned: ['/', '/smp/', '/pvp/', '/pvp/player/'],
+};
+
+export const LLMS = {
+  file: 'llms.txt',
+  must: ['play.chromabit.us', '19132', '26.3', 'Java', 'Bedrock'],
+  mustCi: ['ranked'],
+  forbidCi: ['store credit', 'ten rounds', 'each round'],
+  /**
+   * Numbers allowed in llms.txt (facts already on the site): 10 placement
+   * matches, level 2, 3 divisions / best of three, 7 tiers, port 19132, Java
+   * 26.3, tournament Tokens 1000/500/250, Heartwood 9 zones / 4 difficulties /
+   * 3 phases; 80,000 only while the built FAQ states it. Digits are read after
+   * URLs are removed; commas inside a number are dropped (1,000 = 1000).
+   * Number words count too (two..ninety, hundred, thousand, million); "one" is
+   * not read as a number.
+   */
+  numbers: ['10', '2', '3', '7', '19132', '26.3', '1000', '500', '250', '9', '4'],
+  conditional: { 80000: { route: '/faq/', text: '80,000' } },
+};
+
+const NUMBER_WORDS = {
+  two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12,
+  thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20,
+  thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100, thousand: 1000, million: 1000000,
+};
+
+const headEl = (p) => findAll(dom(p), isTag('head'))[0] ?? null;
+const bodyEl = (p) => findAll(dom(p), isTag('body'))[0] ?? dom(p);
+const headLinks = (p) => (headEl(p) ? findAll(headEl(p), isTag('link')) : []);
+const relHas = (el, rel) => (el.attrs.rel ?? '').toLowerCase().split(/\s+/).includes(rel);
+const pathOf = (url) => {
+  try {
+    return new URL(url, `${SITE}/`).pathname;
+  } catch {
+    return null;
+  }
+};
+const isFileIn = (f) => existsSync(f) && statSync(f).isFile();
+
+/** True when an absolute https://chromabit.us URL resolves to a file in dist (fragment and query ignored). */
+function siteUrlResolves(url, dist) {
+  let u;
+  try {
+    u = new URL(url);
+  } catch {
+    return false;
+  }
+  let path;
+  try {
+    path = decodeURIComponent(u.pathname);
+  } catch {
+    return false;
+  }
+  const target = join(dist, path);
+  return path.endsWith('/') ? isFileIn(join(target, 'index.html')) : isFileIn(target) || isFileIn(join(target, 'index.html'));
+}
+const isSiteUrl = (s) => typeof s === 'string' && /^https:\/\/chromabit\.us(\/|$|#|\?)/.test(s);
+const isAbsHttps = (s) => typeof s === 'string' && /^https:\/\/[^\s/]+/.test(s);
+
+function readFixture(name) {
+  const file = join(FIXTURE_DIR, name);
+  if (!existsSync(file)) return null;
+  return JSON.parse(readFileSync(file, 'utf-8'));
+}
+
+/** The visible text a U8 change must not alter: blockText of #app. */
+export const visibleText = (p) => blockText(app(p));
+
+/** Snapshot of titles, descriptions and visible text for the two U8 fixtures. */
+export function snapshot(dist = DIST, capturedFrom = 'unknown') {
+  const heads = {};
+  const text = {};
+  for (const route of SEMANTIC_ROUTES) {
+    const p = page(route, dist);
+    if (!p) continue;
+    const descs = metaValues(p, 'description');
+    heads[route] = { title: p.titles.length === 1 ? p.titles[0] : null, description: descs.length === 1 ? descs[0] : null };
+    text[route] = visibleText(p);
+  }
+  const indexed = INDEXABLE.filter((r) => heads[r]);
+  for (const route of Object.keys(heads)) {
+    const h = heads[route];
+    const d = h.description;
+    const inRange = d !== null && d.length >= SEO.descMin && d.length <= SEO.descMax;
+    const unique = d !== null && indexed.filter((r) => heads[r].description === d).length <= (INDEXABLE.includes(route) ? 1 : 0);
+    let why = null;
+    if (route === SEO.store.route) why = `store wording: "${SEO.store.oldPhrase}" becomes Chromabit wording without "server"`;
+    else if (SEO.descRangeExempt[route]) why = null;
+    else if (!inRange) why = `${d === null ? 'no single description' : `${d.length} characters`}, outside ${SEO.descMin}-${SEO.descMax}`;
+    else if (INDEXABLE.includes(route) && !unique) why = 'not unique across the indexable pages';
+    h.descriptionFrozen = why === null;
+    if (why) h.released = why;
+  }
+  return {
+    heads: { capturedFrom, note: 'Titles always frozen; a description is frozen unless "released" says why it may change.', pages: heads },
+    text: {
+      capturedFrom,
+      normalisation: 'blockText(#app): tags stripped, script/style/template/svg text ignored, a space at every non-inline element boundary, entities decoded, curly quotes straightened, whitespace incl. nbsp collapsed to one space, trimmed',
+      pages: text,
+    },
+  };
+}
+
+/** U8-H: head tags of every indexable page. */
+function seoHead(dist) {
+  const problems = [];
+  const seen = { title: new Map(), description: new Map() };
+  for (const route of INDEXABLE) {
+    const p = page(route, dist);
+    if (!p) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    const r = route;
+    const pinned = SEO.pinned[r] ?? [];
+    const html = findAll(dom(p), isTag('html'))[0];
+    if (!html || html.attrs.lang !== 'en') problems.push(`${r} <html lang> is ${q(html?.attrs.lang ?? null)}, want "en"`);
+    if (p.titles.length !== 1) problems.push(`${r} has ${p.titles.length} <title>, want 1`);
+    else if (!p.titles[0]) problems.push(`${r} <title> is empty`);
+    else seen.title.set(r, p.titles[0]);
+    const descs = metaValues(p, 'description');
+    if (descs.length !== 1) {
+      if (!pinned.includes('description')) problems.push(`${r} has ${descs.length} meta descriptions, want 1`);
+    } else {
+      const d = descs[0];
+      seen.description.set(r, d);
+      if (!SEO.descRangeExempt[r] && !pinned.includes('description') && (d.length < SEO.descMin || d.length > SEO.descMax))
+        problems.push(`${r} description is ${d.length} characters, want ${SEO.descMin}-${SEO.descMax}: ${q(d)}`);
+      if (r === SEO.store.route) {
+        if (d.includes(SEO.store.oldPhrase)) problems.push(`${r} description still says ${q(SEO.store.oldPhrase)}`);
+        if (SEO.store.forbid.test(d)) problems.push(`${r} description contains "server": ${q(d)}`);
+        if (!d.includes(SEO.store.need)) problems.push(`${r} description does not name ${q(SEO.store.need)}`);
+      }
+    }
+    const want = `${SITE}${r}`;
+    if (!pinned.includes('canonical')) {
+      const canon = headLinks(p).filter((l) => relHas(l, 'canonical'));
+      if (canon.length !== 1) problems.push(`${r} has ${canon.length} <link rel="canonical">, want 1`);
+      else if (canon[0].attrs.href !== want) problems.push(`${r} canonical is ${q(canon[0].attrs.href ?? null)}, want ${q(want)}`);
+    }
+    problems.push(
+      ...expectMeta(p, 'og:url', want),
+      ...expectMeta(p, 'og:locale', SEO.locale),
+      ...expectMeta(p, 'og:image:width', SEO.imageWidth),
+      ...expectMeta(p, 'og:image:height', SEO.imageHeight),
+      ...expectMeta(p, 'twitter:card', SEO.twitterCard),
+      // The same image as og:image (whose URL and file og-preview-image / pvp-page pin).
+      ...expectMeta(p, 'twitter:image', OG_IMAGE_URL),
+    );
+    for (const key of ['og:type', 'og:title', 'og:description', 'og:image:alt', 'twitter:title', 'twitter:description', 'theme-color']) {
+      if (pinned.includes(key)) continue;
+      const v = metaValues(p, key);
+      if (v.length !== 1) problems.push(`${r} has ${v.length} ${key}, want 1`);
+      else if (!v[0]) problems.push(`${r} ${key} is empty`);
+    }
+    const robots = metaValues(p, 'robots');
+    if (robots.length !== 1) problems.push(`${r} has ${robots.length} robots metas, want 1`);
+    else {
+      const tokens = robots[0].toLowerCase().split(',').map((t) => t.trim());
+      const missing = SEO.robotsTokens.filter((t) => !tokens.includes(t));
+      if (missing.length || tokens.some((t) => t === 'noindex' || t === 'nofollow' || t === 'none'))
+        problems.push(`${r} robots is ${q(robots[0])}, want ${q(SEO.robotsTokens.join(', '))} (no noindex/nofollow)`);
+    }
+  }
+  for (const [kind, map] of Object.entries(seen)) {
+    const by = new Map();
+    for (const [r, v] of map) by.set(v, [...(by.get(v) ?? []), r]);
+    for (const [v, rs] of by) if (rs.length > 1) problems.push(`${rs.join(' and ')} share the ${kind} ${clip(v, 80)}`);
+  }
+  return problems;
+}
+
+/** Digit numbers in `text` (commas dropped) that do not occur in `visible`. */
+function numbersNotIn(text, visible) {
+  const vis = new Set((visible.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, '')));
+  return (text.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, '').replace(/\.$/, '')).filter((n) => !vis.has(n));
+}
+
+/** U8-H: titles and approved descriptions stay byte-identical to the 762b268 snapshot. */
+function seoTitlesFrozen(dist) {
+  const base = readFixture('seo-head-base.json');
+  if (!base) return [`fixture ${join(FIXTURE_DIR, 'seo-head-base.json')} missing`];
+  const problems = [];
+  for (const [route, b] of Object.entries(base.pages)) {
+    const p = page(route, dist);
+    if (!p) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    const title = p.titles.length === 1 ? p.titles[0] : null;
+    if (title !== b.title) problems.push(`${route} title is ${q(title)}, frozen at ${q(b.title)}`);
+    const descs = metaValues(p, 'description');
+    const d = descs.length === 1 ? descs[0] : null;
+    if (b.descriptionFrozen) {
+      if (d !== b.description) problems.push(`${route} description is ${q(d)}, frozen at ${q(b.description)}`);
+    } else if (d !== null) {
+      // A released description is rewritten from facts on the page: every number in it is on the page.
+      const extra = numbersNotIn(d, textOf(bodyEl(p)));
+      if (extra.length) problems.push(`${route} rewritten description states ${q(extra)}, not in the page's visible text`);
+    }
+  }
+  return problems;
+}
+
+/** Walk a JSON value: fn(key, value, ownerNode, typesOfNearestTypedAncestor). */
+function walkLd(value, fn, key = null, owner = null, ctx = []) {
+  if (Array.isArray(value)) {
+    for (const v of value) walkLd(v, fn, key, owner, ctx);
+    return;
+  }
+  if (value && typeof value === 'object') {
+    const t = types(value);
+    const here = t.length ? [...ctx, ...t] : ctx;
+    for (const [k, v] of Object.entries(value)) {
+      fn(k, v, value, here);
+      walkLd(v, fn, k, value, here);
+    }
+  }
+}
+
+/** Parsed JSON-LD blocks of a page (unparsable blocks skipped: ld-json-parses / pvp-page report those). */
+function ldBlocks(p) {
+  const out = [];
+  for (const raw of p.jsonLd) {
+    try {
+      out.push(JSON.parse(raw));
+    } catch {
+      /* reported elsewhere */
+    }
+  }
+  return out;
+}
+
+/** Every object with an @type anywhere in the page's JSON-LD. */
+function ldTyped(p) {
+  const out = [];
+  const visit = (v) => {
+    if (Array.isArray(v)) v.forEach(visit);
+    else if (v && typeof v === 'object') {
+      if (types(v).length) out.push(v);
+      Object.values(v).forEach(visit);
+    }
+  };
+  ldBlocks(p).forEach(visit);
+  return out;
+}
+
+const ldUrl = (v) => (typeof v === 'string' ? v : v && typeof v === 'object' ? v['@id'] ?? v.url ?? v.contentUrl ?? null : null);
+const SITE_ROOT = /^https:\/\/chromabit\.us\/?$/;
+
+function orgProblems(n, dist, where) {
+  const problems = [];
+  const discord = siteConfig().discord;
+  if (n.name !== NETWORK) problems.push(`${where} Organization name is ${q(n.name ?? null)}, want ${q(NETWORK)}`);
+  if (!SITE_ROOT.test(n.url ?? '')) problems.push(`${where} Organization url is ${q(n.url ?? null)}, want ${q(`${SITE}/`)}`);
+  const logo = ldUrl(n.logo);
+  if (!isSiteUrl(logo) || !siteUrlResolves(logo, dist)) problems.push(`${where} Organization logo ${q(logo)} is not an absolute ${SITE}/ URL of a file in dist`);
+  const same = [].concat(n.sameAs ?? []);
+  if (!same.includes(discord)) problems.push(`${where} Organization sameAs ${q(same)} lacks the Discord URL ${q(discord)}`);
+  return problems;
+}
+function siteProblems(n, where) {
+  const problems = [];
+  if (typeof n.name !== 'string' || !n.name.trim()) problems.push(`${where} WebSite has no name`);
+  if (!SITE_ROOT.test(n.url ?? '')) problems.push(`${where} WebSite url is ${q(n.url ?? null)}, want ${q(`${SITE}/`)}`);
+  return problems;
+}
+
+/** U8-J: structured data on every indexable page. */
+function seoJsonLd(dist) {
+  const problems = [];
+  const home = page('/', dist);
+  const homeNodes = home ? ldTyped(home) : [];
+  const homeOrg = homeNodes.filter((n) => types(n).includes('Organization'));
+  const homeSite = homeNodes.filter((n) => types(n).includes('WebSite'));
+  const orgId = homeOrg.length === 1 && !orgProblems(homeOrg[0], dist, '/').length ? homeOrg[0]['@id'] ?? null : null;
+  const siteId = homeSite.length === 1 && !siteProblems(homeSite[0], '/').length ? homeSite[0]['@id'] ?? null : null;
+  for (const route of INDEXABLE) {
+    const p = page(route, dist);
+    if (!p) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    const r = route;
+    const blocks = ldBlocks(p);
+    if (!blocks.length) {
+      problems.push(`${r} has no JSON-LD`);
+      continue;
+    }
+    for (const [i, block] of blocks.entries()) {
+      for (const item of Array.isArray(block) ? block : [block]) {
+        if (!item || typeof item !== 'object' || item['@context'] !== 'https://schema.org')
+          problems.push(`${r} JSON-LD block ${i + 1} @context is ${q(item?.['@context'] ?? null)}, want "https://schema.org"`);
+        const members = item && Array.isArray(item['@graph']) ? item['@graph'] : [item];
+        for (const m of members) if (!types(m).length) problems.push(`${r} JSON-LD block ${i + 1} has a node without @type`);
+      }
+      walkLd(block, (k, v) => {
+        if (k === '@id' && !(typeof v === 'string' && isSiteUrl(v))) problems.push(`${r} JSON-LD @id ${q(v)} is not an absolute ${SITE}/ URL`);
+        if (['@id', 'url', 'item', 'logo', 'contentUrl', 'image'].includes(k) && typeof v === 'string') {
+          if (!isAbsHttps(v)) problems.push(`${r} JSON-LD ${k} ${q(v)} is not an absolute https URL`);
+          else if (isSiteUrl(v) && !siteUrlResolves(v, dist)) problems.push(`${r} JSON-LD ${k} ${q(v)} does not resolve to a file in dist`);
+        }
+        if (typeof v === 'number' && !SEO.ldNumberKeys.includes(k)) problems.push(`${r} JSON-LD ${k} is the number ${v} (no volatile numbers)`);
+        if (SEO.ldForbiddenKeys.includes(k)) problems.push(`${r} JSON-LD has ${k} (volatile)`);
+      });
+    }
+    const nodes = ldTyped(p);
+    const ids = new Set();
+    walkLd(blocks, (k, v) => k === '@id' && typeof v === 'string' && ids.add(v));
+    // Organization and WebSite: inline, or by @id reference to the home page's nodes.
+    const orgs = nodes.filter((n) => types(n).includes('Organization'));
+    if (orgs.length) orgs.forEach((n) => problems.push(...orgProblems(n, dist, r)));
+    else if (!(orgId && ids.has(orgId))) problems.push(`${r} has no Organization node and no @id reference to the home page's Organization${orgId ? ` (${orgId})` : ' (none valid with an @id on /)'}`);
+    const sites = nodes.filter((n) => types(n).includes('WebSite'));
+    if (sites.length) sites.forEach((n) => problems.push(...siteProblems(n, r)));
+    else if (!(siteId && ids.has(siteId))) problems.push(`${r} has no WebSite node and no @id reference to the home page's WebSite${siteId ? ` (${siteId})` : ' (none valid with an @id on /)'}`);
+
+    if (r === '/') {
+      const games = nodes.filter((n) => types(n).includes('VideoGame') && /minecraft/i.test(n.name ?? ''));
+      if (games.length !== 1) problems.push(`/ has ${games.length} VideoGame nodes named Minecraft, want 1`);
+      else {
+        const [g] = games;
+        const platforms = [].concat(g.gamePlatform ?? []).join(' | ');
+        if (!/java/i.test(platforms) || !/bedrock/i.test(platforms)) problems.push(`/ VideoGame gamePlatform is ${q(g.gamePlatform ?? null)}, want both Java and Bedrock editions`);
+        const servers = [].concat(g.gameServer ?? []).filter((s) => s && types(s).includes('GameServer'));
+        if (servers.length !== 1) problems.push(`/ VideoGame has ${servers.length} gameServer nodes of @type GameServer, want 1`);
+        else {
+          const [s] = servers;
+          if (typeof s.name !== 'string' || !s.name.trim()) problems.push('/ GameServer has no name');
+          let names = false;
+          walkLd(s, (k, v) => typeof v === 'string' && v.includes(SEO.gameAddress) && (names = true));
+          if (!isAbsHttps(s.url) && !names) problems.push(`/ GameServer has neither a url nor the address ${q(SEO.gameAddress)}`);
+        }
+      }
+    } else {
+      const crumbs = nodes.filter((n) => types(n).includes('BreadcrumbList'));
+      if (crumbs.length !== 1) problems.push(`${r} has ${crumbs.length} BreadcrumbList nodes, want 1`);
+      else {
+        const items = [].concat(crumbs[0].itemListElement ?? []);
+        const got = items.map((it) => [it?.position, ldUrl(it?.item), typeof it?.name === 'string' ? !!it.name.trim() : typeof it?.item?.name === 'string' && !!it.item.name.trim()]);
+        const wantCrumbs = [[1, `${SITE}/`, true], [2, `${SITE}${r}`, true]];
+        if (q(got) !== q(wantCrumbs)) problems.push(`${r} BreadcrumbList is ${q(got)} ([position, item, named]), want ${q(wantCrumbs)}`);
+      }
+    }
+    if (r === PVP.route) {
+      const pages = nodes.filter((n) => types(n).includes('WebPage'));
+      if (pages.length !== 1) problems.push(`/pvp/ has ${pages.length} WebPage nodes, want 1`);
+      else {
+        const w = pages[0];
+        if (typeof w.name !== 'string' || !w.name.trim()) problems.push('/pvp/ WebPage has no name');
+        if (typeof w.description !== 'string' || !w.description.trim()) problems.push('/pvp/ WebPage has no description');
+        if (w.url !== `${SITE}/pvp/`) problems.push(`/pvp/ WebPage url is ${q(w.url ?? null)}, want ${q(`${SITE}/pvp/`)}`);
+      }
+      // The six mode names visible on /pvp/, in page order (pvp-modes pins the page to PVP.modes).
+      const lists = nodes.filter((n) => types(n).includes('ItemList'));
+      const wantModes = PVP.modes.map(([t]) => t);
+      if (lists.length !== 1) problems.push(`/pvp/ has ${lists.length} ItemList nodes, want 1`);
+      else {
+        const items = [].concat(lists[0].itemListElement ?? []);
+        const names = items.map((it) => (typeof it?.name === 'string' ? it.name : it?.item?.name ?? null));
+        const pos = items.map((it) => it?.position);
+        if (q(names) !== q(wantModes)) problems.push(`/pvp/ ItemList names are ${q(names)}, want ${q(wantModes)}`);
+        if (q(pos) !== q(wantModes.map((_, i) => i + 1))) problems.push(`/pvp/ ItemList positions are ${q(pos)}, want 1..${wantModes.length}`);
+      }
+    }
+  }
+  return problems;
+}
+
+/** U8-J: every name/text/description/headline string in a page's JSON-LD (outside Organization/WebSite) is visible on that page or is its meta description. */
+function seoJsonLdVisibleFacts(dist) {
+  const problems = [];
+  for (const route of INDEXABLE) {
+    const p = page(route, dist);
+    if (!p) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    const body = bodyEl(p);
+    const hay = [textOf(body), blockText(body)].map((t) => t.toLowerCase());
+    const meta = metaValues(p, 'description').map((d) => norm(d).toLowerCase());
+    const bad = [];
+    walkLd(ldBlocks(p), (k, v, owner, ctx) => {
+      if (!SEO.ldFactKeys.includes(k) || typeof v !== 'string') return;
+      if (ctx.some((t) => SEO.ldBoilerplate.includes(t) || SEO.ldOwnedElsewhere.includes(t))) return;
+      if (/^https?:\/\//.test(v.trim())) return;
+      const n = norm(v).toLowerCase();
+      if (!n || meta.includes(n) || hay.some((h) => h.includes(n))) return;
+      bad.push(`${types(owner).join('/') || ctx.at(-1) || 'node'} ${k} ${clip(norm(v), 100)}`);
+    });
+    if (bad.length) problems.push(`${route} JSON-LD states what the page does not show: ${bad.slice(0, 4).join('; ')}${bad.length > 4 ? ` (+${bad.length - 4} more)` : ''}`);
+  }
+  return problems;
+}
+
+/** Problems with the well-formedness of a small XML document (no DTDs, no CDATA). */
+export function xmlProblems(text) {
+  const problems = [];
+  let s = text.replace(/^﻿/, '');
+  s = s.replace(/^\s*<\?xml[^?]*\?>/, '');
+  if (/<\?xml/.test(s)) problems.push('XML declaration not at the start');
+  const stack = [];
+  let roots = 0;
+  const re = /<!--[\s\S]*?-->|<[^>]*>|[^<]+/g;
+  let m;
+  while ((m = re.exec(s))) {
+    const tok = m[0];
+    if (tok.startsWith('<!--')) continue;
+    if (tok.startsWith('<')) {
+      const close = /^<\/([A-Za-z_][\w.:-]*)\s*>$/.exec(tok);
+      const open = /^<([A-Za-z_][\w.:-]*)((?:\s+[A-Za-z_][\w.:-]*\s*=\s*(?:"[^"<]*"|'[^'<]*'))*)\s*(\/?)>$/.exec(tok);
+      if (close) {
+        if (stack.at(-1) !== close[1]) problems.push(`</${close[1]}> closes <${stack.at(-1) ?? '(nothing)'}>`);
+        else stack.pop();
+      } else if (open) {
+        if (!stack.length) roots++;
+        if (!open[3]) stack.push(open[1]);
+      } else problems.push(`malformed tag ${q(tok.slice(0, 60))}`);
+    } else {
+      if (!stack.length && tok.trim()) problems.push(`text outside the root: ${q(tok.trim().slice(0, 40))}`);
+      for (const amp of tok.matchAll(/&([^;\s]*);?/g))
+        if (!/^&(amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);$/i.test(amp[0])) problems.push(`bad entity ${q(amp[0])}`);
+    }
+    if (problems.length > 5) break;
+  }
+  if (stack.length) problems.push(`unclosed <${stack.join('>, <')}>`);
+  if (roots !== 1) problems.push(`${roots} root elements, want 1`);
+  return problems;
+}
+
+/** U8-C: dist/sitemap.xml is valid XML listing exactly the seven indexable URLs, each with a YYYY-MM-DD lastmod. */
+function seoSitemap(dist) {
+  const file = join(dist, 'sitemap.xml');
+  if (!existsSync(file)) return []; // sitemap-pvp's failure
+  const xml = readFileSync(file, 'utf-8');
+  const problems = xmlProblems(xml).map((x) => `dist/sitemap.xml is not well-formed: ${x}`);
+  if (!/<urlset\s[^>]*xmlns\s*=\s*"http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/.test(xml)) problems.push('dist/sitemap.xml root is not <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+  // Profile URLs are player-not-in-sitemap's failure.
+  const urls = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => m[1]).filter((u) => !u.includes(PLAYER.sitemapNeedle));
+  const locs = [];
+  for (const u of urls) {
+    const loc = [...u.matchAll(/<loc>\s*([^<]*?)\s*<\/loc>/g)].map((m) => decode(m[1]));
+    const mods = [...u.matchAll(/<lastmod>\s*([^<]*?)\s*<\/lastmod>/g)].map((m) => m[1]);
+    if (loc.length !== 1) {
+      problems.push(`a <url> has ${loc.length} <loc>`);
+      continue;
+    }
+    locs.push(loc[0]);
+    const day = mods.length === 1 && /^\d{4}-\d{2}-\d{2}$/.test(mods[0]) ? new Date(`${mods[0]}T00:00:00Z`) : null;
+    const ok = !!day && !Number.isNaN(day.getTime()) && day.toISOString().slice(0, 10) === mods[0];
+    if (!ok) problems.push(`${loc[0]} lastmod is ${q(mods)}, want one YYYY-MM-DD date`);
+  }
+  const want = INDEXABLE.map((r) => `${SITE}${r}`);
+  const extra = locs.filter((l) => !want.includes(l));
+  const missing = want.filter((w) => !locs.includes(w));
+  const dupes = [...new Set(locs.filter((l, i) => locs.indexOf(l) !== i))];
+  if (missing.length) problems.push(`dist/sitemap.xml lacks ${q(missing)}`);
+  if (extra.length) problems.push(`dist/sitemap.xml lists ${q(extra)}, which are not indexable pages`);
+  if (dupes.length) problems.push(`dist/sitemap.xml lists ${q(dupes)} more than once`);
+  return problems;
+}
+
+/** robots.txt groups: [{ agents: [lowercased], rules: [{ field, value }] }] and the Sitemap values. */
+export function robotsGroups(text) {
+  const groups = [];
+  const sitemaps = [];
+  let cur = null;
+  let lastWasAgent = false;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.replace(/#.*$/, '').trim();
+    if (!line) continue;
+    const m = /^([A-Za-z-]+)\s*:\s*(.*)$/.exec(line);
+    if (!m) continue;
+    const field = m[1].toLowerCase();
+    const value = m[2].trim();
+    if (field === 'sitemap') {
+      sitemaps.push(value);
+      continue;
+    }
+    if (field === 'user-agent') {
+      if (!lastWasAgent) groups.push((cur = { agents: [], rules: [] }));
+      cur.agents.push(value.toLowerCase());
+      lastWasAgent = true;
+      continue;
+    }
+    lastWasAgent = false;
+    if (cur) cur.rules.push({ field, value });
+  }
+  return { groups, sitemaps };
+}
+
+/** U8-C: dist/robots.txt allows everyone and the named AI and search crawlers, and points at the sitemap. */
+function seoRobots(dist) {
+  const file = join(dist, 'robots.txt');
+  if (!existsSync(file)) return ['dist/robots.txt missing'];
+  const text = readFileSync(file, 'utf-8');
+  const { groups, sitemaps } = robotsGroups(text);
+  const problems = [];
+  if (!groups.some((g) => g.agents.includes('*'))) problems.push('dist/robots.txt has no "User-agent: *" group');
+  for (const g of groups)
+    for (const rule of g.rules) {
+      if (rule.field !== 'disallow' || !rule.value) continue;
+      if (rule.value === '/') problems.push(`dist/robots.txt has "Disallow: /" for ${q(g.agents)}`);
+      else {
+        const blocked = INDEXABLE.filter((r) => r.startsWith(rule.value) || rule.value === '/*');
+        if (blocked.length) problems.push(`dist/robots.txt "Disallow: ${rule.value}" for ${q(g.agents)} blocks ${q(blocked)}`);
+      }
+    }
+  if (!sitemaps.includes(SEO.sitemapUrl)) problems.push(`dist/robots.txt has no "Sitemap: ${SEO.sitemapUrl}" line (has ${q(sitemaps)})`);
+  for (const bot of SEO.crawlers) {
+    const own = groups.filter((g) => g.agents.includes(bot.toLowerCase()));
+    if (!own.length) problems.push(`dist/robots.txt has no explicit group for ${bot}`);
+    else if (!own.some((g) => g.rules.some((rule) => rule.field === 'allow' && rule.value === '/'))) problems.push(`dist/robots.txt group for ${bot} has no "Allow: /"`);
+  }
+  return problems;
+}
+
+/** Numbers stated in `text` (digits after URLs are removed, and number words), as strings. */
+export function statedNumbers(text) {
+  const plain = text.replace(/https?:\/\/\S+/g, ' ');
+  const digits = (plain.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, '').replace(/\.$/, ''));
+  const words = (plain.toLowerCase().match(/[a-z]+/g) ?? []).filter((w) => w in NUMBER_WORDS).map((w) => `${w} (${NUMBER_WORDS[w]})`);
+  return { digits, words };
+}
+
+/** U8-C: dist/llms.txt for answer engines: title, the facts, absolute links to every indexable page, only allowlisted numbers. */
+function seoLlms(dist) {
+  const file = join(dist, LLMS.file);
+  if (!existsSync(file)) return [`dist/${LLMS.file} missing`];
+  const text = readFileSync(file, 'utf-8');
+  const problems = [];
+  const first = text.split(/\r?\n/)[0] ?? '';
+  if (!first.startsWith('# ') || !first.includes('Chromabit')) problems.push(`dist/${LLMS.file} first line is ${q(first)}, want a "# " title containing "Chromabit"`);
+  for (const s of LLMS.must) if (!text.includes(s)) problems.push(`dist/${LLMS.file} does not contain ${q(s)}`);
+  for (const s of LLMS.mustCi) if (!text.toLowerCase().includes(s)) problems.push(`dist/${LLMS.file} does not contain ${q(s)}`);
+  const flat = squash(text).toLowerCase();
+  for (const s of LLMS.forbidCi) if (flat.includes(s)) problems.push(`dist/${LLMS.file} contains ${q(s)}`);
+  const urls = [...text.matchAll(/https?:\/\/[^\s)\]>"'<]+/g)].map((m) => m[0].replace(/[.,;:]+$/, ''));
+  const site = urls.filter((u) => /^https?:\/\/(www\.)?chromabit\.us/.test(u));
+  for (const u of site) {
+    if (!isSiteUrl(u)) problems.push(`dist/${LLMS.file} links ${q(u)} (want https://chromabit.us/...)`);
+    else if (!siteUrlResolves(u, dist)) problems.push(`dist/${LLMS.file} links ${q(u)}, which is missing from dist`);
+  }
+  const missing = INDEXABLE.map((r) => `${SITE}${r}`).filter((w) => !site.includes(w));
+  if (missing.length) problems.push(`dist/${LLMS.file} does not link ${q(missing)}`);
+  const relative = [...text.matchAll(/\]\((\/[^)]*)\)/g)].map((m) => m[1]);
+  if (relative.length) problems.push(`dist/${LLMS.file} has relative links ${q(relative)} (want absolute ${SITE}/...)`);
+  const allowed = new Set(LLMS.numbers);
+  for (const [n, cond] of Object.entries(LLMS.conditional)) {
+    const p = page(cond.route, dist);
+    if (p && textOf(bodyEl(p)).includes(cond.text)) allowed.add(n);
+  }
+  const { digits, words } = statedNumbers(text);
+  const badDigits = [...new Set(digits.filter((d) => !allowed.has(d)))];
+  const badWords = [...new Set(words.filter((w) => !allowed.has(w.match(/\((\d+)\)/)[1])))];
+  if (badDigits.length || badWords.length) problems.push(`dist/${LLMS.file} states numbers that are not site facts: ${q([...badDigits, ...badWords])} (allowed: ${[...allowed].join(', ')}, seven)`);
+  return problems;
+}
+
+/** U8-C: if dist/404.html exists it is noindex. */
+function seo404(dist) {
+  const file = join(dist, '404.html');
+  if (!existsSync(file)) return [];
+  const head = (readFileSync(file, 'utf-8').match(/<head[\s>][\s\S]*?<\/head>/i) ?? [''])[0];
+  const robots = [...head.matchAll(/<meta\b[^>]*>/gi)].map((m) => parseAttrs(m[0])).filter((a) => a.name === 'robots');
+  return robots.some((a) => (a.content ?? '').toLowerCase().split(',').map((t) => t.trim()).includes('noindex')) ? [] : ['dist/404.html has no robots noindex'];
+}
+
+/** U8-S: one <h1> (where no earlier check pins it), heading levels never skip deeper (h1->h3, h2->h4) in document order. */
+function a11yHeadings(dist) {
+  return eachPage(
+    SEMANTIC_ROUTES,
+    (p) => {
+      const problems = [];
+      const hs = findAll(dom(p), (el) => /^h[1-6]$/.test(el.tag));
+      const h1 = hs.filter((h) => h.tag === 'h1').length;
+      if (h1 !== 1 && !SEO.h1Pinned.includes(p.route)) problems.push(`${p.route} has ${h1} <h1>, want 1`);
+      for (let i = 1; i < hs.length; i++) {
+        const a = Number(hs[i - 1].tag[1]);
+        const b = Number(hs[i].tag[1]);
+        if (b > a + 1) problems.push(`${p.route} <${hs[i - 1].tag}> ${clip(textOf(hs[i - 1]), 40)} is followed by <${hs[i].tag}> ${clip(textOf(hs[i]), 40)} (skips a level)`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** The accessible name of an element (aria-label, aria-labelledby, text, img alt, title). */
+function accName(el, root) {
+  const label = (el.attrs['aria-label'] ?? '').trim();
+  if (label) return label;
+  const ids = (el.attrs['aria-labelledby'] ?? '').trim().split(/\s+/).filter(Boolean);
+  if (ids.length) {
+    const t = ids.map((id) => {
+      const target = findAll(root, (e) => e.attrs.id === id)[0];
+      return target ? textOf(target) : '';
+    }).join(' ').trim();
+    if (t) return t;
+  }
+  const t = textOf(el, (e) => e.attrs['aria-hidden'] === 'true');
+  if (t) return t;
+  const alts = findAll(el, (e) => e.tag === 'img' && (e.attrs.alt ?? '').trim() && e.attrs['aria-hidden'] !== 'true').map((e) => e.attrs.alt.trim());
+  if (alts.length) return alts.join(' ');
+  return (el.attrs.title ?? '').trim();
+}
+const describe = (el) => `<${el.tag}${el.attrs.class ? ` class=${q(el.attrs.class)}` : ''}${el.attrs.href ? ` href=${q(el.attrs.href)}` : ''}>`;
+
+/** U8-S: one <main>, every <nav> named when there is more than one (the <footer> is nav-links' / player-nav's). */
+function a11yLandmarks(dist) {
+  return eachPage(
+    SEMANTIC_ROUTES,
+    (p) => {
+      const problems = [];
+      const root = dom(p);
+      const mains = findAll(root, isTag('main')).length;
+      if (mains !== 1) problems.push(`${p.route} has ${mains} <main>, want 1`);
+      const navs = findAll(root, isTag('nav'));
+      if (navs.length > 1)
+        for (const n of navs) {
+          const named = (n.attrs['aria-label'] ?? '').trim() || ((n.attrs['aria-labelledby'] ?? '').trim() && accName({ tag: 'nav', attrs: { 'aria-labelledby': n.attrs['aria-labelledby'] }, children: [] }, root));
+          if (!named) problems.push(`${p.route} ${describe(n)} has no aria-label or resolvable aria-labelledby (${navs.length} <nav> on the page)`);
+        }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** U8-S: icon-only links and buttons are named; the /pvp/ join section is labelled; the search count is announced. */
+function a11yNames(dist) {
+  return eachPage(
+    SEMANTIC_ROUTES,
+    (p) => {
+      const problems = [];
+      const root = dom(p);
+      for (const el of findAll(root, (e) => e.tag === 'button' || (e.tag === 'a' && 'href' in e.attrs)))
+        if (!accName(el, root)) problems.push(`${p.route} ${describe(el)} has no accessible name`);
+      if (p.route === PVP.route) {
+        const joins = findAll(root, hasClass('pvp-join'));
+        if (joins.length !== 1) problems.push(`/pvp/ has ${joins.length} .pvp-join sections, want 1`);
+        else {
+          const j = joins[0];
+          const named = (j.attrs['aria-label'] ?? '').trim() || ((j.attrs['aria-labelledby'] ?? '').trim() && accName({ tag: j.tag, attrs: { 'aria-labelledby': j.attrs['aria-labelledby'] }, children: [] }, root));
+          if (!named) problems.push('/pvp/ join section (.pvp-join) has no aria-label or resolvable aria-labelledby');
+        }
+        for (const block of findAll(root, hasAttr('data-player-search'))) {
+          const live = findAll(block, (e) => e.attrs['aria-live'] === 'polite' || e.attrs.role === 'status');
+          if (!live.length) problems.push('/pvp/ [data-player-search] has no polite live region (aria-live="polite" or role="status") for the result count');
+        }
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** Above the first screen: inside a <header>, a <nav> or a .page-hero (the masthead every page has). */
+const inHero = (el) => {
+  for (let a = el.parent; a; a = a.parent) if (a.tag === 'header' || a.tag === 'nav' || hasClass('page-hero')(a)) return true;
+  return false;
+};
+
+/** U8-S: every <img> has alt, width and height; images below the first screen load lazily and decode async. */
+function imgAttrs(dist) {
+  return eachPage(
+    SEMANTIC_ROUTES,
+    (p) => {
+      const problems = [];
+      for (const img of findAll(dom(p), isTag('img'))) {
+        const what = `${p.route} <img src=${q(img.attrs.src ?? null)}>`;
+        if (!('alt' in img.attrs)) problems.push(`${what} has no alt`);
+        for (const dim of ['width', 'height']) if (!/^[1-9]\d*$/.test(img.attrs[dim] ?? '')) problems.push(`${what} ${dim} is ${q(img.attrs[dim] ?? null)}, want a positive integer`);
+        if (!inHero(img) && (img.attrs.loading !== 'lazy' || img.attrs.decoding !== 'async'))
+          problems.push(`${what} is below the first screen with loading=${q(img.attrs.loading ?? null)} decoding=${q(img.attrs.decoding ?? null)}, want "lazy" and "async"`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/**
+ * U8-P: font preconnects, the hero logo preload on /, no render-blocking head
+ * scripts. A head <script> passes when it is type="module", async, defer or
+ * application/ld+json. The one inline script allowed to block is the
+ * font-ready snippet, recognised by this marker: no src, its text contains both
+ * "fonts-ready" and "document.fonts", and it is at most 2000 characters (about
+ * 950 today); only the first such script is allowed.
+ */
+function perfHints(dist) {
+  return eachPage(
+    SEMANTIC_ROUTES,
+    (p) => {
+      const problems = [];
+      const r = p.route;
+      const links = headLinks(p);
+      const origin = (h) => (h ?? '').replace(/\/+$/, '');
+      const pre = (host) => links.filter((l) => relHas(l, 'preconnect') && origin(l.attrs.href) === host);
+      if (!pre('https://fonts.googleapis.com').length) problems.push(`${r} has no <link rel="preconnect" href="https://fonts.googleapis.com">`);
+      const gs = pre('https://fonts.gstatic.com');
+      if (!gs.length) problems.push(`${r} has no <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`);
+      else if (!gs.some((l) => 'crossorigin' in l.attrs)) problems.push(`${r} fonts.gstatic.com preconnect has no crossorigin`);
+      if (r === '/') {
+        const preloads = links.filter((l) => relHas(l, 'preload') && l.attrs.as === 'image' && l.attrs.fetchpriority === 'high');
+        if (!preloads.length) problems.push('/ has no <link rel="preload" as="image" fetchpriority="high">');
+        const logo = findAll(dom(p), (el) => el.tag === 'img' && hasClass('logo')(el) && inHero(el))[0];
+        if (logo && preloads.length && !preloads.some((l) => pathOf(l.attrs.href) === pathOf(logo.attrs.src)))
+          problems.push(`/ image preload ${q(preloads.map((l) => l.attrs.href))} is not the hero logo ${q(logo.attrs.src ?? null)}`);
+      }
+      const head = headEl(p);
+      let fontReady = 0;
+      for (const s of head ? findAll(head, isTag('script')) : []) {
+        const type = (s.attrs.type ?? '').toLowerCase();
+        if (type === 'module' || 'async' in s.attrs || 'defer' in s.attrs || type === 'application/ld+json') continue;
+        const body = s.children.map((c) => c.text ?? '').join('');
+        if (!('src' in s.attrs) && body.includes('fonts-ready') && body.includes('document.fonts') && body.length <= 2000 && fontReady++ === 0) continue;
+        problems.push(`${r} head has a render-blocking <script${s.attrs.src ? ` src=${q(s.attrs.src)}` : ` (inline, ${body.length} chars)`}>`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** U8-P (review finding): PVP pages send no referrer (avatar requests leaked the origin); other pages keep the default. */
+export const REFERRER = { routes: ['/pvp/', '/pvp/player/'], content: 'no-referrer' };
+function pvpReferrer(dist) {
+  return eachPage(
+    SEMANTIC_ROUTES,
+    (p) => {
+      const v = metaValues(p, 'referrer');
+      if (REFERRER.routes.includes(p.route))
+        return v.length === 1 && v[0] === REFERRER.content ? [] : [`${p.route} referrer metas are ${q(v)}, want [${q(REFERRER.content)}]`];
+      return v.length ? [`${p.route} has a referrer meta ${q(v)} (only the PVP pages change referrer behaviour)`] : [];
+    },
+    dist,
+  );
+}
+
+/** U8-V: the visible text of #app on every page is the 762b268 snapshot's, exactly. */
+function visibleTextUnchanged(dist) {
+  const base = readFixture('visible-text-base.json');
+  if (!base) return [`fixture ${join(FIXTURE_DIR, 'visible-text-base.json')} missing`];
+  const problems = [];
+  for (const [route, want] of Object.entries(base.pages)) {
+    const p = page(route, dist);
+    if (!p) {
+      problems.push(`${route} missing (${fileOf(route)})`);
+      continue;
+    }
+    const got = visibleText(p);
+    if (got === want) continue;
+    let i = 0;
+    while (i < got.length && i < want.length && got[i] === want[i]) i++;
+    problems.push(`${route} visible text differs at character ${i}: now ${clip(got.slice(Math.max(0, i - 30), i + 50), 90)}, was ${clip(want.slice(Math.max(0, i - 30), i + 50), 90)} (${got.length} vs ${want.length} chars)`);
+  }
+  return problems;
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -1803,6 +2640,22 @@ export const CHECKS = [
   ['player-nav', playerNav],
   ['player-internal-links', playerInternalLinks],
   ['pvp-search-shell', pvpSearchShell],
+  // U8: SEO / AEO, semantics, hints, and the no-visible-change guards
+  ['seo-head', seoHead],
+  ['seo-titles-frozen', seoTitlesFrozen],
+  ['seo-jsonld', seoJsonLd],
+  ['seo-jsonld-visible-facts', seoJsonLdVisibleFacts],
+  ['seo-sitemap', seoSitemap],
+  ['seo-robots', seoRobots],
+  ['seo-llms', seoLlms],
+  ['seo-404', seo404],
+  ['a11y-headings', a11yHeadings],
+  ['a11y-landmarks', a11yLandmarks],
+  ['a11y-names', a11yNames],
+  ['img-attrs', imgAttrs],
+  ['perf-hints', perfHints],
+  ['pvp-referrer', pvpReferrer],
+  ['visible-text-unchanged', visibleTextUnchanged],
 ];
 
 // -------------------------------------------------------------------- main --
@@ -1829,5 +2682,16 @@ export function run(dist = DIST, log = console.log) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  process.exitCode = run();
+  if (process.argv[2] === '--snapshot') {
+    // U8: write test/fixtures/{seo-head-base,visible-text-base}.json from a build.
+    //   node test/check_site.mjs --snapshot <distDir> [outDir] [capturedFrom]
+    const dist = resolve(process.argv[3] ?? join(ROOT, 'dist'));
+    const out = resolve(process.argv[4] ?? join(ROOT, 'test', 'fixtures'));
+    const snap = snapshot(dist, process.argv[5] ?? 'unknown');
+    writeFileSync(join(out, 'seo-head-base.json'), `${JSON.stringify(snap.heads, null, 2)}\n`);
+    writeFileSync(join(out, 'visible-text-base.json'), `${JSON.stringify(snap.text, null, 2)}\n`);
+    console.log(`wrote ${join(out, 'seo-head-base.json')} and ${join(out, 'visible-text-base.json')}`);
+  } else {
+    process.exitCode = run();
+  }
 }

@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "key": "sample_04",
+  "name": "Sample_04",
+  "edition": "java",
+  "uuid": "00000000-0000-4000-8000-000000000004",
+  "best": {"tier": "Emerald", "division": "II", "rating": 1745, "overallRank": 4},
+  "kits": [
+    {"key": "sword", "label": "Sword", "placed": true, "rating": 1745, "tier": "Emerald", "division": "II", "peak": 1790, "wins": 20, "losses": 20, "streak": 0, "rank": 4}
+  ],
+  "career": {"kills": 300, "deaths": 280, "bestStreak": 3, "tournamentWins": 2},
+  "recent": [
+    {"at": "2026-11-09T22:30:00.000Z", "kit": "sword", "result": "loss", "ratingChange": -12, "opponent": {"name": ".Sample_02", "edition": "bedrock", "key": "b-sample_02"}}
+  ]
+}
