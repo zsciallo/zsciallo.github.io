@@ -65,7 +65,11 @@ export const SMP_NAME_ALLOWED = ['/auctions/', '/smp/'];
 
 // ----------------------------------------------------------------- helpers --
 
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+const ENTITIES = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  // Added in U3 for the landing page copy (middle dots, curly apostrophes).
+  middot: '·', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', ndash: '–', mdash: '—', hellip: '…', copy: '©',
+};
 
 /** Decode the HTML entities a template or the prerenderer is likely to emit. */
 export function decode(text) {
@@ -176,6 +180,216 @@ export function pngSize(buf) {
   if (buf.length < 24 || !buf.subarray(0, 8).equals(SIGNATURE)) return 'not a PNG (bad signature)';
   if (buf.toString('latin1', 12, 16) !== 'IHDR') return 'not a PNG (first chunk is not IHDR)';
   return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+
+// ----------------------------------------------------- a tiny DOM (U3+) --
+//
+// The landing-page checks need structure (what is inside what, and in what
+// order), so the built HTML is parsed into a small element tree. It knows void
+// elements, `/>`, raw-text elements (script, style, textarea, title),
+// comments and valueless attributes; a stray close tag closes up to its match
+// or is ignored. That is all the prerendered markup needs.
+//
+// Text comparison, used by every U3 check:
+//   textOf(el)    tags stripped (inline concatenation, <br> is a space), text
+//                 of script/style/template/svg ignored, entities decoded,
+//                 curly quotes made straight (’ -> ', “” -> "), whitespace
+//                 (incl. nbsp) collapsed to one space and trimmed.
+//   blockText(el) the same, but every non-inline element boundary counts as a
+//                 space, so <p>A</p><p>B</p> reads "A B" while
+//                 CHROMABIT <span>NETWORK</span> still reads "CHROMABIT NETWORK".
+
+const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+const RAW_TEXT = new Set(['script', 'style', 'textarea', 'title']);
+const NO_TEXT = new Set(['script', 'style', 'template', 'svg']);
+const INLINE = new Set([
+  'a', 'abbr', 'b', 'bdi', 'bdo', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 's', 'samp',
+  'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'img', 'label',
+]);
+
+function parseTagAttrs(src) {
+  const attrs = {};
+  for (const m of src.matchAll(/([^\s"'>\/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g)) {
+    attrs[m[1].toLowerCase()] = decode(m[2] ?? m[3] ?? m[4] ?? '');
+  }
+  return attrs;
+}
+
+/** Parse HTML into { tag, attrs, children, parent, order } elements and { text } nodes. */
+export function parseHtml(html) {
+  let order = 0;
+  const root = { tag: '#root', attrs: {}, children: [], parent: null, order: order++ };
+  const stack = [root];
+  const top = () => stack[stack.length - 1];
+  const text = (t) => t && top().children.push({ text: t, parent: top() });
+  const OPEN = /<([a-zA-Z][a-zA-Z0-9:-]*)((?:\s+[^\s"'>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*)\s*(\/?)>/y;
+  const CLOSE = /<\/([a-zA-Z][a-zA-Z0-9:-]*)\s*>/y;
+  let i = 0;
+  while (i < html.length) {
+    const lt = html.indexOf('<', i);
+    if (lt < 0) {
+      text(html.slice(i));
+      break;
+    }
+    text(html.slice(i, lt));
+    if (html.startsWith('<!--', lt)) {
+      const end = html.indexOf('-->', lt + 4);
+      i = end < 0 ? html.length : end + 3;
+      continue;
+    }
+    if (html[lt + 1] === '!' || html[lt + 1] === '?') {
+      const end = html.indexOf('>', lt);
+      i = end < 0 ? html.length : end + 1;
+      continue;
+    }
+    CLOSE.lastIndex = lt;
+    const close = CLOSE.exec(html);
+    if (close) {
+      const tag = close[1].toLowerCase();
+      const at = stack.map((e) => e.tag).lastIndexOf(tag);
+      if (at > 0) stack.length = at;
+      i = CLOSE.lastIndex;
+      continue;
+    }
+    OPEN.lastIndex = lt;
+    const open = OPEN.exec(html);
+    if (!open) {
+      text('<');
+      i = lt + 1;
+      continue;
+    }
+    const tag = open[1].toLowerCase();
+    const el = { tag, attrs: parseTagAttrs(open[2]), children: [], parent: top(), order: order++ };
+    top().children.push(el);
+    i = OPEN.lastIndex;
+    if (RAW_TEXT.has(tag)) {
+      const end = html.toLowerCase().indexOf(`</${tag}`, i);
+      const stop = end < 0 ? html.length : end;
+      if (stop > i) el.children.push({ text: html.slice(i, stop), parent: el });
+      const gt = end < 0 ? -1 : html.indexOf('>', end);
+      i = gt < 0 ? html.length : gt + 1;
+    } else if (!VOID.has(tag) && !open[3]) {
+      stack.push(el);
+    }
+  }
+  return root;
+}
+
+/** Normalise text for comparison (see the block comment above). */
+export const norm = (t) => squash(t.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'));
+
+function collect(node, block, skip, out) {
+  if ('text' in node) {
+    out.push(decode(node.text));
+    return;
+  }
+  if (node !== skip.root && skip.fn && skip.fn(node)) return;
+  if (NO_TEXT.has(node.tag)) return;
+  if (node.tag === 'br') {
+    out.push(' ');
+    return;
+  }
+  const sep = block && !INLINE.has(node.tag);
+  if (sep) out.push(' ');
+  for (const c of node.children) collect(c, block, skip, out);
+  if (sep) out.push(' ');
+}
+
+/** Visible text of an element, inline concatenation; `skip(el)` drops subtrees. */
+export function textOf(node, skip = null) {
+  const out = [];
+  collect(node, false, { root: node, fn: skip }, out);
+  return norm(out.join(''));
+}
+
+/** Visible text with a space at every block boundary; `skip(el)` drops subtrees. */
+export function blockText(node, skip = null) {
+  const out = [];
+  collect(node, true, { root: node, fn: skip }, out);
+  return norm(out.join(''));
+}
+
+/** Every element under `node` (not `node` itself) matching `pred`, in document order. */
+export function findAll(node, pred) {
+  const out = [];
+  const walk = (n) => {
+    for (const c of n.children ?? []) {
+      if ('text' in c) continue;
+      if (pred(c)) out.push(c);
+      walk(c);
+    }
+  };
+  walk(node);
+  return out;
+}
+
+const hasClass = (name) => (el) => (el.attrs.class ?? '').split(/\s+/).includes(name);
+const hasAttr = (name, value) => (el) => name in el.attrs && (value === undefined || el.attrs[name] === value);
+const isTag = (...tags) => (el) => tags.includes(el.tag);
+const isHeading = isTag('h2', 'h3', 'h4', 'h5', 'h6');
+const inside = (el, ancestor) => {
+  for (let p = el.parent; p; p = p.parent) if (p === ancestor) return true;
+  return false;
+};
+const insideAny = (el, ancestors) => ancestors.some((a) => inside(el, a));
+const q = JSON.stringify;
+/** Quote `s`, cut to `max` characters so one long text does not swamp the line. */
+const clip = (s, max = 240) => q(s.length > max ? `${s.slice(0, max)}...(+${s.length - max} chars)` : s);
+
+/** The parsed element tree of a page (cached on the page object). */
+function dom(p) {
+  p.dom ??= parseHtml(p.html);
+  return p.dom;
+}
+
+/** The <div id="app"> element, or the whole document if there is none. */
+function app(p) {
+  return findAll(dom(p), (el) => el.tag === 'div' && el.attrs.id === 'app')[0] ?? dom(p);
+}
+
+/** Everything after </head>, raw. */
+function rawBody(p) {
+  const at = p.html.search(/<\/head\s*>/i);
+  return at < 0 ? p.html : p.html.slice(at);
+}
+
+/** The site nav: the first <header> in #app. */
+const navOf = (p) => findAll(app(p), isTag('header'))[0] ?? null;
+
+/**
+ * Where `needle` occurs in the raw HTML `raw` (entities decoded, normalised)
+ * or the visible text of `node`; null when it occurs in neither.
+ */
+function occurrence(raw, node, needle, { ci = false } = {}) {
+  const fold = (s) => (ci ? s.toLowerCase() : s);
+  const want = fold(needle);
+  for (const hay of [norm(decode(raw)), node ? textOf(node) : '']) {
+    const at = fold(hay).indexOf(want);
+    if (at >= 0) return excerpt(hay, at, needle.length);
+  }
+  return null;
+}
+
+/** The single element matching `pred` under `node`, or a problem string. */
+function one(node, pred, what, where) {
+  const found = findAll(node, pred);
+  if (found.length === 1) return found[0];
+  return `${where} has ${found.length} ${what}, want 1`;
+}
+
+/** Exactly one [data-copy-ip] under `node`, a <button>, optionally labelled `label`. */
+function copyButtonIn(node, where, label = 'COPY IP') {
+  const btn = one(node, hasAttr('data-copy-ip'), '[data-copy-ip] buttons', where);
+  if (typeof btn === 'string') return [[btn], null];
+  const problems = [];
+  if (btn.tag !== 'button') problems.push(`${where} [data-copy-ip] is a <${btn.tag}>, want <button>`);
+  if (label !== null && textOf(btn) !== label)
+    problems.push(`${where} [data-copy-ip] label is ${q(textOf(btn))}, want ${q(label)}`);
+  return [problems, btn];
+}
+
+function siteConfig() {
+  return JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8'));
 }
 
 // ------------------------------------------------------------------ checks --
@@ -293,6 +507,357 @@ function homeNoStoreCredit(dist) {
   );
 }
 
+// ---------------------------------------------- U3: landing page and /smp/ --
+//
+// Hooks (the contract with the implementer): [data-join-box], [data-copy-ip],
+// a[data-discord-join], [data-claim], [data-mode-card="pvp"|"smp"],
+// [data-banner="pvp"|"smp"], [data-live="ladder"|"movers"], .beta-tag,
+// [data-section="dungeon"], [data-fact]. The market ticker is MarketTicker's
+// root class `tape`. Card titles are h2-h6 elements. Texts are compared as
+// described above the DOM helpers.
+
+export const LANDING = {
+  eyebrow: 'MINECRAFT NETWORK · JAVA + BEDROCK',
+  h1: 'CHROMABIT NETWORK',
+  tagline: 'Grind the market. Climb the ladder.',
+  address: 'play.chromabit.us',
+  java: 'Java: any version up to 26.3',
+  bedrock: 'Bedrock: same address, port 19132',
+  claim: 'THE ONLY RANKED COMPETITIVE PVP FOR JAVA AND BEDROCK',
+  claimForbidden: 'One ladder for both editions',
+  cardsForbidden: ['TWO WAYS TO PLAY', 'ONE ADDRESS'],
+  cards: {
+    pvp: {
+      title: 'CHROMAPVP',
+      beta: true,
+      desc: 'Ranked kit PVP. Duels, the FFA pit, the Prismatic Arena and tournaments.',
+      live: 'ladder',
+      liveHeading: 'TOP OF THE LADDER',
+      href: '/pvp/',
+      link: 'ENTER PVP',
+    },
+    smp: {
+      title: 'ECONOMY SMP',
+      beta: false,
+      desc: 'Survival with a player-run market. Claims, custom spawners, King of the Hill.',
+      live: 'movers',
+      liveHeading: "TODAY'S TOP MOVERS",
+      href: '/smp/',
+      link: 'EXPLORE THE SMP',
+    },
+  },
+  copyButtons: 3,
+  /** Case-sensitive texts that must not appear anywhere in / (raw HTML or visible text). */
+  removed: ['Player Economy', 'Store Credit Prizes', 'Grief Prevention', 'Custom Spawners', 'REAL PRIZES', 'Server Events', 'PLAYER-DRIVEN'],
+};
+
+export const SMP_PAGE = {
+  h1: 'MINE IT. PRICE IT. TRADE IT.',
+  dungeonWord: 'HEARTWOOD',
+  minFacts: 3,
+  tickerClass: 'tape',
+  auctionsHref: '/auctions/',
+  auctionsLabel: 'OPEN THE AUCTION HOUSE',
+  removed: ['Player Economy', 'Store Credit Prizes', 'Grief Prevention', 'Community Events'],
+};
+
+/** The landing page's pieces: nav, footer, the region between them, and the hooked blocks. */
+function landing(p) {
+  const root = app(p);
+  const nav = navOf(p);
+  const footer = findAll(root, isTag('footer'))[0] ?? null;
+  let region = null;
+  if (nav && footer && nav.parent === footer.parent) {
+    const sibs = nav.parent.children;
+    region = { tag: '#region', attrs: {}, children: sibs.slice(sibs.indexOf(nav) + 1, sibs.indexOf(footer)) };
+  }
+  const scope = region ?? root;
+  return {
+    nav,
+    footer,
+    region,
+    joinBoxes: findAll(root, hasAttr('data-join-box')),
+    claims: findAll(root, hasAttr('data-claim')),
+    cards: findAll(root, hasAttr('data-mode-card')),
+    scope,
+  };
+}
+
+/** AC1 (U3): hero logo, eyebrow, single h1 CHROMABIT NETWORK, tagline; nothing else between nav and footer. */
+function homeHero(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const problems = [];
+      const h1s = findAll(dom(p), isTag('h1'));
+      if (h1s.length !== 1) problems.push(`/ has ${h1s.length} <h1>, want 1`);
+      else if (textOf(h1s[0]) !== LANDING.h1) problems.push(`/ <h1> text is ${q(textOf(h1s[0]))}, want ${q(LANDING.h1)}`);
+      const L = landing(p);
+      if (!L.region) {
+        problems.push('/ has no nav <header> and <footer> as siblings in #app');
+        return problems;
+      }
+      const inRegion = (el) => L.region.children.includes(el) || L.region.children.some((c) => inside(el, c));
+      const h1 = h1s.length === 1 && inRegion(h1s[0]) ? h1s[0] : null;
+      if (h1s.length === 1 && !h1) problems.push('/ <h1> is not between the nav and the footer');
+      const logo = findAll(L.region, (el) => el.tag === 'img' && hasClass('logo')(el))[0];
+      if (!logo) problems.push('/ hero has no logo (img.logo) between the nav and the footer');
+      else if (h1 && logo.order > h1.order) problems.push('/ hero logo comes after the <h1>');
+      const hooked = (el) => 'data-join-box' in el.attrs || 'data-claim' in el.attrs || 'data-mode-card' in el.attrs;
+      const rest = blockText(L.region, hooked);
+      const want = `${LANDING.eyebrow} ${LANDING.h1} ${LANDING.tagline}`;
+      if (rest !== want)
+        problems.push(`/ text between nav and footer outside the join box, claim band and mode cards is ${clip(rest)}, want ${q(want)}`);
+      // Order: h1 < join box < claim band < first mode card (missing blocks are their own checks' problem).
+      const seq = [
+        ['<h1>', h1],
+        ['[data-join-box]', L.joinBoxes[0]],
+        ['[data-claim]', L.claims[0]],
+        ['first [data-mode-card]', L.cards[0]],
+      ].filter(([, el]) => el);
+      for (let k = 1; k < seq.length; k++)
+        if (seq[k - 1][1].order > seq[k][1].order) problems.push(`/ ${seq[k][0]} comes before ${seq[k - 1][0]}`);
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** AC2 (U3): one join box: address + COPY IP, Discord JOIN link to config.discord, edition line; no store/ladder button in the hero. */
+function homeJoinBox(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const problems = [];
+      const L = landing(p);
+      if (L.joinBoxes.length !== 1) return [`/ has ${L.joinBoxes.length} [data-join-box], want 1`];
+      const [box] = L.joinBoxes;
+      const addrs = findAll(box, (el) => textOf(el).includes(LANDING.address));
+      const addr = addrs.filter((el) => !addrs.some((o) => o !== el && inside(o, el)))[0];
+      if (!addr) problems.push(`/ join box does not show ${q(LANDING.address)}`);
+      const [copyProblems, copy] = copyButtonIn(box, '/ join box');
+      problems.push(...copyProblems);
+      const link = one(box, (el) => el.tag === 'a' && 'data-discord-join' in el.attrs, 'a[data-discord-join] links', '/ join box');
+      if (typeof link === 'string') problems.push(link);
+      else {
+        const want = siteConfig().discord;
+        if (link.attrs.href !== want) problems.push(`/ join box Discord link href is ${q(link.attrs.href)}, want ${q(want)}`);
+        if (textOf(link) !== 'JOIN') problems.push(`/ join box Discord link label is ${q(textOf(link))}, want "JOIN"`);
+        if (!/discord/i.test(blockText(box)) && !/discord/i.test(link.attrs['aria-label'] ?? ''))
+          problems.push('/ join box Discord row does not say "Discord"');
+        if (addr && addr.order > link.order) problems.push('/ join box address comes after the Discord row');
+        if (copy && copy.order > link.order) problems.push('/ join box COPY IP comes after the Discord row');
+      }
+      const line = findAll(
+        box,
+        (el) =>
+          blockText(el).includes(LANDING.java) &&
+          blockText(el).includes(LANDING.bedrock) &&
+          !(copy && inside(copy, el)) &&
+          !(typeof link !== 'string' && inside(link, el)),
+      );
+      if (!line.length) problems.push(`/ join box has no single line with ${q(LANDING.java)} and ${q(LANDING.bedrock)}`);
+      // No store or ladder button anywhere in the hero (between nav and footer, outside the claim band and mode cards).
+      const outside = [...L.claims, ...L.cards];
+      for (const el of findAll(L.scope, isTag('a', 'button'))) {
+        if (insideAny(el, outside) || outside.includes(el)) continue;
+        const label = textOf(el);
+        const href = el.attrs.href ?? '';
+        if (/store|ladder/i.test(label) || /^\/(store|pvp)(\/|$|\?|#)/.test(href))
+          problems.push(`/ hero has a <${el.tag}> ${q(label)}${href ? ` -> ${href}` : ''} (no store or ladder button in the hero)`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** AC3 (U3): the claim band is exactly the headline; "One ladder for both editions" appears nowhere. */
+function homeClaim(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const problems = [];
+      const L = landing(p);
+      if (L.claims.length !== 1) problems.push(`/ has ${L.claims.length} [data-claim], want 1`);
+      else if (blockText(L.claims[0]) !== LANDING.claim)
+        problems.push(`/ claim band text is ${q(blockText(L.claims[0]))}, want exactly ${q(LANDING.claim)}`);
+      const hit = occurrence(p.html, app(p), LANDING.claimForbidden, { ci: true });
+      if (hit) problems.push(`/ mentions ${q(LANDING.claimForbidden)}: ${hit}`);
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** AC4 (U3): the pvp and smp mode cards, in that order, with no section heading above them. */
+function homeModeCards(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const problems = [];
+      const L = landing(p);
+      const ids = L.cards.map((c) => c.attrs['data-mode-card']);
+      if (ids.join(',') !== 'pvp,smp')
+        problems.push(`/ [data-mode-card] values in document order are ${q(ids)}, want ["pvp","smp"]`);
+      const betas = findAll(dom(p), hasClass('beta-tag'));
+      for (const [id, spec] of Object.entries(LANDING.cards)) {
+        const where = `/ ${id} card`;
+        const matches = L.cards.filter((c) => c.attrs['data-mode-card'] === id);
+        if (matches.length !== 1) {
+          if (ids.join(',') === 'pvp,smp') problems.push(`/ has ${matches.length} [data-mode-card="${id}"], want 1`);
+          continue;
+        }
+        const [card] = matches;
+        const banner = one(card, hasAttr('data-banner', id), `[data-banner="${id}"]`, where);
+        if (typeof banner === 'string') problems.push(banner);
+        else if (id === 'smp') {
+          const img = findAll(banner, (el) => el.tag === 'img' && (el.attrs.src ?? '').trim())[0];
+          if (!img) problems.push(`${where} banner has no screenshot <img src>`);
+          if (!blockText(banner)) problems.push(`${where} banner has no caption text`);
+        }
+        const isBeta = hasClass('beta-tag');
+        const titles = findAll(card, isHeading).map((h) => textOf(h, isBeta));
+        if (!titles.includes(spec.title)) problems.push(`${where} has no heading ${q(spec.title)} (headings: ${q(titles)})`);
+        const cardBetas = betas.filter((b) => inside(b, card));
+        if (spec.beta) {
+          if (cardBetas.length !== 1) problems.push(`${where} has ${cardBetas.length} .beta-tag, want 1`);
+          else if (textOf(cardBetas[0]) !== 'BETA') problems.push(`${where} .beta-tag text is ${q(textOf(cardBetas[0]))}, want "BETA"`);
+        } else if (cardBetas.length) problems.push(`${where} has a .beta-tag (BETA is only on the pvp card)`);
+        if (!findAll(card, (el) => textOf(el) === spec.desc).length) problems.push(`${where} has no description ${q(spec.desc)}`);
+        const live = one(card, hasAttr('data-live', spec.live), `[data-live="${spec.live}"]`, where);
+        if (typeof live === 'string') problems.push(live);
+        else {
+          const t = blockText(live);
+          if (t && !t.startsWith(spec.liveHeading)) problems.push(`${where} live block starts ${q(t.slice(0, 40))}, want heading ${q(spec.liveHeading)}`);
+        }
+        const links = findAll(card, (el) => el.tag === 'a' && el.attrs.href === spec.href && textOf(el) === spec.link);
+        if (links.length !== 1) problems.push(`${where} has ${links.length} <a href="${spec.href}"> ${q(spec.link)}, want 1`);
+        problems.push(...copyButtonIn(card, where)[0]);
+      }
+      for (const bad of LANDING.cardsForbidden) {
+        const hit = occurrence(p.html, app(p), bad);
+        if (hit) problems.push(`/ mentions ${q(bad)} (no section heading above the cards): ${hit}`);
+      }
+      const stray = betas.filter((b) => !insideAny(b, L.cards)).length;
+      if (stray) problems.push(`/ has ${stray} .beta-tag outside the mode cards (BETA is only on the pvp card)`);
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** AC5 (U3): exactly three [data-copy-ip] buttons on /. */
+function homeCopyButtons(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const n = findAll(dom(p), hasAttr('data-copy-ip')).length;
+      return n === LANDING.copyButtons ? [] : [`/ has ${n} [data-copy-ip], want ${LANDING.copyButtons}`];
+    },
+    dist,
+  );
+}
+
+/**
+ * AC6 (U3): the old feature cards, events section, PLAYER-DRIVEN heading and
+ * the standalone carousel are gone from /, and "store credit" (any case) is
+ * nowhere in the body. The head is home-no-store-credit's job.
+ */
+function homeRemoved(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const problems = [];
+      const body = rawBody(p);
+      for (const gone of LANDING.removed) {
+        const hit = occurrence(body, app(p), gone);
+        if (hit) problems.push(`/ still has ${q(gone)}: ${hit}`);
+      }
+      const hit = occurrence(body, app(p), 'store credit', { ci: true });
+      if (hit) problems.push(`/ body mentions "store credit": ${hit}`);
+      const smpCards = findAll(dom(p), hasAttr('data-mode-card', 'smp'));
+      const carousels = findAll(dom(p), hasClass('carousel')).filter((el) => !insideAny(el, smpCards));
+      if (carousels.length) problems.push(`/ has ${carousels.length} .carousel outside the smp card (standalone carousel section)`);
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** AC7 (U3): the short /smp/ page, and how it is reached (footer, not nav). */
+function smpPage(dist) {
+  const problems = eachPage(
+    ['/smp/'],
+    (p) => {
+      const problems = [];
+      const root = dom(p);
+      const h1s = findAll(root, isTag('h1'));
+      if (h1s.length !== 1) problems.push(`/smp/ has ${h1s.length} <h1>, want 1`);
+      else if (textOf(h1s[0]) !== SMP_PAGE.h1) problems.push(`/smp/ <h1> text is ${q(textOf(h1s[0]))}, want ${q(SMP_PAGE.h1)}`);
+      const dungeon = one(root, hasAttr('data-section', 'dungeon'), '[data-section="dungeon"]', '/smp/');
+      if (typeof dungeon === 'string') problems.push(dungeon);
+      else {
+        const heading = findAll(dungeon, isTag('h2', 'h3', 'h4', 'h5', 'h6'))[0];
+        if (!heading) problems.push('/smp/ dungeon block has no heading');
+        else if (!textOf(heading).includes(SMP_PAGE.dungeonWord))
+          problems.push(`/smp/ dungeon heading is ${q(textOf(heading))}, want it to contain ${q(SMP_PAGE.dungeonWord)}`);
+        const facts = findAll(dungeon, hasAttr('data-fact'));
+        if (facts.length < SMP_PAGE.minFacts) problems.push(`/smp/ dungeon block has ${facts.length} [data-fact], want at least ${SMP_PAGE.minFacts}`);
+        const empty = facts.filter((f) => !blockText(f)).length;
+        if (empty) problems.push(`/smp/ dungeon block has ${empty} empty [data-fact]`);
+      }
+      if (!findAll(root, hasClass(SMP_PAGE.tickerClass)).length) problems.push(`/smp/ has no market ticker (.${SMP_PAGE.tickerClass})`);
+      const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel);
+      if (!auctions.length) problems.push(`/smp/ has no <a href="${SMP_PAGE.auctionsHref}"> ${q(SMP_PAGE.auctionsLabel)}`);
+      problems.push(...copyButtonIn(root, '/smp/', null)[0]);
+      const betas = findAll(root, hasClass('beta-tag')).length;
+      if (betas) problems.push(`/smp/ has ${betas} .beta-tag, want 0`);
+      const credit = occurrence(p.html, app(p), 'store credit', { ci: true });
+      if (credit) problems.push(`/smp/ mentions "store credit": ${credit}`);
+      for (const gone of SMP_PAGE.removed) {
+        const hit = occurrence(rawBody(p), app(p), gone);
+        if (hit) problems.push(`/smp/ still has ${q(gone)}: ${hit}`);
+      }
+      return problems;
+    },
+    dist,
+  );
+  // Not in the nav on any page; the home footer links to it.
+  for (const route of Object.keys(PAGES)) {
+    const p = page(route, dist);
+    const nav = p && navOf(p);
+    if (nav && findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length)
+      problems.push(`${route} nav links to /smp/ (the SMP page is not in the nav)`);
+  }
+  const home = page('/', dist);
+  if (home) {
+    const footer = findAll(app(home), isTag('footer'))[0];
+    if (!footer || !findAll(footer, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length)
+      problems.push('/ footer has no link to /smp/');
+  }
+  return problems;
+}
+
+/** AC8 (U3): every application/ld+json block on every page parses as JSON. */
+function ldJsonParses(dist) {
+  return eachPage(
+    Object.keys(PAGES),
+    (p) => {
+      const problems = [];
+      p.jsonLd.forEach((raw, i) => {
+        try {
+          JSON.parse(raw);
+        } catch (e) {
+          problems.push(`${p.route} JSON-LD block ${i + 1} does not parse: ${e.message}`);
+        }
+      });
+      return problems;
+    },
+    dist,
+  );
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -302,6 +867,15 @@ export const CHECKS = [
   ['smp-name-allowlist', smpNameAllowlist],
   ['og-preview-image', ogPreviewImage],
   ['home-no-store-credit', homeNoStoreCredit],
+  // U3: landing page and /smp/
+  ['home-hero', homeHero],
+  ['home-join-box', homeJoinBox],
+  ['home-claim', homeClaim],
+  ['home-mode-cards', homeModeCards],
+  ['home-copy-buttons', homeCopyButtons],
+  ['home-removed', homeRemoved],
+  ['smp-page', smpPage],
+  ['ld-json-parses', ldJsonParses],
 ];
 
 // -------------------------------------------------------------------- main --
