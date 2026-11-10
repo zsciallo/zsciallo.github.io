@@ -76,7 +76,91 @@ const SMP_BODY =
   `</main>${FOOTER}`;
 // U4-copy: the privacy page's "Other services" section names mc-heads.net.
 const PRIVACY_OTHER = '<section class="other-services"><h2>Other services</h2><p>Player head images on the PVP pages load from mc-heads.net.</p></section>';
-const LD_FAQ = '{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]}';
+// U5: the /faq/ page renders the FAQ as FaqPage.jsx does (.faq-group >
+// .faq-section-label + .faq-item > .faq-question / .faq-answer), from a
+// faq.json-shaped model, and its FAQPage JSON-LD is generated from the same
+// model the way tools/build_faq_ld.py does. A defect planted in the model
+// therefore reaches the page and the JSON-LD alike (as a faq.json edit plus
+// build_faq_ld.py would); faq-jsonld-sync cases plant defects in the JSON-LD
+// only. The FAQ markup sits after #app (before the footer) so the U2 cases
+// keep their exact #app strings; the checker reads the whole document.
+const FAQ_BASE = JSON.parse(readFileSync(join(ROOT, 'test', 'fixtures', 'faq-base.json'), 'utf-8')).groups;
+const PVP_FAQ = {
+  id: 'pvp',
+  title: 'PVP',
+  items: [
+    { q: 'What is ChromaPVP?', a: "ChromaPVP is the network's kit PVP server. Join play.chromabit.us and pick Kit PVP in the hub. It has ranked and unranked duels, the FFA pit, the Prismatic Arena and tournaments." },
+    { q: 'How does ranked work?', a: 'Play 10 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2.' },
+    { q: 'Can Bedrock players play ranked?', a: 'Yes. Java and Bedrock players queue into the same matches and share one ladder.' },
+    { q: 'Which kits are ranked?', a: 'Sword and Mace.' },
+    { q: 'Where are the leaderboards?', a: 'On the [PVP page](/pvp/) of this site, and in game with `/leaderboard`.' },
+    { q: 'What happens when a season ends?', a: 'Each season has its own ladder. When a new season starts, everyone plays placement matches again.' },
+  ],
+};
+const KIND_Q = 'What kind of server is Chromabit?';
+const KIND_A =
+  'Chromabit is a network with two servers behind one address: a survival server with a player-run economy, and ChromaPVP, a ranked kit PVP server. ' +
+  'On the SMP, the difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank.';
+const PVPON_Q = 'Is PvP on?';
+const PVPON_A = 'On the SMP, PvP is on in the overworld, the Nether and the End, and in the KOTH arena. Off at spawn, inside claims and in the dungeon. A 15-second combat tag blocks `/home`, `/spawn` and teleports while you are fighting.';
+/** The spec'd FAQ: base groups, PVP group second, the two re-led answers. */
+function goodFaq() {
+  const groups = structuredClone(FAQ_BASE);
+  for (const g of groups)
+    for (const it of g.items) {
+      if (it.q === KIND_Q) it.a = KIND_A;
+      if (it.q === PVPON_Q) it.a = PVPON_A;
+    }
+  groups.splice(1, 0, structuredClone(PVP_FAQ));
+  return groups;
+}
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** faq.json markdown-lite to HTML, as FaqPage.jsx's rich(). */
+function richHtml(md) {
+  return md
+    .split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g)
+    .map((part) => {
+      if (!part) return '';
+      if (part.startsWith('**')) return `<strong>${esc(part.slice(2, -2))}</strong>`;
+      if (part.startsWith('`')) return `<code>${esc(part.slice(1, -1))}</code>`;
+      const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+      if (link) return /^https?:/.test(link[2]) ? `<a href="${link[2]}" target="_blank" rel="noopener">${esc(link[1])}</a>` : `<a href="${link[2]}">${esc(link[1])}</a>`;
+      return esc(part);
+    })
+    .join('');
+}
+let faqIds = 0;
+function faqHtml(groups) {
+  return (
+    '<section aria-label="Frequently asked questions" class="faq-section"><div class="faq-list">' +
+    groups
+      .map(
+        (g) =>
+          `<div id="${g.id}" class="faq-group"><p class="faq-section-label">${esc(g.title.toUpperCase())}</p>` +
+          g.items
+            .map(
+              (it) =>
+                `<div class="faq-item reveal"><h3 class="faq-heading"><button type="button" aria-expanded="false" aria-controls="F${faqIds}" class="faq-question"><span>${esc(it.q)}</span><span aria-hidden="true" class="faq-icon">+</span></button></h3>` +
+                `<div id="F${faqIds++}" role="region" inert class="faq-answer-wrap"><div class="faq-answer">${richHtml(it.a)}</div></div></div>`,
+            )
+            .join('') +
+          '</div>',
+      )
+      .join('') +
+    '</div></section>'
+  );
+}
+const ldPlain = (md) => md.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').trim();
+/** The FAQPage JSON-LD for `groups`, as tools/build_faq_ld.py writes it (compact). */
+function faqLd(groups) {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    url: 'https://chromabit.us/faq/',
+    mainEntity: groups.flatMap((g) => g.items.map((it) => ({ '@type': 'Question', name: it.q, acceptedAnswer: { '@type': 'Answer', text: ldPlain(it.a) } }))),
+  });
+}
+const LD_FAQ = faqLd(goodFaq());
 
 // U4: /pvp/ as the spec describes it (prerendered: empty board, hidden season strip).
 const PVP_TITLE = 'Ranked PVP Leaderboards | Chromabit';
@@ -159,6 +243,22 @@ function htmlPage(head, body) {
   return `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  ${head}\n</head>\n<body>\n<div id="app">${body}</div>\n</body>\n</html>\n`;
 }
 
+/** U5: the /faq/ page for a FAQ model (default: the spec'd one) and its JSON-LD (default: generated from the model). */
+function faqPage(groups = goodFaq(), ld = faqLd(groups)) {
+  return framed(htmlPage(
+    headFor('FAQ | Chromabit', `<script type="application/ld+json">${ld}</script>`),
+    '<main>Everything you need to know about Chromabit.</main>',
+  )).replace(`\n${FOOTER}\n</body>`, `\n${faqHtml(groups)}\n${FOOTER}\n</body>`);
+}
+
+/** U5: the good site with /faq/ built from `edit(groups)` (a faq.json-level change) and optionally a JSON-LD override. */
+function faqSite(editFaq = () => {}, ld = null) {
+  const groups = goodFaq();
+  editFaq(groups);
+  return { ...goodSite(), 'faq/index.html': faqPage(groups, ld ?? faqLd(groups)) };
+}
+const faqItem = (groups, q) => groups.flatMap((g) => g.items).find((it) => it.q === q);
+
 /** A dist/ that should pass every check. */
 function goodSite() {
   return {
@@ -174,10 +274,7 @@ function goodSite() {
       HOME_BODY,
     ),
     'smp/index.html': htmlPage(headFor('Economy SMP | Chromabit'), SMP_BODY),
-    'faq/index.html': framed(htmlPage(
-      headFor('FAQ | Chromabit', `<script type="application/ld+json">${LD_FAQ}</script>`),
-      '<main>Everything you need to know about Chromabit.</main>',
-    )),
+    'faq/index.html': faqPage(goodFaq(), LD_FAQ),
     'store/index.html': framed(htmlPage(headFor('Store | Chromabit'), '<main>Every purchase directly supports Chromabit.</main>')),
     'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP'), '<main>Chromabit SMP market</main>')),
     'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit'), `<main>Privacy</main>${PRIVACY_OTHER}`)),
@@ -311,6 +408,11 @@ try {
       'privacy-mc-heads',
       // owner ruling 2026-11-10
       'pvp-labels-removed',
+      // U5
+      'faq-pvp-group',
+      'faq-network-answers',
+      'faq-unchanged',
+      'faq-jsonld-sync',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -733,12 +835,14 @@ ${r.out}`,
   );
 
   // U3-AC8 ld-json-parses
-  expectFail(
-    'U3-AC8 broken JSON-LD on /faq/',
-    mutate('faq/index.html', LD_FAQ, LD_FAQ.replace('"mainEntity":[]}', '"mainEntity":[],}')),
-    'ld-json-parses',
-    '/faq/ JSON-LD block 1 does not parse',
-  );
+  // Since U5 the /faq/ JSON-LD is the full FAQPage (was '"mainEntity":[]}', which no longer
+  // occurs), so the same kind of defect (a stray comma in mainEntity) is planted at the start
+  // of the array; faq-jsonld-sync also needs that block, so it fails with ld-json-parses
+  // (both, and only both).
+  expectFails('U3-AC8 broken JSON-LD on /faq/', mutate('faq/index.html', LD_FAQ, LD_FAQ.replace('"mainEntity":[', '"mainEntity":[,')), {
+    'ld-json-parses': '/faq/ JSON-LD block 1 does not parse',
+    'faq-jsonld-sync': '/faq/ JSON-LD block 1 does not parse',
+  });
   expectFail('U3-AC8 broken block on /smp/', mutate(S, '</main>', '</main><script type="application/ld+json">{"@type": "WebPage"</script>'), 'ld-json-parses', '/smp/ JSON-LD block 1 does not parse');
   expectFail(
     'U3-AC8 broken block in a /privacy/ body',
@@ -982,6 +1086,184 @@ ${r.out}`);
   expectFail('U4-copy privacy without mc-heads.net', mutate('privacy/index.html', 'load from mc-heads.net.', 'load from a head service.'), 'privacy-mc-heads', '/privacy/ prerendered body does not mention "mc-heads.net"');
   expectFail('U4-copy mc-heads.net only outside #app', edit(mutate('privacy/index.html', 'load from mc-heads.net.', 'load from a head service.'), 'privacy/index.html', '<meta charset="UTF-8">', '<meta charset="UTF-8"><link rel="preconnect" href="https://mc-heads.net">'), 'privacy-mc-heads', '/privacy/ prerendered body does not mention "mc-heads.net"');
   expectFail('U4-copy privacy says mc-heads.com', mutate('privacy/index.html', 'load from mc-heads.net.', 'load from mc-heads.com.'), 'privacy-mc-heads', 'does not mention "mc-heads.net"');
+
+  // ------------------------------------------------------------------ U5 --
+  const pvpGroup = (gs) => gs.find((g) => g.id === 'pvp');
+  const moveGroup = (gs, from, to) => gs.splice(to, 0, gs.splice(from, 1)[0]);
+
+  // The base build: no PVP group, old answers, JSON-LD regenerated from the base faq.json.
+  expectFails('U5 the base FAQ fails exactly the three new content checks', faqSite((gs) => {
+    gs.splice(1, 1);
+    faqItem(gs, KIND_Q).a = FAQ_BASE[1].items[0].a;
+    faqItem(gs, PVPON_Q).a = FAQ_BASE[1].items[4].a;
+  }), {
+    'faq-pvp-group': '/faq/ has 0 groups labelled "PVP", want 1',
+    'faq-network-answers': 'still starts "A survival server"',
+    'faq-jsonld-sync': '/faq/ FAQPage JSON-LD lacks the PVP questions',
+  });
+  {
+    const r = runOn(faqSite((gs) => { faqItem(gs, PVPON_Q).a = PVPON_A.replace('On the SMP, PvP is on in', 'On the SMP, on in'); }));
+    check('U5 the re-led "Is PvP on?" may keep "on in the overworld"', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    // Curly apostrophe, double spaces and an &nbsp; in the page; extra whitespace in the JSON-LD: all normalised.
+    const groups = goodFaq();
+    const site = faqSite((gs) => { pvpGroup(gs).items[0].a = pvpGroup(gs).items[0].a.replace("network's kit", 'network’s  kit'); }, faqLd(groups).replace('Sword and Mace.', ' Sword  and Mace. '));
+    const [head, body] = site['faq/index.html'].split('</head>');
+    site['faq/index.html'] = `${head}</head>${body.replace('Ranked duels are best', 'Ranked duels&nbsp;are best')}`;
+    const r = runOn(site);
+    check('U5 FAQ text is normalised (quotes, whitespace, nbsp)', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    const r = runOn(faqSite((gs) => { pvpGroup(gs).title = 'PvP'; }));
+    check('U5 a group titled "PvP" renders as PVP and passes', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+
+  // U5-AC1 faq-pvp-group
+  expectFail('U5-AC1 group label', faqSite((gs) => { pvpGroup(gs).title = 'Ranked PVP'; }), 'faq-pvp-group', '/faq/ has 0 groups labelled "PVP"');
+  expectFail('U5-AC1 group placed after Gameplay', faqSite((gs) => moveGroup(gs, 1, 2)), 'faq-pvp-group', '/faq/ "PVP" group is group 3, want group 2');
+  expectFail('U5-AC1 group placed first', faqSite((gs) => moveGroup(gs, 1, 0)), 'faq-pvp-group', '/faq/ "PVP" group is group 1, want group 2');
+  expectFail('U5-AC1 group placed last', faqSite((gs) => moveGroup(gs, 1, gs.length - 1)), 'faq-pvp-group', 'want group 2');
+  expectFail(
+    'U5-AC1 two PVP groups',
+    faqSite((gs) => { const g = pvpGroup(gs); gs.splice(2, 0, { id: 'pvp2', title: 'PVP', items: g.items.splice(3) }); }),
+    'faq-pvp-group',
+    '/faq/ has 2 groups labelled "PVP"',
+  );
+  expectFail('U5-AC1 questions swapped', faqSite((gs) => moveGroup(pvpGroup(gs).items, 2, 3)), 'faq-pvp-group', '/faq/ PVP questions are');
+  // A PVP question that is not on the page is not in the JSON-LD either, which faq-jsonld-sync requires.
+  expectFails('U5-AC1 a question missing', faqSite((gs) => pvpGroup(gs).items.splice(5, 1)), {
+    'faq-pvp-group': '/faq/ PVP questions are',
+    'faq-jsonld-sync': 'lacks the PVP questions ["What happens when a season ends?"]',
+  });
+  // A reworded PVP question is also a question the base never had, and the spec'd one is missing from the JSON-LD.
+  expectFails('U5-AC1 a question reworded', faqSite((gs) => { pvpGroup(gs).items[1].q = 'How does ranked play work?'; }), {
+    'faq-pvp-group': '/faq/ PVP questions are',
+    'faq-unchanged': '/faq/ groups (besides the PVP questions) are',
+    'faq-jsonld-sync': 'lacks the PVP questions ["How does ranked work?"]',
+  });
+  expectFail(
+    'U5-AC1 a PVP question in the Gameplay group',
+    faqSite((gs) => { gs[2].items.push(pvpGroup(gs).items.pop()); }),
+    'faq-pvp-group',
+    '/faq/ PVP questions are',
+  );
+  expectFail('U5-AC1 answer off by one char', faqSite((gs) => { pvpGroup(gs).items[3].a = 'Sword and Mace!'; }), 'faq-pvp-group', '/faq/ answer to "Which kits are ranked?" is "Sword and Mace!"');
+  expectFail('U5-AC1 answer with an extra sentence', faqSite((gs) => { pvpGroup(gs).items[2].a += ' Crossplay is on.'; }), 'faq-pvp-group', '/faq/ answer to "Can Bedrock players play ranked?"');
+  expectFail('U5-AC1 answer number wrong', faqSite((gs) => { pvpGroup(gs).items[1].a = pvpGroup(gs).items[1].a.replace('Play 10', 'Play 5'); }), 'faq-pvp-group', '/faq/ answer to "How does ranked work?"');
+  expectFail('U5-AC1 em dash in an answer', faqSite((gs) => { pvpGroup(gs).items[5].a = pvpGroup(gs).items[5].a.replace('own ladder. When', 'own ladder — when'); }), 'faq-pvp-group', 'has an em dash');
+  expectFail('U5-AC1 leaderboards without the link', faqSite((gs) => { pvpGroup(gs).items[4].a = 'On the PVP page of this site, and in game with `/leaderboard`.'; }), 'faq-pvp-group', 'links in the answer to "Where are the leaderboards?" are []');
+  expectFail('U5-AC1 leaderboards link to /pvp', faqSite((gs) => { pvpGroup(gs).items[4].a = pvpGroup(gs).items[4].a.replace('(/pvp/)', '(/pvp)'); }), 'faq-pvp-group', '[["/pvp","PVP page"]]');
+  expectFail('U5-AC1 leaderboards link text', faqSite((gs) => { pvpGroup(gs).items[4].a = 'On the PVP [page](/pvp/) of this site, and in game with `/leaderboard`.'; }), 'faq-pvp-group', '[["/pvp/","page"]]');
+
+  // U5-AC2 faq-network-answers
+  expectFail('U5-AC2 old "What kind" answer', faqSite((gs) => { faqItem(gs, KIND_Q).a = FAQ_BASE[1].items[0].a; }), 'faq-network-answers', 'still starts "A survival server"');
+  expectFail(
+    'U5-AC2 network sentence not first',
+    faqSite((gs) => { faqItem(gs, KIND_Q).a = `Welcome. ${KIND_A}`; }),
+    'faq-network-answers',
+    'want it to start "Chromabit is a network with two servers behind one address',
+  );
+  expectFail(
+    'U5-AC2 network sentence reworded',
+    faqSite((gs) => { faqItem(gs, KIND_Q).a = KIND_A.replace('two servers behind one address', 'two servers on one address'); }),
+    'faq-network-answers',
+    'want it to start',
+  );
+  expectFail(
+    'U5-AC2 "What kind" without "On the SMP,"',
+    faqSite((gs) => { faqItem(gs, KIND_Q).a = KIND_A.replace('On the SMP, the difficulty', 'The difficulty'); }),
+    'faq-network-answers',
+    'after the network sentence is "The difficulty is Hard',
+  );
+  expectFail(
+    'U5-AC2 "What kind" keeps the old first sentence too',
+    faqSite((gs) => { faqItem(gs, KIND_Q).a = KIND_A.replace('On the SMP,', 'A survival server with a player-run economy. On the SMP,'); }),
+    'faq-network-answers',
+    'after the network sentence is "A survival server',
+  );
+  expectFail(
+    'U5-AC2 "What kind" drops a fact',
+    faqSite((gs) => { faqItem(gs, KIND_Q).a = KIND_A.replace(', and spend on land, gear and rank.', '.'); }),
+    'faq-network-answers',
+    'after the network sentence is',
+  );
+  expectFail(
+    'U5-AC2 "What kind" adds a claim after "On the SMP,"',
+    faqSite((gs) => { faqItem(gs, KIND_Q).a = KIND_A.replace('On the SMP, the difficulty', 'On the SMP, the biggest economy around, the difficulty'); }),
+    'faq-network-answers',
+    'after the network sentence is',
+  );
+  expectFail('U5-AC2 old "Is PvP on?" answer', faqSite((gs) => { faqItem(gs, PVPON_Q).a = FAQ_BASE[1].items[4].a; }), 'faq-network-answers', 'still starts "On in the overworld"');
+  expectFail(
+    'U5-AC2 "Is PvP on?" lead without the comma',
+    faqSite((gs) => { faqItem(gs, PVPON_Q).a = PVPON_A.replace('On the SMP, PvP', 'On the SMP PvP'); }),
+    'faq-network-answers',
+    '/faq/ answer to "Is PvP on?" is "On the SMP PvP',
+  );
+  expectFail(
+    'U5-AC2 "Is PvP on?" fact changed',
+    faqSite((gs) => { faqItem(gs, PVPON_Q).a = PVPON_A.replace('15-second', '10-second'); }),
+    'faq-network-answers',
+    '/faq/ answer to "Is PvP on?" is',
+  );
+  expectFail(
+    'U5-AC2 "Is PvP on?" with an em dash',
+    faqSite((gs) => { faqItem(gs, PVPON_Q).a = PVPON_A.replace('On the SMP, PvP is on in', 'On the SMP, PvP is on — in'); }),
+    'faq-network-answers',
+    'has an em dash',
+  );
+  expectFail('U5-AC2 store credit on /faq/ (any case)', mutate('faq/index.html', 'Everything you need', 'Win Store&nbsp;Credit. Everything you need'), 'faq-network-answers', '/faq/ mentions "store credit"');
+  expectFail('U5-AC2 store credit in the /faq/ head', mutate('faq/index.html', '<title>FAQ | Chromabit</title>', '<title>FAQ | Chromabit</title><meta name="keywords" content="store credit">'), 'faq-network-answers', '/faq/ mentions "store credit"');
+  // Renaming a re-led question is a change to a base question too, so faq-unchanged fails with it (both, and only both).
+  expectFails('U5-AC2 "What kind" question renamed', faqSite((gs) => { faqItem(gs, KIND_Q).q = 'What is Chromabit?'; }), {
+    'faq-network-answers': '/faq/ has 0 questions "What kind of server is Chromabit?", want 1',
+    'faq-unchanged': '/faq/ group "gameplay" questions are',
+  });
+
+  // U5-AC3 faq-unchanged
+  expectFail('U5-AC3 a base answer changed', faqSite((gs) => { faqItem(gs, 'How much money do I start with?').a = faqItem(gs, 'How much money do I start with?').a.replace('$80,000', '$100,000'); }), 'faq-unchanged', '/faq/ answer to "How much money do I start with?" changed');
+  expectFail('U5-AC3 a base answer re-led too', faqSite((gs) => { const it = faqItem(gs, 'What happens when I die?'); it.a = `On the SMP, you lose${it.a.slice('You lose'.length)}`; }), 'faq-unchanged', '/faq/ answer to "What happens when I die?" changed');
+  expectFail('U5-AC3 markup-only change keeps text but drops a link', faqSite((gs) => { const it = faqItem(gs, 'What is in the auction house?'); it.a = it.a.replace('[auctions page](/auctions/)', 'auctions page'); }), 'faq-unchanged', 'links in the answer to "What is in the auction house?" are []');
+  expectFail('U5-AC3 a link target changed', faqSite((gs) => { const it = faqItem(gs, 'What do paid ranks give?'); it.a = it.a.replace('(/store/)', '(/store/?tab=ranks)'); }), 'faq-unchanged', 'links in the answer to "What do paid ranks give?"');
+  expectFail('U5-AC3 a base question reworded', faqSite((gs) => { faqItem(gs, 'Is there voice chat?').q = 'Is there proximity voice chat?'; }), 'faq-unchanged', '/faq/ group "joining" questions are');
+  expectFail('U5-AC3 a base question removed', faqSite((gs) => gs.at(-1).items.pop()), 'faq-unchanged', '/faq/ group "rules" questions are');
+  expectFail('U5-AC3 two base questions swapped', faqSite((gs) => moveGroup(gs.find((g) => g.id === 'ranks').items, 0, 1)), 'faq-unchanged', '/faq/ group "ranks" questions are');
+  expectFail('U5-AC3 an extra non-PVP question', faqSite((gs) => { gs.find((g) => g.id === 'gameplay').items.push({ q: 'Is there a network?', a: 'Yes.' }); }), 'faq-unchanged', '/faq/ group "gameplay" questions are');
+  // A seventh question in the PVP group breaks the PVP list too.
+  expectFails('U5-AC3 a non-PVP question in the PVP group', faqSite((gs) => { pvpGroup(gs).items.push({ q: 'Is there a hub?', a: 'Yes.' }); }), {
+    'faq-unchanged': '/faq/ groups (besides the PVP questions) are',
+    'faq-pvp-group': '/faq/ PVP questions are',
+  });
+  expectFail('U5-AC3 a re-led question moved to another group', faqSite((gs) => { const g = gs.find((x) => x.id === 'gameplay'); gs.find((x) => x.id === 'economy').items.unshift(...g.items.splice(4, 1)); }), 'faq-unchanged', '/faq/ group "gameplay" questions are');
+  expectFail('U5-AC3 a group renamed', faqSite((gs) => { gs.at(-1).title = 'Server rules'; }), 'faq-unchanged', '"rules:SERVER RULES"');
+  expectFail('U5-AC3 a group id changed', faqSite((gs) => { gs.find((g) => g.id === 'events').id = 'events-crates'; }), 'faq-unchanged', '"events-crates:EVENTS AND CRATES"');
+  expectFail('U5-AC3 two groups swapped', faqSite((gs) => moveGroup(gs, 3, 4)), 'faq-unchanged', '/faq/ groups (besides the PVP questions) are');
+  expectFail('U5-AC3 a group removed', faqSite((gs) => gs.splice(gs.findIndex((g) => g.id === 'protection'), 1)), 'faq-unchanged', '/faq/ groups (besides the PVP questions) are');
+
+  // U5-AC4 faq-jsonld-sync (defects in the JSON-LD only; the page is the spec'd one)
+  const ldOf = (editLd) => {
+    const doc = JSON.parse(faqLd(goodFaq()));
+    editLd(doc);
+    return JSON.stringify(doc);
+  };
+  expectFail('U5-AC4 JSON-LD from the base faq.json (stale)', faqSite(() => {}, faqLd(FAQ_BASE)), 'faq-jsonld-sync', '/faq/ FAQPage JSON-LD lacks the PVP questions');
+  expectFail('U5-AC4 a question missing from the JSON-LD', faqSite(() => {}, ldOf((d) => d.mainEntity.pop())), 'faq-jsonld-sync', '/faq/ FAQPage mainEntity has 32 entries, the page shows 33 questions');
+  expectFail('U5-AC4 a question twice in the JSON-LD', faqSite(() => {}, ldOf((d) => d.mainEntity.push(d.mainEntity[0]))), 'faq-jsonld-sync', 'mainEntity has 34 entries');
+  expectFail('U5-AC4 JSON-LD order differs', faqSite(() => {}, ldOf((d) => moveGroup(d.mainEntity, 0, 1))), 'faq-jsonld-sync', 'mainEntity 1 name is "Can I play on Bedrock, phone or console?", the page shows "What is the server address?"');
+  expectFail('U5-AC4 PVP group placed elsewhere in the JSON-LD', faqSite(() => {}, ldOf((d) => d.mainEntity.push(...d.mainEntity.splice(4, 6)))), 'faq-jsonld-sync', 'mainEntity 5 name is');
+  expectFail('U5-AC4 stale re-led answer in the JSON-LD', faqSite(() => {}, ldOf((d) => { d.mainEntity.find((e) => e.name === KIND_Q).acceptedAnswer.text = FAQ_BASE[1].items[0].a; })), 'faq-jsonld-sync', `(${JSON.stringify(KIND_Q)}) answer is "A survival server`);
+  expectFail('U5-AC4 markup left in a JSON-LD answer', faqSite(() => {}, ldOf((d) => { d.mainEntity[0].acceptedAnswer.text = '**play.chromabit.us** for Java Edition. Bedrock Edition uses the same address with port **19132**. There is no whitelist and no application.'; })), 'faq-jsonld-sync', 'answer is "**play.chromabit.us**');
+  expectFail('U5-AC4 question name differs', faqSite(() => {}, ldOf((d) => { d.mainEntity[7].name = 'Which kits are ranked'; })), 'faq-jsonld-sync', 'mainEntity 8 name is "Which kits are ranked"');
+  expectFail('U5-AC4 entry not a Question', faqSite(() => {}, ldOf((d) => { d.mainEntity[2]['@type'] = 'Thing'; })), 'faq-jsonld-sync', 'mainEntity 3 @type is "Thing"');
+  expectFail('U5-AC4 answer without @type Answer', faqSite(() => {}, ldOf((d) => { delete d.mainEntity[5].acceptedAnswer['@type']; })), 'faq-jsonld-sync', 'mainEntity 6 ("How does ranked work?") has no acceptedAnswer');
+  expectFail('U5-AC4 no FAQPage block', faqSite(() => {}, ldOf((d) => { d['@type'] = 'WebPage'; })), 'faq-jsonld-sync', '/faq/ has 0 JSON-LD FAQPage nodes, want 1');
+  expectFail('U5-AC4 mainEntity not an array', faqSite(() => {}, ldOf((d) => { d.mainEntity = d.mainEntity[0]; })), 'faq-jsonld-sync', '/faq/ FAQPage mainEntity is not an array');
+  {
+    const site = faqSite();
+    site['faq/index.html'] = site['faq/index.html'].replace('</head>', `<script type="application/ld+json">${LD_FAQ}</script>\n</head>`);
+    expectFail('U5-AC4 two FAQPage blocks', site, 'faq-jsonld-sync', '/faq/ has 2 JSON-LD FAQPage nodes, want 1');
+  }
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

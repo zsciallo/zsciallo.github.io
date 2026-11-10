@@ -1292,6 +1292,249 @@ function pvpLabelsRemoved(dist) {
   });
 }
 
+// ------------------------------------------------ U5: the network FAQ --
+//
+// Hooks (the markup FaqPage.jsx renders today; the contract with the
+// implementer): every question group is a .faq-group (its id attribute is the
+// group id) holding one .faq-section-label (the group title, upper-cased by
+// the page) and one .faq-item per question. Inside a .faq-item, the
+// .faq-question button holds the question (its .faq-icon / aria-hidden="true"
+// "+" is not part of the text) and .faq-answer holds the answer. Groups and
+// items are read from the whole /faq/ document in document order.
+//
+// Text comparison: as U3/U4, textOf() (tags stripped with inline
+// concatenation, entities decoded, curly quotes straightened, whitespace incl.
+// nbsp collapsed to one space and trimmed), then exact and case-sensitive. A
+// faq.json answer is compared by first stripping its markdown-lite the way
+// tools/build_faq_ld.py does (**b** -> b, `c` -> c, [t](href) -> t), then the
+// same norm(). JSON-LD names and answer texts get norm() too. Links in an
+// answer are compared as [href, textOf(a)] pairs in order.
+
+export const FAQ = {
+  route: '/faq/',
+  /** Visible label of the new group (FaqPage upper-cases the title) and its 0-based position among .faq-group. */
+  pvpLabel: 'PVP',
+  pvpIndex: 1,
+  /** [question, answer text, links in the answer as [href, text]] in order. */
+  pvp: [
+    [
+      'What is ChromaPVP?',
+      'ChromaPVP is the network\'s kit PVP server. Join play.chromabit.us and pick Kit PVP in the hub. It has ranked and unranked duels, the FFA pit, the Prismatic Arena and tournaments.',
+      [],
+    ],
+    [
+      'How does ranked work?',
+      'Play 10 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2.',
+      [],
+    ],
+    ['Can Bedrock players play ranked?', 'Yes. Java and Bedrock players queue into the same matches and share one ladder.', []],
+    ['Which kits are ranked?', 'Sword and Mace.', []],
+    ['Where are the leaderboards?', 'On the PVP page of this site, and in game with /leaderboard.', [['/pvp/', 'PVP page']]],
+    ['What happens when a season ends?', 'Each season has its own ladder. When a new season starts, everyone plays placement matches again.', []],
+  ],
+  /**
+   * The two re-led answers. Each must equal `lead` + one space + a remainder
+   * matching `rest`: the remainder starts "On the SMP," and keeps the old
+   * answer's facts word for word; between "On the SMP, " and the kept text at
+   * most 40 characters with no full stop (e.g. "the " or "PvP is ").
+   */
+  network: [
+    {
+      q: 'What kind of server is Chromabit?',
+      lead: 'Chromabit is a network with two servers behind one address: a survival server with a player-run economy, and ChromaPVP, a ranked kit PVP server.',
+      rest: /^On the SMP, [^.]{0,12}?difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank\.$/,
+      restDesc: '"On the SMP, ...difficulty is Hard, PvP is on in the wild, and the market is where most of the game happens: you earn by mining, farming spawners and trading, and spend on land, gear and rank."',
+      notStart: 'A survival server',
+    },
+    {
+      q: 'Is PvP on?',
+      lead: null,
+      rest: /^On the SMP, [^.]{0,12}?in the overworld, the Nether and the End, and in the KOTH arena\. Off at spawn, inside claims and in the dungeon\. A 15-second combat tag blocks \/home, \/spawn and teleports while you are fighting\.$/,
+      restDesc: '"On the SMP, ...in the overworld, the Nether and the End, and in the KOTH arena. Off at spawn, inside claims and in the dungeon. A 15-second combat tag blocks /home, /spawn and teleports while you are fighting."',
+      notStart: 'On in the overworld',
+    },
+  ],
+  /** src/data/faq.json at c8a09be, before U5. */
+  baseFixture: join(ROOT, 'test', 'fixtures', 'faq-base.json'),
+  emDash: '—',
+};
+
+/** Strip faq.json markdown-lite to the text the page shows (as tools/build_faq_ld.py does), normalised. */
+export function faqPlain(md) {
+  return norm(md.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'));
+}
+/** [href, text] of every [text](href) in a faq.json answer. */
+export const faqLinks = (md) => [...md.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)].map((m) => [m[2], norm(m[1])]);
+
+const isFaqIcon = (el) => hasClass('faq-icon')(el) || el.attrs['aria-hidden'] === 'true';
+
+/** The FAQ as rendered: groups [{ id, label, items: [{ q, a, links }] }] plus structural problems. */
+function faqModel(p) {
+  if (p.faq) return p.faq;
+  const problems = [];
+  const groups = findAll(dom(p), hasClass('faq-group')).map((g, gi) => {
+    const labels = findAll(g, hasClass('faq-section-label'));
+    if (labels.length !== 1) problems.push(`/faq/ group ${gi + 1} has ${labels.length} .faq-section-label, want 1`);
+    const items = findAll(g, hasClass('faq-item')).map((it, ii) => {
+      const qs = findAll(it, hasClass('faq-question'));
+      const as = findAll(it, hasClass('faq-answer'));
+      if (qs.length !== 1) problems.push(`/faq/ group ${gi + 1} item ${ii + 1} has ${qs.length} .faq-question, want 1`);
+      if (as.length !== 1) problems.push(`/faq/ group ${gi + 1} item ${ii + 1} has ${as.length} .faq-answer, want 1`);
+      const a = as[0];
+      return {
+        q: qs[0] ? textOf(qs[0], isFaqIcon) : '',
+        a: a ? textOf(a) : '',
+        links: a ? findAll(a, isTag('a')).map((l) => [l.attrs.href ?? '', textOf(l)]) : [],
+      };
+    });
+    return { id: g.attrs.id ?? '', label: labels[0] ? textOf(labels[0]) : '', items };
+  });
+  if (!groups.length) problems.push('/faq/ has no .faq-group');
+  p.faq = { groups, problems };
+  return p.faq;
+}
+
+const onFaq = (dist, fn) => eachPage([FAQ.route], fn, dist);
+const allItems = (groups) => groups.flatMap((g) => g.items);
+
+/** U5-AC1: one PVP group, directly after the first group, with the six questions and exact answers in order. */
+function faqPvpGroup(dist) {
+  return onFaq(dist, (p) => {
+    const { groups, problems: structural } = faqModel(p);
+    const problems = [...structural];
+    const at = groups.map((g, i) => (g.label === FAQ.pvpLabel ? i : -1)).filter((i) => i >= 0);
+    if (at.length !== 1) {
+      problems.push(`/faq/ has ${at.length} groups labelled ${q(FAQ.pvpLabel)}, want 1 (labels: ${q(groups.map((g) => g.label))})`);
+      return problems;
+    }
+    if (at[0] !== FAQ.pvpIndex)
+      problems.push(`/faq/ ${q(FAQ.pvpLabel)} group is group ${at[0] + 1}, want group ${FAQ.pvpIndex + 1} (directly after the first group) (labels: ${q(groups.map((g) => g.label))})`);
+    const items = groups[at[0]].items;
+    const gotQs = items.map((i) => i.q);
+    const wantQs = FAQ.pvp.map(([qq]) => qq);
+    if (q(gotQs) !== q(wantQs)) problems.push(`/faq/ PVP questions are ${q(gotQs)}, want ${q(wantQs)}`);
+    FAQ.pvp.forEach(([qq, a, links]) => {
+      const item = items.find((i) => i.q === qq);
+      if (!item) return;
+      if (item.a !== norm(a)) problems.push(`/faq/ answer to ${q(qq)} is ${clip(item.a)}, want ${q(a)}`);
+      if (item.a.includes(FAQ.emDash)) problems.push(`/faq/ answer to ${q(qq)} has an em dash`);
+      if (q(item.links) !== q(links)) problems.push(`/faq/ links in the answer to ${q(qq)} are ${q(item.links)}, want ${q(links)}`);
+    });
+    return problems;
+  });
+}
+
+/** U5-AC2: the two re-led answers; no "store credit" (any case) on /faq/. */
+function faqNetworkAnswers(dist) {
+  return onFaq(dist, (p) => {
+    const { groups, problems: structural } = faqModel(p);
+    const problems = [...structural];
+    const items = allItems(groups);
+    for (const spec of FAQ.network) {
+      const found = items.filter((i) => i.q === spec.q);
+      if (found.length !== 1) {
+        problems.push(`/faq/ has ${found.length} questions ${q(spec.q)}, want 1`);
+        continue;
+      }
+      const a = found[0].a;
+      if (a.startsWith(spec.notStart)) problems.push(`/faq/ answer to ${q(spec.q)} still starts ${q(spec.notStart)}`);
+      if (a.includes(FAQ.emDash)) problems.push(`/faq/ answer to ${q(spec.q)} has an em dash`);
+      let rest = a;
+      if (spec.lead) {
+        if (!a.startsWith(`${spec.lead} `)) {
+          problems.push(`/faq/ answer to ${q(spec.q)} is ${clip(a)}, want it to start ${q(spec.lead)}`);
+          continue;
+        }
+        rest = a.slice(spec.lead.length + 1);
+      }
+      if (!spec.rest.test(rest))
+        problems.push(`/faq/ answer to ${q(spec.q)} ${spec.lead ? 'after the network sentence ' : ''}is ${clip(rest)}, want ${spec.restDesc}`);
+    }
+    const credit = occurrence(p.html, dom(p), 'store credit', { ci: true });
+    if (credit) problems.push(`/faq/ mentions "store credit": ${credit}`);
+    return problems;
+  });
+}
+
+/**
+ * U5-AC3: apart from the six PVP questions (wherever they are) every group and
+ * question is the base snapshot's: same groups in order (id, label), same
+ * questions in order, same answers and links, except the answers of the two
+ * re-led questions (their wording is faq-network-answers' job).
+ */
+function faqUnchanged(dist) {
+  return onFaq(dist, (p) => {
+    const { groups, problems: structural } = faqModel(p);
+    const problems = [...structural];
+    const base = JSON.parse(readFileSync(FAQ.baseFixture, 'utf-8')).groups;
+    const pvpQs = new Set(FAQ.pvp.map(([qq]) => qq));
+    const edited = new Set(FAQ.network.map((n) => n.q));
+    const got = groups.map((g) => ({ ...g, items: g.items.filter((i) => !pvpQs.has(i.q)) })).filter((g) => g.items.length);
+    const shape = (gs) => gs.map((g) => `${g.id}:${g.label}`);
+    const want = base.map((g) => ({ id: g.id, label: g.title.toUpperCase(), items: g.items }));
+    if (q(shape(got)) !== q(shape(want))) {
+      problems.push(`/faq/ groups (besides the PVP questions) are ${q(shape(got))}, want ${q(shape(want))}`);
+      return problems;
+    }
+    want.forEach((wg, gi) => {
+      const gg = got[gi];
+      const gotQs = gg.items.map((i) => i.q);
+      const wantQs = wg.items.map((i) => norm(i.q));
+      if (q(gotQs) !== q(wantQs)) {
+        problems.push(`/faq/ group ${q(wg.id)} questions are ${q(gotQs)}, want ${q(wantQs)}`);
+        return;
+      }
+      wg.items.forEach((wi, ii) => {
+        if (edited.has(wi.q)) return;
+        const gi2 = gg.items[ii];
+        if (gi2.a !== faqPlain(wi.a)) problems.push(`/faq/ answer to ${q(wi.q)} changed: ${clip(gi2.a)}, want ${q(faqPlain(wi.a))}`);
+        if (q(gi2.links) !== q(faqLinks(wi.a))) problems.push(`/faq/ links in the answer to ${q(wi.q)} are ${q(gi2.links)}, want ${q(faqLinks(wi.a))}`);
+      });
+    });
+    return problems;
+  });
+}
+
+/** U5-AC4: the FAQPage JSON-LD parses and matches the visible FAQ one to one; the six PVP questions are in it. */
+function faqJsonLdSync(dist) {
+  return onFaq(dist, (p) => {
+    const { groups, problems: structural } = faqModel(p);
+    const problems = [...structural];
+    const { nodes, errors } = jsonLdNodes(p);
+    problems.push(...errors);
+    const pages = nodes.filter((n) => types(n).includes('FAQPage'));
+    if (pages.length !== 1) {
+      problems.push(`/faq/ has ${pages.length} JSON-LD FAQPage nodes, want 1`);
+      return problems;
+    }
+    const entity = pages[0].mainEntity;
+    if (!Array.isArray(entity)) {
+      problems.push('/faq/ FAQPage mainEntity is not an array');
+      return problems;
+    }
+    const visible = allItems(groups);
+    if (entity.length !== visible.length)
+      problems.push(`/faq/ FAQPage mainEntity has ${entity.length} entries, the page shows ${visible.length} questions`);
+    const mismatches = [];
+    entity.forEach((e, i) => {
+      const v = visible[i];
+      if (!types(e).includes('Question')) mismatches.push(`mainEntity ${i + 1} @type is ${q(e?.['@type'])}, want "Question"`);
+      const name = typeof e?.name === 'string' ? norm(e.name) : e?.name;
+      if (v && name !== v.q) mismatches.push(`mainEntity ${i + 1} name is ${q(name)}, the page shows ${q(v.q)}`);
+      const ans = e?.acceptedAnswer;
+      if (!ans || !types(ans).includes('Answer') || typeof ans.text !== 'string')
+        mismatches.push(`mainEntity ${i + 1} (${q(name)}) has no acceptedAnswer of @type Answer with a text`);
+      else if (v && norm(ans.text) !== v.a)
+        mismatches.push(`mainEntity ${i + 1} (${q(name)}) answer is ${clip(norm(ans.text), 120)}, the page shows ${clip(v.a, 120)}`);
+    });
+    if (mismatches.length) problems.push(`/faq/ JSON-LD differs from the page: ${mismatches.slice(0, 3).join('; ')}${mismatches.length > 3 ? ` (+${mismatches.length - 3} more)` : ''}`);
+    const names = new Set(entity.map((e) => (typeof e?.name === 'string' ? norm(e.name) : '')));
+    const missing = FAQ.pvp.map(([qq]) => qq).filter((qq) => !names.has(qq));
+    if (missing.length) problems.push(`/faq/ FAQPage JSON-LD lacks the PVP questions ${q(missing)}`);
+    return problems;
+  });
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -1324,6 +1567,11 @@ export const CHECKS = [
   ['home-join-rel', homeJoinRel],
   ['privacy-mc-heads', privacyMcHeads],
   ['pvp-labels-removed', pvpLabelsRemoved],
+  // U5: the network FAQ
+  ['faq-pvp-group', faqPvpGroup],
+  ['faq-network-answers', faqNetworkAnswers],
+  ['faq-unchanged', faqUnchanged],
+  ['faq-jsonld-sync', faqJsonLdSync],
 ];
 
 // -------------------------------------------------------------------- main --
