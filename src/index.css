@@ -5245,6 +5245,13 @@ html.js .pkg-card.reveal {
   padding-top: 0.7rem;
 }
 
+/* COPY IP and JOIN are the same width (owner, 2026-11-10). */
+.join-row > .btn {
+  min-width: 7.5rem;
+  justify-content: center;
+  text-align: center;
+}
+
 .join-text {
   display: flex;
   flex-direction: column;

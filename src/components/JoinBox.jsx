@@ -41,7 +41,7 @@ function StatusLabel({ config, status }) {
 
 /**
  * The hero's two actions: see the address and copy it, see the Discord and
- * join it. One small card, two rows, the edition line underneath.
+ * join it. One small card, two rows, the Bedrock line underneath.
  */
 export function JoinBox({ config, status }) {
   const members = useDiscordMembers(config.discord);
@@ -65,9 +65,8 @@ export function JoinBox({ config, status }) {
           JOIN
         </ArcadeButton>
       </div>
-      {/* Each edition on one piece, so a narrow box breaks between them. */}
       <p class="join-foot">
-        <span class="join-ed">Java: any version up to 26.3 ·</span> <span class="join-ed">Bedrock: same address, port 19132</span>
+        <span class="join-ed">Bedrock: play.chromabit.us</span>
       </p>
     </div>
   );

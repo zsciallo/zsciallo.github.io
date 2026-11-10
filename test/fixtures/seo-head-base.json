@@ -1,5 +1,5 @@
 {
-  "capturedFrom": "dc46510",
+  "capturedFrom": "ec68cca-jointweak",
   "note": "Titles always frozen; a description is frozen unless \"released\" says why it may change.",
   "pages": {
     "/": {
@@ -14,9 +14,8 @@
     },
     "/smp/": {
       "title": "Economy SMP | Chromabit",
-      "description": "Chromabit Economy SMP is a Minecraft survival server for Java and Bedrock with a player-run economy, an auction house and server events. Join the grind at play.chromabit.us.",
-      "descriptionFrozen": false,
-      "released": "173 characters, outside 70-160"
+      "description": "Chromabit Economy SMP: survival with an auction house, the market's top movers and the Season 4 Heartwood dungeon, 9 zones each with its own boss.",
+      "descriptionFrozen": true
     },
     "/faq/": {
       "title": "FAQ | Chromabit",
@@ -25,7 +24,7 @@
     },
     "/store/": {
       "title": "Store | Chromabit",
-      "description": "The official Chromabit store. Buy ranks, crate keys, and more for the Chromabit Minecraft server. Every purchase supports the server.",
+      "description": "The official Chromabit store. Buy ranks, crate keys, and more. Every purchase directly supports Chromabit.",
       "descriptionFrozen": false,
       "released": "store wording: \"the Chromabit Minecraft server\" becomes Chromabit wording without \"server\""
     },

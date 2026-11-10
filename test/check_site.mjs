@@ -536,8 +536,9 @@ export const LANDING = {
   h1: 'CHROMABIT NETWORK',
   tagline: 'Grind the market. Climb the ladder.',
   address: 'play.chromabit.us',
-  java: 'Java: any version up to 26.3',
-  bedrock: 'Bedrock: same address, port 19132',
+  // Owner 2026-11-10: the edition line is just the Bedrock address (was
+  // "Java: any version up to 26.3 · Bedrock: same address, port 19132").
+  bedrock: 'Bedrock: play.chromabit.us',
   claim: 'THE ONLY RANKED COMPETITIVE PVP FOR JAVA AND BEDROCK',
   claimForbidden: 'One ladder for both editions',
   cardsForbidden: ['TWO WAYS TO PLAY', 'ONE ADDRESS'],
@@ -668,12 +669,11 @@ function homeJoinBox(dist) {
       const line = findAll(
         box,
         (el) =>
-          blockText(el).includes(LANDING.java) &&
           blockText(el).includes(LANDING.bedrock) &&
           !(copy && inside(copy, el)) &&
           !(typeof link !== 'string' && inside(link, el)),
       );
-      if (!line.length) problems.push(`/ join box has no single line with ${q(LANDING.java)} and ${q(LANDING.bedrock)}`);
+      if (!line.length) problems.push(`/ join box has no line with ${q(LANDING.bedrock)}`);
       // No store or ladder button anywhere in the hero (between nav and footer, outside the claim band and mode cards).
       const outside = [...L.claims, ...L.cards];
       for (const el of findAll(L.scope, isTag('a', 'button'))) {

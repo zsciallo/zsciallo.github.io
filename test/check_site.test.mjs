@@ -45,7 +45,7 @@ const JOIN_BOX =
   '<div class="join-box" data-join-box>' +
   '<div class="join-row"><span class="join-ip">play.<span class="accent">chromabit</span>.us</span><button type="button" class="join-copy" data-copy-ip><svg><path d="M0 0"></path></svg>COPY IP</button></div>' +
   `<div class="join-row"><span class="join-label">Discord</span><a data-discord-join href="${DISCORD}" target="_blank" rel="noopener">JOIN</a></div>` +
-  '<p class="join-editions">Java: any version up to 26.3 &middot; Bedrock: same address, port 19132</p>' +
+  '<p class="join-editions">Bedrock: play.chromabit.us</p>' +
   '</div>';
 const CLAIM = '<section class="claim" data-claim><h2 class="claim-title">THE ONLY RANKED COMPETITIVE PVP FOR JAVA AND BEDROCK</h2></section>';
 const PVP_CARD =
@@ -803,7 +803,7 @@ ${r.out}`);
   const H = 'index.html';
   const S = 'smp/index.html';
   const DISCORD_ROW = `<div class="join-row"><span class="join-label">Discord</span><a data-discord-join href="${DISCORD}" target="_blank" rel="noopener">JOIN</a></div>`;
-  const EDITIONS = '<p class="join-editions">Java: any version up to 26.3 &middot; Bedrock: same address, port 19132</p>';
+  const EDITIONS = '<p class="join-editions">Bedrock: play.chromabit.us</p>';
 
   // U3-AC1 home-hero
   expectFail('U3-AC1 old h1', mutate(H, 'CHROMABIT <span class="accent">NETWORK</span>', 'CHROMABIT <span class="accent">SMP</span>'), 'home-hero', '/ <h1> text is "CHROMABIT SMP"');
@@ -862,7 +862,9 @@ ${r.out}`);
 ${r.out}`,
     );
   }
-  expectFail('U3-AC2 address missing', mutate(H, 'play.<span class="accent">chromabit</span>.us', 'mc.chromabit.net'), 'home-join-box', 'does not show "play.chromabit.us"');
+  // Owner 2026-11-10: the Bedrock line under the rows also states the address, so with the
+  // address gone from row one the checker reports it as sitting after the Discord row.
+  expectFail('U3-AC2 address missing', mutate(H, 'play.<span class="accent">chromabit</span>.us', 'mc.chromabit.net'), 'home-join-box', 'address comes after the Discord row');
   expectFail('U3-AC2 copy label', mutate(H, '</svg>COPY IP</button>', '</svg>COPY</button>'), 'home-join-box', '/ join box [data-copy-ip] label is "COPY", want "COPY IP"');
   expectFail(
     'U3-AC2 copy is not a button',
@@ -880,13 +882,8 @@ ${r.out}`,
     'home-join-box',
     'address comes after the Discord row',
   );
-  expectFail('U3-AC2 bedrock port', mutate(H, 'port 19132', 'port 19133'), 'home-join-box', 'has no single line with');
-  expectFail(
-    'U3-AC2 edition texts split across rows',
-    edit(mutate(H, EDITIONS, '<p class="join-editions">Java: any version up to 26.3</p>'), H, 'rel="noopener">JOIN</a></div>', 'rel="noopener">JOIN</a><span>Bedrock: same address, port 19132</span></div>'),
-    'home-join-box',
-    'has no single line with',
-  );
+  expectFail('U3-AC2 bedrock line wrong', mutate(H, 'Bedrock: play.chromabit.us', 'Bedrock: play.example.us'), 'home-join-box', 'has no line with');
+  expectFail('U3-AC2 bedrock line missing', mutate(H, EDITIONS, ''), 'home-join-box', 'has no line with');
   expectFail('U3-AC2 visit store button in the hero', mutate(H, EDITIONS, `<a class="arcade-btn" href="/store/">VISIT STORE</a>${EDITIONS}`), 'home-join-box', '/ hero has a <a> "VISIT STORE" -> /store/');
   expectFail('U3-AC2 ladder button in the hero', mutate(H, EDITIONS, `<button type="button">SEE THE LADDER</button>${EDITIONS}`), 'home-join-box', '/ hero has a <button> "SEE THE LADDER"');
   expectFail('U3-AC2 pvp link in the hero', mutate(H, EDITIONS, `<a href="/pvp/">GO</a>${EDITIONS}`), 'home-join-box', '"GO" -> /pvp/');
