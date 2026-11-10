@@ -275,6 +275,125 @@
   background: none;
 }
 
+/* A board name opens the player's profile: still the name, in its colour,
+   with an underline only on hover and focus. */
+.pvp-name-link {
+  color: inherit;
+  text-decoration: none;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+
+.pvp-name-link:hover,
+.pvp-name-link:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.pvp-name-link:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
+/* ─── player search (U7) ───
+   A label and a box above the tabs; matches list in the flow under the box,
+   so they push the tabs down rather than covering them. */
+.pvp-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+  max-width: 26rem;
+}
+
+.pvp-search[hidden] {
+  display: none;
+}
+
+.pvp-search-label {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.pvp-search-input {
+  width: 100%;
+  padding: 0.45rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--text);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pvp-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+.pvp-search-results {
+  list-style: none;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg2);
+}
+
+.pvp-search-results[hidden] {
+  display: none;
+}
+
+.pvp-search-hit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.35rem 0.55rem;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.pvp-search-hit:hover,
+.pvp-search-hit:focus-visible {
+  background-color: rgba(199, 125, 255, 0.1);
+}
+
+.pvp-search-hit:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -2px;
+}
+
+.pvp-search-hit .pvp-tier {
+  flex: none;
+}
+
+.pvp-tier--unplaced {
+  border-color: transparent;
+  background: none;
+}
+
+.pvp-search-none {
+  font-size-adjust: none;
+  font-size: 1.1rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
 /* ─── empty board ─── */
 .pvp-empty {
   padding: 0.2rem 0 1.3rem;
@@ -455,6 +574,214 @@
   line-height: 1.35;
   color: var(--text);
   text-wrap: balance;
+}
+
+/* ─── player profile (U7) ───
+   /pvp/player/: the masthead (head, name, edition and best tier), one card
+   per kit plus the career card, and the recent ranked matches. The recent
+   table stays a table at every width: four short columns, with the
+   opponent's name truncating and its badge dropping under it on phones. */
+/* The loading, not-ranked and unavailable states are only the masthead: the
+   page keeps a screen's height so the footer stays at the bottom. */
+.pvp-profile {
+  min-height: calc(100vh - var(--nav-h) - 11rem);
+}
+
+.pvp-profile-hero {
+  padding-bottom: 2.6rem;
+}
+
+.pvp-profile-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.pvp-profile-head {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+}
+
+/* Names are one word of up to 16 characters (17 with Bedrock's dot), so the
+   title is smaller than the page titles and may break anywhere rather than
+   push the page wider. */
+.pvp-hero .hero-title.pvp-profile-name {
+  min-width: 0;
+  font-size: clamp(2rem, 8vw, 4.5rem);
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.pvp-profile-meta {
+  align-items: center;
+}
+
+.pvp-profile-meta .pvp-ed {
+  font-size: 1.05rem;
+}
+
+.pvp-profile-best {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 1rem;
+  white-space: nowrap;
+}
+
+.pvp-profile-best .pvp-tier {
+  font-size: 1.2rem;
+}
+
+.pvp-profile-best--none {
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.pvp-profile-state {
+  font-size-adjust: none;
+  font-size: 1.35rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.pvp-profile-body {
+  gap: 3rem;
+}
+
+.pvp-kits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.1rem;
+}
+
+.pvp-kit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1.1rem 1.25rem 1.2rem;
+}
+
+.pvp-kit-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.pvp-kit-title {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.9rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.pvp-kit-rank {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.pvp-kit-placing {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  color: var(--accent);
+}
+
+.pvp-kit-lines {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+.pvp-recent-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.pvp-recent {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.pvp-recent th {
+  padding: 0.35rem 0.7rem 0.45rem;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pvp-recent td {
+  padding: 0.42rem 0.7rem;
+  border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.pvp-recent tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pvp-recent .pvp-r-opp {
+  width: 100%;
+  max-width: 0;
+}
+
+.pvp-recent .pvp-r-rating {
+  text-align: right;
+}
+
+.pvp-recent td.pvp-r-kit {
+  color: var(--muted);
+}
+
+.pvp-r-result--win,
+.pvp-recent .pvp-up {
+  color: var(--positive);
+}
+
+.pvp-r-result--loss,
+.pvp-recent .pvp-down {
+  color: #ff8a8a;
+}
+
+.pvp-r-result--draw {
+  color: var(--muted);
+}
+
+.pvp-recent-empty {
+  padding: 1.1rem 1rem;
 }
 
 /* ─── narrower ─── */
@@ -647,8 +974,61 @@
   }
 }
 
+/* Phones, profile and search: the recent table tightens its cells (the
+   opponent's badge already drops under the name, via .pvp-who above), the
+   masthead head shrinks, and the kit cards stack (auto-fit, one column). */
+@media (max-width: 600px) {
+  .pvp-search {
+    max-width: none;
+  }
+
+  .pvp-search-hit {
+    font-size: 1.2rem;
+  }
+
+  .pvp-recent {
+    font-size: 1.2rem;
+  }
+
+  .pvp-recent th {
+    padding: 0.3rem 0.4rem 0.4rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+  }
+
+  .pvp-recent td {
+    padding: 0.42rem 0.4rem;
+  }
+
+  .pvp-recent th:first-child,
+  .pvp-recent td:first-child {
+    padding-left: 0.6rem;
+  }
+
+  .pvp-recent th:last-child,
+  .pvp-recent td:last-child {
+    padding-right: 0.6rem;
+  }
+
+  .pvp-profile-id {
+    gap: 0.65rem;
+  }
+
+  .pvp-profile-head {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pvp-kit {
+    padding: 1rem 1.1rem 1.1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pvp-table tbody tr {
+  .pvp-table tbody tr,
+  .pvp-name-link,
+  .pvp-search-input,
+  .pvp-search-hit {
     transition: none;
   }
 }

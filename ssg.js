@@ -19,6 +19,7 @@ const pages = [
   { module: '/src/App.jsx', export: 'default', dist: 'dist/index.html' },
   { module: '/src/pages/SmpPage.jsx', export: 'SmpPage', dist: 'dist/smp/index.html' },
   { module: '/src/pages/PvpPage.jsx', export: 'PvpPage', dist: 'dist/pvp/index.html' },
+  { module: '/src/pages/PvpPlayerPage.jsx', export: 'PvpPlayerPage', dist: 'dist/pvp/player/index.html' },
   { module: '/src/pages/FaqPage.jsx', export: 'FaqPage', dist: 'dist/faq/index.html' },
   { module: '/src/pages/StorePage.jsx', export: 'StorePage', dist: 'dist/store/index.html' },
   { module: '/src/pages/PrivacyPage.jsx', export: 'PrivacyPage', dist: 'dist/privacy/index.html' },

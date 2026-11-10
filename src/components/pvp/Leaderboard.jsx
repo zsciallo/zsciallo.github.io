@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'preact/hooks';
-import { boardQuery, boardView, builtinTierColour, selectBoardKey, tabList } from '../../lib/pvp';
+import { boardQuery, boardView, builtinTierColour, rowHref, selectBoardKey, tabList } from '../../lib/pvp';
 import defaultHead from '../../assets/pvp-default-head.svg';
 import { ArcadeButton } from '../ArcadeButton';
+import { EditionBadge } from './EditionBadge';
+import { PlayerSearch } from './PlayerSearch';
 
 /** Column classes, in the order of boardView().columns; the CSS lays them out by these. */
 const COLUMN_CLASS = {
@@ -20,8 +22,7 @@ function hideBroken(e) {
   e.currentTarget.style.visibility = 'hidden';
 }
 
-function Player({ row }) {
-  const bedrock = row.edition === 'bedrock';
+function Player({ row, href }) {
   return (
     <div class="pvp-player">
       <span class="pvp-head">
@@ -29,9 +30,9 @@ function Player({ row }) {
           referrerpolicy="no-referrer" onError={hideBroken} />
       </span>
       <span class="pvp-who">
-        {/* Text, never markup: names come from the game. */}
-        <span class="pvp-name" title={row.name}>{row.name}</span>
-        <span class={`pvp-ed pvp-ed--${row.edition}`} data-edition={row.edition}>{bedrock ? 'BEDROCK' : 'JAVA'}</span>
+        {/* Text, never markup: names come from the game. The name opens the player's profile. */}
+        <a class="pvp-name pvp-name-link" href={href} title={row.name}>{row.name}</a>
+        <EditionBadge edition={row.edition} />
       </span>
     </div>
   );
@@ -40,12 +41,12 @@ function Player({ row }) {
 /** The feed ladder's colour, else the built-in ladder's (a feed without `ladder` still colours the badges). */
 const badgeColour = (tier) => tier.colour ?? builtinTierColour(tier.label.split(' ')[0]);
 
-function Row({ row, kind }) {
+function Row({ row, kind, index }) {
   const colour = row.tier ? badgeColour(row.tier) : null;
   return (
     <tr data-row data-top={row.top ?? undefined}>
       <td class="pvp-c-rank"><span class="pvp-rank">{row.rank}</span></td>
-      <td class="pvp-c-player"><Player row={row} /></td>
+      <td class="pvp-c-player"><Player row={row} href={rowHref(row, index)} /></td>
       {kind === 'count' ? (
         <td class="pvp-c-value">{row.value}</td>
       ) : (
@@ -89,8 +90,12 @@ function Empty() {
   );
 }
 
-/** The leaderboard: board tabs, the table, the empty state and the note line. */
-export function Leaderboard({ doc }) {
+/**
+ * The leaderboard: the player search, board tabs, the table, the empty state
+ * and the note line. `index` is players.json (null until it loads): it shows
+ * the search and gives row links their exact profile key.
+ */
+export function Leaderboard({ doc, index = null }) {
   const [requested, setRequested] = useState(requestedBoard);
   const tabs = tabList(doc);
   const key = selectBoardKey(doc, requested);
@@ -110,6 +115,8 @@ export function Leaderboard({ doc }) {
 
   return (
     <section class="pvp-board" data-board aria-label="Leaderboards">
+      <PlayerSearch index={index} />
+
       <div class="pvp-tabs" role="group" aria-label="Choose a leaderboard">
         {tabs.map((t) => (
           <ArcadeButton
@@ -139,7 +146,7 @@ export function Leaderboard({ doc }) {
           </thead>
           <tbody>
             {view.rows.map((row) => (
-              <Row key={`${row.rank}:${row.name}`} row={row} kind={view.kind} />
+              <Row key={`${row.rank}:${row.name}`} row={row} kind={view.kind} index={index} />
             ))}
           </tbody>
         </table>

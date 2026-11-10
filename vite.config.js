@@ -21,6 +21,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         smp: resolve(__dirname, 'smp/index.html'),
         pvp: resolve(__dirname, 'pvp/index.html'),
+        pvpPlayer: resolve(__dirname, 'pvp/player/index.html'),
         faq: resolve(__dirname, 'faq/index.html'),
         store: resolve(__dirname, 'store/index.html'),
         privacy: resolve(__dirname, 'privacy/index.html'),

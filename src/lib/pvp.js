@@ -15,14 +15,25 @@
 // (e.g. VITE_PVP_BASE=/pvp-fixture npm run build).
 export const BASE = import.meta.env?.VITE_PVP_BASE || 'https://api.chromabit.us/pvp';
 
-async function getJson(path) {
+/**
+ * One feed document: { status: 'ok', doc } on a JSON answer, { status: 'missing' }
+ * on a 404, { status: 'error' } on any other failure (another status, a network
+ * error, the 8 s timeout, a body that is not JSON). Never throws.
+ */
+async function request(path) {
   try {
     const response = await fetch(`${BASE}${path}`, { cache: 'no-cache', signal: AbortSignal.timeout(8000) });
-    if (!response.ok) return null;
-    return await response.json();
+    if (response.status === 404) return { status: 'missing' };
+    if (!response.ok) return { status: 'error' };
+    return { status: 'ok', doc: await response.json() };
   } catch {
-    return null;
+    return { status: 'error' };
   }
+}
+
+async function getJson(path) {
+  const answer = await request(path);
+  return answer.status === 'ok' ? answer.doc : null;
 }
 
 const isObject = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -37,6 +48,24 @@ export async function fetchBoards() {
 export async function fetchSeason() {
   const doc = await getJson('/season.json');
   return isObject(doc) ? doc : null;
+}
+
+/** players.json (the search index), or null when the feed is unreachable or not an index. */
+export async function fetchPlayers() {
+  const doc = await getJson('/players.json');
+  return isObject(doc) && Array.isArray(doc.players) ? doc : null;
+}
+
+/**
+ * One player's profile: { status: 'ok', doc }, { status: 'missing' } (not
+ * ranked this season: a 404, or a key that is not valid, which is never
+ * requested), or { status: 'error' } (the feed failed). Never throws.
+ */
+export async function fetchPlayer(key) {
+  if (!isValidPlayerKey(key)) return { status: 'missing' };
+  const answer = await request(`/players/${key}.json`);
+  if (answer.status !== 'ok') return answer;
+  return isObject(answer.doc) ? answer : { status: 'error' };
 }
 
 /** The rows of one board (`overall`, `sword`, ...), [] when it is missing or empty. */
@@ -218,4 +247,142 @@ export function seasonView(season, now) {
     endsIn = d >= 1 ? `${d}d ${h}h` : h >= 1 ? `${h}h ${m}m` : `${m}m`;
   }
   return { name: season.name ?? '', endsIn };
+}
+
+// ------------------------------------------------- players and profiles --
+//
+// The feed also publishes players.json (one entry per ranked player: key,
+// name, edition, bestTier, bestDivision) for the search box, and
+// players/<key>.json per player for /pvp/player/?name=<key>. The key is the
+// server's: playerKey() mirrors it, but the index's own key wins when the
+// server had to tell two names apart.
+
+/** The server's key for a name: lower case, a leading '.' as 'b-', anything else outside [a-z0-9_] as '-'. */
+export function playerKey(name) {
+  if (typeof name !== 'string') return '';
+  const lower = name.toLowerCase();
+  const bedrock = lower.startsWith('.');
+  return (bedrock ? 'b-' : '') + (bedrock ? lower.slice(1) : lower).replace(/[^a-z0-9_]/g, '-');
+}
+
+const KEY = /^[a-z0-9_-]{1,40}$/;
+
+/** True for a string that can be a profile key; nothing else is ever requested. */
+export const isValidPlayerKey = (s) => typeof s === 'string' && KEY.test(s);
+
+/** The profile page of a key. */
+export const profileHref = (key) => `/pvp/player/?name=${key}`;
+
+const indexPlayers = (index) => (isObject(index) && Array.isArray(index.players) ? index.players.filter(isObject) : []);
+
+/** A board row's profile link: the index key for that exact name, else the derived key. */
+export function rowHref(row, index) {
+  const hit = indexPlayers(index).find((p) => p.name === row?.name);
+  return profileHref(hit && typeof hit.key === 'string' ? hit.key : playerKey(row?.name));
+}
+
+/** A name for matching: no leading '.', lower case. */
+const fold = (name) => name.replace(/^\./, '').toLowerCase();
+
+const indexTierLabel = (p) => (p.bestTier ? tierLabel({ tier: p.bestTier, division: p.bestDivision }) : 'UNPLACED');
+
+/**
+ * Index players whose name contains the query (no leading '.', any case):
+ * names that start with it first, then the rest, each group alphabetical.
+ */
+export function searchPlayers(index, query, limit = 8) {
+  const q = fold(String(query ?? '').trim());
+  if (!q) return [];
+  const hits = indexPlayers(index)
+    .filter((p) => typeof p.name === 'string' && fold(p.name).includes(q))
+    .map((p) => ({ p, folded: fold(p.name), prefix: fold(p.name).startsWith(q) }));
+  hits.sort((a, b) => (a.prefix !== b.prefix ? (a.prefix ? -1 : 1) : a.folded < b.folded ? -1 : a.folded > b.folded ? 1 : 0));
+  return hits.slice(0, limit).map(({ p }) => ({
+    key: p.key,
+    name: p.name,
+    edition: p.edition === 'bedrock' ? 'bedrock' : 'java',
+    href: profileHref(p.key),
+    tierLabel: indexTierLabel(p),
+  }));
+}
+
+/** 1234567 -> '1,234,567'. */
+export function formatCount(n) {
+  return String(Math.trunc(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/** '1 win' / '2 wins'. */
+const count = (n, one, many, format = String) => `${format(n ?? 0)} ${n === 1 ? one : many}`;
+
+const RESULTS = { win: 'WIN', loss: 'LOSS', draw: 'DRAW' };
+
+/** The size the profile asks mc-heads for (the masthead shows it at 64 CSS px or less). */
+const PROFILE_HEAD_PX = 128;
+
+/**
+ * Everything the profile page shows for one players/<key>.json, or null for a
+ * document that is not an object. `ladder` is boards.json's `ladder` (or
+ * { tiers: LADDER }); tier colours are its hex values only. An unplaced kit
+ * shows its placement progress and its record, never a rating, tier, peak or rank.
+ */
+export function profileView(doc, ladder) {
+  if (!isObject(doc)) return null;
+  const colourOf = (tier) => ladderHex({ ladder }, tier);
+  const edition = doc.edition === 'bedrock' ? 'bedrock' : 'java';
+  const uuid = typeof doc.uuid === 'string' && doc.uuid ? doc.uuid : null;
+  const best = isObject(doc.best)
+    ? { label: tierLabel(doc.best), colour: colourOf(doc.best.tier), overallRank: doc.best.overallRank }
+    : null;
+
+  const kitDocs = Array.isArray(doc.kits) ? doc.kits.filter(isObject) : [];
+  const kits = kitDocs.map((k) => {
+    const record = `${count(k.wins, 'win', 'wins')}, ${count(k.losses, 'loss', 'losses')}`;
+    if (k.placed !== true) {
+      return { key: k.key, label: k.label, placed: false, tier: null, lines: [`Placing ${k.games ?? 0}/${k.placementMatches ?? 0}`, record] };
+    }
+    return {
+      key: k.key,
+      label: k.label,
+      placed: true,
+      tier: k.tier ? { label: tierLabel(k), colour: colourOf(k.tier) } : null,
+      lines: [`Rating ${k.rating}`, `Peak ${k.peak}`, record, `Win streak ${k.streak ?? 0}`, `#${k.rank}`],
+    };
+  });
+
+  const c = isObject(doc.career) ? doc.career : {};
+  const career = {
+    lines: [
+      count(c.kills, 'kill', 'kills', formatCount),
+      count(c.deaths, 'death', 'deaths', formatCount),
+      `Best streak ${formatCount(c.bestStreak)}`,
+      count(c.tournamentWins, 'tournament won', 'tournaments won', formatCount),
+    ],
+  };
+
+  const kitLabel = (key) => kitDocs.find((k) => k.key === key)?.label ?? String(key ?? '');
+  const recent = (Array.isArray(doc.recent) ? doc.recent.filter(isObject) : []).map((r) => {
+    const opp = isObject(r.opponent) ? r.opponent : {};
+    const change = r.ratingChange;
+    return {
+      result: RESULTS[r.result] ?? 'DRAW',
+      kit: kitLabel(r.kit),
+      opponent: {
+        name: typeof opp.name === 'string' && opp.name ? opp.name : 'Unknown player',
+        edition: opp.edition === 'bedrock' ? 'bedrock' : 'java',
+        href: isValidPlayerKey(opp.key) ? profileHref(opp.key) : null,
+      },
+      rating: typeof change !== 'number' ? '' : change > 0 ? `+${change}` : String(change),
+    };
+  });
+
+  return {
+    name: doc.name,
+    edition,
+    headUrl: edition === 'java' && uuid ? `https://mc-heads.net/avatar/${encodeURIComponent(uuid)}/${PROFILE_HEAD_PX}` : null,
+    best,
+    kits,
+    career,
+    recent,
+    empty: recent.length === 0,
+  };
 }

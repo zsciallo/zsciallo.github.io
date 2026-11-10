@@ -1,5 +1,6 @@
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { usePvpFeed } from '../hooks/usePvpFeed';
+import { usePlayerIndex } from '../hooks/usePlayerIndex';
 import { CopyIpButton } from '../components/CopyIpButton';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
@@ -28,6 +29,7 @@ const MODES = [
 
 export function PvpPage() {
   const { boards, season, now } = usePvpFeed();
+  const index = usePlayerIndex();
   useScrollReveal();
 
   return (
@@ -47,7 +49,7 @@ export function PvpPage() {
         </section>
 
         <div class="pvp-body container">
-          <Leaderboard doc={boards} />
+          <Leaderboard doc={boards} index={index} />
 
           <TierLadder doc={boards} />
 
