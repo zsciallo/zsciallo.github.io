@@ -610,6 +610,8 @@ try {
       // U9
       'card-tokens',
       'card-no-frost',
+      // U8 round 2 (U9 review L1)
+      'css-has-isolated',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -1910,6 +1912,21 @@ ${r.out}`);
   expectFail('U9 hairline: .mode-card--pvp::before 2px strip', cssAdd('.mode-card--pvp::before{content:"";position:absolute;height:2px;background:#ff7de1}'), 'card-no-frost', '.mode-card--pvp::before still draws a 2px hairline');
   passes('U9 hairline: a button ::after shine is not a card', goodSite());
   passes('U9 hairline: a 1px divider between join rows is not a pseudo hairline', cssAdd('.join-row+.join-row{border-top:1px solid #221838}'));
+
+  // ------------------------------------------------------ U8 round 2 --
+  // css-has-isolated (U9 review L1): a :has() selector never shares a selector list with one that does not need it.
+  const HAS_HOVER = '.faq-item:hover,.faq-item:has(.faq-question:focus-visible){background-color:var(--surface-hover)}';
+  // No built CSS is card-tokens' and card-no-frost's failure only (case 'U9 no built CSS' above, unchanged).
+  expectFail('U8r2 :has: hover and :has() in one list (the U9 FAQ rule)', cssAdd(HAS_HOVER), 'css-has-isolated', '".faq-item:hover" shares a selector list with ".faq-item:has(.faq-question:focus-visible)"');
+  expectFail('U8r2 :has: open state and :has() in one list', cssAdd('.listing-card.open,.listing-card.open:has(.listing-head:focus-visible){background-color:var(--surface-selected)}'), 'css-has-isolated', '".listing-card.open" shares a selector list with ".listing-card.open:has(.listing-head:focus-visible)"');
+  expectFail('U8r2 :has: :has() as a descendant step, mixed', cssAdd('.qty-input:disabled,.qty-fx:has(.qty-input:disabled) .qty-num{opacity:.55}'), 'css-has-isolated', '".qty-input:disabled" shares a selector list with ".qty-fx:has(.qty-input:disabled) .qty-num"');
+  expectFail('U8r2 :has: :has() inside :not(), mixed', cssAdd('.a,.b:not(:has(.c)){color:red}'), 'css-has-isolated', '".a" shares a selector list with ".b:not(:has(.c))"');
+  expectFail('U8r2 :has: mixed inside a media query', cssAdd(`@media (hover:hover){${HAS_HOVER}}`), 'css-has-isolated', '(@media (hover:hover))');
+  expectFail('U8r2 :has: mixed with three selectors, :has() in the middle', cssAdd('.x:hover,.x:has(.y:focus-visible),.x.on{color:red}'), 'css-has-isolated', '".x:hover,.x.on" shares a selector list with ".x:has(.y:focus-visible)"');
+  passes('U8r2 :has: split into one rule each passes', cssAdd('.faq-item:hover{background-color:var(--surface-hover)}.faq-item:has(.faq-question:focus-visible){background-color:var(--surface-hover)}'));
+  passes('U8r2 :has: a list where every selector needs :has() passes', cssAdd('.a:has(.b),.c:has(.d){color:red}'));
+  passes('U8r2 :has: a mixed list inside @supports selector(:has(a)) passes (skipped whole without :has())', cssAdd(`@supports selector(:has(a)){${HAS_HOVER}}`));
+  passes('U8r2 :has: a commented-out mixed rule is ignored', cssAdd(`/* ${HAS_HOVER} */`));
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

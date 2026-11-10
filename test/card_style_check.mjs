@@ -741,7 +741,7 @@ function grouped(items) {
   });
 }
 
-async function openState(b, origin, state, width) {
+export async function openState(b, origin, state, width) {
   const { browserContextId } = await b.send('Target.createBrowserContext', { disposeOnDetach: true });
   const { targetId } = await b.send('Target.createTarget', { url: 'about:blank', browserContextId });
   const { sessionId } = await b.send('Target.attachToTarget', { targetId, flatten: true });
@@ -936,6 +936,90 @@ async function hoverProblems(page, width) {
   return out;
 }
 
+/**
+ * U8 round 2 (U9 review L2): a selected / open card stays on --surface-selected
+ * while it is hovered, while its focus target has keyboard focus, and while
+ * both. For every CARDS entry with fill 'selected', the first 2 rendered
+ * elements that entry decides are read three times: :hover forced (CDP
+ * CSS.forcePseudoState); the focus target focused after a real Tab key press
+ * (keyboard modality; the target is the focus of the first other CARDS entry
+ * with a focus that the element also matches: .faq-item -> .faq-question,
+ * .pool-card -> itself, .store-item.store-item--button -> itself,
+ * .listing-card -> .listing-head) and it must match :focus-visible; then focus
+ * and :hover together. A selected card with no focus entry is read hovered only.
+ * Returns { key, detail } items and the number of cards read.
+ */
+export const SELECTED_HOLD_STATES = ['faq-open', 'auctions-pool', 'store-crate-open', 'auctions-listing-open'];
+const HOLD_READ_FN = `function (spec, mode) {
+  const L = window.__cards;
+  const T = L.resolved(spec);
+  const bg = L.rgba(getComputedStyle(this).backgroundColor);
+  return !bg || bg[3] !== 1 || bg.slice(0, 3).join() !== T.selected.slice(0, 3).join() ? ['background-color ' + L.rgbText(bg) + ' while ' + mode + ', want ' + L.rgbText(T.selected) + ' (--surface-selected)'] : [];
+}`;
+const HOLD_FOCUS_FN = `function (focusSel) {
+  const L = window.__cards;
+  const target = focusSel === ':scope' ? this : this.querySelector(focusSel);
+  if (!target) return ['focus target ' + focusSel + ' not found inside the card'];
+  target.focus({ preventScroll: true });
+  if (document.activeElement !== target) return ['focus did not land on ' + L.label(target)];
+  if (!target.matches(':focus-visible')) return [L.label(target) + ' is focused but not :focus-visible'];
+  return [];
+}`;
+async function selectedHoldProblems(page) {
+  const out = [];
+  let read = 0;
+  const { root } = await page.s('DOM.getDocument', { depth: 0 });
+  await page.s('CSS.enable');
+  let modal = false;
+  const settle = async () => {
+    await page.ev(FREEZE_ANIMATIONS);
+    await sleep(30);
+    await page.ev(FREEZE_ANIMATIONS);
+  };
+  for (const c of CARDS.filter((x) => x.fill === 'selected')) {
+    const { nodeIds } = await page.s('DOM.querySelectorAll', { nodeId: root.nodeId, selector: c.sel });
+    let n = 0;
+    for (const nodeId of nodeIds) {
+      if (n >= 2) break;
+      const { object } = await page.s('DOM.resolveNode', { nodeId });
+      const call = async (functionDeclaration, args = []) => (await page.s('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration, arguments: args.map((value) => ({ value })), returnByValue: true, awaitPromise: true })).result.value;
+      const vis = await call('function () { return window.__cards.rendered(this) && window.__cards.entryOf(this, ' + JSON.stringify(CARDS) + ')?.sel === ' + JSON.stringify(c.sel) + '; }');
+      if (!vis) continue;
+      n++;
+      read++;
+      const path = await call(PATH_FN);
+      const focusSel = await call('function (cards) { const e = cards.find((x) => x.focus && x.fill !== "selected" && this.matches(x.sel)); return e ? e.focus : null; }', [CARDS.map(({ sel, focus, fill }) => ({ sel, focus, fill }))]);
+      const push = (list) => {
+        for (const d of list ?? []) out.push({ key: `${c.sel} (${path.split(' > ').pop()})`, detail: d });
+      };
+      await page.s('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['hover'] });
+      await settle();
+      push(await call(HOLD_READ_FN, [SPEC_TOKENS, 'hovered']));
+      await page.s('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
+      await settle();
+      if (!focusSel) continue;
+      if (!modal) {
+        await keyboardModality(page);
+        modal = true;
+      }
+      const f = await call(HOLD_FOCUS_FN, [focusSel]);
+      if (f?.length) {
+        push(f);
+        continue;
+      }
+      await settle();
+      push(await call(HOLD_READ_FN, [SPEC_TOKENS, `keyboard-focused (${focusSel})`]));
+      await page.s('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['hover'] });
+      await settle();
+      push(await call(HOLD_READ_FN, [SPEC_TOKENS, `hovered and keyboard-focused (${focusSel})`]));
+      await page.s('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
+      await call(`function (focusSel) { const t = focusSel === ':scope' ? this : this.querySelector(focusSel); if (t) t.blur(); return true; }`, [focusSel]);
+      await settle();
+    }
+  }
+  return { items: out, read };
+}
+
 /** perceptible items for the selected/open cards INSPECT measured. */
 function selectedPercept(r) {
   const out = [];
@@ -946,7 +1030,7 @@ function selectedPercept(r) {
   return out;
 }
 
-async function withBrowser(dist, fn) {
+export async function withBrowser(dist, fn) {
   const chrome = findChrome();
   if (!chrome) return check('chrome-found', ['no Chrome: set CHROME to chrome.exe']);
   if (!existsSync(join(dist, 'index.html'))) return check('dist-built', [`${dist} has no index.html: build first (npm run build)`]);
@@ -1021,6 +1105,9 @@ async function runChecks(dist, args) {
           check(`${id} hover`, grouped(hov.hover));
           check(`${id} focus`, grouped(hov.focus));
           check(`${id} perceptible`, grouped([...hov.percept, ...selectedPercept(r)]));
+          // U8 round 2 (U9 review L2): selected / open cards keep their fill under hover and keyboard focus.
+          const hold = await selectedHoldProblems(page);
+          check(`${id} selected-hold`, [...grouped(hold.items), SELECTED_HOLD_STATES.includes(state.id) && !hold.read ? 'no selected/open card rendered to read (the state must show one)' : null]);
           lastTokens = r.tokens;
           check(`${id} dividers`, grouped(r.dividers.map((d) => ({ key: d.path.split(' > ').slice(-2).join(' > '), detail: `${d.detail}, want ${DIVIDER.width} ${DIVIDER.style} ${DIVIDER.color}` }))));
           check(`${id} completeness`, grouped(r.complete.map((c) => ({ key: c.path, detail: c.why.join(', ') }))).map((l) => `${l} (not in CARDS or ALLOW)`));
@@ -1320,6 +1407,34 @@ async function selfTest(dist) {
         r = await page.ev(INSPECT(cfgFor(1280)));
         const same = items(selectedPercept(r), '.pool-card.selected');
         check('self pool: selected equal to hover fails perceptible (vs --surface-hover)', same.some((x) => x.includes('vs --surface-hover 1:1')) && !r.cards.some((c) => c.sel === '.pool-card.selected') ? [] : [`percept: ${same.join(' | ') || 'none'}; cards: ${JSON.stringify(r.cards.filter((c) => c.sel === '.pool-card.selected'))}`]);
+      } finally {
+        await page.close();
+      }
+    }
+    // U8 round 2 (U9 review L2): selected-hold. Each block plants a compliant rule first (holds on any build),
+    // then a hover / focus rule placed AFTER the selected rule at equal specificity, the wrong order L2 describes.
+    const holdItems = async (page, key) => (await selectedHoldProblems(page)).items.filter((x) => x.key.startsWith(key)).map((x) => x.detail);
+    for (const [stateId, sel, compliant, hoverAfter, focusAfter] of [
+      ['auctions-pool', '.pool-card.selected', '.pool-card.selected,.pool-card.selected:hover,.pool-card.selected:focus-visible{background-color:#2c214f!important}', '.pool-card:hover{background-color:#21193c}', '.pool-card:focus-visible{background-color:#21193c}'],
+      ['faq-open', '.faq-item[data-open]', '.faq-item[data-open]{background-color:#2c214f!important}', '.faq-item:hover{background-color:#21193c}', '.faq-item[data-open]:has(.faq-question:focus-visible){background-color:#21193c}'],
+      ['store-crate-open', '.store-item.is-open', '.store-item.is-open{background-color:#2c214f!important}', '.store-item.store-item--button:hover{background-color:#21193c}', '.store-item.store-item--button:focus-visible{background-color:#21193c}'],
+    ]) {
+      const page = await openState(b, origin, st(stateId), 1280);
+      try {
+        await page.ev(addStyle(':root{--surface:#150f27!important;--surface-hover:#21193c!important;--surface-selected:#2c214f!important}'));
+        // The compliant baseline: the selected fill wins in every mode.
+        await page.ev(addStyle(compliant));
+        const ok = await selectedHoldProblems(page);
+        check(`self selected-hold ${stateId}: a selected fill that wins under hover and focus passes`, [ok.read ? null : 'no selected card read', ...ok.items.filter((x) => x.key.startsWith(sel)).map((x) => x.detail)]);
+        // Remove the !important baseline, then plant the hover rule after the selected rule.
+        await page.ev("(() => { const s = [...document.head.querySelectorAll('style')].pop(); s.remove(); return true; })()");
+        await page.ev(addStyle(hoverAfter));
+        let got = await holdItems(page, sel);
+        check(`self selected-hold ${stateId}: a hover rule after the selected rule fails (hovered)`, got.some((x) => x.includes('while hovered,')) ? [] : [`items: ${got.join(' | ') || 'none'}`]);
+        await page.ev("(() => { const s = [...document.head.querySelectorAll('style')].pop(); s.remove(); return true; })()");
+        await page.ev(addStyle(focusAfter));
+        got = await holdItems(page, sel);
+        check(`self selected-hold ${stateId}: a focus rule after the selected rule fails (keyboard-focused)`, got.some((x) => x.includes('while keyboard-focused')) && !got.some((x) => x.includes('while hovered,')) ? [] : [`items: ${got.join(' | ') || 'none'}`]);
       } finally {
         await page.close();
       }

@@ -31,13 +31,18 @@
 //     gets a fixed answer (ROUTES below): api.chromabit.us/api/status ->
 //     test/fixtures/visual/status.json; api.chromabit.us/pvp/<path> ->
 //     test/fixtures/visual/pvp/<path> (404 when absent); api.chromabit.us/market/
-//     <path> -> the same file from <distDir>/market/ (the static market copy the
-//     build ships; its hash is in the manifest and both captures must match);
-//     other api.chromabit.us paths -> 404 (e.g. /store/offers: the store's
-//     designed empty state); api.mcsrvstat.us -> mcsrvstat.json; the Discord
-//     invite API -> discord-invite.json; mc-heads.net -> a fixed 8x8 PNG;
-//     PostHog and Tebex -> 200 with an empty body ({} / {"data":[]}); any other
+//     <path> and the preview origin's /market/*.json -> test/fixtures/card-style/
+//     market/<path> (round 2; was <distDir>/market, the untracked copy), and
+//     /market/icons/* -> the fixed PNG (the dist market hash is still in the
+//     manifest and both captures must match); other api.chromabit.us paths ->
+//     404 (e.g. /store/offers: no offer banners); api.mcsrvstat.us ->
+//     mcsrvstat.json; the Discord invite API -> discord-invite.json;
+//     mc-heads.net -> a fixed 8x8 PNG; PostHog -> 200 {}; headless.tebex.io
+//     .../categories -> test/fixtures/card-style/tebex-categories.json (round 2:
+//     /store/ renders 10 package cards), other Tebex -> {"data":[]}; any other
 //     host -> 404, listed in the manifest as unexpected;
+//   - PAGES carry a ready selector (the shot FAILS when the fixture content did
+//     not render) and optional setup steps (faq-open clicks the first question);
 //   - after the load event: network idle (no request in flight for 500 ms),
 //     document.fonts.ready, a scroll from top to bottom in viewport steps (lazy
 //     images and scroll reveals fire), every <img> complete, network idle
@@ -48,7 +53,8 @@
 //     captureBeyondViewport, clip 0,0,width,scrollHeight).
 //   Masks: MASKS (selector list) are hidden with visibility:hidden (layout
 //   kept) just before the shot. None are needed: with the animation pinning the
-//   determinism proof (two captures of 762b268, compared) is in the U8 report.
+//   determinism proof (two captures of 762b268, compared) is in the U8 report;
+//   round 2 repeated it on dc46510 with the extended pages (U8-test-writer-r2).
 //
 // Comparison: PNGs are decoded with node:zlib (8-bit, non-interlaced, colour
 // type 2 or 6, as Chrome writes them). Same width and height are required; a
@@ -70,16 +76,30 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const VITE = join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
 export const FIX = join(ROOT, 'test', 'fixtures', 'visual');
 
+/** Waits (up to 10 s) for a rendered match of a selector; resolves to true, or false if it never renders. */
+const waitFor = (sel) => `(async () => { for (let i = 0; i < 100; i++) { const el = document.querySelector(${JSON.stringify(sel)}); if (el && el.getClientRects().length) return true; await new Promise((r) => setTimeout(r, 100)); } return false; })()`;
+const click = (sel) => `(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return false; el.click(); return true; })()`;
+
+/**
+ * [id, path, opts]. opts.ready: a selector that must render before the shot
+ * (the fixture produced the content the image is for; a capture without it
+ * FAILS instead of photographing an empty page). opts.setup: expressions run
+ * in order after the page settled; each must resolve to true.
+ * Round 2 (U8 r2, on dc46510): every content page has a ready selector; /store/
+ * renders the 10 fixture packages (Tebex fixture below) instead of the empty
+ * catalogue; 'faq-open' is the FAQ with its first item open.
+ */
 export const PAGES = [
-  ['home', '/'],
-  ['pvp', '/pvp/'],
-  ['pvp-player', '/pvp/player/'],
-  ['pvp-player-sample_01', '/pvp/player/?name=sample_01'],
-  ['smp', '/smp/'],
-  ['faq', '/faq/'],
-  ['store', '/store/'],
-  ['auctions', '/auctions/'],
-  ['privacy', '/privacy/'],
+  ['home', '/', { ready: '.mode-card' }],
+  ['pvp', '/pvp/', { ready: '.pvp-table [data-row]' }],
+  ['pvp-player', '/pvp/player/', { ready: '.pvp-profile-state' }],
+  ['pvp-player-sample_01', '/pvp/player/?name=sample_01', { ready: '.pvp-kit' }],
+  ['smp', '/smp/', { ready: '.fact' }],
+  ['faq', '/faq/', { ready: '.faq-item' }],
+  ['faq-open', '/faq/', { ready: '.faq-item', setup: [click('.faq-question'), waitFor('.faq-item[data-open]')] }],
+  ['store', '/store/', { ready: '.pkg-card' }],
+  ['auctions', '/auctions/', { ready: '.market-row' }],
+  ['privacy', '/privacy/', { ready: '.legal' }],
 ];
 export const WIDTHS = [400, 1280];
 export const HEIGHT = 900;
@@ -227,27 +247,44 @@ export const HEAD_PNG = encodePng(8, 8, Buffer.from(Array.from({ length: 64 }, (
 export const json = (body, status = 200) => ({ status, type: 'application/json', body: typeof body === 'string' ? body : JSON.stringify(body) });
 export const fileOr404 = (file, type = 'application/json') => (existsSync(file) && statSync(file).isFile() ? { status: 200, type, body: readFileSync(file) } : json({ error: 'not found' }, 404));
 
+/**
+ * Round 2 (U8 r2): the committed fixtures test/card_style_check.mjs uses. The
+ * Tebex categories (3 categories, 10 packages, no package images) make
+ * /store/ render package cards; the market documents (anonymised, trimmed)
+ * replace the untracked public/market copy, so /auctions/ no longer depends on
+ * whatever market data the worktree happens to have.
+ */
+export const CS_FIX = join(ROOT, 'test', 'fixtures', 'card-style');
+
 /** The fixed answer for a request URL, or 'pass' for the preview origin and Google Fonts. */
 export function route(url, origin, dist, unexpected) {
-  if (url.startsWith(origin) || url.startsWith('data:') || url.startsWith('blob:')) return 'pass';
   let u;
   try {
     u = new URL(url);
   } catch {
-    return json({}, 404);
+    return url.startsWith('data:') || url.startsWith('blob:') ? 'pass' : json({}, 404);
   }
+  const market = (p) => fileOr404(join(CS_FIX, 'market', ...p.split('/')));
+  if (url.startsWith(origin)) {
+    // The build's static market copy (dist/market, from the untracked public/market): fixtures instead.
+    if (u.pathname.startsWith('/market/icons/')) return { status: 200, type: 'image/png', body: HEAD_PNG };
+    if (u.pathname.startsWith('/market/') && u.pathname.endsWith('.json')) return market(u.pathname.slice('/market/'.length));
+    return 'pass';
+  }
+  if (url.startsWith('data:') || url.startsWith('blob:')) return 'pass';
   const host = u.hostname;
   if (host === 'fonts.googleapis.com' || host === 'fonts.gstatic.com') return 'pass';
   if (host === 'api.chromabit.us') {
     if (u.pathname === '/api/status') return fileOr404(join(FIX, 'status.json'));
     if (u.pathname.startsWith('/pvp/')) return fileOr404(join(FIX, 'pvp', ...u.pathname.slice('/pvp/'.length).split('/')));
-    if (u.pathname.startsWith('/market/')) return fileOr404(join(dist, 'market', ...u.pathname.slice('/market/'.length).split('/')));
+    if (u.pathname.startsWith('/market/')) return market(u.pathname.slice('/market/'.length));
     return json({ error: 'not found' }, 404);
   }
   if (host === 'api.mcsrvstat.us') return fileOr404(join(FIX, 'mcsrvstat.json'));
   if (host === 'discord.com' && u.pathname.startsWith('/api/')) return fileOr404(join(FIX, 'discord-invite.json'));
   if (host === 'mc-heads.net') return { status: 200, type: 'image/png', body: HEAD_PNG };
   if (host.endsWith('posthog.com')) return { status: 200, type: u.pathname.endsWith('.js') ? 'application/javascript' : 'application/json', body: u.pathname.endsWith('.js') ? '' : '{}' };
+  if (host === 'headless.tebex.io' && /\/categories$/.test(u.pathname)) return fileOr404(join(CS_FIX, 'tebex-categories.json'));
   if (host.endsWith('tebex.io')) return json({ data: [] });
   unexpected.add(`${u.origin}${u.pathname}`);
   return json({}, 404);
@@ -391,7 +428,7 @@ export const FREEZE_ANIMATIONS = `(() => {
 })()`;
 
 /** One full-page screenshot under the deterministic conditions; returns { png, width, height, unexpected }. */
-async function shoot(b, origin, dist, path, width) {
+async function shoot(b, origin, dist, path, width, opts = {}) {
   const { browserContextId } = await b.send('Target.createBrowserContext', { disposeOnDetach: true });
   const { targetId } = await b.send('Target.createTarget', { url: 'about:blank', browserContextId });
   const { sessionId } = await b.send('Target.attachToTarget', { targetId, flatten: true });
@@ -465,6 +502,11 @@ async function shoot(b, origin, dist, path, width) {
     await idle();
     await ev(`Promise.all([...document.images].map((i) => i.complete ? 0 : new Promise((r) => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); setTimeout(r, 5000); }))).then(() => true)`);
     await idle();
+    if (opts.ready && !(await ev(waitFor(opts.ready)))) throw new Error(`the fixture did not render ${opts.ready} on ${path}`);
+    for (const step of opts.setup ?? []) {
+      if (!(await ev(step))) throw new Error(`setup step failed on ${path}: ${step.slice(0, 120)}`);
+      await idle();
+    }
     await ev(`(() => { scrollTo({ top: 0, behavior: 'instant' }); return true; })()`);
     await ev(FREEZE_ANIMATIONS);
     if (MASKS.length) await ev(`(() => { const st = document.createElement('style'); st.textContent = ${JSON.stringify(`${MASKS.join(',')}{visibility:hidden!important}`)}; document.head.appendChild(st); return true; })()`);
@@ -551,15 +593,15 @@ async function capture(outDir, dist) {
       tolerance: TOLERANCE,
       images: {},
     };
-    for (const [name, path] of PAGES)
+    for (const [name, path, opts] of PAGES)
       for (const width of WIDTHS) {
         const id = `${name}@${width}`;
         try {
-          const r = await shoot(b, origin, dist, path, width);
+          const r = await shoot(b, origin, dist, path, width, opts);
           const file = `${id}.png`;
           writeFileSync(join(outDir, file), r.png);
           const img = decodePng(r.png);
-          manifest.images[id] = { path, file, width: img.width, height: img.height, sha256: sha(r.png), unexpectedRequests: r.unexpected };
+          manifest.images[id] = { path, setup: opts?.setup?.length ? opts.setup : undefined, file, width: img.width, height: img.height, sha256: sha(r.png), unexpectedRequests: r.unexpected };
           note(`capture ${id}`, `${img.width}x${img.height}${r.unexpected.length ? ` (${r.unexpected.length} unexpected request(s) answered 404, listed in the manifest)` : ''}`);
         } catch (e) {
           check(`capture ${id}`, [String(e?.message ?? e)]);

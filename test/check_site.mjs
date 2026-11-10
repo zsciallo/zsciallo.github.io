@@ -2752,6 +2752,31 @@ function cardNoFrost(dist) {
   return [...new Set(problems)];
 }
 
+/**
+ * U8 r2 (U9 review L1): a :has() selector never shares a selector list with a
+ * selector that does not need :has(). A browser without :has() (Firefox < 121,
+ * Safari < 15.4) drops the whole rule when one selector in the list is
+ * invalid, so `.faq-item:hover, .faq-item:has(.faq-question:focus-visible)`
+ * loses the hover fill there too. A selector "needs :has()" when its text
+ * contains ":has(" anywhere (also inside :not()/:is()). Rules nested in
+ * `@supports selector(:has(...))` are exempt: a browser without :has() skips
+ * that block as a whole anyway. Splitting the list into one rule per selector,
+ * in place, keeps the cascade (same specificity, same order).
+ */
+function cssHasIsolated(dist) {
+  const css = builtCss(dist);
+  if (css == null) return []; // card-tokens' and card-no-frost's failure
+  const problems = [];
+  for (const r of cssRules(css)) {
+    if (/selector\(\s*:has\(/.test(r.at)) continue;
+    const has = r.selectors.filter((s) => s.includes(':has('));
+    const plain = r.selectors.filter((s) => !s.includes(':has('));
+    if (has.length && plain.length)
+      problems.push(`${q(plain.join(','))} shares a selector list with ${q(has.join(','))}${r.at ? ` (${r.at})` : ''}: without :has() support the whole rule is dropped; give the :has() selector its own rule`);
+  }
+  return [...new Set(problems)];
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -2814,6 +2839,8 @@ export const CHECKS = [
   // U9: card surface restyle (static half; test/card_style_check.mjs renders)
   ['card-tokens', cardTokens],
   ['card-no-frost', cardNoFrost],
+  // U8 round 2: carried over from the U9 review (L1)
+  ['css-has-isolated', cssHasIsolated],
 ];
 
 // -------------------------------------------------------------------- main --
