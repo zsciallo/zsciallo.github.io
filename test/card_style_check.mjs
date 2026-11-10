@@ -264,8 +264,6 @@ export const CARDS = [
   { sel: '.store-item', kind: 'inset', states: ['store-crate'], note: 'reward tiles in the package modal (a modal\'s inner card surfaces)' },
   { sel: '.store-kit', kind: 'inset', states: ['store-rank'], note: 'kit panels in the rank modal' },
   { sel: '.store-table-wrap', kind: 'inset', states: ['store-table'], note: 'table panel in the package modal' },
-  // Round 3: the free-key progress panel inside the cart drawer (a drawer's inner card surface, as in the package modals).
-  { sel: '.cart-keys', kind: 'inset', states: ['store-cart'], note: 'the free Chroma Key progress panel in the cart drawer' },
   // /auctions/
   { sel: '.market-table', kind: 'card', states: ['auctions'], note: 'the item table' },
   { sel: '.stat-row', kind: 'card', states: ['auctions-item', 'auctions-pool', 'auctions-markets', 'auctions-futures'], note: 'stat tile rows' },
@@ -316,6 +314,8 @@ export const ALLOW = [
   { sel: '.detail-ench li, .detail-contents li', note: 'enchant and contents chips on an auction item (owner: chips, not cards)' },
   { sel: '.slot-window', note: 'the reel windows of the key-roll slot machine (machine art inside the cabinet chrome)' },
   { sel: '.cart-keys-bar, .cart-keys-bar *', note: 'the free-key progress bar and its fill (a meter, not a box)' },
+  // Round 4 ruling (Q1): the free-key progress panel keeps its amber wash and border (information on the revenue path).
+  { sel: '.cart-keys', note: "promo callout, owner's store (the free Chroma Key progress panel in the cart drawer); guarded unchanged" },
   { sel: '.beta-tag, .tier-chip, .pvp-ed, .pvp-tier, .status-badge, .store-rarity-count, .store-promo-tag, .store-cmd, .store-kit-command, .rank-step, .rank-tag, .market-tag, .futures-badge, .pkg-freekey-chip, .cart-fab-badge, .deal-badge', note: 'badges and chips (owner: chips, not cards)' },
   { sel: '.pvp-rung', note: 'tier rungs (owner kept)' },
   { sel: 'tr[data-top]', note: 'top-3 leaderboard row tints (owner kept)' },
@@ -363,6 +363,8 @@ export const GUARD = [
   // --snapshot-guard --add (existing entries untouched).
   { sel: '.type-option', states: ['store-type'], note: 'purchase-type choice (a control: keeps its border, edge and fill)' },
   { sel: '.store-tooltip', states: ['store-crate-open'], note: 'Minecraft-style item tooltip (keeps its border)' },
+  // Round 4 ruling (Q1): allowlisted promo callout, kept as it is.
+  { sel: '.cart-keys', states: ['store-cart'], note: 'free-key progress panel in the cart drawer (promo callout)' },
 ].map((g) => ({ ...g, props: GUARD_PROPS }));
 
 /**
@@ -1277,6 +1279,19 @@ async function selfTest(dist) {
         h = await hoverProblems(page, 1280);
         const nofill = items(h.focus, '.pkg-card');
         check('self store: focus with the ring but no hover fill fails focus', nofill.length && nofill.every((x) => x.startsWith('background-color')) ? [] : [`focus: ${nofill.join(' | ') || 'none'}`]);
+      } finally {
+        await page.close();
+      }
+    }
+    {
+      // Round 4: the .cart-keys allowance covers that panel only; another bordered box in the drawer is still flagged.
+      const page = await openState(b, origin, st('store'), 1280);
+      try {
+        await page.ev("(() => { const d = document.querySelector('.cart-drawer'); if (!d) return false; const t = document.createElement('template'); t.innerHTML = '<div class=\"planted-drawer-box\" style=\"border:1px solid #2a1e44;border-radius:8px;background:rgba(255,210,122,.06);padding:12px\">box</div><div class=\"cart-keys planted-drawer-keys\" style=\"border:1px solid #2a1e44;border-radius:8px;padding:12px\">keys</div>'; d.append(...t.content.children); return true; })()");
+        await page.ev(FREEZE_ANIMATIONS);
+        const r = await page.ev(INSPECT(cfgFor(1280, true)));
+        check('self a plain bordered box inside the cart drawer (not .cart-keys) fails completeness', r.complete.some((c) => c.label.includes('planted-drawer-box')) ? [] : ['not flagged']);
+        check('self a .cart-keys panel in the drawer is excused as a promo callout', !r.complete.some((c) => c.label.includes('planted-drawer-keys')) && r.excused.some((e) => e.allow === '.cart-keys' && e.label.includes('planted-drawer-keys')) ? [] : ['not excused by the .cart-keys entry']);
       } finally {
         await page.close();
       }
