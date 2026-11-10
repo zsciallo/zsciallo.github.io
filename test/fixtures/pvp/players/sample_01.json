@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "key": "sample_01",
+  "name": "Sample_01",
+  "edition": "java",
+  "uuid": "00000000-0000-4000-8000-000000000001",
+  "best": {"tier": "Chroma", "division": null, "rating": 1987, "overallRank": 1},
+  "kits": [
+    {"key": "sword", "label": "Sword", "placed": true, "rating": 1987, "tier": "Chroma", "division": null, "peak": 2004, "wins": 40, "losses": 12, "streak": 5, "rank": 3},
+    {"key": "mace", "label": "Mace", "placed": true, "rating": 1702, "tier": "Emerald", "division": "III", "peak": 1755, "wins": 18, "losses": 9, "streak": 0, "rank": 2}
+  ],
+  "career": {"kills": 1234, "deaths": 987, "bestStreak": 12, "tournamentWins": 3},
+  "recent": [
+    {"at": "2026-11-09T22:50:00.000Z", "kit": "sword", "result": "win", "ratingChange": 11, "opponent": {"name": ".Sample_02", "edition": "bedrock", "key": "b-sample_02"}},
+    {"at": "2026-11-09T22:40:00.000Z", "kit": "mace", "result": "loss", "ratingChange": -13, "opponent": {"name": "Sample_03", "edition": "java", "key": "sample_03"}},
+    {"at": "2026-11-09T22:30:00.000Z", "kit": "sword", "result": "draw", "ratingChange": 0, "opponent": {"name": "Sample_12", "edition": "java", "key": null}},
+    {"at": "2026-11-09T22:20:00.000Z", "kit": "mace", "result": "win", "ratingChange": null, "opponent": {"name": null, "edition": "java", "key": null}}
+  ]
+}

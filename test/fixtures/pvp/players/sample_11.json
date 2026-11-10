@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-11-09T23:00:00.000Z",
+  "seasonId": 1,
+  "key": "sample_11",
+  "name": "Sample_11",
+  "edition": "java",
+  "uuid": "00000000-0000-4000-8000-000000000011",
+  "best": {"tier": "Silver", "division": "III", "rating": 1520, "overallRank": 12},
+  "kits": [
+    {"key": "sword", "label": "Sword", "placed": true, "rating": 1520, "tier": "Silver", "division": "III", "peak": 1588, "wins": 12, "losses": 10, "streak": 2, "rank": 9}
+  ],
+  "career": {"kills": 2048, "deaths": 1999, "bestStreak": 4, "tournamentWins": 0},
+  "recent": []
+}

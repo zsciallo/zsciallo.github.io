@@ -182,7 +182,7 @@ const PVP_TABS =
   '<button type="button" data-board-tab="tournament" aria-pressed="false">TOURNAMENT WINS</button></div>';
 const PVP_EMPTY = '<p class="board-empty" data-board-empty>No ranked players yet. Play 10 placement matches to appear here.</p>';
 const PVP_NOTE = '<p class="board-note">Updates every minute. Players appear after 10 placement matches.</p>';
-const PVP_BOARD = `<section class="board" data-board>${PVP_TABS}${PVP_EMPTY}${PVP_NOTE}</section>`;
+
 const TIER_ROWS = [['Tin', 'START'], ['Bronze', '1350'], ['Silver', '1500'], ['Gold', '1600'], ['Emerald', '1700'], ['Mithril', '1800'], ['Chroma', '1950']];
 const PVP_TIERS =
   '<section class="tiers" data-tiers><h2>SEVEN TIERS</h2><ol>' +
@@ -212,7 +212,25 @@ const PVP_MODES =
 const PVP_JOIN =
   '<section class="pvp-join"><p>Connect to <span class="accent">play.chromabit.us</span> and pick Kit PVP in the hub.</p>' +
   '<button type="button" class="pvp-copy" data-copy-ip>COPY IP</button></section>';
+// U7: the player search block, hidden in the prerender, above the board table.
+const PVP_SEARCH =
+  '<div class="player-search" data-player-search hidden><label for="player-q">FIND A PLAYER</label>' +
+  '<input id="player-q" type="search" autocomplete="off" maxlength="20"><ul class="search-results" data-search-results></ul></div>';
+// U7: the search block sits inside the board section, above the tabs (so the U4 mutation strings stay unchanged).
+const PVP_BOARD = `<section class="board" data-board>${PVP_SEARCH}${PVP_TABS}${PVP_EMPTY}${PVP_NOTE}</section>`;
 const PVP_BODY = `${PVP_NAV}<main>${PVP_MAST}${PVP_BOARD}${PVP_TIERS}${PVP_FACTS}${PVP_MODES}${PVP_JOIN}</main>${FOOTER}`;
+// U7: the /pvp/player/ shell as the spec describes it (loading state, no player data).
+const PLAYER_TITLE = 'Player | Chromabit';
+const PLAYER_ROBOTS = '<meta name="robots" content="noindex,follow">';
+const PLAYER_EYEBROW = '<p class="section-eyebrow">CHROMAPVP &middot; PLAYER <span class="beta-tag">BETA</span></p>';
+const PLAYER_H1 = '<h1 class="hero-title">PLAYER</h1>';
+const PLAYER_BACK = '<a class="profile-back" href="/pvp/">ALL LEADERBOARDS</a>';
+const PLAYER_STATE = '<p class="profile-state" data-profile-state>Loading player.</p>';
+const PLAYER_MAST =
+  `<section class="page-hero profile-hero">${PLAYER_EYEBROW}` +
+  `<div class="profile-name"><img class="profile-head" src="/assets/pvp-default-head.svg" alt="" width="64" height="64">${PLAYER_H1}</div>` +
+  `<p class="profile-best" data-profile-best hidden></p>${PLAYER_BACK}</section>`;
+const PLAYER_BODY = `${PVP_NAV}<main>${PLAYER_MAST}${PLAYER_STATE}</main>${FOOTER}`;
 const SITEMAP =
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   '  <url><loc>https://chromabit.us/</loc></url>\n  <url><loc>https://chromabit.us/pvp/</loc></url>\n</urlset>\n';
@@ -282,6 +300,7 @@ function goodSite() {
       headFor(PVP_TITLE, `<meta name="description" content="${PVP_DESC}">\n  <meta name="twitter:title" content="${PVP_TITLE}">\n  ${PVP_CANON}`),
       PVP_BODY,
     ),
+    'pvp/player/index.html': htmlPage(headFor(PLAYER_TITLE, `${PLAYER_ROBOTS}\n  ${PVP_CANON}`), PLAYER_BODY),
     'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
   };
@@ -413,6 +432,12 @@ try {
       'faq-network-answers',
       'faq-unchanged',
       'faq-jsonld-sync',
+      // U7
+      'player-shell',
+      'player-not-in-sitemap',
+      'player-nav',
+      'player-internal-links',
+      'pvp-search-shell',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -1264,6 +1289,119 @@ ${r.out}`);
     site['faq/index.html'] = site['faq/index.html'].replace('</head>', `<script type="application/ld+json">${LD_FAQ}</script>\n</head>`);
     expectFail('U5-AC4 two FAQPage blocks', site, 'faq-jsonld-sync', '/faq/ has 2 JSON-LD FAQPage nodes, want 1');
   }
+
+  // ===================================================================== U7 ==
+  const PL = 'pvp/player/index.html';
+  const plMut = (from, to) => mutate(PL, from, to);
+  const passes = (name, site) => {
+    const r = runOn(site);
+    check(name, r.code === 0, `exit ${r.code}:\n${r.out}`);
+  };
+
+  // U7 player-shell
+  expectFails('U7 profile page missing', { ...goodSite(), [PL]: null }, {
+    'player-shell': '/pvp/player/ missing (pvp/player/index.html)',
+    'player-nav': '/pvp/player/ missing',
+    'player-internal-links': '/pvp/player/ missing',
+  });
+  expectFail('U7 profile shell not prerendered', plMut(`<div id="app">${PLAYER_BODY}</div>`, `<div id="app"></div>${PLAYER_BODY}`), 'player-shell', '/pvp/player/ <div id="app"> is empty');
+  expectFail('U7 profile title', plMut(`<title>${PLAYER_TITLE}</title>`, '<title>Player Profile | Chromabit</title>'), 'player-shell', '/pvp/player/ title is "Player Profile | Chromabit"');
+  expectFail('U7 profile robots missing', plMut(PLAYER_ROBOTS, ''), 'player-shell', '/pvp/player/ has 0 robots metas, want 1');
+  expectFail('U7 profile robots index', plMut(PLAYER_ROBOTS, '<meta name="robots" content="index, follow">'), 'player-shell', '/pvp/player/ robots is "index, follow"');
+  expectFail('U7 profile robots nofollow', plMut(PLAYER_ROBOTS, '<meta name="robots" content="noindex,nofollow">'), 'player-shell', '/pvp/player/ robots is "noindex,nofollow"');
+  expectFail('U7 profile two robots metas', plMut(PLAYER_ROBOTS, `${PLAYER_ROBOTS}<meta name="robots" content="index">`), 'player-shell', '/pvp/player/ has 2 robots metas');
+  passes('U7 profile robots "noindex, follow" (space) passes', plMut(PLAYER_ROBOTS, '<meta name="robots" content="noindex, follow">'));
+  expectFail('U7 profile canonical to itself', plMut(PVP_CANON, '<link rel="canonical" href="https://chromabit.us/pvp/player/">'), 'player-shell', '/pvp/player/ canonical is "https://chromabit.us/pvp/player/"');
+  expectFail('U7 profile canonical missing', plMut(PVP_CANON, ''), 'player-shell', '/pvp/player/ has 0 <link rel="canonical">');
+  expectFail('U7 profile og:site_name', plMut(`<meta property="og:site_name" content="${NET}">`, '<meta property="og:site_name" content="Chromabit">'), 'player-shell', '/pvp/player/ og:site_name is "Chromabit"');
+  expectFail('U7 profile author missing', plMut(`<meta name="author" content="${NET}">`, ''), 'player-shell', '/pvp/player/ has no author');
+  expectFail('U7 profile JSON-LD broken', plMut('</head>', '<script type="application/ld+json">{nope</script>\n</head>'), 'player-shell', '/pvp/player/ JSON-LD block 1 does not parse');
+  expectFail('U7 profile h1 text', plMut(PLAYER_H1, '<h1 class="hero-title">LOADING</h1>'), 'player-shell', '/pvp/player/ <h1> text is "LOADING", want "PLAYER"');
+  expectFail('U7 profile two h1', plMut(PLAYER_H1, `${PLAYER_H1}<h1>PLAYER</h1>`), 'player-shell', '/pvp/player/ has 2 <h1>, want 1');
+  expectFail('U7 profile no h1', plMut(PLAYER_H1, '<h2>PLAYER</h2>'), 'player-shell', '/pvp/player/ has 0 <h1>, want 1');
+  expectFail('U7 profile eyebrow text', plMut('CHROMAPVP &middot; PLAYER <span', 'CHROMAPVP &middot; PROFILE <span'), 'player-shell', '/pvp/player/ has no eyebrow "CHROMAPVP · PLAYER"');
+  expectFail('U7 profile eyebrow without BETA', plMut(' <span class="beta-tag">BETA</span></p>', '</p>'), 'player-shell', '/pvp/player/ has 0 .beta-tag, want 1');
+  expectFail('U7 profile BETA outside the eyebrow', plMut(' <span class="beta-tag">BETA</span></p>', '</p><span class="beta-tag">BETA</span>'), 'player-shell', 'eyebrow "CHROMAPVP · PLAYER" has no .beta-tag inside it');
+  expectFail('U7 profile two BETA tags', plMut(PLAYER_STATE, `${PLAYER_STATE}<span class="beta-tag">BETA</span>`), 'player-shell', '/pvp/player/ has 2 .beta-tag, want 1');
+  expectFail('U7 profile BETA tag text', plMut('<span class="beta-tag">BETA</span>', '<span class="beta-tag">NEW</span>'), 'player-shell', 'eyebrow .beta-tag text is "NEW"');
+  {
+    const site = plMut(`${PLAYER_EYEBROW}<div class="profile-name">`, '<div class="profile-name">');
+    expectFail('U7 profile eyebrow after the h1', edit(site, PL, PLAYER_STATE, `${PLAYER_STATE}${PLAYER_EYEBROW}`), 'player-shell', '/pvp/player/ eyebrow comes after the <h1>');
+  }
+  expectFail('U7 profile state missing', plMut(PLAYER_STATE, '<p>Loading player.</p>'), 'player-shell', '/pvp/player/ has 0 [data-profile-state], want 1');
+  expectFail('U7 profile state hidden', plMut('data-profile-state>', 'data-profile-state hidden>'), 'player-shell', '/pvp/player/ [data-profile-state] is hidden');
+  expectFail('U7 profile state inside a hidden wrapper', plMut(PLAYER_STATE, `<div hidden>${PLAYER_STATE}</div>`), 'player-shell', '/pvp/player/ [data-profile-state] is hidden');
+  expectFail('U7 profile state text', plMut('>Loading player.<', '>Loading...<'), 'player-shell', 'want an element with "Loading player."');
+  expectFail('U7 profile two state elements', plMut(PLAYER_STATE, `${PLAYER_STATE}${PLAYER_STATE}`), 'player-shell', '/pvp/player/ has 2 [data-profile-state], want 1');
+  passes('U7 profile state text in a child element passes', plMut(PLAYER_STATE, '<div class="profile-state" data-profile-state><p>Loading player.</p></div>'));
+  expectFail('U7 profile shell shows the not-ranked text', plMut(PLAYER_STATE, `${PLAYER_STATE}<p>Not ranked this season.</p>`), 'player-shell', 'prerendered shell shows "Not ranked this season."');
+  expectFail('U7 profile shell shows the unavailable text', plMut(PLAYER_STATE, `${PLAYER_STATE}<p>Player data is unavailable right now.</p>`), 'player-shell', 'prerendered shell shows "Player data is unavailable right now."');
+  passes('U7 profile shell may carry the other states hidden', plMut(PLAYER_STATE, `${PLAYER_STATE}<p hidden>Not ranked this season.</p><div hidden><p>Player data is unavailable right now.</p></div>`));
+  expectFail('U7 profile back link missing', plMut(PLAYER_BACK, ''), 'player-shell', 'has no back link <a href="/pvp/">ALL LEADERBOARDS</a>');
+  expectFail('U7 profile back link text', plMut(PLAYER_BACK, '<a href="/pvp/">BACK</a>'), 'player-shell', 'has no back link');
+  expectFail('U7 profile back link href', plMut(PLAYER_BACK, '<a href="/">ALL LEADERBOARDS</a>'), 'player-shell', 'has no back link');
+  expectFail('U7 profile back link hidden', plMut(PLAYER_BACK, '<a href="/pvp/" hidden>ALL LEADERBOARDS</a>'), 'player-shell', '/pvp/player/ back link "ALL LEADERBOARDS" is hidden');
+  expectFails('U7 profile back link only in the footer', edit(plMut(PLAYER_BACK, ''), PL, '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/pvp/">PVP</a><a href="/pvp/">ALL LEADERBOARDS</a><a href="/smp/">'), {
+    'player-shell': 'has no back link',
+    'player-nav': '/pvp/player/ footer has 2 links to /pvp/',
+  });
+  for (const [attr, html] of [
+    ['data-kit', '<article data-kit="sword"><h3>Sword</h3></article>'],
+    ['data-career', '<section data-career><p>0 kills</p></section>'],
+    ['data-recent', '<section data-recent><h2>RECENT RANKED</h2></section>'],
+    ['data-recent-row', '<table><tbody><tr data-recent-row><td>WIN</td></tr></tbody></table>'],
+  ])
+    expectFail(`U7 profile shell shows [${attr}]`, plMut(PLAYER_STATE, `${PLAYER_STATE}${html}`), 'player-shell', `prerendered shell shows 1 [${attr}]`);
+  passes('U7 profile shell may carry hidden data blocks', plMut(PLAYER_STATE, `${PLAYER_STATE}<section data-career hidden></section><div hidden><article data-kit="sword"></article><section data-recent></section></div>`));
+  expectFail('U7 profile shell with sample data', plMut(PLAYER_STATE, `${PLAYER_STATE}<p hidden>Sample_01</p>`), 'player-shell', '/pvp/player/ contains sample data ("Sample_")');
+  expectFail('U7 profile shell with the fixture base', plMut('</head>', '<meta name="x-feed" content="/pvp-fixture">\n</head>'), 'player-shell', '/pvp/player/ contains "/pvp-fixture"');
+
+  // U7 player-not-in-sitemap
+  const withLoc = (loc) => ({ ...goodSite(), 'sitemap.xml': SITEMAP.replace('</urlset>', `  <url><loc>${loc}</loc></url>\n</urlset>`) });
+  expectFail('U7 sitemap lists the profile page', withLoc('https://chromabit.us/pvp/player/'), 'player-not-in-sitemap', 'dist/sitemap.xml lists the profile page');
+  expectFail('U7 sitemap lists a profile', withLoc('https://chromabit.us/pvp/player/?name=sample_01'), 'player-not-in-sitemap', 'dist/sitemap.xml lists the profile page');
+  // A missing sitemap stays sitemap-pvp's failure alone (the U4-AC9 "sitemap missing" case covers it).
+
+  // U7 player-nav
+  expectFail('U7 profile nav: PVP not current', plMut(PVP_NAV, NAV), 'player-nav', '/pvp/player/ nav aria-current="page" links are [], want ["/pvp/"]');
+  expectFail('U7 profile nav: HOME current too', plMut('<a href="/">HOME</a>', '<a href="/" aria-current="page">HOME</a>'), 'player-nav', 'links are ["/","/pvp/"]');
+  expectFail('U7 profile nav: STORE missing', plMut('<li><a href="/store/">STORE</a></li>', ''), 'player-nav', '/pvp/player/ nav links are');
+  expectFail('U7 profile nav: BETA marker', plMut('aria-current="page" class="active">PVP</a>', 'aria-current="page" class="active">PVP <span data-beta>BETA</span></a>'), 'player-nav', 'BETA marker');
+  expectFails('U7 profile nav: .beta-tag in the nav', plMut('aria-current="page" class="active">PVP</a>', 'aria-current="page" class="active">PVP</a><span class="beta-tag">BETA</span>'), {
+    'player-nav': 'BETA marker',
+    'player-shell': '/pvp/player/ has 2 .beta-tag',
+  });
+  expectFail('U7 profile nav missing', plMut(PVP_NAV, ''), 'player-nav', '/pvp/player/ has no nav <header>');
+  expectFail('U7 profile footer without PVP', plMut('<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/smp/">'), 'player-nav', '/pvp/player/ footer has 0 links to /pvp/');
+  expectFail('U7 profile footer missing', plMut(FOOTER, ''), 'player-nav', '/pvp/player/ has no <footer>');
+
+  // U7 player-internal-links
+  expectFail('U7 profile broken internal link', plMut(PLAYER_STATE, `${PLAYER_STATE}<a href="/pvp/players/">x</a>`), 'player-internal-links', '/pvp/player/ <a href="/pvp/players/"> does not resolve');
+  passes('U7 profile links with a query resolve', plMut(PLAYER_STATE, `${PLAYER_STATE}<a href="/pvp/?board=sword">x</a><a href="/pvp/player/?name=b-x">y</a>`));
+
+  // U7 pvp-search-shell
+  const PV = 'pvp/index.html';
+  const svMut = (from, to) => mutate(PV, from, to);
+  const BOARD_TABLE = '<table data-board-table><thead><tr><th>#</th></tr></thead><tbody></tbody></table>';
+  expectFail('U7 search block missing', svMut(PVP_SEARCH, ''), 'pvp-search-shell', '/pvp/ has 0 [data-player-search], want 1');
+  expectFail('U7 two search blocks', svMut(PVP_SEARCH, `${PVP_SEARCH}${PVP_SEARCH.replace(/player-q/g, 'player-q2')}`), 'pvp-search-shell', '/pvp/ has 2 [data-player-search], want 1');
+  expectFail('U7 search block not hidden', svMut('data-player-search hidden>', 'data-player-search>'), 'pvp-search-shell', 'has no hidden attribute in the prerendered HTML');
+  expectFail('U7 search block only inside a hidden wrapper', svMut(PVP_SEARCH, `<div hidden>${PVP_SEARCH.replace('data-player-search hidden>', 'data-player-search>')}</div>`), 'pvp-search-shell', 'has no hidden attribute');
+  passes('U7 search above the board table passes', svMut(PVP_EMPTY, `${BOARD_TABLE}${PVP_EMPTY}`));
+  expectFail('U7 search below the board table', edit(svMut(PVP_SEARCH, ''), PV, PVP_EMPTY, `${BOARD_TABLE}${PVP_SEARCH}${PVP_EMPTY}`), 'pvp-search-shell', 'comes after [data-board-table]');
+  expectFail('U7 search label text', svMut('>FIND A PLAYER<', '>Find a player<'), 'pvp-search-shell', '/pvp/ search <label> text is "Find a player", want "FIND A PLAYER"');
+  expectFail('U7 search label missing', svMut('<label for="player-q">FIND A PLAYER</label>', '<span>FIND A PLAYER</span>'), 'pvp-search-shell', '/pvp/ [data-player-search] has 0 <label>, want 1');
+  expectFail('U7 search label not tied', svMut('<label for="player-q">', '<label for="other">'), 'pvp-search-shell', 'is not tied to the <input>');
+  passes('U7 search input inside its label passes', svMut('<label for="player-q">FIND A PLAYER</label><input id="player-q" type="search" autocomplete="off" maxlength="20">', '<label>FIND A PLAYER <input type="search" autocomplete="off" maxlength="20"></label>'));
+  expectFail('U7 search input type', svMut('type="search"', 'type="text"'), 'pvp-search-shell', 'search <input> type is "text", want "search"');
+  expectFail('U7 search input autocomplete missing', svMut(' autocomplete="off"', ''), 'pvp-search-shell', 'search <input> autocomplete is null, want "off"');
+  expectFail('U7 search input maxlength', svMut('maxlength="20"', 'maxlength="16"'), 'pvp-search-shell', 'search <input> maxlength is "16", want "20"');
+  expectFail('U7 search two inputs', svMut('maxlength="20">', 'maxlength="20"><input type="hidden" name="x">'), 'pvp-search-shell', 'has 2 <input>, want 1');
+  expectFail('U7 search results list missing', svMut('<ul class="search-results" data-search-results></ul>', '<ul></ul>'), 'pvp-search-shell', 'has 0 [data-search-results], want 1');
+  expectFail('U7 search results list outside the block', edit(svMut('<ul class="search-results" data-search-results></ul>', ''), PV, '<div class="board-tabs"', '<ul data-search-results></ul><div class="board-tabs"'), 'pvp-search-shell', 'has 0 [data-search-results], want 1');
+  expectFail('U7 search prerendered with a result', svMut('data-search-results></ul>', 'data-search-results><li><a data-search-result href="/pvp/player/?name=x">x</a></li></ul>'), 'pvp-search-shell', '/pvp/ prerendered HTML has 1 [data-search-result], want 0');
+  expectFail('U7 search prerendered with a plain link', svMut('data-search-results></ul>', 'data-search-results><li><a href="/pvp/">x</a></li></ul>'), 'pvp-search-shell', 'prerendered [data-search-results] contains links');
+  expectFail('U7 no-match text shown with an empty query', svMut(PVP_SEARCH, `${PVP_SEARCH}<p>No ranked player by that name.</p>`), 'pvp-search-shell', 'shows "No ranked player by that name." with an empty query');
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

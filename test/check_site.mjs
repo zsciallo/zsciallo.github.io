@@ -49,7 +49,13 @@ export const PAGES = {
  */
 export const PVP_PAGES = { '/pvp/': 'pvp/index.html' };
 export const ALL_ROUTES = [...Object.keys(PAGES), ...Object.keys(PVP_PAGES)];
-const fileOf = (route) => PAGES[route] ?? PVP_PAGES[route];
+/**
+ * U7: the profile shell. Kept out of PAGES and ALL_ROUTES on purpose (as U4
+ * did for /pvp/) so every earlier check keeps exactly its scope; the U7 checks
+ * read it through fileOf and check its head, nav and links themselves.
+ */
+export const PLAYER_PAGES = { '/pvp/player/': 'pvp/player/index.html' };
+const fileOf = (route) => PAGES[route] ?? PVP_PAGES[route] ?? PLAYER_PAGES[route];
 
 export const HOME = {
   title: 'Chromabit Network | Ranked PVP and Economy SMP for Java + Bedrock',
@@ -1535,6 +1541,225 @@ function faqJsonLdSync(dist) {
   });
 }
 
+// ----------------------------------- U7: player search and the profile page --
+//
+// Hooks (the contract with the implementer):
+//   /pvp/player/  [data-profile-state] (the loading / not-ranked / unavailable
+//                 text), [data-edition], [data-profile-best], [data-kit="<key>"],
+//                 [data-career], [data-recent], [data-recent-row], .beta-tag in
+//                 the eyebrow, and a back link <a href="/pvp/">ALL LEADERBOARDS</a>
+//                 outside the nav <header> and the <footer>.
+//   /pvp/         [data-player-search] holding a <label> and its <input>, and
+//                 [data-search-results] with [data-search-result] links.
+// The prerendered /pvp/player/ is the loading shell: no player data at all.
+// Texts compare as U3/U4 (textOf: entities decoded, curly quotes straightened,
+// whitespace incl. nbsp collapsed and trimmed, case-sensitive); the eyebrow is
+// compared without its BETA tag. "Hidden" is the HTML `hidden` attribute on
+// the element or on any ancestor.
+
+export const PLAYER = {
+  route: '/pvp/player/',
+  title: 'Player | Chromabit',
+  /** Compared with whitespace removed and lower-cased, so "noindex, follow" also passes. */
+  robots: 'noindex,follow',
+  canonical: 'https://chromabit.us/pvp/',
+  eyebrow: 'CHROMAPVP · PLAYER',
+  h1: 'PLAYER',
+  loading: 'Loading player.',
+  /** State texts that must not show in the prerendered shell. */
+  otherStates: ['Not ranked this season.', 'Player data is unavailable right now.'],
+  back: ['/pvp/', 'ALL LEADERBOARDS'],
+  /** Blocks that only exist once a player has loaded: absent or hidden in the shell. */
+  dataBlocks: ['data-kit', 'data-career', 'data-recent', 'data-recent-row'],
+  sitemapNeedle: 'chromabit.us/pvp/player',
+};
+
+export const PLAYER_SEARCH = {
+  label: 'FIND A PLAYER',
+  input: { type: 'search', autocomplete: 'off', maxlength: '20' },
+  noMatch: 'No ranked player by that name.',
+};
+
+const hiddenUp = (el) => {
+  for (let p = el; p; p = p.parent) if (p.attrs && 'hidden' in p.attrs) return true;
+  return false;
+};
+const onPlayer = (dist, fn) => eachPage([PLAYER.route], fn, dist);
+
+/** U7-A: the profile shell exists, is prerendered, has the spec'd head, masthead, loading state and back link, and no player data. */
+function playerShell(dist) {
+  return onPlayer(dist, (p) => {
+    const problems = [];
+    const r = PLAYER.route;
+    const at = p.html.search(/<div\s+id\s*=\s*["']app["'][^>]*>/i);
+    if (at < 0) problems.push(`${r} has no <div id="app">`);
+    else if (/^\s*<\/div>/i.test(p.html.slice(at).replace(/^<div[^>]*>/i, ''))) problems.push(`${r} <div id="app"> is empty (not prerendered)`);
+    problems.push(...expectTitle(p, PLAYER.title), ...expectMeta(p, 'og:site_name', NETWORK), ...expectMeta(p, 'author', NETWORK));
+    const robots = metaValues(p, 'robots');
+    if (robots.length !== 1) problems.push(`${r} has ${robots.length} robots metas, want 1`);
+    else if (robots[0].replace(/\s+/g, '').toLowerCase() !== PLAYER.robots) problems.push(`${r} robots is ${q(robots[0])}, want ${q(PLAYER.robots)}`);
+    const canon = [...p.head.matchAll(/<link\b[^>]*>/gi)]
+      .map((m) => parseAttrs(m[0]))
+      .filter((a) => (a.rel ?? '').toLowerCase().split(/\s+/).includes('canonical'));
+    if (canon.length !== 1) problems.push(`${r} has ${canon.length} <link rel="canonical">, want 1`);
+    else if (canon[0].href !== PLAYER.canonical) problems.push(`${r} canonical is ${q(canon[0].href)}, want ${q(PLAYER.canonical)}`);
+    p.jsonLd.forEach((raw, i) => {
+      try {
+        JSON.parse(raw);
+      } catch (e) {
+        problems.push(`${r} JSON-LD block ${i + 1} does not parse: ${e.message}`);
+      }
+    });
+
+    const root = dom(p);
+    const h1s = findAll(root, isTag('h1'));
+    if (h1s.length !== 1) problems.push(`${r} has ${h1s.length} <h1>, want 1`);
+    else if (textOf(h1s[0]) !== PLAYER.h1) problems.push(`${r} <h1> text is ${q(textOf(h1s[0]))}, want ${q(PLAYER.h1)}`);
+    const tags = findAll(root, hasClass('beta-tag'));
+    if (tags.length !== 1) problems.push(`${r} has ${tags.length} .beta-tag, want 1`);
+    const brows = withText(root, PLAYER.eyebrow, isBetaMarker).filter((el) => findAll(el, hasClass('beta-tag')).length);
+    if (brows.length !== 1) {
+      const loose = withText(root, PLAYER.eyebrow, isBetaMarker).length;
+      problems.push(loose ? `${r} eyebrow ${q(PLAYER.eyebrow)} has no .beta-tag inside it` : `${r} has no eyebrow ${q(PLAYER.eyebrow)} (text compared without the BETA tag)`);
+    } else {
+      const inner = findAll(brows[0], hasClass('beta-tag'));
+      if (inner.length === 1 && textOf(inner[0]) !== 'BETA') problems.push(`${r} eyebrow .beta-tag text is ${q(textOf(inner[0]))}, want "BETA"`);
+      if (h1s.length === 1 && brows[0].order > h1s[0].order) problems.push(`${r} eyebrow comes after the <h1>`);
+    }
+
+    const state = one(root, hasAttr('data-profile-state'), '[data-profile-state]', r);
+    if (typeof state === 'string') problems.push(state);
+    else {
+      if (hiddenUp(state)) problems.push(`${r} [data-profile-state] is hidden in the prerendered HTML`);
+      if (!hasTextIn(state, PLAYER.loading)) problems.push(`${r} [data-profile-state] text is ${q(textOf(state))}, want an element with ${q(PLAYER.loading)}`);
+    }
+    for (const other of PLAYER.otherStates) {
+      const shown = withText(root, other).filter((el) => !hiddenUp(el));
+      if (shown.length) problems.push(`${r} prerendered shell shows ${q(other)}`);
+    }
+
+    const nav = siteNav(p);
+    const footer = siteFooter(p);
+    const [backHref, backText] = PLAYER.back;
+    const backs = findAll(root, (el) => el.tag === 'a' && el.attrs.href === backHref && textOf(el) === backText).filter(
+      (a) => !(nav && inside(a, nav)) && !(footer && inside(a, footer)),
+    );
+    if (!backs.length) problems.push(`${r} has no back link <a href=${q(backHref)}>${backText}</a> outside the nav and footer`);
+    else if (backs.every(hiddenUp)) problems.push(`${r} back link ${q(backText)} is hidden`);
+
+    for (const attr of PLAYER.dataBlocks) {
+      const shown = findAll(root, hasAttr(attr)).filter((el) => !hiddenUp(el));
+      if (shown.length) problems.push(`${r} prerendered shell shows ${shown.length} [${attr}] (want none, or hidden)`);
+    }
+    if (p.html.includes(PVP.sampleMarker)) problems.push(`${r} contains sample data (${q(PVP.sampleMarker)})`);
+    if (p.html.includes(PVP.fixtureBase)) problems.push(`${r} contains ${q(PVP.fixtureBase)}`);
+    return problems;
+  });
+}
+
+/** Some element at or under `node` whose text is exactly `want`. */
+function hasTextIn(node, want) {
+  return textOf(node) === want || findAll(node, (el) => textOf(el) === want).length > 0;
+}
+
+/** U7-A: the profile page is not in dist/sitemap.xml (it is noindex). A missing sitemap is sitemap-pvp's failure, not this one's. */
+function playerNotInSitemap(dist) {
+  const file = join(dist, 'sitemap.xml');
+  if (!existsSync(file)) return [];
+  const locs = [...readFileSync(file, 'utf-8').matchAll(/<loc>\s*([^<]*?)\s*<\/loc>/g)].map((m) => decode(m[1]));
+  const hits = locs.filter((l) => l.includes(PLAYER.sitemapNeedle));
+  return hits.length ? [`dist/sitemap.xml lists the profile page: ${q(hits)}`] : [];
+}
+
+/** U7-A/D: /pvp/player/ nav is HOME PVP STORE AUCTIONS FAQ with PVP the only current link, no BETA marker in any nav, footer links PVP. */
+function playerNav(dist) {
+  return onPlayer(dist, (p) => {
+    const problems = [];
+    const r = p.route;
+    const nav = siteNav(p);
+    if (!nav) problems.push(`${r} has no nav <header>`);
+    else {
+      const links = findAll(nav, (el) => el.tag === 'a' && !hasClass('site-nav-brand')(el));
+      const got = links.map((a) => [a.attrs.href ?? '', textOf(a)]);
+      if (q(got) !== q(NAV_LINKS)) problems.push(`${r} nav links are ${q(got)}, want ${q(NAV_LINKS)}`);
+      const active = links.filter((a) => a.attrs['aria-current'] === 'page').map((a) => a.attrs.href);
+      if (active.join(',') !== '/pvp/') problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
+      const navs = [nav, ...findAll(dom(p), isTag('nav')).filter((n) => !inside(n, nav))];
+      const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
+      if (marks.length) problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0`);
+    }
+    const footer = siteFooter(p);
+    if (!footer) problems.push(`${r} has no <footer>`);
+    else {
+      const pvp = findAll(footer, (el) => el.tag === 'a' && el.attrs.href === '/pvp/');
+      if (pvp.length !== 1) problems.push(`${r} footer has ${pvp.length} links to /pvp/, want 1`);
+      else if (textOf(pvp[0]) !== 'PVP') problems.push(`${r} footer /pvp/ link label is ${q(textOf(pvp[0]))}, want "PVP"`);
+    }
+    return problems;
+  });
+}
+
+/** U7-D: every site-internal href on /pvp/player/ resolves to a file in dist (same rule as internal-links). */
+function playerInternalLinks(dist) {
+  return onPlayer(dist, (p) => {
+    const problems = [];
+    const seen = new Set();
+    for (const el of findAll(dom(p), (el) => typeof el.attrs.href === 'string')) {
+      const href = el.attrs.href.trim();
+      if (!href.startsWith('/') || href.startsWith('//') || seen.has(href)) continue;
+      seen.add(href);
+      let path = href.replace(/[?#].*$/, '');
+      try {
+        path = decodeURIComponent(path);
+      } catch {
+        problems.push(`${p.route} <${el.tag} href=${q(href)}> is not a valid URL path`);
+        continue;
+      }
+      const isFile = (f) => existsSync(f) && statSync(f).isFile();
+      const target = join(dist, path);
+      const ok = path.endsWith('/') ? isFile(join(target, 'index.html')) : isFile(target) || isFile(join(target, 'index.html'));
+      if (!ok) problems.push(`${p.route} <${el.tag} href=${q(href)}> does not resolve to a file in dist`);
+    }
+    return problems;
+  });
+}
+
+/** U7-B: the prerendered /pvp/ has the search block, hidden, above the board table, with its label, input and an empty results list. */
+function pvpSearchShell(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const root = dom(p);
+    const block = one(root, hasAttr('data-player-search'), '[data-player-search]', '/pvp/');
+    if (typeof block === 'string') return [block];
+    if (!('hidden' in block.attrs)) problems.push('/pvp/ [data-player-search] has no hidden attribute in the prerendered HTML (want hidden until players.json loads)');
+    const table = findAll(root, hasAttr('data-board-table'))[0];
+    if (table && block.order > table.order) problems.push('/pvp/ [data-player-search] comes after [data-board-table] (want it above the board)');
+    const labels = findAll(block, isTag('label'));
+    const inputs = findAll(block, isTag('input'));
+    if (labels.length !== 1) problems.push(`/pvp/ [data-player-search] has ${labels.length} <label>, want 1`);
+    else if (textOf(labels[0]) !== PLAYER_SEARCH.label) problems.push(`/pvp/ search <label> text is ${q(textOf(labels[0]))}, want ${q(PLAYER_SEARCH.label)}`);
+    if (inputs.length !== 1) problems.push(`/pvp/ [data-player-search] has ${inputs.length} <input>, want 1`);
+    else {
+      const [input] = inputs;
+      for (const [attr, want] of Object.entries(PLAYER_SEARCH.input))
+        if (input.attrs[attr] !== want) problems.push(`/pvp/ search <input> ${attr} is ${q(input.attrs[attr] ?? null)}, want ${q(want)}`);
+      if (labels.length === 1) {
+        const [label] = labels;
+        const linked = (label.attrs.for && label.attrs.for === input.attrs.id) || inside(input, label);
+        if (!linked) problems.push(`/pvp/ search <label> is not tied to the <input> (for=${q(label.attrs.for ?? null)}, input id=${q(input.attrs.id ?? null)}, and the input is not inside the label)`);
+      }
+    }
+    const results = findAll(block, hasAttr('data-search-results'));
+    if (results.length !== 1) problems.push(`/pvp/ [data-player-search] has ${results.length} [data-search-results], want 1`);
+    const items = findAll(root, hasAttr('data-search-result'));
+    if (items.length) problems.push(`/pvp/ prerendered HTML has ${items.length} [data-search-result], want 0`);
+    if (results.length === 1 && findAll(results[0], isTag('a')).length) problems.push('/pvp/ prerendered [data-search-results] contains links');
+    const noMatch = withText(root, PLAYER_SEARCH.noMatch).filter((el) => !hiddenUp(el));
+    if (noMatch.length) problems.push(`/pvp/ shows ${q(PLAYER_SEARCH.noMatch)} with an empty query`);
+    return problems;
+  });
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -1572,6 +1797,12 @@ export const CHECKS = [
   ['faq-network-answers', faqNetworkAnswers],
   ['faq-unchanged', faqUnchanged],
   ['faq-jsonld-sync', faqJsonLdSync],
+  // U7: player search and the profile page
+  ['player-shell', playerShell],
+  ['player-not-in-sitemap', playerNotInSitemap],
+  ['player-nav', playerNav],
+  ['player-internal-links', playerInternalLinks],
+  ['pvp-search-shell', pvpSearchShell],
 ];
 
 // -------------------------------------------------------------------- main --
