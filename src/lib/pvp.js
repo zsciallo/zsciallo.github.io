@@ -1,10 +1,14 @@
-// Client for the ChromaPVP ladder feed.
+// Client for the ChromaPVP ladder feed, and the pure view helpers the /pvp/
+// page renders from.
 //
 // The staff bot builds the documents from the arena database every minute
 // (discord-bot repo, pvp_tools/build_pvp_data.py, served by web/server.py as
 // /pvp/{season,boards,meta}.json). Unlike the market there is no static copy
 // in this repo, so a feed that is down or not deployed yet simply means no
 // ladder on the page: every call here resolves to null instead of throwing.
+//
+// This module has no imports and touches no browser globals at import time, so
+// plain Node can load it (test/pvp_lib.test.mjs).
 //
 // VITE_PVP_BASE overrides the origin at build time. Production builds never set
 // it; it exists so a local build can point at a fixture folder for screenshots
@@ -21,29 +25,181 @@ async function getJson(path) {
   }
 }
 
+const isObject = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
+
 /** boards.json, or null when the feed is unreachable or not a boards document. */
 export async function fetchBoards() {
   const doc = await getJson('/boards.json');
   return doc && Array.isArray(doc.boards) ? doc : null;
 }
 
+/** season.json, or null when the feed is unreachable or not an object. */
+export async function fetchSeason() {
+  const doc = await getJson('/season.json');
+  return isObject(doc) ? doc : null;
+}
+
 /** The rows of one board (`overall`, `sword`, ...), [] when it is missing or empty. */
 export function boardRows(doc, key) {
-  const board = doc?.boards?.find((b) => b?.key === key);
+  const board = feedBoard(doc, key);
   return Array.isArray(board?.rows) ? board.rows : [];
+}
+
+// ------------------------------------------------------------- the ladder --
+
+/**
+ * The ladder as the feed ships it (pvp_tools/ladder.json in the discord-bot
+ * repo). The page prerenders from this and swaps in `doc.ladder.tiers` once
+ * boards.json answers, so a ladder change shows up without a site build.
+ * Keep it in step with the --tier-* tokens in index.css.
+ */
+export const LADDER = Object.freeze([
+  { name: 'Tin', min: 0, colour: '#8A8F98' },
+  { name: 'Bronze', min: 1350, colour: '#CD7F32' },
+  { name: 'Silver', min: 1500, colour: '#C0C0C0' },
+  { name: 'Gold', min: 1600, colour: '#FFD700' },
+  { name: 'Emerald', min: 1700, colour: '#50C878' },
+  { name: 'Mithril', min: 1800, colour: '#FF77E9' },
+  { name: 'Chroma', min: 1950, colour: '#B24BF3' },
+]);
+
+const HEX = /^#[0-9a-f]{3,8}$/i;
+const hexOrNull = (colour) => (typeof colour === 'string' && HEX.test(colour) ? colour : null);
+
+/**
+ * The tier rungs to show: the feed's ladder when it has a usable one, else
+ * LADDER. Each is { name, min, minLabel, colour }; the lowest tier reads START.
+ */
+export function ladderTiers(doc) {
+  const feed = doc?.ladder?.tiers;
+  const usable = Array.isArray(feed) && feed.length > 0 && feed.every((t) => typeof t?.name === 'string' && Number.isFinite(t?.min));
+  const tiers = usable ? feed : LADDER;
+  return tiers.map((t, i) => ({
+    name: t.name,
+    min: t.min,
+    minLabel: i === 0 ? 'START' : String(t.min),
+    colour: hexOrNull(t.colour),
+  }));
 }
 
 // The seven tiers have colour tokens in index.css (--tier-tin ... --tier-chroma).
 const TIERS = new Set(['tin', 'bronze', 'silver', 'gold', 'emerald', 'mithril', 'chroma']);
-const HEX = /^#[0-9a-f]{3,8}$/i;
 
 /** CSS colour for a tier: the site's token for a known tier, else the feed's own hex, else null. */
 export function tierColour(tier, doc) {
   const name = String(tier ?? '').toLowerCase();
   if (TIERS.has(name)) return `var(--tier-${name})`;
-  const colour = doc?.ladder?.tiers?.find((t) => String(t?.name).toLowerCase() === name)?.colour;
-  return HEX.test(colour ?? '') ? colour : null;
+  return ladderHex(doc, name);
+}
+
+/** The ladder's hex for a tier name (case-insensitive), or null. */
+function ladderHex(doc, name) {
+  const tiers = doc?.ladder?.tiers;
+  if (!Array.isArray(tiers)) return null;
+  const want = String(name ?? '').toLowerCase();
+  return hexOrNull(tiers.find((t) => String(t?.name).toLowerCase() === want)?.colour);
 }
 
 /** "Mithril I", or just "Chroma" for the top tier, which has no division. */
 export const tierLabel = (row) => [row?.tier, row?.division].filter(Boolean).join(' ');
+
+// ------------------------------------------------------------- the boards --
+
+/** What the page shows before (or without) the feed: the six boards of season 1. */
+const DEFAULT_BOARDS = [
+  { key: 'overall', label: 'Overall' },
+  { key: 'sword', label: 'Sword' },
+  { key: 'mace', label: 'Mace' },
+  { key: 'axe', label: 'Axe', soon: true },
+  { key: 'chaos', label: 'Chaos', soon: true },
+  { key: 'tournament', label: 'Tournament Wins' },
+];
+
+const tabOf = (board) => {
+  const soon = board.soon === true;
+  return { key: board.key, label: `${String(board.label ?? board.key).toUpperCase()}${soon ? ' · SOON' : ''}`, soon };
+};
+
+/** The board tabs, in feed order; the six defaults when the feed has none. */
+export function tabList(doc) {
+  const boards = isObject(doc) && Array.isArray(doc.boards) ? doc.boards : [];
+  const tabs = boards.filter((b) => isObject(b) && typeof b.key === 'string').map(tabOf);
+  return tabs.length ? tabs : DEFAULT_BOARDS.map(tabOf);
+}
+
+/** `requested` when it names a live (not soon) tab, else 'overall'. */
+export function selectBoardKey(doc, requested) {
+  return tabList(doc).some((t) => t.key === requested && !t.soon) ? requested : 'overall';
+}
+
+function feedBoard(doc, key) {
+  const boards = isObject(doc) && Array.isArray(doc.boards) ? doc.boards : [];
+  return boards.find((b) => isObject(b) && b.key === key) ?? null;
+}
+
+const RATING_COLUMNS = ['#', 'PLAYER', 'TIER', 'RATING', 'W - L', 'WIN %'];
+const COUNT_COLUMNS = ['#', 'PLAYER', 'TOURNAMENTS WON'];
+
+/** One feed row as the table shows it. */
+function rowView(row, kind, doc) {
+  const edition = row.edition === 'bedrock' ? 'bedrock' : 'java';
+  const uuid = typeof row.uuid === 'string' && row.uuid ? row.uuid : null;
+  const base = {
+    rank: row.rank,
+    name: row.name,
+    edition,
+    // Bedrock skins need a different lookup; the page shows its default head.
+    headUrl: edition === 'java' && uuid ? `https://mc-heads.net/avatar/${encodeURIComponent(uuid)}/32` : null,
+    top: [1, 2, 3].includes(row.rank) ? row.rank : null,
+  };
+  if (kind === 'count') return { ...base, tier: null, rating: null, record: null, winPct: null, value: row.value };
+  const wins = Number(row.wins) || 0;
+  const losses = Number(row.losses) || 0;
+  const games = wins + losses;
+  return {
+    ...base,
+    tier: row.tier ? { label: tierLabel(row), colour: ladderHex(doc, row.tier) } : null,
+    rating: row.rating,
+    record: `${wins} - ${losses}`,
+    winPct: `${games ? Math.round((100 * wins) / games) : 0}%`,
+    value: null,
+  };
+}
+
+/** Everything the table needs for one board; empty rows when the feed lacks it. */
+export function boardView(doc, key) {
+  const tab = tabList(doc).find((t) => t.key === key);
+  const board = feedBoard(doc, key);
+  const kind = board ? (board.kind === 'count' ? 'count' : 'rating') : key === 'tournament' ? 'count' : 'rating';
+  const rows = Array.isArray(board?.rows) ? board.rows.filter(isObject).map((row) => rowView(row, kind, doc)) : [];
+  return {
+    key,
+    label: tab ? tab.label : String(key).toUpperCase(),
+    kind,
+    soon: tab ? tab.soon : false,
+    columns: [...(kind === 'count' ? COUNT_COLUMNS : RATING_COLUMNS)],
+    rows,
+  };
+}
+
+// ------------------------------------------------------------- the season --
+
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/** { name, endsIn } for the season strip, or null without a season. */
+export function seasonView(season, now) {
+  if (!isObject(season) || season.id == null) return null;
+  const at = now instanceof Date ? now.getTime() : Number(now);
+  const end = typeof season.endsAt === 'string' ? Date.parse(season.endsAt) : NaN;
+  const left = end - at;
+  let endsIn = null;
+  if (Number.isFinite(left) && left > 0) {
+    const d = Math.floor(left / DAY);
+    const h = Math.floor((left % DAY) / HOUR);
+    const m = Math.floor((left % HOUR) / MINUTE);
+    endsIn = d >= 1 ? `${d}d ${h}h` : h >= 1 ? `${h}h ${m}m` : `${m}m`;
+  }
+  return { name: season.name ?? '', endsIn };
+}

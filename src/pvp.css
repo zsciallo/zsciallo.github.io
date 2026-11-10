@@ -1,0 +1,653 @@
+/* ═══ /pvp/ (run 20261109-network-site, U4) ═════════════════════════════════
+   The ranked PVP page: masthead with the season strip, the leaderboard, the
+   tier ladder, four fact tiles, the six modes and the join block. Built from
+   the site's tokens, .card, .fact, .claim-band and the arcade buttons. Nothing
+   here moves on its own except the .reveal entrance; hover feedback is colour
+   only. 400px is the narrowest supported width: the table turns into two-line
+   grid rows below 600px instead of scrolling sideways. */
+
+/* ─── masthead ─── */
+.page-hero.pvp-hero {
+  padding-bottom: 2.2rem;
+}
+
+/* ON BOTH EDITIONS. is one unbreakable line: below the shared 3rem floor it
+   keeps shrinking, so it fits 360px phones as well as 400px ones. */
+.pvp-hero .hero-title {
+  font-size: clamp(2.25rem, 10.5vw, 6rem);
+}
+
+.pvp-sub {
+  max-width: 34rem;
+  font-size-adjust: none;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.pvp-season {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.pvp-season[hidden] {
+  display: none;
+}
+
+.pvp-season > span {
+  white-space: nowrap;
+}
+
+.pvp-season-name {
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.pvp-season b {
+  font-weight: 400;
+  color: var(--text);
+}
+
+/* ─── body ─── */
+.pvp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3.75rem;
+  padding: 0 2rem 4rem;
+}
+
+.pvp-section .section-title {
+  margin-bottom: 1.4rem;
+}
+
+/* ─── leaderboard ─── */
+.pvp-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.pvp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 0.6rem;
+  /* Room for the arcade edge under the buttons. */
+  padding-bottom: 7px;
+}
+
+.pvp-tab.btn-secondary {
+  color: var(--muted);
+}
+
+.pvp-tab.btn-secondary:not(:disabled):hover {
+  color: var(--text);
+}
+
+.pvp-board-card {
+  padding: 0.5rem;
+}
+
+.pvp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.pvp-table th {
+  padding: 0.35rem 0.7rem 0.45rem;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pvp-table td {
+  padding: 0.42rem 0.7rem;
+  border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.pvp-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pvp-table tbody tr {
+  transition: background-color 0.15s;
+}
+
+.pvp-table tbody tr:hover {
+  background-color: rgba(199, 125, 255, 0.05);
+}
+
+.pvp-table .pvp-c-rating,
+.pvp-table .pvp-c-rec,
+.pvp-table .pvp-c-pct,
+.pvp-table .pvp-c-value {
+  text-align: right;
+}
+
+.pvp-table td.pvp-c-rec,
+.pvp-table td.pvp-c-pct {
+  color: var(--muted);
+}
+
+.pvp-table .pvp-c-rank {
+  width: 3rem;
+}
+
+.pvp-table .pvp-c-player {
+  width: 100%;
+  max-width: 0;
+}
+
+/* Top three: a tint across the row and a medal-coloured rank. */
+.pvp-table tr[data-top='1'],
+.pvp-ghost[data-ghost='1'] {
+  --medal: var(--tier-gold);
+  background-image: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent 70%);
+}
+
+.pvp-table tr[data-top='2'],
+.pvp-ghost[data-ghost='2'] {
+  --medal: var(--tier-silver);
+  background-image: linear-gradient(90deg, rgba(192, 192, 192, 0.08), transparent 70%);
+}
+
+.pvp-table tr[data-top='3'],
+.pvp-ghost[data-ghost='3'] {
+  --medal: var(--tier-bronze);
+  background-image: linear-gradient(90deg, rgba(205, 127, 50, 0.09), transparent 70%);
+}
+
+.pvp-rank {
+  display: inline-block;
+  min-width: 1.7rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+[data-top] .pvp-rank,
+.pvp-ghost .pvp-rank {
+  border: 1px solid var(--medal);
+  border-radius: 4px;
+  color: var(--medal);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pvp-player {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+/* The default head is the frame's background: a Bedrock row shows it as its
+   own image, and a Java head that fails to load hides itself over it. */
+.pvp-head {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: url('./assets/pvp-default-head.svg') center / cover;
+  image-rendering: pixelated;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.pvp-head img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.pvp-who {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.pvp-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvp-ed {
+  flex: none;
+  padding: 0 0.4rem;
+  border: 1px solid;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+}
+
+.pvp-ed--java {
+  color: #5cb8ff;
+  border-color: rgba(92, 184, 255, 0.45);
+}
+
+.pvp-ed--bedrock {
+  color: #6fe39a;
+  border-color: rgba(111, 227, 154, 0.45);
+}
+
+.pvp-tier {
+  display: inline-block;
+  padding: 0 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pvp-tier--none {
+  border-color: transparent;
+  background: none;
+}
+
+/* ─── empty board ─── */
+.pvp-empty {
+  padding: 0.2rem 0 1.3rem;
+}
+
+.pvp-ghosts {
+  list-style: none;
+}
+
+.pvp-ghost {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+
+.pvp-ghost[data-ghost='2'] {
+  opacity: 0.75;
+}
+
+.pvp-ghost[data-ghost='3'] {
+  opacity: 0.5;
+}
+
+.pvp-ghost .pvp-rank {
+  margin-right: 0.6rem;
+}
+
+.pvp-ghost-head {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  background: rgba(164, 147, 196, 0.12);
+}
+
+.pvp-ghost-bar {
+  flex: 0 1 10rem;
+  height: 0.55rem;
+  border-radius: 2px;
+  background: rgba(164, 147, 196, 0.14);
+}
+
+.pvp-ghost-bar--short {
+  flex-basis: 3.5rem;
+  margin-left: auto;
+}
+
+.pvp-empty-text {
+  padding: 1.1rem 1rem 0;
+  font-size-adjust: none;
+  font-size: 1.2rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.pvp-note {
+  font-size-adjust: none;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+/* ─── tier ladder ─── */
+.pvp-ladder {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.pvp-rung {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.7rem 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted);
+}
+
+.pvp-rung-name {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pvp-rung-min {
+  font-family: var(--font-mono);
+  font-size-adjust: none;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+/* ─── facts ─── */
+.pvp-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+/* The figure scales with its tile, so III · II · I fits a quarter of the
+   desktop column and half of a phone. */
+.pvp-fact {
+  container-type: inline-size;
+}
+
+.pvp-fact .fact-figure {
+  display: flex;
+  align-items: center;
+  /* Every figure gets the same box, so the labels under them line up. */
+  height: min(2.6rem, 30cqi);
+  white-space: nowrap;
+  font-size: min(2.6rem, 30cqi);
+}
+
+.pvp-fact .fact-figure--long {
+  font-size: min(2.6rem, 18cqi);
+}
+
+/* ─── modes ─── */
+.pvp-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.pvp-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1.1rem 1.25rem 1.3rem;
+}
+
+.pvp-mode-title {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-size: 1.9rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.pvp-mode-desc {
+  font-size-adjust: none;
+  font-size: 1.12rem;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+/* ─── join ─── */
+.pvp-join {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding-bottom: calc(1.6rem + 7px);
+}
+
+.pvp-join-line {
+  font-size-adjust: none;
+  font-size: 1.2rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+/* ─── narrower ─── */
+@media (max-width: 860px) {
+  .pvp-modes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pvp-ladder {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* Chroma, the top tier, closes the second row on its own. */
+  .pvp-rung:last-child {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 700px) {
+  .pvp-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phones: each table row becomes a two-line grid. Line one is rank, head,
+   name, tier and rating; the name's edition badge and the W - L and win %
+   sit on line two, under the name, the tier and the rating. The header row
+   uses the same grid, so TIER sits over W - L and RATING over WIN %. Columns
+   3 and 4 are right-aligned against fixed edges, so they line up from row to
+   row even though each row is its own grid. */
+@media (max-width: 600px) {
+  .pvp-tabs {
+    gap: 0.75rem 0.5rem;
+  }
+
+  .pvp-tab {
+    flex: 1 1 auto;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  .pvp-board-card {
+    padding: 0.25rem 0;
+  }
+
+  .pvp-table,
+  .pvp-table thead,
+  .pvp-table tbody {
+    display: block;
+  }
+
+  .pvp-table tr {
+    display: grid;
+    grid-template-columns: 1.7rem minmax(0, 1fr) auto 3.1rem;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.1rem;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid rgba(42, 30, 68, 0.6);
+  }
+
+  .pvp-table--count tr {
+    grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+  }
+
+  .pvp-table thead tr {
+    border-bottom-color: var(--border);
+  }
+
+  .pvp-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .pvp-table th,
+  .pvp-table td {
+    display: block;
+    width: auto;
+    max-width: none;
+    padding: 0;
+    border: 0;
+  }
+
+  .pvp-table th {
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+  }
+
+  .pvp-table .pvp-c-rank,
+  .pvp-table .pvp-c-player {
+    grid-row: 1 / span 2;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .pvp-table .pvp-c-tier,
+  .pvp-table .pvp-c-rating,
+  .pvp-table .pvp-c-rec,
+  .pvp-table .pvp-c-pct,
+  .pvp-table .pvp-c-value {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .pvp-table .pvp-c-tier { grid-column: 3; grid-row: 1; }
+  .pvp-table .pvp-c-rating { grid-column: 4; grid-row: 1; }
+  .pvp-table .pvp-c-rec { grid-column: 3; grid-row: 2; }
+  .pvp-table .pvp-c-pct { grid-column: 4; grid-row: 2; }
+  .pvp-table .pvp-c-value { grid-column: 3; grid-row: 1 / span 2; }
+
+  .pvp-table td.pvp-c-rec,
+  .pvp-table td.pvp-c-pct {
+    font-size: 1.05rem;
+  }
+
+  .pvp-rank {
+    min-width: 1.5rem;
+  }
+
+  .pvp-table {
+    font-size: 1.2rem;
+  }
+
+  .pvp-player {
+    gap: 0.5rem;
+  }
+
+  .pvp-who {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .pvp-name {
+    max-width: 100%;
+  }
+
+  .pvp-ed {
+    font-size: 0.82rem;
+  }
+
+  .pvp-tier {
+    font-size: 0.95rem;
+    padding: 0 0.35rem;
+  }
+
+  .pvp-ghost {
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 1.2rem;
+  }
+
+  .pvp-ghost .pvp-rank {
+    margin-right: 0.2rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .pvp-modes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .pvp-body {
+    gap: 3rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .page-hero.pvp-hero {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .pvp-ladder {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pvp-facts {
+    gap: 0.75rem;
+  }
+
+  .pvp-fact {
+    padding: 0.95rem 0.9rem 1rem;
+  }
+
+  .pvp-mode {
+    padding: 1rem 1.1rem 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvp-table tbody tr {
+    transition: none;
+  }
+}

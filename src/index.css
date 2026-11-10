@@ -6004,3 +6004,20 @@ html.js .event-card.reveal {
     padding-right: 1.1rem;
   }
 }
+
+/* ═══ NETWORK SITE (run 20261109-network-site, U4) ══════════════════════════
+   The BETA marker on the PVP nav link (every page). The /pvp/ page itself is
+   styled in pvp.css. */
+.nav-beta {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0 0.3rem;
+  border: 1px solid rgba(212, 184, 74, 0.55);
+  border-radius: 3px;
+  background: rgba(212, 184, 74, 0.1);
+  color: #d4b84a;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  vertical-align: 0.35em;
+}

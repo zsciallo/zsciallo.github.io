@@ -5,6 +5,7 @@ export function Footer() {
     <footer>
       <nav class="footer-nav">
         <a href="/">HOME</a>
+        <a href="/pvp/">PVP</a>
         <a href="/smp/">ECONOMY SMP</a>
         <a href="/faq/">FAQ</a>
         <a href="/auctions/">AUCTIONS</a>
