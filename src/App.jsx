@@ -25,7 +25,7 @@ export default function App() {
     <MotionRoot>
       <NavBar current="home" />
       <main>
-        <section class="page-hero container" aria-label="Chromabit SMP">
+        <section class="page-hero container" aria-label="Chromabit Network">
 
           <Logo />
 
@@ -51,7 +51,7 @@ export default function App() {
           <div class="rule" />
         </section>
 
-        <section class="features-section" aria-label="Chromabit SMP features">
+        <section class="features-section" aria-label="Chromabit features">
           <div class="container">
             <SectionHeader
               eyebrow="HOW IT WORKS"

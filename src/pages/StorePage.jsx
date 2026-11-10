@@ -511,16 +511,16 @@ export function StorePage() {
     <MotionRoot>
       <NavBar current="store" />
       <main>
-        <section class="page-hero container" aria-label="Chromabit SMP Store">
-          <a href="/" class="logo-link" aria-label="Back to Chromabit SMP home">
-            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit SMP" />
+        <section class="page-hero container" aria-label="Chromabit Store">
+          <a href="/" class="logo-link" aria-label="Back to Chromabit home">
+            <img class="logo-sm" src="/server-icon-old-2.png" alt="Chromabit" />
           </a>
 
           <p class="section-eyebrow">SERVER STORE</p>
           <h1 class="hero-title hero-title--inline">
             GEAR <span class="accent">UP.</span>
           </h1>
-          <p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports Chromabit SMP.</p>
+          <p class="hero-sub">Ranks, crate keys, and more. Every purchase directly supports Chromabit.</p>
 
           <p class="store-powered">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

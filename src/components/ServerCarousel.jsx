@@ -89,12 +89,12 @@ export function ServerCarousel() {
               }
               setZoomed(true);
             }}
-            aria-label={`Enlarge Chromabit SMP screenshot ${i + 1}`}
+            aria-label={`Enlarge Chromabit screenshot ${i + 1}`}
           >
             <img
               class="carousel-slide"
               src={src}
-              alt={desc || `Chromabit SMP screenshot ${i + 1}`}
+              alt={desc || `Chromabit screenshot ${i + 1}`}
               loading={i === 0 ? 'eager' : 'lazy'}
             />
             {desc && <span class="carousel-caption">{desc}</span>}
@@ -125,7 +125,7 @@ export function ServerCarousel() {
         <dialog
           ref={dialogRef}
           class="lightbox"
-          aria-label={`Chromabit SMP screenshot ${index + 1}`}
+          aria-label={`Chromabit screenshot ${index + 1}`}
           onClose={() => setZoomed(false)}
           onClick={(e) => { if (e.target === e.currentTarget) setZoomed(false); }}
         >
@@ -134,7 +134,7 @@ export function ServerCarousel() {
             <img
               class="lightbox-img"
               src={images[index].src}
-              alt={images[index].desc || `Chromabit SMP screenshot ${index + 1}`}
+              alt={images[index].desc || `Chromabit screenshot ${index + 1}`}
             />
             {images[index].desc && <span class="lightbox-caption">{images[index].desc}</span>}
           </figure>

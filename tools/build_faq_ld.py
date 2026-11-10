@@ -43,7 +43,7 @@ def main():
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "url": "https://chromabit.us/faq/",
-        "isPartOf": {"@type": "WebSite", "name": "Chromabit SMP", "url": "https://chromabit.us"},
+        "isPartOf": {"@type": "WebSite", "name": "Chromabit Network", "url": "https://chromabit.us"},
         "mainEntity": entity,
     }
     body = json.dumps(doc, indent=2, ensure_ascii=False)

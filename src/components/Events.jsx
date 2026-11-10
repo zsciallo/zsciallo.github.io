@@ -3,7 +3,7 @@ import { SectionHeader } from './SectionHeader';
 
 export function Events({ prize, discord }) {
   return (
-    <section class="events-section" aria-label="Chromabit SMP Events and Prizes">
+    <section class="events-section" aria-label="Chromabit events and prizes">
       <div class="container">
         <SectionHeader eyebrow="COMPETE &amp; WIN" title={<>REAL PRIZES.<br />EVERY EVENT.</>} />
 

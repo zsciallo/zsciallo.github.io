@@ -38,12 +38,12 @@ export function FaqPage() {
     <MotionRoot>
       <NavBar current="faq" />
       <main>
-        <section class="page-hero container" aria-label="Chromabit SMP FAQ">
+        <section class="page-hero container" aria-label="Chromabit FAQ">
           <p class="section-eyebrow">HELP CENTER</p>
           <h1 class="hero-title">
             HAVE<span class="accent">QUESTIONS?</span>
           </h1>
-          <p class="hero-sub">Everything you need to know about Chromabit Economy SMP.</p>
+          <p class="hero-sub">Everything you need to know about Chromabit.</p>
 
           <StatusBadge status={status} />
 
