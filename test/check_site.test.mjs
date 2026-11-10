@@ -28,11 +28,12 @@ const DISCORD = JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8
 // U3: the landing page and /smp/ as the spec describes them, using the data-*
 // hooks the checker asserts. Each fragment is a named constant so the cases
 // below can plant one defect by replacing an exact string.
-// U4: the nav on every page is HOME PVP STORE AUCTIONS FAQ with a [data-beta]
-// marker in the PVP link, and every footer links /pvp/ (the U3 navs had
-// HOME STORE AUCTIONS and HOME STORE; the U3 cases still find their strings).
-const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
-const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP<span data-beta>BETA</span></a><a href="/store/">STORE</a><a href="/auctions/">AUCTIONS</a><a href="/faq/">FAQ</a></header>';
+// U4: the nav on every page is HOME PVP STORE AUCTIONS FAQ, and every footer
+// links /pvp/ (the U3 navs had HOME STORE AUCTIONS and HOME STORE; the U3 cases
+// still find their strings). Owner ruling 2026-11-10: no BETA marker in the nav
+// (the earlier fixture had a [data-beta] span in the PVP link).
+const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
+const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/store/">STORE</a><a href="/auctions/">AUCTIONS</a><a href="/faq/">FAQ</a></header>';
 const HERO_HEAD =
   '<div class="logo-wrap"><a href="/" aria-label="Back to Chromabit home"><img class="logo" src="/server-icon.png" alt="Chromabit logo"></a></div>' +
   '<p class="section-eyebrow">MINECRAFT NETWORK &middot; JAVA + BEDROCK</p>' +
@@ -308,6 +309,8 @@ try {
       'home-join-rel',
       // U4-copy
       'privacy-mc-heads',
+      // owner ruling 2026-11-10
+      'pvp-labels-removed',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -896,6 +899,18 @@ ${r.out}`,
     '/pvp/ mode 1 has no heading "Duels"',
   );
 
+  // Owner ruling 2026-11-10: the /pvp/ section labels are gone (pvp-labels-removed only; the headings stay required).
+  expectFail('U4-owner THE CLIMB above the tiers', mutate(P, '<section class="tiers" data-tiers><h2>', '<section class="tiers" data-tiers><p class="section-eyebrow">THE CLIMB</p><h2>'), 'pvp-labels-removed', '/pvp/ mentions "THE CLIMB"');
+  expectFail('U4-owner MORE THAN DUELS above the modes', mutate(P, '<section class="modes" data-modes><h2>', '<section class="modes" data-modes><p class="section-eyebrow">MORE THAN DUELS</p><h2>'), 'pvp-labels-removed', '/pvp/ mentions "MORE THAN DUELS"');
+  expectFail('U4-owner JOIN AND PLACE in the join section', mutate(P, '<section class="pvp-join"><p>', '<section class="pvp-join"><p class="section-eyebrow">JOIN AND PLACE</p><p>'), 'pvp-labels-removed', '/pvp/ mentions "JOIN AND PLACE"');
+  expectFail('U4-owner a label split by markup', mutate(P, '</main>', '<p>THE <b>CLIMB</b></p></main>'), 'pvp-labels-removed', '/pvp/ mentions "THE CLIMB"');
+  expectFail('U4-owner a label in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="JOIN AND PLACE">`), 'pvp-labels-removed', '/pvp/ mentions "JOIN AND PLACE"');
+  {
+    const r = runOn(mutate(P, '</main>', '<p>The climb starts here. More than duels.</p></main>'));
+    check('U4-owner labels are case-sensitive (other case passes)', r.code === 0, `exit ${r.code}:
+${r.out}`);
+  }
+
   // U4-AC7 pvp-join
   expectFail('U4-AC7 join line', mutate(P, 'and pick Kit PVP in the hub.', 'and pick PVP.'), 'pvp-join', '/pvp/ has no join line');
   expectFail('U4-AC7 no copy button', mutate(P, ' data-copy-ip>', '>'), 'pvp-join', '/pvp/ has 0 [data-copy-ip] buttons, want 1');
@@ -905,30 +920,30 @@ ${r.out}`,
   expectFail('U4-AC7 store credit in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="store credit">`), 'pvp-join', '/pvp/ mentions "store credit"');
   expectFail('U4-AC7 Chromabit SMP', mutate(P, '</main>', '<p>Also try Chromabit SMP</p></main>'), 'pvp-join', '/pvp/ mentions "Chromabit SMP"');
 
+  // Owner ruling 2026-11-10: no badge line on either landing mode card (home-mode-cards only).
+  expectFail('U4-owner COMPETITIVE badge on the pvp card', mutate(H, '<p class="mode-desc">Ranked kit PVP.', '<span class="mode-badge">COMPETITIVE &middot; JAVA + BEDROCK</span><p class="mode-desc">Ranked kit PVP.'), 'home-mode-cards', '/ mentions "COMPETITIVE · JAVA + BEDROCK"');
+  expectFail('U4-owner SURVIVAL badge on the smp card', mutate(H, '<p class="mode-desc">Survival with', '<span class="mode-badge">SURVIVAL · JAVA + BEDROCK</span><p class="mode-desc">Survival with'), 'home-mode-cards', '/ mentions "SURVIVAL · JAVA + BEDROCK"');
+  expectFail('U4-owner badge split by markup', mutate(H, '<p class="mode-desc">Survival with', '<span>SURVIVAL &middot; <b>JAVA + BEDROCK</b></span><p class="mode-desc">Survival with'), 'home-mode-cards', '/ mentions "SURVIVAL · JAVA + BEDROCK"');
+
   // U4-AC8 nav-links
-  expectFail('U4-AC8 PVP link missing on /store/', mutate('store/index.html', '<li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li>', ''), 'nav-links', '/store/ nav links are');
+  expectFail('U4-AC8 PVP link missing on /store/', mutate('store/index.html', '<li><a href="/pvp/">PVP</a></li>', ''), 'nav-links', '/store/ nav links are');
   expectFail(
     'U4-AC8 PVP after STORE on /faq/',
-    mutate('faq/index.html', '<li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li><li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE</a></li><li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li>'),
+    mutate('faq/index.html', '<li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE</a></li><li><a href="/pvp/">PVP</a></li>'),
     'nav-links',
     '/faq/ nav links are [["/","HOME"],["/store/","STORE"],["/pvp/","PVP"]',
   );
-  expectFail('U4-AC8 PVP label on /', mutate(H, '<a href="/pvp/">PVP <span', '<a href="/pvp/">RANKED <span'), 'nav-links', '/ nav links are [["/","HOME"],["/pvp/","RANKED"]');
+  expectFail('U4-AC8 PVP label on /', mutate(H, '<a href="/pvp/">PVP</a>', '<a href="/pvp/">RANKED</a>'), 'nav-links', '/ nav links are [["/","HOME"],["/pvp/","RANKED"]');
   expectFail('U4-AC8 PVP href without slash on /privacy/', mutate('privacy/index.html', '<li><a href="/pvp/">PVP', '<li><a href="/pvp">PVP'), 'nav-links', '/privacy/ nav links are');
   expectFail('U4-AC8 FAQ missing from the nav on /smp/', mutate(S, '<a href="/faq/">FAQ</a></header>', '</header>'), 'nav-links', '/smp/ nav links are');
-  expectFail('U4-AC8 BETA missing on /auctions/', mutate('auctions/index.html', ' <span class="nav-beta" data-beta>BETA</span>', ''), 'nav-links', '/auctions/ nav PVP link has 0 BETA markers, want 1');
-  expectFail('U4-AC8 BETA marker text', mutate(H, '<span class="nav-beta" data-beta>BETA</span>', '<span class="nav-beta" data-beta>NEW</span>'), 'nav-links', '/ nav PVP BETA marker text is "NEW"');
-  expectFail(
-    'U4-AC8 BETA on STORE',
-    mutate('store/index.html', '<li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE<span data-beta>BETA</span></a></li>'),
-    'nav-links',
-    '/store/ nav link /store/ has a BETA marker',
-  );
-  {
-    // The spec allows the marker as .beta-tag too; only the U3 BETA counts on / and /smp/ forbid it there.
-    const r = runOn(mutate('faq/index.html', '<span class="nav-beta" data-beta>BETA</span>', '<span class="beta-tag">BETA</span>'));
-    check('U4-AC8 a .beta-tag marker is accepted by nav-links', r.lines.includes('PASS nav-links') && r.code === 0, `exit ${r.code}:\n${r.out}`);
-  }
+  // Owner ruling 2026-11-10 (supersedes Amendment 2's BETA in the nav): no [data-beta] and no .beta-tag in any nav.
+  expectFail('U4-owner [data-beta] in the PVP nav link on /auctions/', mutate('auctions/index.html', '<a href="/pvp/">PVP</a></li>', '<a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li>'), 'nav-links', '/auctions/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner .beta-tag in the PVP nav link on /faq/', mutate('faq/index.html', '<a href="/pvp/">PVP</a></li>', '<a href="/pvp/">PVP <span class="beta-tag">BETA</span></a></li>'), 'nav-links', '/faq/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner [data-beta] on /pvp/ (nav-links only; the eyebrow tag stays)', mutate(P, '<a href="/pvp/" aria-current="page" class="active">PVP</a>', '<a href="/pvp/" aria-current="page" class="active">PVP<span data-beta>BETA</span></a>'), 'nav-links', '/pvp/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner BETA on STORE on /store/', mutate('store/index.html', '<li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE<span data-beta>BETA</span></a></li>'), 'nav-links', '/store/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner marker outside a link but inside the header on /privacy/', mutate('privacy/index.html', '</ul></header>', '</ul><span class="beta-tag">BETA</span></header>'), 'nav-links', '/privacy/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner marker in a footer <nav> on /store/', mutate('store/index.html', '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/pvp/">PVP</a><span data-beta>BETA</span><a href="/smp/">'), 'nav-links', '/store/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner PVP nav text not exactly PVP on /smp/', mutate(S, '<a href="/pvp/">PVP</a><a href="/store/">', '<a href="/pvp/">PVP BETA</a><a href="/store/">'), 'nav-links', '/smp/ nav links are [["/","HOME"],["/pvp/","PVP BETA"]');
   expectFail('U4-AC8 PVP not active on /pvp/', mutate(P, '<a href="/pvp/" aria-current="page" class="active">', '<a href="/pvp/">'), 'nav-links', '/pvp/ nav aria-current="page" links are [], want ["/pvp/"]');
   expectFail('U4-AC8 HOME active on /pvp/', mutate(P, '<li><a href="/">HOME</a></li>', '<li><a href="/" aria-current="page">HOME</a></li>'), 'nav-links', '/pvp/ nav aria-current="page" links are ["/","/pvp/"]');
   expectFail('U4-AC8 PVP active on /faq/', mutate('faq/index.html', '<li><a href="/pvp/">', '<li><a href="/pvp/" aria-current="page">'), 'nav-links', '/faq/ nav marks PVP as the current page');

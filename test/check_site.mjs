@@ -535,6 +535,8 @@ export const LANDING = {
   claim: 'THE ONLY RANKED COMPETITIVE PVP FOR JAVA AND BEDROCK',
   claimForbidden: 'One ladder for both editions',
   cardsForbidden: ['TWO WAYS TO PLAY', 'ONE ADDRESS'],
+  /** Owner ruling 2026-11-10: neither mode card has a badge line; these texts appear nowhere on /. */
+  cardBadgesForbidden: ['COMPETITIVE · JAVA + BEDROCK', 'SURVIVAL · JAVA + BEDROCK'],
   cards: {
     pvp: {
       title: 'CHROMAPVP',
@@ -748,6 +750,10 @@ function homeModeCards(dist) {
         const hit = occurrence(p.html, app(p), bad);
         if (hit) problems.push(`/ mentions ${q(bad)} (no section heading above the cards): ${hit}`);
       }
+      for (const bad of LANDING.cardBadgesForbidden) {
+        const hit = occurrence(p.html, app(p), bad);
+        if (hit) problems.push(`/ mentions ${q(bad)} (mode cards have no badge line): ${hit}`);
+      }
       const stray = betas.filter((b) => !insideAny(b, L.cards)).length;
       if (stray) problems.push(`/ has ${stray} .beta-tag outside the mode cards (BETA is only on the pvp card)`);
       return problems;
@@ -876,11 +882,11 @@ function ldJsonParses(dist) {
 //               [data-mode] [data-copy-ip], and .beta-tag in the eyebrow.
 //   every page  the nav is the first <header> in the document; its links are
 //               every <a> in it except the brand link (a.site-nav-brand). The
-//               active link carries aria-current="page". The BETA marker in
-//               the PVP link is an element with class beta-tag OR attribute
-//               data-beta. NOTE: the U3 checks home-mode-cards and smp-page
-//               count .beta-tag on / and /smp/, so the nav marker must use
-//               [data-beta] WITHOUT the beta-tag class.
+//               active link carries aria-current="page". Owner ruling
+//               2026-11-10: NO BETA marker in any nav (no [data-beta], no
+//               .beta-tag inside a <header> or <nav>); the PVP link text is
+//               exactly "PVP". (Superseded: Amendment 2's BETA in the nav.)
+//               The /pvp/ eyebrow and the landing pvp card keep .beta-tag.
 //
 // Texts are compared exactly (case-sensitive) after the same normalisation as
 // U3: textOf() / blockText() (entities decoded, curly quotes straightened,
@@ -936,6 +942,8 @@ export const PVP = {
     ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
     ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
   ],
+  /** Owner ruling 2026-11-10: section labels removed; these texts appear nowhere on /pvp/. */
+  labelsForbidden: ['THE CLIMB', 'MORE THAN DUELS', 'JOIN AND PLACE'],
   /** U4-copy, U4-copy-2: texts that must appear nowhere on /pvp/ (raw HTML or visible text). */
   modesForbidden: ['Ten rounds', 'each round'],
   join: 'Connect to play.chromabit.us and pick Kit PVP in the hub.',
@@ -1163,7 +1171,7 @@ function pvpJoin(dist) {
   });
 }
 
-/** U4-AC8: on every page the nav is HOME PVP STORE AUCTIONS FAQ, PVP has BETA, PVP active only on /pvp/; footer links PVP. */
+/** U4-AC8: on every page the nav is HOME PVP STORE AUCTIONS FAQ, no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
 function navLinks(dist) {
   return eachPage(
     ALL_ROUTES,
@@ -1174,16 +1182,14 @@ function navLinks(dist) {
       if (!nav) problems.push(`${r} has no nav <header>`);
       else {
         const links = findAll(nav, (el) => el.tag === 'a' && !hasClass('site-nav-brand')(el));
-        const got = links.map((a) => [a.attrs.href ?? '', textOf(a, isBetaMarker)]);
+        const got = links.map((a) => [a.attrs.href ?? '', textOf(a)]);
         if (q(got) !== q(NAV_LINKS)) problems.push(`${r} nav links are ${q(got)}, want ${q(NAV_LINKS)}`);
-        for (const a of links) {
-          const marks = findAll(a, isBetaMarker);
-          if (a.attrs.href === '/pvp/') {
-            if (marks.length !== 1) problems.push(`${r} nav PVP link has ${marks.length} BETA markers, want 1`);
-            else if (textOf(marks[0]) !== 'BETA') problems.push(`${r} nav PVP BETA marker text is ${q(textOf(marks[0]))}, want "BETA"`);
-          } else if (marks.length) problems.push(`${r} nav link ${a.attrs.href} has a BETA marker (only PVP has one)`);
-        }
         const active = links.filter((a) => a.attrs['aria-current'] === 'page').map((a) => a.attrs.href);
+        // Owner ruling 2026-11-10: no BETA marker in any nav (the site <header> and every <nav>).
+        const navs = [nav, ...findAll(dom(p), isTag('nav')).filter((n) => !inside(n, nav))];
+        const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
+        if (marks.length)
+          problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0 (first: <${marks[0].tag}> ${q(textOf(marks[0]))})`);
         if (r === PVP.route) {
           if (active.join(',') !== '/pvp/') problems.push(`/pvp/ nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
         } else {
@@ -1274,6 +1280,18 @@ function privacyMcHeads(dist) {
   );
 }
 
+/** Owner ruling 2026-11-10: the /pvp/ section labels THE CLIMB, MORE THAN DUELS, JOIN AND PLACE are gone. */
+function pvpLabelsRemoved(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    for (const gone of PVP.labelsForbidden) {
+      const hit = occurrence(p.html, app(p), gone);
+      if (hit) problems.push(`/pvp/ mentions ${q(gone)}: ${hit}`);
+    }
+    return problems;
+  });
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -1305,6 +1323,7 @@ export const CHECKS = [
   ['internal-links', internalLinks],
   ['home-join-rel', homeJoinRel],
   ['privacy-mc-heads', privacyMcHeads],
+  ['pvp-labels-removed', pvpLabelsRemoved],
 ];
 
 // -------------------------------------------------------------------- main --
