@@ -173,9 +173,10 @@ export const CARDS = [
   { sel: '.card.pvp-kit', kind: 'card', states: ['profile'], note: 'profile kit cards and the career card (.pvp-career)' },
   // /store/
   { sel: '.pkg-card', kind: 'card', hover: true, states: ['store'], note: 'package cards' },
-  { sel: '.store-item.is-open', kind: 'inset', fill: 'hover', states: ['store-crate-open'], note: 'an opened reward tile in the package modal' },
+  // Owner ruling (round 2): rarity colour is information. An opened reward tile keeps its rarity-coloured
+  // border (guarded per rarity: rarity-borders line); fill, gradient, shadow, pseudo boxes and radius are still judged.
+  { sel: '.store-item.is-open', kind: 'inset', fill: 'inset|hover', borderGuarded: true, states: ['store-crate-open'], note: 'an opened reward tile in the package modal (border = rarity colour, guarded)' },
   { sel: '.store-item', kind: 'inset', states: ['store-crate'], note: 'reward tiles in the package modal (a modal\'s inner card surfaces)' },
-  { sel: '.pkg-modal--rank .store-perk', kind: 'inset', hover: true, states: ['store-rank'], note: 'rank perk rows in the rank modal (boxed there; elsewhere .store-perk is a plain list row)' },
   { sel: '.store-kit', kind: 'inset', states: ['store-rank'], note: 'kit panels in the rank modal' },
   { sel: '.store-table-wrap', kind: 'inset', states: ['store-table'], note: 'table panel in the package modal' },
   // /auctions/
@@ -220,6 +221,7 @@ export const ALLOW = [
   { sel: '.site-nav, .site-nav *, .nav-bar', note: 'the nav and its active-link bar' },
   { sel: '.pkg-modal, .modal, .modal-overlay, .lightbox, .lightbox-caption, .cart-drawer, .slot-cabinet', note: 'modal, lightbox, drawer and key-roll chrome (they keep their own; their inner card surfaces are in CARDS)' },
   { sel: '.rule', note: 'the hero divider rule (a 2px line, not a box)' },
+  { sel: '.pkg-modal--rank .store-perk', note: "rank perk rows keep their per-rank tint: information-carrying colour, owner's store (owner ruling, U9 round 2); guarded per rank by the rank-tints line" },
 ];
 
 /** Computed properties the GUARD compares. */
@@ -254,6 +256,22 @@ export const GUARD = [
   { sel: 'body', states: ['home', 'auctions'], note: 'page background' },
   { sel: '.dither-bg', states: ['home'], note: 'dither canvas' },
 ].map((g) => ({ ...g, props: GUARD_PROPS }));
+
+/**
+ * Colour cues the owner kept in the store (round 2 ruling: "information, not
+ * decoration"), guarded per rarity and per rank in card-style-guard.json
+ * (probes):
+ *   rarity-borders  (state store-crate-open) every rarity group's first reward
+ *                   tile is opened in turn; the opened tile's four border sides
+ *                   (width, style, colour, border-image) equal the snapshot.
+ *   rank-tints      (state store) each rank's modal is opened in turn; every
+ *                   perk row's background, border and radius equal the snapshot.
+ */
+export const RARITY_PROBE_STATE = 'store-crate-open';
+export const RANK_PROBE_STATE = 'store';
+export const RANKS = ['VIP', 'VIP+', 'MVP', 'MVP+'];
+const BORDER_PROPS = ['top', 'right', 'bottom', 'left'].flatMap((x) => [`border-${x}-width`, `border-${x}-style`, `border-${x}-color`]).concat('border-image-source');
+const RANK_PROPS = ['background-color', 'background-image', 'border-top-width', 'border-top-style', 'border-top-color', 'border-top-left-radius'];
 
 /** Dividers inside a card (join rows, table rows): every visible side of a 1-3-sided border is a 1px solid line in this colour. */
 export const DIVIDER = { width: '1px', style: 'solid', color: '#221838' };
@@ -360,16 +378,23 @@ const LIB = String.raw`(() => {
     if (w === 0 || h === 0) return null;
     return { position: ps.position, width: ps.width, height: ps.height, w, h, gradient: ps.backgroundImage.includes('gradient'), fill, border, shadow, bg: ps.backgroundImage !== 'none' ? ps.backgroundImage.slice(0, 50) : ps.backgroundColor };
   };
-  /** Rule failures for a card element: kind 'card' | 'inset', fill 'surface' | 'hover'. */
-  const cardProblems = (el, kind, fill, tokens) => {
+  /**
+   * Rule failures for a card element: kind 'card' | 'inset', fill 'surface' |
+   * 'hover' | 'inset|hover' (either token). borderGuarded: the border is not
+   * judged here (an opened reward tile keeps its rarity border; the
+   * rarity-borders line compares it with the snapshot).
+   */
+  const cardProblems = (el, kind, fill, tokens, borderGuarded = false) => {
     const cs = getComputedStyle(el);
     const out = [];
-    const want = fill === 'hover' ? tokens.hover : kind === 'inset' ? tokens.inset : tokens.surface;
+    const base = kind === 'inset' ? tokens.inset : tokens.surface;
+    const baseName = kind === 'inset' ? '--surface-inset' : '--surface';
+    const wants = fill === 'hover' ? [[tokens.hover, '--surface-hover']] : fill === 'inset|hover' ? [[base, baseName], [tokens.hover, '--surface-hover']] : [[base, baseName]];
     const radius = kind === 'inset' ? tokens.radiusInset : tokens.radiusCard;
     const bg = rgba(cs.backgroundColor);
-    if (!bg || !want || bg.slice(0, 3).join() !== want.slice(0, 3).join() || bg[3] !== 1) out.push('background-color ' + rgbText(bg) + ', want ' + rgbText(want) + ' (' + (fill === 'hover' ? '--surface-hover' : kind === 'inset' ? '--surface-inset' : '--surface') + ')');
+    if (!bg || bg[3] !== 1 || !wants.some(([w]) => w && bg.slice(0, 3).join() === w.slice(0, 3).join())) out.push('background-color ' + rgbText(bg) + ', want ' + wants.map(([w, n]) => rgbText(w) + ' (' + n + ')').join(' or '));
     if (cs.backgroundImage !== 'none') out.push('background-image ' + cs.backgroundImage.slice(0, 70));
-    const bw = SIDES.filter((s) => parseFloat(cs['border' + s + 'Width']) > 0);
+    const bw = borderGuarded ? [] : SIDES.filter((s) => parseFloat(cs['border' + s + 'Width']) > 0);
     if (bw.length) out.push('border ' + bw.map((s) => s.toLowerCase() + ' ' + cs['border' + s + 'Width']).join(' '));
     if (cs.boxShadow !== 'none') out.push('box-shadow ' + cs.boxShadow.slice(0, 70));
     for (const p of ['::before', '::after']) {
@@ -427,7 +452,7 @@ const INSPECT = (cfg) => `(() => {
     if (e) {
       cardEls.push([el, e]);
       out.matched[e.sel] = (out.matched[e.sel] || 0) + 1;
-      const p = L.cardProblems(el, e.kind, e.fill || 'surface', T);
+      const p = L.cardProblems(el, e.kind, e.fill || 'surface', T, !!e.borderGuarded);
       if (p.length) out.cards.push({ sel: e.sel, path: L.path(el), problems: p });
       continue;
     }
@@ -495,6 +520,76 @@ const INSPECT = (cfg) => `(() => {
   }
   return out;
 })()`;
+
+const waitGone = (sel) => `(async () => { for (let i = 0; i < 50; i++) { if (!document.querySelector(${JSON.stringify(sel)})) return true; await new Promise((r) => setTimeout(r, 100)); } return false; })()`;
+
+/** Opens the first reward tile of every rarity group in the open package modal; { 'rarity label': border props | null }. */
+async function rarityProbe(page) {
+  return page.ev(`(async () => {
+    const out = {};
+    for (const g of document.querySelectorAll('.pkg-modal .store-rarity')) {
+      const btn = g.querySelector('.store-item--button');
+      if (!btn) continue;
+      const key = ([...g.classList].find((c) => c.startsWith('store-rarity--')) || 'store-rarity--?').slice(14) + ' ' + ((g.querySelector('.store-rarity-label') || {}).textContent || '').trim();
+      if (!btn.classList.contains('is-open')) btn.click();
+      let open = null;
+      for (let i = 0; i < 40 && !(open = g.querySelector('.store-item.is-open')); i++) await new Promise((r) => setTimeout(r, 50));
+      if (!open) { out[key] = null; continue; }
+      ${FREEZE_ANIMATIONS};
+      const cs = getComputedStyle(open);
+      const v = {};
+      for (const p of ${JSON.stringify(BORDER_PROPS)}) v[p] = cs.getPropertyValue(p);
+      out[key] = v;
+    }
+    return out;
+  })()`);
+}
+
+/** Opens each rank's package modal in turn; { rank: [perk row props] | null }. */
+async function rankProbe(page) {
+  const out = {};
+  for (const name of RANKS) {
+    const ok = await page.ev(`(() => { const c = [...document.querySelectorAll('.pkg-card')].find((x) => (x.querySelector('.pkg-name') || {}).textContent?.trim() === ${JSON.stringify(name)}); if (!c) return false; c.click(); return true; })()`);
+    if (!ok || !(await page.ev(waitFor('.pkg-modal--rank .store-perk')))) {
+      out[name] = null;
+      continue;
+    }
+    await page.ev(FREEZE_ANIMATIONS);
+    out[name] = await page.ev(`[...document.querySelectorAll('.pkg-modal--rank .store-perk')].map((el) => { const cs = getComputedStyle(el); const v = {}; for (const p of ${JSON.stringify(RANK_PROPS)}) v[p] = cs.getPropertyValue(p); return v; })`);
+    await page.ev("(() => { const b = document.querySelector('.pkg-modal-close'); if (b) b.click(); return true; })()");
+    await page.ev(waitGone('.pkg-modal'));
+  }
+  return out;
+}
+
+/** Probe readings of a state, keyed like the guard file ('<state>@<w> rarity <group>' / '<state>@<w> rank <name>'); {} for other states. */
+async function probes(page, state, width) {
+  const out = {};
+  if (state.id === RARITY_PROBE_STATE) for (const [k, v] of Object.entries(await rarityProbe(page))) out[`${state.id}@${width} rarity ${k}`] = v;
+  if (state.id === RANK_PROBE_STATE) for (const [k, v] of Object.entries(await rankProbe(page))) out[`${state.id}@${width} rank ${k}`] = v;
+  return out;
+}
+
+/** Problems comparing probe readings with the snapshot for keys starting with prefix. */
+export function probeProblems(got, base, prefix) {
+  const out = [];
+  const keys = new Set([...Object.keys(got), ...Object.keys(base ?? {})].filter((k) => k.startsWith(prefix)));
+  if (!keys.size) out.push(`nothing probed for ${prefix.trim()}`);
+  for (const k of [...keys].sort()) {
+    const name = k.slice(prefix.length);
+    if (!base || !(k in base)) out.push(`${name}: not in the snapshot`);
+    else if (!(k in got) || got[k] == null) out.push(`${name}: could not be opened`);
+    else if (JSON.stringify(got[k]) !== JSON.stringify(base[k])) {
+      const a = [].concat(got[k]);
+      const b = [].concat(base[k]);
+      const diffs = [];
+      if (a.length !== b.length) diffs.push(`${a.length} rows, was ${b.length}`);
+      for (let i = 0; i < Math.min(a.length, b.length); i++) for (const p of Object.keys(b[i])) if (a[i][p] !== b[i][p]) diffs.push(`${p} ${JSON.stringify(a[i][p])}, was ${JSON.stringify(b[i][p])}`);
+      out.push(`${name}: ${[...new Set(diffs)].join(', ')}`);
+    }
+  }
+  return out;
+}
 
 const HOVER_FN = `function (kind, spec) { const L = window.__cards; return L.cardProblems(this, kind, 'hover', L.resolved(spec)); }`;
 const PATH_FN = 'function () { return window.__cards.path(this); }';
@@ -658,7 +753,7 @@ async function withBrowser(dist, fn) {
   }
 }
 
-const cfgFor = (width, report = false) => ({ report, spec: SPEC_TOKENS, cards: CARDS.map(({ sel, kind, fill }) => ({ sel, kind, fill })), allow: ALLOW.map(({ sel }) => ({ sel })), guard: GUARD.map(({ sel, props }) => ({ sel, props })), gaps: width === 400, minGap: MIN_GAP, divider: DIVIDER, dividerSkip: DIVIDER_SKIP, mutedMin: MUTED_MIN, textMin: TEXT_MIN });
+const cfgFor = (width, report = false) => ({ report, spec: SPEC_TOKENS, cards: CARDS.map(({ sel, kind, fill, borderGuarded }) => ({ sel, kind, fill, borderGuarded })), allow: ALLOW.map(({ sel }) => ({ sel })), guard: GUARD.map(({ sel, props }) => ({ sel, props })), gaps: width === 400, minGap: MIN_GAP, divider: DIVIDER, dividerSkip: DIVIDER_SKIP, mutedMin: MUTED_MIN, textMin: TEXT_MIN });
 
 function selectedStates(args) {
   const i = args.indexOf('--only');
@@ -724,6 +819,11 @@ async function runChecks(dist, args) {
           check(`${id} overflow`, r.scrollWidth > r.innerWidth ? [`scrollWidth ${r.scrollWidth} > ${r.innerWidth}`] : []);
           if (width === 400) check(`${id} separation`, r.gaps.map((g) => `${g.a} then ${g.b}: gap ${g.gap}px, want >= ${MIN_GAP}`));
           check(`${id} contrast`, grouped(r.contrast.map((c) => ({ key: c.sel, detail: `muted ${c.muted}:1 (>= ${MUTED_MIN}), text ${c.text}:1 (>= ${TEXT_MIN}) on ${c.bg}` }))));
+          if (state.id === RARITY_PROBE_STATE || state.id === RANK_PROBE_STATE) {
+            const kind = state.id === RARITY_PROBE_STATE ? 'rarity' : 'rank';
+            const got = await probes(page, state, width);
+            check(`${id} ${kind === 'rarity' ? 'rarity-borders' : 'rank-tints'}`, guardBase?.probes ? probeProblems(got, guardBase.probes, `${id} ${kind} `) : ['no probes in the guard snapshot: run --snapshot-guard on the pre-U9 build']);
+          }
         } catch (e) {
           check(`${id} inspect`, [String(e?.message ?? e)]);
         } finally {
@@ -746,8 +846,9 @@ async function runChecks(dist, args) {
 
 async function snapshotGuard(dist, args) {
   const entries = {};
+  const probeEntries = {};
   await withBrowser(dist, async (b, origin) => {
-    const ids = new Set(GUARD.flatMap((g) => g.states));
+    const ids = new Set([...GUARD.flatMap((g) => g.states), RARITY_PROBE_STATE, RANK_PROBE_STATE]);
     for (const state of STATES.filter((s) => ids.has(s.id)))
       for (const width of WIDTHS.filter((w) => !state.widths || state.widths.includes(w))) {
         const page = await openState(b, origin, state, width);
@@ -759,13 +860,17 @@ async function snapshotGuard(dist, args) {
             check(`snapshot ${state.id}@${width} ${g.sel}`, v ? [] : ['not rendered']);
             if (v) entries[`${state.id}@${width} ${g.sel}`] = v;
           }
+          for (const [k, v] of Object.entries(await probes(page, state, width))) {
+            check(`snapshot ${k}`, v ? [] : ['could not be opened']);
+            if (v) probeEntries[k] = v;
+          }
         } finally {
           await page.close();
         }
       }
   });
   const rev = (await import('node:child_process')).spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf-8' }).stdout.trim();
-  writeFileSync(GUARD_FILE, `${JSON.stringify({ capturedFrom: rev, note: 'Computed styles the U9 card restyle must not change (owner kept these). Regenerate only with orchestrator sign-off.', entries }, null, 2)}\n`);
+  writeFileSync(GUARD_FILE, `${JSON.stringify({ capturedFrom: rev, note: 'Computed styles the U9 card restyle must not change (owner kept these). Regenerate only with orchestrator sign-off. probes: the store colour cues the owner kept (U9 round 2), per rarity and per rank.', entries, probes: probeEntries }, null, 2)}\n`);
   console.log(`wrote ${GUARD_FILE} (${Object.keys(entries).length} entries)`);
 }
 
@@ -837,6 +942,43 @@ async function selfTest(dist) {
         check(`self ${w} contrast fails on a light card`, r.contrast.some((c) => c.path.includes('planted-lowc')) ? [] : ['not reported']);
         check(`self ${w} overflow is reported`, r.scrollWidth > r.innerWidth || width > 640 ? [] : [`scrollWidth ${r.scrollWidth}`]);
         if (width === 400) check(`self ${w} separation: cards stacked with no gap are reported`, r.gaps.some((g) => g.a.includes('planted-bad') || g.a.includes('planted-good')) ? [] : [`gaps: ${JSON.stringify(r.gaps).slice(0, 300)}`]);
+      } finally {
+        await page.close();
+      }
+    }
+    // Round 2: the store colour cues. Readings before a plant are the baseline,
+    // so these hold on any build.
+    const st = (id) => STATES.find((x) => x.id === id);
+    const addStyle = (css) => `(() => { const s = document.createElement('style'); s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); return true; })()`;
+    {
+      const page = await openState(b, origin, st(RARITY_PROBE_STATE), 1280);
+      try {
+        const before = await probes(page, st(RARITY_PROBE_STATE), 1280);
+        check('self rarity probe opens a tile in several rarity groups', Object.values(before).filter(Boolean).length >= 3 ? [] : [`got ${JSON.stringify(Object.keys(before))}`]);
+        await page.ev(addStyle('.store-item--button.is-open{border-color:#2a1e44 !important}'));
+        const after = await probes(page, st(RARITY_PROBE_STATE), 1280);
+        const p = probeProblems(after, before, `${RARITY_PROBE_STATE}@1280 rarity `);
+        check('self a non-rarity border on an opened reward tile fails rarity-borders', p.length && p.every((x) => x.includes('border-top-color')) ? [] : [`problems: ${p.join(' | ') || 'none'}`]);
+        await page.ev(addStyle('.store-item--button.is-open{background-image:linear-gradient(#1d1636,#16102a) !important;box-shadow:0 0 6px #000 !important}.store-item:not(.is-open){border:1px solid #ff0000 !important}'));
+        await page.ev(FREEZE_ANIMATIONS);
+        const r = await page.ev(INSPECT(cfgFor(1280)));
+        const open = r.cards.filter((c) => c.sel === '.store-item.is-open').flatMap((c) => c.problems).join(' | ');
+        const shut = r.cards.filter((c) => c.sel === '.store-item').flatMap((c) => c.problems).join(' | ');
+        check('self an opened reward tile still fails gradient and shadow (border not judged there)', open.includes('background-image') && open.includes('box-shadow') && !open.includes('border ') ? [] : [`opened tile problems: ${open}`]);
+        check('self a closed reward tile with a border still fails cards', shut.includes('border top 1px') ? [] : [`closed tile problems: ${shut}`]);
+      } finally {
+        await page.close();
+      }
+    }
+    {
+      const page = await openState(b, origin, st(RANK_PROBE_STATE), 1280);
+      try {
+        const before = await probes(page, st(RANK_PROBE_STATE), 1280);
+        check('self rank probe opens every rank modal', RANKS.every((n) => before[`${RANK_PROBE_STATE}@1280 rank ${n}`]) ? [] : [`got ${JSON.stringify(Object.keys(before))}`]);
+        await page.ev(addStyle('.pkg-modal--rank .store-perk{background:#150f27 !important}'));
+        const after = await probes(page, st(RANK_PROBE_STATE), 1280);
+        const p = probeProblems(after, before, `${RANK_PROBE_STATE}@1280 rank `);
+        check('self flattening the rank perk tint fails rank-tints', p.length === RANKS.length && p.every((x) => x.includes('background-image')) ? [] : [`problems: ${p.join(' | ') || 'none'}`]);
       } finally {
         await page.close();
       }
