@@ -448,11 +448,12 @@
   padding-bottom: calc(1.6rem + 7px);
 }
 
+/* With no heading above it, the line leads the closing block. */
 .pvp-join-line {
   font-size-adjust: none;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   line-height: 1.35;
-  color: var(--muted);
+  color: var(--text);
   text-wrap: balance;
 }
 

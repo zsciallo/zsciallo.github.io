@@ -6,7 +6,7 @@ import { click } from '../lib/sound';
 
 const LINKS = [
   { id: 'home', href: '/', label: 'HOME' },
-  { id: 'pvp', href: '/pvp/', label: 'PVP', beta: true },
+  { id: 'pvp', href: '/pvp/', label: 'PVP' },
   { id: 'store', href: '/store/', label: 'STORE' },
   { id: 'auctions', href: '/auctions/', label: 'AUCTIONS' },
   { id: 'faq', href: '/faq/', label: 'FAQ' },
@@ -25,8 +25,6 @@ function NavLink({ link, active, still, onNavigate }) {
       onHoverStart={() => setHover(true)} onHoverEnd={() => setHover(false)}
       whileTap={still ? undefined : { y: 1 }}>
       {link.label}
-      {/* [data-beta], not .beta-tag: the landing checks count .beta-tag on the mode cards. */}
-      {link.beta && <span class="nav-beta" data-beta>BETA</span>}
       <m.span class="nav-bar" aria-hidden="true"
         initial={active ? { scaleX: 0 } : false}
         animate={{ scaleX: active || hover ? 1 : 0 }}

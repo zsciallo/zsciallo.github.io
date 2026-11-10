@@ -5777,24 +5777,6 @@ html.js .event-card.reveal {
   padding: 1.2rem 1.3rem 1.4rem;
 }
 
-.mode-badge {
-  align-self: flex-start;
-  padding: 0 0.45rem;
-  border-radius: 4px;
-  background: rgba(199, 125, 255, 0.14);
-  color: var(--accent);
-  font-family: var(--font-hud);
-  font-size-adjust: none;
-  font-size: 0.95rem;
-  letter-spacing: 0.14em;
-  line-height: 1.35;
-}
-
-.mode-card--pvp .mode-badge {
-  background: rgba(255, 125, 225, 0.14);
-  color: var(--accent-2);
-}
-
 .mode-title {
   display: flex;
   flex-wrap: wrap;
@@ -6003,21 +5985,4 @@ html.js .event-card.reveal {
     padding-left: 1.1rem;
     padding-right: 1.1rem;
   }
-}
-
-/* ═══ NETWORK SITE (run 20261109-network-site, U4) ══════════════════════════
-   The BETA marker on the PVP nav link (every page). The /pvp/ page itself is
-   styled in pvp.css. */
-.nav-beta {
-  display: inline-block;
-  margin-left: 0.35rem;
-  padding: 0 0.3rem;
-  border: 1px solid rgba(212, 184, 74, 0.55);
-  border-radius: 3px;
-  background: rgba(212, 184, 74, 0.1);
-  color: #d4b84a;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  line-height: 1.3;
-  vertical-align: 0.35em;
 }

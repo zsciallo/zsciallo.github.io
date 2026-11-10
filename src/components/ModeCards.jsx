@@ -122,7 +122,6 @@ export function ModeCards() {
           <PvpArt />
         </div>
         <div class="mode-body">
-          <span class="mode-badge">COMPETITIVE · JAVA + BEDROCK</span>
           <h3 class="mode-title">CHROMAPVP <span class="beta-tag">BETA</span></h3>
           <p class="mode-desc">Ranked kit PVP. Duels, the FFA pit, the Prismatic Arena and tournaments.</p>
           <LadderTop />
@@ -138,7 +137,6 @@ export function ModeCards() {
           <ServerCarousel />
         </div>
         <div class="mode-body">
-          <span class="mode-badge">SURVIVAL · JAVA + BEDROCK</span>
           <h3 class="mode-title">ECONOMY SMP</h3>
           <p class="mode-desc">Survival with a player-run market. Claims, custom spawners, King of the Hill.</p>
           <TopMovers />

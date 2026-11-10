@@ -63,7 +63,6 @@ export function PvpPage() {
           </section>
 
           <section class="pvp-section reveal" data-modes aria-labelledby="pvp-modes-title">
-            <p class="section-eyebrow">MORE THAN DUELS</p>
             <h2 class="section-title" id="pvp-modes-title">WHAT YOU CAN PLAY</h2>
             <div class="pvp-modes">
               {MODES.map(([title, desc]) => (
@@ -75,8 +74,7 @@ export function PvpPage() {
             </div>
           </section>
 
-          <section class="claim-band pvp-join reveal" aria-labelledby="pvp-join-title">
-            <h2 class="claim-title" id="pvp-join-title">JOIN AND <span class="accent">PLACE</span></h2>
+          <section class="claim-band pvp-join reveal" aria-label="Join">
             <p class="pvp-join-line">Connect to play.chromabit.us and pick Kit PVP in the hub.</p>
             <CopyIpButton variant="primary" size="md" />
           </section>
