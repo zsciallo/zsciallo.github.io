@@ -66,9 +66,9 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { crc32, deflateSync, inflateSync } from 'node:zlib';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const VITE = join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
-const FIX = join(ROOT, 'test', 'fixtures', 'visual');
+export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+export const VITE = join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
+export const FIX = join(ROOT, 'test', 'fixtures', 'visual');
 
 export const PAGES = [
   ['home', '/'],
@@ -104,7 +104,7 @@ function finish() {
   console.log(failed ? `RESULT: FAIL ${failed} of ${passed + failed}` : `RESULT: PASS ${passed} checks`);
   process.exitCode = failed ? 1 : 0;
 }
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sha = (buf) => createHash('sha256').update(buf).digest('hex');
 
 // ------------------------------------------------------------------ PNG --
@@ -220,12 +220,12 @@ export function diffImages(a, b) {
 }
 
 /** A fixed 8x8 opaque PNG for mc-heads.net avatars. */
-const HEAD_PNG = encodePng(8, 8, Buffer.from(Array.from({ length: 64 }, (_, i) => [96 + (i % 8) * 8, 72, 120 + ((i >> 3) % 8) * 8, 255]).flat()));
+export const HEAD_PNG = encodePng(8, 8, Buffer.from(Array.from({ length: 64 }, (_, i) => [96 + (i % 8) * 8, 72, 120 + ((i >> 3) % 8) * 8, 255]).flat()));
 
 // ---------------------------------------------------------------- routes --
 
-const json = (body, status = 200) => ({ status, type: 'application/json', body: typeof body === 'string' ? body : JSON.stringify(body) });
-const fileOr404 = (file, type = 'application/json') => (existsSync(file) && statSync(file).isFile() ? { status: 200, type, body: readFileSync(file) } : json({ error: 'not found' }, 404));
+export const json = (body, status = 200) => ({ status, type: 'application/json', body: typeof body === 'string' ? body : JSON.stringify(body) });
+export const fileOr404 = (file, type = 'application/json') => (existsSync(file) && statSync(file).isFile() ? { status: 200, type, body: readFileSync(file) } : json({ error: 'not found' }, 404));
 
 /** The fixed answer for a request URL, or 'pass' for the preview origin and Google Fonts. */
 export function route(url, origin, dist, unexpected) {
@@ -255,7 +255,7 @@ export function route(url, origin, dist, unexpected) {
 
 // --------------------------------------------------------------- browser --
 
-function findChrome() {
+export function findChrome() {
   const local = process.env.LOCALAPPDATA ?? '';
   return [
     process.env.CHROME,
@@ -272,7 +272,7 @@ function findChrome() {
     .find((c) => existsSync(c)) ?? null;
 }
 
-function freePort() {
+export function freePort() {
   return new Promise((res, rej) => {
     const srv = createServer();
     srv.once('error', rej);
@@ -283,7 +283,7 @@ function freePort() {
   });
 }
 
-async function waitReady(url, ms) {
+export async function waitReady(url, ms) {
   const until = Date.now() + ms;
   while (Date.now() < until) {
     try {
@@ -296,7 +296,7 @@ async function waitReady(url, ms) {
   return false;
 }
 
-async function launchChrome(chrome, profile) {
+export async function launchChrome(chrome, profile) {
   const proc = spawn(
     chrome,
     [
@@ -354,7 +354,7 @@ async function launchChrome(chrome, profile) {
   return { proc, send, listeners, close };
 }
 
-const FREEZE = (t) => `(() => {
+export const FREEZE = (t) => `(() => {
   const T = ${t};
   const RealDate = Date;
   class FrozenDate extends RealDate {
@@ -377,7 +377,7 @@ const FREEZE = (t) => `(() => {
  *  finished (their end state is what a visitor sees once the page settles),
  *  infinite ones (logo float/pulse, status-dot blink, shine loops) are paused at
  *  t = 0. Repeated after the settle wait to catch any started late. */
-const FREEZE_ANIMATIONS = `(() => {
+export const FREEZE_ANIMATIONS = `(() => {
   let n = 0;
   for (const a of document.getAnimations()) {
     const t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;

@@ -2597,6 +2597,155 @@ function visibleTextUnchanged(dist) {
   return problems;
 }
 
+// ------------------------------------------------------------------- U9 --
+// Card surface restyle ("C · Surface", owner 2026-11-10): the static half. The
+// rendered half (computed styles on every page) is test/card_style_check.mjs,
+// whose CARDS list also decides here what counts as a card.
+
+/** The five tokens and their spec values (plan Amendment 4). */
+export const CARD_TOKENS = {
+  '--surface': '#150f27',
+  '--surface-inset': '#0f0a1d',
+  '--surface-hover': '#1a1330',
+  '--radius-card': '10px',
+  '--radius-inset': '6px',
+};
+/** The frost gradient as index.css defines it, whitespace-free and with the minifier's short decimals. */
+const FROST_LITERAL = 'linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01))';
+
+/** Every built stylesheet under dist/assets, concatenated, or null when there is none. */
+function builtCss(dist) {
+  const dir = join(dist, 'assets');
+  if (!existsSync(dir)) return null;
+  const files = readdirSync(dir).filter((f) => f.endsWith('.css')).sort();
+  return files.length ? files.map((f) => readFileSync(join(dir, f), 'utf-8')).join('\n') : null;
+}
+
+/**
+ * A flat list of style rules: { selectors: [..], decls: [[prop, value]], at: '@media ...' | '' }.
+ * Comments and strings are respected; @media/@supports/@layer/@container are
+ * descended into, @keyframes/@font-face/@property skipped.
+ */
+export function cssRules(css) {
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [];
+  let i = 0;
+  const readUntil = (stops) => {
+    let s = '';
+    while (i < src.length && !stops.includes(src[i])) {
+      if (src[i] === '"' || src[i] === "'") {
+        const q = src[i];
+        let j = i + 1;
+        while (j < src.length && src[j] !== q) j += src[j] === '\\' ? 2 : 1;
+        s += src.slice(i, j + 1);
+        i = j + 1;
+      } else s += src[i++];
+    }
+    return s;
+  };
+  const skipBlock = () => {
+    let depth = 0;
+    do {
+      readUntil(['{', '}']);
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') depth--;
+      i++;
+    } while (depth > 0 && i < src.length);
+  };
+  const block = (at) => {
+    while (i < src.length) {
+      const head = readUntil(['{', '}', ';']).trim();
+      if (src[i] === '}') {
+        i++;
+        return;
+      }
+      if (src[i] === ';') {
+        i++;
+        continue;
+      }
+      if (i >= src.length) return;
+      if (head.startsWith('@')) {
+        if (/^@(media|supports|layer|container|document)\b/.test(head)) {
+          i++;
+          block(`${at} ${head}`.trim());
+        } else skipBlock();
+        continue;
+      }
+      i++;
+      const body = readUntil(['}']);
+      i++;
+      const decls = [];
+      for (const d of body.split(/;(?![^(]*\))/)) {
+        const k = d.indexOf(':');
+        if (k > 0) decls.push([d.slice(0, k).trim().toLowerCase(), d.slice(k + 1).trim()]);
+      }
+      const selectors = head.split(/,(?![^(]*\))/).map((s) => s.trim()).filter(Boolean);
+      rules.push({ selectors, decls, at });
+    }
+  };
+  block('');
+  return rules;
+}
+
+let cardClassCache = null;
+/** The class names that make an element a card: the subject classes of every CARDS entry in card_style_check.mjs. */
+async function loadCardClasses() {
+  if (cardClassCache) return cardClassCache;
+  const { CARDS, DEAD_CARD_CLASSES } = await import(new URL('./card_style_check.mjs', import.meta.url).href);
+  // Card classes no page renders any more still count: their frost/hairline rules are dead CSS to delete.
+  const set = new Set(DEAD_CARD_CLASSES);
+  for (const c of CARDS)
+    for (const sel of c.sel.split(/,(?![^(]*\))/)) {
+      const subject = sel.trim().split(/\s*[\s>+~]\s*(?![^(]*\))/).pop();
+      for (const m of subject.replace(/:not\([^)]*\)/g, '').matchAll(/\.([\w-]+)/g)) set.add(m[1]);
+    }
+  cardClassCache = set;
+  return set;
+}
+const CARD_CLASSES = await loadCardClasses();
+
+/** The card class a selector's subject (last compound, pseudo-elements kept apart) carries, or null. */
+function cardSubject(selector) {
+  const subject = selector.trim().split(/\s*[\s>+~]\s*(?![^(]*\))/).pop();
+  const pseudoEl = (subject.match(/::?(before|after)\b/) ?? [])[1] ?? null;
+  const bare = subject.replace(/:not\([^)]*\)/g, '').replace(/:(is|where|has)\([^)]*\)/g, '');
+  for (const m of bare.matchAll(/\.([\w-]+)/g)) if (CARD_CLASSES.has(m[1])) return { cls: m[1], pseudoEl };
+  return null;
+}
+
+/** U9: the built CSS defines the five surface tokens at :root with the spec values, and nowhere else with another value. */
+function cardTokens(dist) {
+  const css = builtCss(dist);
+  if (css == null) return ['no built CSS under dist/assets'];
+  const rules = cssRules(css);
+  const problems = [];
+  for (const [name, want] of Object.entries(CARD_TOKENS)) {
+    const decls = rules.flatMap((r) => r.decls.filter(([p]) => p === name).map(([, v]) => ({ v: v.replace(/\s*!important$/, '').trim(), r })));
+    const atRoot = decls.filter(({ r }) => !r.at && r.selectors.includes(':root'));
+    if (!atRoot.length) problems.push(`${name} is not declared in a top-level :root rule`);
+    for (const { v, r } of decls)
+      if (v.toLowerCase() !== want) problems.push(`${name} is ${JSON.stringify(v)} in ${r.selectors.join(',')}${r.at ? ` (${r.at})` : ''}, want ${want}`);
+  }
+  return [...new Set(problems)];
+}
+
+/** U9: no rule applies the frost gradient to a card, and no card keeps a ::before/::after hairline rule. */
+function cardNoFrost(dist) {
+  const css = builtCss(dist);
+  if (css == null) return ['no built CSS under dist/assets'];
+  const problems = [];
+  for (const r of cssRules(css)) {
+    const cards = r.selectors.map((s) => [s, cardSubject(s)]).filter(([, c]) => c);
+    if (!cards.length) continue;
+    const frost = r.decls.find(([p, v]) => /^background(-image)?$/.test(p) && (/var\(\s*--frost\s*[,)]/.test(v) || v.replace(/\s+/g, '').replace(/0\./g, '.').includes(FROST_LITERAL)));
+    if (frost) for (const [s] of cards) problems.push(`${s} applies the frost gradient (${frost[0]}: ${frost[1].slice(0, 60)})`);
+    const height = r.decls.find(([p]) => p === 'height');
+    const hairline = height && /^(0?\.5|1|1\.5|2)px$/.test(height[1].replace(/\s*!important$/, '')) && r.decls.some(([p]) => /^background/.test(p));
+    if (hairline) for (const [s, c] of cards) if (c.pseudoEl) problems.push(`${s} still draws a ${height[1]} hairline`);
+  }
+  return [...new Set(problems)];
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -2656,6 +2805,9 @@ export const CHECKS = [
   ['perf-hints', perfHints],
   ['pvp-referrer', pvpReferrer],
   ['visible-text-unchanged', visibleTextUnchanged],
+  // U9: card surface restyle (static half; test/card_style_check.mjs renders)
+  ['card-tokens', cardTokens],
+  ['card-no-frost', cardNoFrost],
 ];
 
 // -------------------------------------------------------------------- main --

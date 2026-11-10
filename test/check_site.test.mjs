@@ -424,8 +424,21 @@ function goodSite() {
     'server-icon.png': png(64, 64),
     'robots.txt': ROBOTS_TXT,
     'llms.txt': LLMS_TXT,
+    // U9: a built stylesheet with the surface tokens and a card on them.
+    'assets/index-good.css': CARD_CSS,
   };
 }
+
+/** U9: minified like Vite's output: the tokens at :root, the frost token still defined (it may stay for non-cards), cards on --surface. */
+const CARD_CSS =
+  ':root{--accent:#c77dff;--surface:#150f27;--surface-inset:#0f0a1d;--surface-hover:#1a1330;--radius-card:10px;--radius-inset:6px;' +
+  '--frost:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01))}' +
+  '.card{background-color:var(--surface);border:0;border-radius:var(--radius-card);position:relative}' +
+  '.mode-live{background-color:var(--surface-inset);border-radius:var(--radius-inset)}' +
+  '.faq-item[data-open],.faq-item:hover{background-color:var(--surface-hover)}' +
+  '.btn{background:var(--frost),#9a4dff}.btn:after{content:"";position:absolute;height:1px;background:#fff}' +
+  '@media (max-width:600px){.card{padding:1rem}}@keyframes pulse{0%{opacity:.5}to{opacity:1}}' +
+  '.join-row+.join-row{border-top:1px solid #221838}';
 
 function png(width, height) {
   const buf = Buffer.alloc(33);
@@ -594,6 +607,9 @@ try {
       'perf-hints',
       'pvp-referrer',
       'visible-text-unchanged',
+      // U9
+      'card-tokens',
+      'card-no-frost',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -1857,6 +1873,37 @@ ${r.out}`);
   expectFail('U8 referrer: /pvp/ without no-referrer', mutate(P, REFERRER_META, ''), 'pvp-referrer', '/pvp/ referrer metas are [], want ["no-referrer"]');
   expectFail('U8 referrer: /pvp/player/ with origin', plMut(REFERRER_META, '<meta name="referrer" content="origin">'), 'pvp-referrer', '/pvp/player/ referrer metas are ["origin"]');
   expectFail('U8 referrer: /store/ changes referrer behaviour', mutate(ST, ROBOTS_META, `${ROBOTS_META}${REFERRER_META}`), 'pvp-referrer', '/store/ has a referrer meta ["no-referrer"]');
+
+  // ---------------------------------------------------------------- U9 --
+  // card-tokens / card-no-frost read the built CSS (assets/*.css).
+  const CSS = 'assets/index-good.css';
+  const cssMut = (from, to) => mutate(CSS, from, to);
+  const cssAdd = (extra) => cssMut('.join-row+.join-row', `${extra}.join-row+.join-row`);
+  expectFails('U9 no built CSS', { ...goodSite(), [CSS]: null }, { 'card-tokens': 'no built CSS under dist/assets', 'card-no-frost': 'no built CSS under dist/assets' });
+  passes('U9 tokens: two stylesheets, tokens in the second, pass', { ...goodSite(), 'assets/a-first.css': '.x{color:red}' });
+  passes('U9 tokens: upper-case hex passes', cssMut('--surface:#150f27', '--surface:#150F27'));
+  passes('U9 tokens: spaces and !important pass', cssMut('--radius-card:10px', '--radius-card: 10px !important'));
+  expectFail('U9 tokens: --surface-hover missing', cssMut('--surface-hover:#1a1330;', ''), 'card-tokens', '--surface-hover is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --surface wrong value', cssMut('--surface:#150f27', '--surface:#16102a'), 'card-tokens', '--surface is "#16102a" in :root, want #150f27');
+  expectFail('U9 tokens: --surface-inset wrong value', cssMut('--surface-inset:#0f0a1d', '--surface-inset:#0f0a1e'), 'card-tokens', '--surface-inset is "#0f0a1e"');
+  expectFail('U9 tokens: --radius-card 12px', cssMut('--radius-card:10px', '--radius-card:12px'), 'card-tokens', '--radius-card is "12px" in :root, want 10px');
+  expectFail('U9 tokens: --radius-inset in rem', cssMut('--radius-inset:6px', '--radius-inset:.375rem'), 'card-tokens', '--radius-inset is ".375rem"');
+  expectFail('U9 tokens: overridden in a media query', cssAdd('@media (max-width:600px){:root{--radius-card:12px}}'), 'card-tokens', '--radius-card is "12px" in :root (@media (max-width:600px)), want 10px');
+  expectFail('U9 tokens: overridden on a card', cssAdd('.pkg-card{--surface:#222}'), 'card-tokens', '--surface is "#222" in .pkg-card');
+  expectFail('U9 tokens: only declared inside a media query', edit(cssAdd('@media (min-width:1px){:root{--surface-inset:#0f0a1d}}'), CSS, '--surface-inset:#0f0a1d;--surface-hover', '--surface-hover'), 'card-tokens', '--surface-inset is not declared in a top-level :root rule');
+  passes('U9 tokens: a comment with another value is ignored', cssAdd('/* :root{--surface:#000} */'));
+  expectFail('U9 frost: var(--frost) on .card', cssAdd('.card{background:var(--frost),var(--surface)}'), 'card-no-frost', '.card applies the frost gradient (background: var(--frost),var(--surface))');
+  expectFail('U9 frost: var(--frost) on .pkg-card:hover', cssAdd('.pkg-card:hover{background-image:var(--frost)}'), 'card-no-frost', '.pkg-card:hover applies the frost gradient');
+  expectFail('U9 frost: the literal gradient, unminified, on .faq-item', cssAdd('.faq-item{background:linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)), #16102a}'), 'card-no-frost', '.faq-item applies the frost gradient');
+  expectFail('U9 frost: inside a media query', cssAdd('@media (max-width:600px){.mode-card{background:var(--frost)}}'), 'card-no-frost', '.mode-card applies the frost gradient');
+  expectFail('U9 frost: one card in a selector list', cssAdd('.btn,.ip-block{background:var(--frost)}'), 'card-no-frost', '.ip-block applies the frost gradient');
+  passes('U9 frost: on a button inside a card passes (not a card)', cssAdd('.card .btn{background:var(--frost)}'));
+  passes('U9 frost: defining the token and using it on a button pass', goodSite());
+  passes('U9 frost: a commented-out rule is ignored', cssAdd('/* .card{background:var(--frost)} */'));
+  expectFail('U9 hairline: .card::before 1px strip', cssAdd('.card:before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#c77dff,transparent)}'), 'card-no-frost', '.card:before still draws a 1px hairline');
+  expectFail('U9 hairline: .mode-card--pvp::before 2px strip', cssAdd('.mode-card--pvp::before{content:"";position:absolute;height:2px;background:#ff7de1}'), 'card-no-frost', '.mode-card--pvp::before still draws a 2px hairline');
+  passes('U9 hairline: a button ::after shine is not a card', goodSite());
+  passes('U9 hairline: a 1px divider between join rows is not a pseudo hairline', cssAdd('.join-row+.join-row{border-top:1px solid #221838}'));
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

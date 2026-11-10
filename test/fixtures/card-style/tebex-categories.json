@@ -1,0 +1,185 @@
+{
+ "data": [
+  {
+   "id": 1,
+   "name": "Ranks",
+   "order": 1,
+   "packages": [
+    {
+     "id": 7564223,
+     "name": "VIP",
+     "type": "single",
+     "base_price": 9.99,
+     "sales_tax": 0,
+     "total_price": 9.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": true,
+     "user_limit": {
+      "limit": 1,
+      "period_length": null,
+      "period_unit": null
+     },
+     "image": null,
+     "order": 1
+    },
+    {
+     "id": 7564226,
+     "name": "VIP+",
+     "type": "single",
+     "base_price": 19.99,
+     "sales_tax": 0,
+     "total_price": 19.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": true,
+     "user_limit": {
+      "limit": 1,
+      "period_length": null,
+      "period_unit": null
+     },
+     "image": null,
+     "order": 2
+    },
+    {
+     "id": 7564228,
+     "name": "MVP",
+     "type": "single",
+     "base_price": 24.99,
+     "sales_tax": 0,
+     "total_price": 24.99,
+     "currency": "USD",
+     "discount": 5,
+     "disable_quantity": true,
+     "user_limit": {
+      "limit": 1,
+      "period_length": null,
+      "period_unit": null
+     },
+     "image": null,
+     "order": 3
+    },
+    {
+     "id": 7663601,
+     "name": "MVP+",
+     "type": "single",
+     "base_price": 49.99,
+     "sales_tax": 0,
+     "total_price": 49.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": true,
+     "user_limit": {
+      "limit": 1,
+      "period_length": null,
+      "period_unit": null
+     },
+     "image": null,
+     "order": 4
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Crate Keys",
+   "order": 2,
+   "packages": [
+    {
+     "id": 7557969,
+     "name": "Chroma Key",
+     "type": "single",
+     "base_price": 4.99,
+     "sales_tax": 0,
+     "total_price": 4.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": false,
+     "user_limit": null,
+     "image": null,
+     "order": 1
+    },
+    {
+     "id": 7557992,
+     "name": "Spawner Key",
+     "type": "single",
+     "base_price": 6.99,
+     "sales_tax": 0,
+     "total_price": 6.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": false,
+     "user_limit": null,
+     "image": null,
+     "order": 2
+    },
+    {
+     "id": 7620947,
+     "name": "Shard Key",
+     "type": "single",
+     "base_price": 2.99,
+     "sales_tax": 0,
+     "total_price": 2.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": false,
+     "user_limit": null,
+     "image": null,
+     "order": 3
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Extras",
+   "order": 3,
+   "packages": [
+    {
+     "id": 7564235,
+     "name": "1,000 Claim Blocks",
+     "type": "single",
+     "base_price": 3.99,
+     "sales_tax": 0,
+     "total_price": 3.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": false,
+     "user_limit": null,
+     "image": null,
+     "order": 1
+    },
+    {
+     "id": 7564237,
+     "name": "Sell Chest",
+     "type": "single",
+     "base_price": 7.99,
+     "sales_tax": 0,
+     "total_price": 7.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": false,
+     "user_limit": null,
+     "image": null,
+     "order": 2
+    },
+    {
+     "id": 7581943,
+     "name": "Chroma Pass",
+     "type": "single",
+     "base_price": 9.99,
+     "sales_tax": 0,
+     "total_price": 9.99,
+     "currency": "USD",
+     "discount": 0,
+     "disable_quantity": true,
+     "user_limit": {
+      "limit": 1,
+      "period_length": null,
+      "period_unit": null
+     },
+     "image": null,
+     "order": 3
+    }
+   ]
+  }
+ ]
+}
