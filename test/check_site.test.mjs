@@ -28,8 +28,11 @@ const DISCORD = JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8
 // U3: the landing page and /smp/ as the spec describes them, using the data-*
 // hooks the checker asserts. Each fragment is a named constant so the cases
 // below can plant one defect by replacing an exact string.
-const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li></ul></header>';
-const NAV_PLAIN = '<header class="site-nav"><a href="/">CHROMABIT</a><a href="/store/">STORE</a></header>';
+// U4: the nav on every page is HOME PVP STORE AUCTIONS FAQ with a [data-beta]
+// marker in the PVP link, and every footer links /pvp/ (the U3 navs had
+// HOME STORE AUCTIONS and HOME STORE; the U3 cases still find their strings).
+const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
+const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP<span data-beta>BETA</span></a><a href="/store/">STORE</a><a href="/auctions/">AUCTIONS</a><a href="/faq/">FAQ</a></header>';
 const HERO_HEAD =
   '<div class="logo-wrap"><a href="/" aria-label="Back to Chromabit home"><img class="logo" src="/server-icon.png" alt="Chromabit logo"></a></div>' +
   '<p class="section-eyebrow">MINECRAFT NETWORK &middot; JAVA + BEDROCK</p>' +
@@ -58,7 +61,7 @@ const SMP_CARD =
   '<div class="mode-live" data-live="movers"></div>' +
   '<a class="mode-enter" href="/smp/">EXPLORE THE SMP</a><button type="button" class="smp-copy" data-copy-ip>COPY IP</button>' +
   '</article>';
-const FOOTER = '<footer><nav class="footer-nav"><a href="/">HOME</a><a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>Welcome &copy; 2026 Chromabit LLC</footer>';
+const FOOTER = '<footer><nav class="footer-nav"><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>Welcome &copy; 2026 Chromabit LLC</footer>';
 const HOME_BODY = `${NAV}<main><section class="page-hero container">${HERO_HEAD}${JOIN_BOX}</section>${CLAIM}<section class="modes">${PVP_CARD}${SMP_CARD}</section></main>${FOOTER}`;
 
 const SMP_BODY =
@@ -71,6 +74,64 @@ const SMP_BODY =
   '<a class="auctions-link" href="/auctions/">OPEN THE AUCTION HOUSE</a>' +
   `</main>${FOOTER}`;
 const LD_FAQ = '{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]}';
+
+// U4: /pvp/ as the spec describes it (prerendered: empty board, hidden season strip).
+const PVP_TITLE = 'Ranked PVP Leaderboards | Chromabit';
+const PVP_DESC = 'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.';
+const PVP_CANON = '<link rel="canonical" href="https://chromabit.us/pvp/">';
+const PVP_NAV = NAV.replace('<a href="/pvp/">', '<a href="/pvp/" aria-current="page" class="active">');
+const PVP_MAST =
+  '<section class="page-hero"><p class="section-eyebrow">CHROMAPVP &middot; RANKED KIT PVP <span class="beta-tag">BETA</span></p>' +
+  '<h1 class="hero-title">RANKED. <span class="accent">ON BOTH EDITIONS.</span></h1>' +
+  '<p class="hero-sub">The only ranked competitive PVP for Java and Bedrock.</p>' +
+  '<div class="season-strip" data-season hidden><span class="season-name"></span></div></section>';
+const PVP_TABS =
+  '<div class="board-tabs" role="group" aria-label="Leaderboard">' +
+  '<button type="button" data-board-tab="overall" aria-pressed="true">OVERALL</button>' +
+  '<button type="button" data-board-tab="sword" aria-pressed="false">SWORD</button>' +
+  '<button type="button" data-board-tab="mace" aria-pressed="false">MACE</button>' +
+  '<button type="button" data-board-tab="axe" aria-pressed="false" disabled>AXE &middot; SOON</button>' +
+  '<button type="button" data-board-tab="chaos" aria-pressed="false" disabled>CHAOS <span class="soon">&middot; SOON</span></button>' +
+  '<button type="button" data-board-tab="tournament" aria-pressed="false">TOURNAMENT WINS</button></div>';
+const PVP_EMPTY = '<p class="board-empty" data-board-empty>No ranked players yet. Play 10 placement matches to appear here.</p>';
+const PVP_NOTE = '<p class="board-note">Updates every minute. Players appear after 10 placement matches.</p>';
+const PVP_BOARD = `<section class="board" data-board>${PVP_TABS}${PVP_EMPTY}${PVP_NOTE}</section>`;
+const TIER_ROWS = [['Tin', 'START'], ['Bronze', '1350'], ['Silver', '1500'], ['Gold', '1600'], ['Emerald', '1700'], ['Mithril', '1800'], ['Chroma', '1950']];
+const PVP_TIERS =
+  '<section class="tiers" data-tiers><h2>SEVEN TIERS</h2><ol>' +
+  TIER_ROWS.map(([n, m]) => `<li data-tier="${n}"><span class="tier-name">${n}</span><span class="tier-min">${m}</span></li>`).join('') +
+  '</ol></section>';
+const FACT_ROWS = [
+  ['10', 'placement matches before you get a rank'],
+  ['BO3', 'every ranked duel is best of three'],
+  ['III &middot; II &middot; I', 'three divisions in every tier below Chroma'],
+  ['LVL 2', 'ranked opens at level 2'],
+];
+const PVP_FACTS = `<ul class="facts" data-facts>${FACT_ROWS.map(([v, l]) => `<li data-fact><strong>${v}</strong><span>${l}</span></li>`).join('')}</ul>`;
+const MODE_ROWS = [
+  ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
+  ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
+  ['Prismatic Arena', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'],
+  ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
+  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 together.'],
+  ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
+];
+const PVP_MODES =
+  '<section class="modes" data-modes><h2>WHAT YOU CAN PLAY</h2>' +
+  MODE_ROWS.map(([t, d]) => `<article class="mode" data-mode><h3>${t}</h3><p>${d}</p></article>`).join('') +
+  '</section>';
+const PVP_JOIN =
+  '<section class="pvp-join"><p>Connect to <span class="accent">play.chromabit.us</span> and pick Kit PVP in the hub.</p>' +
+  '<button type="button" class="pvp-copy" data-copy-ip>COPY IP</button></section>';
+const PVP_BODY = `${PVP_NAV}<main>${PVP_MAST}${PVP_BOARD}${PVP_TIERS}${PVP_FACTS}${PVP_MODES}${PVP_JOIN}</main>${FOOTER}`;
+const SITEMAP =
+  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  '  <url><loc>https://chromabit.us/</loc></url>\n  <url><loc>https://chromabit.us/pvp/</loc></url>\n</urlset>\n';
+
+/** U4: give a page the site nav and footer (around #app, so the U2 cases keep their exact #app strings). */
+function framed(html, nav = NAV) {
+  return html.replace('<body>\n', `<body>\n${nav}\n`).replace('\n</body>', `\n${FOOTER}\n</body>`);
+}
 
 const LD_HOME = JSON.stringify({
   '@context': 'https://schema.org',
@@ -108,13 +169,18 @@ function goodSite() {
       HOME_BODY,
     ),
     'smp/index.html': htmlPage(headFor('Economy SMP | Chromabit'), SMP_BODY),
-    'faq/index.html': htmlPage(
+    'faq/index.html': framed(htmlPage(
       headFor('FAQ | Chromabit', `<script type="application/ld+json">${LD_FAQ}</script>`),
       '<main>Everything you need to know about Chromabit.</main>',
+    )),
+    'store/index.html': framed(htmlPage(headFor('Store | Chromabit'), '<main>Every purchase directly supports Chromabit.</main>')),
+    'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP'), '<main>Chromabit SMP market</main>')),
+    'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit'), '<main>Privacy</main>')),
+    'pvp/index.html': htmlPage(
+      headFor(PVP_TITLE, `<meta name="description" content="${PVP_DESC}">\n  <meta name="twitter:title" content="${PVP_TITLE}">\n  ${PVP_CANON}`),
+      PVP_BODY,
     ),
-    'store/index.html': htmlPage(headFor('Store | Chromabit'), '<main>Every purchase directly supports Chromabit.</main>'),
-    'auctions/index.html': htmlPage(headFor('Auction House | Chromabit SMP'), '<main>Chromabit SMP market</main>'),
-    'privacy/index.html': htmlPage(headFor('Privacy Policy | Chromabit'), '<main>Privacy</main>'),
+    'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
   };
 }
@@ -183,6 +249,19 @@ function expectFail(name, site, only, needle) {
   check(name, ok, `want only ${only} failing with ${JSON.stringify(needle)}, got exit ${r.code}:\n${r.out}`);
 }
 
+/** U4: the run fails, exactly the checks in `want` ({check: needle}) fail, each FAIL line mentioning its needle. */
+function expectFails(name, site, want) {
+  const r = runOn(site);
+  const fails = r.lines.filter((l) => l.startsWith('FAIL '));
+  const entries = Object.entries(want);
+  const ok =
+    r.code === 1 &&
+    fails.length === entries.length &&
+    entries.every(([only, needle]) => fails.some((l) => l.startsWith(`FAIL ${only}:`) && l.includes(needle))) &&
+    r.lines.at(-1) === `RESULT: FAIL ${entries.length} of ${r.lines.length - 1}`;
+  check(name, ok, `want exactly ${JSON.stringify(want)} failing, got exit ${r.code}:\n${r.out}`);
+}
+
 try {
   check('checker found', !!CHECKER, 'neither tools/check_site.mjs nor test/check_site.mjs exists');
 
@@ -211,6 +290,18 @@ try {
       'home-removed',
       'smp-page',
       'ld-json-parses',
+      // U4
+      'pvp-page',
+      'pvp-masthead',
+      'pvp-board',
+      'pvp-tiers',
+      'pvp-facts',
+      'pvp-modes',
+      'pvp-join',
+      'nav-links',
+      'sitemap-pvp',
+      'internal-links',
+      'home-join-rel',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -615,13 +706,16 @@ ${r.out}`,
       `/smp/ still has "${gone}"`,
     );
   }
-  expectFail(
+  // Since U4 an extra nav link also breaks the exact nav list, so nav-links fails with smp-page here (both, and only both).
+  expectFails(
     'U3-AC7 /smp/ in the home nav',
     mutate(H, '<li><a href="/auctions/">AUCTIONS</a></li>', '<li><a href="/smp/">SMP</a></li><li><a href="/auctions/">AUCTIONS</a></li>'),
-    'smp-page',
-    '/ nav links to /smp/',
+    { 'smp-page': '/ nav links to /smp/', 'nav-links': '/ nav links are' },
   );
-  expectFail('U3-AC7 /smp/ in the smp nav', mutate(S, '<a href="/store/">STORE</a></header>', '<a href="/store/">STORE</a><a href="/smp/">SMP</a></header>'), 'smp-page', '/smp/ nav links to /smp/');
+  expectFails('U3-AC7 /smp/ in the smp nav', mutate(S, '<a href="/faq/">FAQ</a></header>', '<a href="/faq/">FAQ</a><a href="/smp/">SMP</a></header>'), {
+    'smp-page': '/smp/ nav links to /smp/',
+    'nav-links': '/smp/ nav links are',
+  });
   expectFail(
     'U3-AC7 home footer lost the /smp/ link',
     mutate(H, '<a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>', '<a href="/store/">STORE</a></nav>'),
@@ -643,6 +737,209 @@ ${r.out}`,
     'ld-json-parses',
     '/privacy/ JSON-LD block 1 does not parse',
   );
+
+  // ------------------------------------------------------------------ U4 --
+  const P = 'pvp/index.html';
+
+  // U4-AC1 pvp-page
+  {
+    // A missing /pvp/ is reported by every check that reads it; require pvp-page to say so.
+    const r = runOn({ ...goodSite(), [P]: null });
+    const line = r.lines.find((l) => l.startsWith('FAIL pvp-page:'));
+    check('U4-AC1 /pvp/ missing', r.code === 1 && !!line && line.includes('/pvp/ missing (pvp/index.html)'), `exit ${r.code}:\n${r.out}`);
+  }
+  expectFail('U4-AC1 empty app div', mutate(P, '<div id="app">', '<div id="app"></div><div>'), 'pvp-page', '/pvp/ <div id="app"> is empty');
+  expectFail('U4-AC1 title', mutate(P, `<title>${PVP_TITLE}</title>`, '<title>Leaderboards | Chromabit</title>'), 'pvp-page', '/pvp/ title is "Leaderboards | Chromabit"');
+  expectFail('U4-AC1 description off by one char', mutate(P, 'Mace ladders, tournaments.', 'Mace ladders, tournaments!'), 'pvp-page', '/pvp/ description is');
+  expectFail('U4-AC1 description missing', mutate(P, `<meta name="description" content="${PVP_DESC}">`, ''), 'pvp-page', '/pvp/ has no description');
+  expectFail('U4-AC1 og:title', mutate(P, `<meta property="og:title" content="${PVP_TITLE}">`, '<meta property="og:title" content="PVP">'), 'pvp-page', '/pvp/ og:title is "PVP"');
+  expectFail('U4-AC1 twitter:title missing', mutate(P, `<meta name="twitter:title" content="${PVP_TITLE}">`, ''), 'pvp-page', '/pvp/ has no twitter:title');
+  expectFail('U4-AC1 og:site_name', mutate(P, `<meta property="og:site_name" content="${NET}">`, '<meta property="og:site_name" content="Chromabit">'), 'pvp-page', '/pvp/ og:site_name is "Chromabit"');
+  expectFail('U4-AC1 author', mutate(P, `<meta name="author" content="${NET}">`, ''), 'pvp-page', '/pvp/ has no author');
+  expectFail('U4-AC1 og:image', mutate(P, `<meta property="og:image" content="${OG}">`, '<meta property="og:image" content="/og.png">'), 'pvp-page', '/pvp/ og:image is "/og.png"');
+  expectFail('U4-AC1 canonical missing', mutate(P, PVP_CANON, ''), 'pvp-page', '/pvp/ has 0 <link rel="canonical">');
+  expectFail('U4-AC1 canonical wrong', mutate(P, PVP_CANON, '<link rel="canonical" href="https://chromabit.us/pvp">'), 'pvp-page', '/pvp/ canonical is "https://chromabit.us/pvp"');
+  expectFail('U4-AC1 two canonicals', mutate(P, PVP_CANON, `${PVP_CANON}<link href="https://chromabit.us/" rel="canonical">`), 'pvp-page', '/pvp/ has 2 <link rel="canonical">');
+  expectFail(
+    'U4-AC1 second h1',
+    mutate(P, '<p class="hero-sub">The only ranked competitive PVP for Java and Bedrock.</p>', '<h1 class="hero-sub">The only ranked competitive PVP for Java and Bedrock.</h1>'),
+    'pvp-page',
+    '/pvp/ has 2 <h1>, want 1',
+  );
+  expectFail('U4-AC1 broken JSON-LD', mutate(P, '</main>', '</main><script type="application/ld+json">{"@type":}</script>'), 'pvp-page', '/pvp/ JSON-LD block 1 does not parse');
+
+  // U4-AC2 pvp-masthead
+  expectFail('U4-AC2 h1 text', mutate(P, 'RANKED. <span class="accent">ON BOTH EDITIONS.</span>', 'RANKED.<span class="accent">ON BOTH EDITIONS.</span>'), 'pvp-masthead', '/pvp/ <h1> text is "RANKED.ON BOTH EDITIONS."');
+  expectFail('U4-AC2 eyebrow text', mutate(P, 'CHROMAPVP &middot; RANKED KIT PVP', 'CHROMAPVP - RANKED KIT PVP'), 'pvp-masthead', '/pvp/ has no eyebrow "CHROMAPVP · RANKED KIT PVP"');
+  expectFail('U4-AC2 no BETA in the eyebrow', mutate(P, ' <span class="beta-tag">BETA</span></p>', '</p>'), 'pvp-masthead', 'has no .beta-tag inside it');
+  expectFail(
+    'U4-AC2 BETA beside the eyebrow, not in it',
+    mutate(P, ' <span class="beta-tag">BETA</span></p>', '</p><span class="beta-tag">BETA</span>'),
+    'pvp-masthead',
+    'has no .beta-tag inside it',
+  );
+  expectFail('U4-AC2 BETA text', mutate(P, '<span class="beta-tag">BETA</span>', '<span class="beta-tag">NEW</span>'), 'pvp-masthead', '/pvp/ eyebrow .beta-tag text is "NEW"');
+  expectFail(
+    'U4-AC2 eyebrow after the h1',
+    edit(mutate(P, '<p class="section-eyebrow">CHROMAPVP &middot; RANKED KIT PVP <span class="beta-tag">BETA</span></p>', ''), P, '</h1>', '</h1><p class="section-eyebrow">CHROMAPVP &middot; RANKED KIT PVP <span class="beta-tag">BETA</span></p>'),
+    'pvp-masthead',
+    '/pvp/ eyebrow comes after the <h1>',
+  );
+  expectFail('U4-AC2 sub line text', mutate(P, 'competitive PVP for Java and Bedrock.', 'competitive PVP.'), 'pvp-masthead', '/pvp/ has 0 sub lines');
+  expectFail('U4-AC2 sub line twice', mutate(P, '</section><section class="board"', '<p>The only ranked competitive PVP for Java and Bedrock.</p></section><section class="board"'), 'pvp-masthead', '/pvp/ has 2 sub lines');
+  expectFail('U4-AC2 season strip missing', mutate(P, ' data-season hidden', ''), 'pvp-masthead', '/pvp/ has 0 [data-season], want 1');
+  expectFail('U4-AC2 season strip visible in the prerender', mutate(P, ' data-season hidden', ' data-season'), 'pvp-masthead', '/pvp/ [data-season] is not hidden');
+
+  // U4-AC3 pvp-board
+  expectFail('U4-AC3 board missing', mutate(P, ' data-board>', '>'), 'pvp-board', '/pvp/ has 0 [data-board], want 1');
+  expectFail(
+    'U4-AC3 tab order',
+    mutate(P, '<button type="button" data-board-tab="sword" aria-pressed="false">SWORD</button><button type="button" data-board-tab="mace" aria-pressed="false">MACE</button>', '<button type="button" data-board-tab="mace" aria-pressed="false">MACE</button><button type="button" data-board-tab="sword" aria-pressed="false">SWORD</button>'),
+    'pvp-board',
+    '/pvp/ board tabs are ["overall","mace","sword"',
+  );
+  expectFail('U4-AC3 a tab missing', mutate(P, '<button type="button" data-board-tab="chaos" aria-pressed="false" disabled>CHAOS <span class="soon">&middot; SOON</span></button>', ''), 'pvp-board', '/pvp/ board tabs are');
+  expectFail('U4-AC3 tab label', mutate(P, '>TOURNAMENT WINS<', '>TOURNAMENTS<'), 'pvp-board', '/pvp/ tab tournament label is "TOURNAMENTS", want "TOURNAMENT WINS"');
+  expectFail('U4-AC3 soon label', mutate(P, 'AXE &middot; SOON', 'AXE (SOON)'), 'pvp-board', '/pvp/ tab axe label is "AXE (SOON)"');
+  expectFail('U4-AC3 soon tab enabled', mutate(P, 'data-board-tab="axe" aria-pressed="false" disabled', 'data-board-tab="axe" aria-pressed="false"'), 'pvp-board', '/pvp/ tab axe is not disabled');
+  expectFail('U4-AC3 live tab disabled', mutate(P, 'data-board-tab="mace" aria-pressed="false"', 'data-board-tab="mace" aria-pressed="false" disabled'), 'pvp-board', '/pvp/ tab mace is disabled');
+  expectFail('U4-AC3 tab is a link', mutate(P, '<button type="button" data-board-tab="sword" aria-pressed="false">SWORD</button>', '<a href="?board=sword" data-board-tab="sword" aria-pressed="false">SWORD</a>'), 'pvp-board', '/pvp/ tab sword is a <a>');
+  expectFail('U4-AC3 two pressed', mutate(P, 'data-board-tab="sword" aria-pressed="false"', 'data-board-tab="sword" aria-pressed="true"'), 'pvp-board', '/pvp/ has 2 tabs with aria-pressed="true"');
+  expectFail('U4-AC3 none pressed', mutate(P, 'data-board-tab="overall" aria-pressed="true"', 'data-board-tab="overall" aria-pressed="false"'), 'pvp-board', '/pvp/ has 0 tabs with aria-pressed="true"');
+  expectFail(
+    'U4-AC3 wrong default',
+    edit(mutate(P, 'data-board-tab="overall" aria-pressed="true"', 'data-board-tab="overall" aria-pressed="false"'), P, 'data-board-tab="sword" aria-pressed="false"', 'data-board-tab="sword" aria-pressed="true"'),
+    'pvp-board',
+    '/pvp/ pressed tab is "sword", want "overall"',
+  );
+  expectFail('U4-AC3 empty state text', mutate(P, 'Play 10 placement matches to appear here.', 'Check back later.'), 'pvp-board', '/pvp/ [data-board-empty] text is');
+  expectFail('U4-AC3 empty state missing', mutate(P, ' data-board-empty', ''), 'pvp-board', '/pvp/ board has 0 [data-board-empty], want 1');
+  expectFail('U4-AC3 empty state hidden in the prerender', mutate(P, ' data-board-empty', ' data-board-empty hidden'), 'pvp-board', '/pvp/ [data-board-empty] is hidden');
+  expectFail(
+    'U4-AC3 a prerendered row',
+    mutate(P, PVP_EMPTY, `${PVP_EMPTY}<table data-board-table><tbody><tr data-row data-top="1"><td>1</td><td>Someone</td></tr></tbody></table>`),
+    'pvp-board',
+    '/pvp/ prerendered HTML has 1 [data-row], want 0',
+  );
+  expectFail('U4-AC3 sample data in the prerender', mutate(P, PVP_EMPTY, `${PVP_EMPTY}<span hidden>Sample_01</span>`), 'pvp-board', '/pvp/ contains sample data ("Sample_")');
+  expectFail('U4-AC3 note line', mutate(P, 'Updates every minute.', 'Updates hourly.'), 'pvp-board', '/pvp/ has no note');
+  expectFail('U4-AC3 fixture build shipped', { ...goodSite(), 'assets/index-abc.js': 'const B="/pvp-fixture"||"https://api.chromabit.us/pvp";' }, 'pvp-board', 'dist/assets/index-abc.js contains "/pvp-fixture"');
+  {
+    const r = runOn({ ...goodSite(), 'assets/index-abc.js': 'const B=void 0||"https://api.chromabit.us/pvp";' });
+    check('U4-AC3 a production bundle passes', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+
+  // U4-AC4 pvp-tiers
+  expectFail('U4-AC4 block missing', mutate(P, ' data-tiers>', '>'), 'pvp-tiers', '/pvp/ has 0 [data-tiers], want 1');
+  expectFail('U4-AC4 heading', mutate(P, '<h2>SEVEN TIERS</h2>', '<h2>TIERS</h2>'), 'pvp-tiers', '/pvp/ [data-tiers] has no heading "SEVEN TIERS"');
+  expectFail('U4-AC4 heading not a heading', mutate(P, '<h2>SEVEN TIERS</h2>', '<p>SEVEN TIERS</p>'), 'pvp-tiers', 'has no heading "SEVEN TIERS"');
+  expectFail(
+    'U4-AC4 order',
+    mutate(P, '<li data-tier="Emerald"><span class="tier-name">Emerald</span><span class="tier-min">1700</span></li><li data-tier="Mithril"><span class="tier-name">Mithril</span><span class="tier-min">1800</span></li>', '<li data-tier="Mithril"><span class="tier-name">Mithril</span><span class="tier-min">1800</span></li><li data-tier="Emerald"><span class="tier-name">Emerald</span><span class="tier-min">1700</span></li>'),
+    'pvp-tiers',
+    '/pvp/ [data-tier] values are',
+  );
+  expectFail('U4-AC4 a tier missing', mutate(P, '<li data-tier="Silver"><span class="tier-name">Silver</span><span class="tier-min">1500</span></li>', ''), 'pvp-tiers', '/pvp/ [data-tier] values are');
+  expectFail('U4-AC4 minimum wrong', mutate(P, '<span class="tier-min">1600</span>', '<span class="tier-min">1650</span>'), 'pvp-tiers', '/pvp/ tier Gold does not show its minimum "1600"');
+  expectFail('U4-AC4 Tin shows 0, not START', mutate(P, '<span class="tier-min">START</span>', '<span class="tier-min">0</span>'), 'pvp-tiers', '/pvp/ tier Tin does not show its minimum "START"');
+  expectFail('U4-AC4 name wrong', mutate(P, '<span class="tier-name">Chroma</span>', '<span class="tier-name">CHROMA</span>'), 'pvp-tiers', '/pvp/ tier Chroma does not show its name "Chroma"');
+  expectFail('U4-AC4 name and minimum run together', mutate(P, '<span class="tier-name">Bronze</span><span class="tier-min">1350</span>', '<span>Bronze 1350</span>'), 'pvp-tiers', '/pvp/ tier Bronze does not show its name');
+
+  // U4-AC5 pvp-facts
+  expectFail('U4-AC5 block missing', mutate(P, ' data-facts>', '>'), 'pvp-facts', '/pvp/ has 0 [data-facts], want 1');
+  expectFail('U4-AC5 three facts', mutate(P, '<li data-fact><strong>LVL 2</strong>', '<li><strong>LVL 2</strong>'), 'pvp-facts', '/pvp/ [data-facts] has 3 [data-fact], want 4');
+  expectFail('U4-AC5 value', mutate(P, '<strong>BO3</strong>', '<strong>BO5</strong>'), 'pvp-facts', '/pvp/ fact 2 is "BO5');
+  expectFail('U4-AC5 label', mutate(P, 'ranked opens at level 2', 'ranked opens at level 5'), 'pvp-facts', '/pvp/ fact 4 is');
+  expectFail('U4-AC5 divisions value', mutate(P, '<strong>III &middot; II &middot; I</strong>', '<strong>III II I</strong>'), 'pvp-facts', '/pvp/ fact 3 is');
+  expectFail(
+    'U4-AC5 order',
+    mutate(P, '<li data-fact><strong>10</strong><span>placement matches before you get a rank</span></li><li data-fact><strong>BO3</strong><span>every ranked duel is best of three</span></li>', '<li data-fact><strong>BO3</strong><span>every ranked duel is best of three</span></li><li data-fact><strong>10</strong><span>placement matches before you get a rank</span></li>'),
+    'pvp-facts',
+    '/pvp/ fact 1 is "BO3',
+  );
+
+  // U4-AC6 pvp-modes
+  expectFail('U4-AC6 block missing', mutate(P, ' data-modes>', '>'), 'pvp-modes', '/pvp/ has 0 [data-modes], want 1');
+  expectFail('U4-AC6 heading', mutate(P, '<h2>WHAT YOU CAN PLAY</h2>', '<h2>MODES</h2>'), 'pvp-modes', '/pvp/ [data-modes] has no heading "WHAT YOU CAN PLAY"');
+  expectFail('U4-AC6 five cards', mutate(P, '<article class="mode" data-mode><h3>Cosmetics</h3>', '<article class="mode"><h3>Cosmetics</h3>'), 'pvp-modes', '/pvp/ [data-modes] has 5 [data-mode], want 6');
+  expectFail('U4-AC6 title', mutate(P, '<h3>FFA Pit</h3>', '<h3>FFA</h3>'), 'pvp-modes', '/pvp/ mode 2 has no heading "FFA Pit"');
+  expectFail('U4-AC6 title case', mutate(P, '<h3>Duels</h3>', '<h3>DUELS</h3>'), 'pvp-modes', '/pvp/ mode 1 has no heading "Duels"');
+  expectFail('U4-AC6 title not a heading', mutate(P, '<h3>Parties</h3>', '<p>Parties</p>'), 'pvp-modes', '/pvp/ mode 5 has no heading "Parties"');
+  expectFail('U4-AC6 description off by one char', mutate(P, 'and the Champion title.', 'and the Champion title!'), 'pvp-modes', '/pvp/ mode "Tournaments" has no description');
+  expectFail('U4-AC6 description split', mutate(P, '<p>Bring up to three friends. Queue Arena 2v2v2 together.</p>', '<p>Bring up to three friends.</p><p>Queue Arena 2v2v2 together.</p>'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  expectFail(
+    'U4-AC6 order',
+    edit(mutate(P, '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article>', ''), P, '</section><section class="pvp-join">', '<article class="mode" data-mode><h3>Duels</h3><p>Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.</p></article></section><section class="pvp-join">'),
+    'pvp-modes',
+    '/pvp/ mode 1 has no heading "Duels"',
+  );
+
+  // U4-AC7 pvp-join
+  expectFail('U4-AC7 join line', mutate(P, 'and pick Kit PVP in the hub.', 'and pick PVP.'), 'pvp-join', '/pvp/ has no join line');
+  expectFail('U4-AC7 no copy button', mutate(P, ' data-copy-ip>', '>'), 'pvp-join', '/pvp/ has 0 [data-copy-ip] buttons, want 1');
+  expectFail('U4-AC7 two copy buttons', mutate(P, '</main>', '<button type="button" data-copy-ip>COPY IP</button></main>'), 'pvp-join', '/pvp/ has 2 [data-copy-ip] buttons, want 1');
+  expectFail('U4-AC7 copy label', mutate(P, 'data-copy-ip>COPY IP<', 'data-copy-ip>COPY<'), 'pvp-join', '/pvp/ [data-copy-ip] label is "COPY"');
+  expectFail('U4-AC7 store credit (any case)', mutate(P, 'hats and titles.</p>', 'hats and titles.</p><p>Win Store&nbsp;Credit</p>'), 'pvp-join', '/pvp/ mentions "store credit"');
+  expectFail('U4-AC7 store credit in the head', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="store credit">`), 'pvp-join', '/pvp/ mentions "store credit"');
+  expectFail('U4-AC7 Chromabit SMP', mutate(P, '</main>', '<p>Also try Chromabit SMP</p></main>'), 'pvp-join', '/pvp/ mentions "Chromabit SMP"');
+
+  // U4-AC8 nav-links
+  expectFail('U4-AC8 PVP link missing on /store/', mutate('store/index.html', '<li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li>', ''), 'nav-links', '/store/ nav links are');
+  expectFail(
+    'U4-AC8 PVP after STORE on /faq/',
+    mutate('faq/index.html', '<li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li><li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE</a></li><li><a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li>'),
+    'nav-links',
+    '/faq/ nav links are [["/","HOME"],["/store/","STORE"],["/pvp/","PVP"]',
+  );
+  expectFail('U4-AC8 PVP label on /', mutate(H, '<a href="/pvp/">PVP <span', '<a href="/pvp/">RANKED <span'), 'nav-links', '/ nav links are [["/","HOME"],["/pvp/","RANKED"]');
+  expectFail('U4-AC8 PVP href without slash on /privacy/', mutate('privacy/index.html', '<li><a href="/pvp/">PVP', '<li><a href="/pvp">PVP'), 'nav-links', '/privacy/ nav links are');
+  expectFail('U4-AC8 FAQ missing from the nav on /smp/', mutate(S, '<a href="/faq/">FAQ</a></header>', '</header>'), 'nav-links', '/smp/ nav links are');
+  expectFail('U4-AC8 BETA missing on /auctions/', mutate('auctions/index.html', ' <span class="nav-beta" data-beta>BETA</span>', ''), 'nav-links', '/auctions/ nav PVP link has 0 BETA markers, want 1');
+  expectFail('U4-AC8 BETA marker text', mutate(H, '<span class="nav-beta" data-beta>BETA</span>', '<span class="nav-beta" data-beta>NEW</span>'), 'nav-links', '/ nav PVP BETA marker text is "NEW"');
+  expectFail(
+    'U4-AC8 BETA on STORE',
+    mutate('store/index.html', '<li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE<span data-beta>BETA</span></a></li>'),
+    'nav-links',
+    '/store/ nav link /store/ has a BETA marker',
+  );
+  {
+    // The spec allows the marker as .beta-tag too; only the U3 BETA counts on / and /smp/ forbid it there.
+    const r = runOn(mutate('faq/index.html', '<span class="nav-beta" data-beta>BETA</span>', '<span class="beta-tag">BETA</span>'));
+    check('U4-AC8 a .beta-tag marker is accepted by nav-links', r.lines.includes('PASS nav-links') && r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+  expectFail('U4-AC8 PVP not active on /pvp/', mutate(P, '<a href="/pvp/" aria-current="page" class="active">', '<a href="/pvp/">'), 'nav-links', '/pvp/ nav aria-current="page" links are [], want ["/pvp/"]');
+  expectFail('U4-AC8 HOME active on /pvp/', mutate(P, '<li><a href="/">HOME</a></li>', '<li><a href="/" aria-current="page">HOME</a></li>'), 'nav-links', '/pvp/ nav aria-current="page" links are ["/","/pvp/"]');
+  expectFail('U4-AC8 PVP active on /faq/', mutate('faq/index.html', '<li><a href="/pvp/">', '<li><a href="/pvp/" aria-current="page">'), 'nav-links', '/faq/ nav marks PVP as the current page');
+  {
+    const r = runOn(mutate('faq/index.html', '<li><a href="/faq/">FAQ</a></li>', '<li><a href="/faq/" aria-current="page" class="active">FAQ</a></li>'));
+    check('U4-AC8 FAQ active on /faq/ is fine', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+  expectFail('U4-AC8 footer lost PVP on /privacy/', mutate('privacy/index.html', '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/smp/">'), 'nav-links', '/privacy/ footer has 0 links to /pvp/, want 1');
+  expectFail('U4-AC8 footer PVP label on /pvp/', mutate(P, '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/pvp/">RANKED</a><a href="/smp/">'), 'nav-links', '/pvp/ footer /pvp/ link label is "RANKED"');
+  expectFail('U4-AC8 no footer on /store/', mutate('store/index.html', FOOTER, ''), 'nav-links', '/store/ has no <footer>');
+
+  // U4-AC9 sitemap-pvp
+  expectFail('U4-AC9 sitemap missing', { ...goodSite(), 'sitemap.xml': null }, 'sitemap-pvp', 'dist/sitemap.xml missing');
+  expectFail('U4-AC9 no /pvp/ in the sitemap', mutate('sitemap.xml', '  <url><loc>https://chromabit.us/pvp/</loc></url>\n', ''), 'sitemap-pvp', 'lists https://chromabit.us/pvp/ 0 times, want 1');
+  expectFail('U4-AC9 /pvp without slash', mutate('sitemap.xml', 'https://chromabit.us/pvp/', 'https://chromabit.us/pvp'), 'sitemap-pvp', '0 times');
+
+  // U4-AC10 internal-links
+  expectFail('U4-AC10 a broken link on /faq/', mutate('faq/index.html', 'Everything you need', '<a href="/rules/">Rules</a> Everything you need'), 'internal-links', '/faq/ <a href="/rules/"> does not resolve');
+  expectFail('U4-AC10 a broken stylesheet in a head', mutate('store/index.html', '<meta charset="UTF-8">', '<meta charset="UTF-8"><link rel="stylesheet" href="/assets/gone.css">'), 'internal-links', '/store/ <link href="/assets/gone.css"> does not resolve');
+  expectFail('U4-AC10 a broken file link on /pvp/', mutate(P, '</main>', '<a href="/pvp/rules.html">rules</a></main>'), 'internal-links', '/pvp/ <a href="/pvp/rules.html"> does not resolve');
+  {
+    const site = mutate('faq/index.html', 'Everything you need', '<a href="/pvp?board=sword#top">a</a><a href="/og-preview.png">b</a><a href="//cdn.example/x">c</a><a href="https://chromabit.us/nope/">d</a><a href="#faq">e</a> Everything you need');
+    const r = runOn(site);
+    check('U4-AC10 queries, fragments, dir without slash, files, external and protocol-relative links pass', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
+
+  // U4-AC11 home-join-rel
+  expectFail('U4-AC11 JOIN without rel', mutate(H, `href="${DISCORD}" target="_blank" rel="noopener">JOIN`, `href="${DISCORD}" target="_blank">JOIN`), 'home-join-rel', '/ JOIN link has target="_blank" and rel=""');
+  expectFail('U4-AC11 JOIN rel noreferrer only', mutate(H, 'target="_blank" rel="noopener">JOIN', 'target="_blank" rel="noreferrer">JOIN'), 'home-join-rel', 'rel="noreferrer"');
+  {
+    const r = runOn(mutate(H, 'target="_blank" rel="noopener">JOIN', 'target="_blank" rel="noreferrer noopener">JOIN'));
+    check('U4-AC11 rel with more tokens passes', r.code === 0, `exit ${r.code}:\n${r.out}`);
+  }
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

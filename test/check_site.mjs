@@ -19,7 +19,7 @@
 // Plain Node ESM, no dependencies: HTML is read with a few narrow regexes, the
 // PNG size from its IHDR chunk.
 
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -41,6 +41,15 @@ export const PAGES = {
   '/auctions/': 'auctions/index.html',
   '/privacy/': 'privacy/index.html',
 };
+
+/**
+ * U4: the /pvp/ page. Kept out of PAGES on purpose so the U2/U3 checks keep
+ * exactly the scope they were written for; the U4 checks read it through
+ * ALL_ROUTES (and check its head themselves, in pvp-page).
+ */
+export const PVP_PAGES = { '/pvp/': 'pvp/index.html' };
+export const ALL_ROUTES = [...Object.keys(PAGES), ...Object.keys(PVP_PAGES)];
+const fileOf = (route) => PAGES[route] ?? PVP_PAGES[route];
 
 export const HOME = {
   title: 'Chromabit Network | Ranked PVP and Economy SMP for Java + Bedrock',
@@ -106,7 +115,7 @@ const cache = new Map();
 export function page(route, dist = DIST) {
   const key = `${dist}\0${route}`;
   if (cache.has(key)) return cache.get(key);
-  const file = join(dist, PAGES[route]);
+  const file = join(dist, fileOf(route));
   let result = null;
   if (existsSync(file)) {
     const html = readFileSync(file, 'utf-8');
@@ -117,7 +126,7 @@ export function page(route, dist = DIST) {
     const jsonLd = [
       ...html.matchAll(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi),
     ].map((m) => m[1]);
-    result = { route, file: PAGES[route], html, head, metas, titles, jsonLd };
+    result = { route, file: fileOf(route), html, head, metas, titles, jsonLd };
   }
   cache.set(key, result);
   return result;
@@ -168,7 +177,7 @@ function eachPage(routes, fn, dist) {
   const problems = [];
   for (const route of routes) {
     const p = page(route, dist);
-    if (!p) problems.push(`${route} missing (${PAGES[route]})`);
+    if (!p) problems.push(`${route} missing (${fileOf(route)})`);
     else problems.push(...fn(p));
   }
   return problems;
@@ -858,6 +867,395 @@ function ldJsonParses(dist) {
   );
 }
 
+// ------------------------------------------- U4: /pvp/ and the network nav --
+//
+// Hooks (the contract with the implementer):
+//   /pvp/       [data-season] [data-board] [data-board-tab="<key>"]
+//               [data-board-table] [data-row] [data-board-empty] [data-tiers]
+//               [data-tier="<Name>"] [data-facts] [data-fact] [data-modes]
+//               [data-mode] [data-copy-ip], and .beta-tag in the eyebrow.
+//   every page  the nav is the first <header> in the document; its links are
+//               every <a> in it except the brand link (a.site-nav-brand). The
+//               active link carries aria-current="page". The BETA marker in
+//               the PVP link is an element with class beta-tag OR attribute
+//               data-beta. NOTE: the U3 checks home-mode-cards and smp-page
+//               count .beta-tag on / and /smp/, so the nav marker must use
+//               [data-beta] WITHOUT the beta-tag class.
+//
+// Texts are compared exactly (case-sensitive) after the same normalisation as
+// U3: textOf() / blockText() (entities decoded, curly quotes straightened,
+// whitespace incl. nbsp collapsed to one space and trimmed). The BETA marker is
+// left out of the text of the element it sits in. "Hidden" means the HTML
+// `hidden` attribute (what Preact renders for hidden={true}).
+
+export const PVP = {
+  route: '/pvp/',
+  title: 'Ranked PVP Leaderboards | Chromabit',
+  description:
+    'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.',
+  canonical: 'https://chromabit.us/pvp/',
+  eyebrow: 'CHROMAPVP · RANKED KIT PVP',
+  h1: 'RANKED. ON BOTH EDITIONS.',
+  sub: 'The only ranked competitive PVP for Java and Bedrock.',
+  /** [key, label, soon] in feed order. */
+  tabs: [
+    ['overall', 'OVERALL', false],
+    ['sword', 'SWORD', false],
+    ['mace', 'MACE', false],
+    ['axe', 'AXE · SOON', true],
+    ['chaos', 'CHAOS · SOON', true],
+    ['tournament', 'TOURNAMENT WINS', false],
+  ],
+  defaultTab: 'overall',
+  empty: 'No ranked players yet. Play 10 placement matches to appear here.',
+  note: 'Updates every minute. Players appear after 10 placement matches.',
+  tiersHeading: 'SEVEN TIERS',
+  tiers: [
+    ['Tin', 'START'],
+    ['Bronze', '1350'],
+    ['Silver', '1500'],
+    ['Gold', '1600'],
+    ['Emerald', '1700'],
+    ['Mithril', '1800'],
+    ['Chroma', '1950'],
+  ],
+  facts: [
+    ['10', 'placement matches before you get a rank'],
+    ['BO3', 'every ranked duel is best of three'],
+    ['III · II · I', 'three divisions in every tier below Chroma'],
+    ['LVL 2', 'ranked opens at level 2'],
+  ],
+  modesHeading: 'WHAT YOU CAN PLAY',
+  modes: [
+    ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
+    ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
+    ['Prismatic Arena', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'],
+    ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
+    ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 together.'],
+    ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
+  ],
+  join: 'Connect to play.chromabit.us and pick Kit PVP in the hub.',
+  /** Production must not ship sample data or a fixture build. */
+  sampleMarker: 'Sample_',
+  fixtureBase: '/pvp-fixture',
+};
+
+/** The nav on every page: [href, label] in order. */
+export const NAV_LINKS = [
+  ['/', 'HOME'],
+  ['/pvp/', 'PVP'],
+  ['/store/', 'STORE'],
+  ['/auctions/', 'AUCTIONS'],
+  ['/faq/', 'FAQ'],
+];
+export const SITEMAP_PVP = 'https://chromabit.us/pvp/';
+
+const isBetaMarker = (el) => hasClass('beta-tag')(el) || 'data-beta' in el.attrs;
+/** Elements that are not ancestors of another element in the list. */
+const innermost = (list) => list.filter((el) => !list.some((o) => o !== el && inside(o, el)));
+/** The innermost elements under `node` whose textOf equals `want`. */
+const withText = (node, want, skip = null) => innermost(findAll(node, (el) => textOf(el, skip) === want));
+const isHidden = (el) => 'hidden' in el.attrs;
+/** The site nav: the first <header> anywhere in the document (not only in #app). */
+const siteNav = (p) => findAll(dom(p), isTag('header'))[0] ?? null;
+const siteFooter = (p) => findAll(dom(p), isTag('footer'))[0] ?? null;
+
+/** Run `fn` on /pvp/; a missing page is one problem. */
+const onPvp = (dist, fn) => eachPage([PVP.route], fn, dist);
+
+/** U4-AC1: /pvp/ exists, is prerendered, its head is as specified, one <h1>, JSON-LD (if any) parses. */
+function pvpPage(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const at = p.html.search(/<div\s+id\s*=\s*["']app["'][^>]*>/i);
+    if (at < 0) problems.push('/pvp/ has no <div id="app">');
+    else if (/^\s*<\/div>/i.test(p.html.slice(at).replace(/^<div[^>]*>/i, '')))
+      problems.push('/pvp/ <div id="app"> is empty (not prerendered)');
+    problems.push(
+      ...expectTitle(p, PVP.title),
+      ...expectMeta(p, 'description', PVP.description),
+      ...expectMeta(p, 'og:site_name', NETWORK),
+      ...expectMeta(p, 'author', NETWORK),
+      ...expectMeta(p, 'og:title', PVP.title),
+      ...expectMeta(p, 'twitter:title', PVP.title),
+      ...expectMeta(p, 'og:image', OG_IMAGE_URL),
+    );
+    const canon = [...p.head.matchAll(/<link\b[^>]*>/gi)]
+      .map((m) => parseAttrs(m[0]))
+      .filter((a) => (a.rel ?? '').toLowerCase().split(/\s+/).includes('canonical'));
+    if (canon.length !== 1) problems.push(`/pvp/ has ${canon.length} <link rel="canonical">, want 1`);
+    else if (canon[0].href !== PVP.canonical) problems.push(`/pvp/ canonical is ${q(canon[0].href)}, want ${q(PVP.canonical)}`);
+    p.jsonLd.forEach((raw, i) => {
+      try {
+        JSON.parse(raw);
+      } catch (e) {
+        problems.push(`/pvp/ JSON-LD block ${i + 1} does not parse: ${e.message}`);
+      }
+    });
+    const h1s = findAll(dom(p), isTag('h1')).length;
+    if (h1s !== 1) problems.push(`/pvp/ has ${h1s} <h1>, want 1`);
+    return problems;
+  });
+}
+
+/** U4-AC2: eyebrow + BETA, the h1 text, the one sub line, the hidden season strip. */
+function pvpMasthead(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const root = dom(p);
+    const h1s = findAll(root, isTag('h1'));
+    const h1 = h1s.length === 1 ? h1s[0] : null; // the count is pvp-page's job
+    if (h1 && textOf(h1) !== PVP.h1) problems.push(`/pvp/ <h1> text is ${q(textOf(h1))}, want ${q(PVP.h1)}`);
+    const brows = withText(root, PVP.eyebrow, isBetaMarker).filter((el) => findAll(el, hasClass('beta-tag')).length);
+    if (brows.length !== 1) {
+      const loose = withText(root, PVP.eyebrow, isBetaMarker).length;
+      problems.push(
+        loose
+          ? `/pvp/ eyebrow ${q(PVP.eyebrow)} has no .beta-tag inside it`
+          : `/pvp/ has no eyebrow ${q(PVP.eyebrow)} (text compared without the BETA tag)`,
+      );
+    } else {
+      const [brow] = brows;
+      const tags = findAll(brow, hasClass('beta-tag'));
+      if (tags.length !== 1) problems.push(`/pvp/ eyebrow has ${tags.length} .beta-tag, want 1`);
+      else if (textOf(tags[0]) !== 'BETA') problems.push(`/pvp/ eyebrow .beta-tag text is ${q(textOf(tags[0]))}, want "BETA"`);
+      if (h1 && brow.order > h1.order) problems.push('/pvp/ eyebrow comes after the <h1>');
+    }
+    const subs = withText(root, PVP.sub);
+    if (subs.length !== 1) problems.push(`/pvp/ has ${subs.length} sub lines ${q(PVP.sub)}, want 1`);
+    const season = one(root, hasAttr('data-season'), '[data-season]', '/pvp/');
+    if (typeof season === 'string') problems.push(season);
+    else if (!isHidden(season)) problems.push('/pvp/ [data-season] is not hidden in the prerendered HTML (want the hidden attribute until season data loads)');
+    return problems;
+  });
+}
+
+/** U4-AC3: the board skeleton: six tabs, one pressed, the empty state, no rows, no sample data. */
+function pvpBoard(dist) {
+  const problems = onPvp(dist, (p) => {
+    const problems = [];
+    const root = dom(p);
+    const board = one(root, hasAttr('data-board'), '[data-board]', '/pvp/');
+    if (typeof board === 'string') return [board];
+    const tabs = findAll(board, hasAttr('data-board-tab'));
+    const keys = tabs.map((t) => t.attrs['data-board-tab']);
+    const want = PVP.tabs.map(([k]) => k);
+    if (keys.join(',') !== want.join(',')) problems.push(`/pvp/ board tabs are ${q(keys)}, want ${q(want)}`);
+    for (const [key, label, soon] of PVP.tabs) {
+      const tab = tabs.find((t) => t.attrs['data-board-tab'] === key);
+      if (!tab) continue;
+      if (tab.tag !== 'button') problems.push(`/pvp/ tab ${key} is a <${tab.tag}>, want <button>`);
+      if (textOf(tab) !== label) problems.push(`/pvp/ tab ${key} label is ${q(textOf(tab))}, want ${q(label)}`);
+      if (soon && !('disabled' in tab.attrs)) problems.push(`/pvp/ tab ${key} is not disabled (soon)`);
+      if (!soon && 'disabled' in tab.attrs) problems.push(`/pvp/ tab ${key} is disabled`);
+    }
+    const pressed = tabs.filter((t) => t.attrs['aria-pressed'] === 'true').map((t) => t.attrs['data-board-tab']);
+    if (pressed.length !== 1) problems.push(`/pvp/ has ${pressed.length} tabs with aria-pressed="true" (${q(pressed)}), want 1`);
+    else if (pressed[0] !== PVP.defaultTab) problems.push(`/pvp/ pressed tab is ${q(pressed[0])}, want ${q(PVP.defaultTab)}`);
+    const empty = one(board, hasAttr('data-board-empty'), '[data-board-empty]', '/pvp/ board');
+    if (typeof empty === 'string') problems.push(empty);
+    else {
+      if (textOf(empty) !== PVP.empty) problems.push(`/pvp/ [data-board-empty] text is ${q(textOf(empty))}, want ${q(PVP.empty)}`);
+      if (isHidden(empty)) problems.push('/pvp/ [data-board-empty] is hidden in the prerendered HTML');
+    }
+    const rows = findAll(root, hasAttr('data-row')).length;
+    if (rows) problems.push(`/pvp/ prerendered HTML has ${rows} [data-row], want 0`);
+    if (p.html.includes(PVP.sampleMarker)) problems.push(`/pvp/ contains sample data (${q(PVP.sampleMarker)})`);
+    if (!withText(root, PVP.note).length) problems.push(`/pvp/ has no note ${q(PVP.note)}`);
+    return problems;
+  });
+  // A fixture build (VITE_PVP_BASE=/pvp-fixture, for test/browser_check.mjs) must never be what ships.
+  const assets = join(dist, 'assets');
+  if (existsSync(assets)) {
+    for (const f of readdirSync(assets).filter((f) => f.endsWith('.js'))) {
+      if (readFileSync(join(assets, f), 'utf-8').includes(PVP.fixtureBase))
+        problems.push(`dist/assets/${f} contains ${q(PVP.fixtureBase)} (a fixture build; rebuild without VITE_PVP_BASE)`);
+    }
+  }
+  return problems;
+}
+
+/** U4-AC4: SEVEN TIERS, seven [data-tier] items in order, each with its name and minimum. */
+function pvpTiers(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const block = one(dom(p), hasAttr('data-tiers'), '[data-tiers]', '/pvp/');
+    if (typeof block === 'string') return [block];
+    if (!findAll(block, isHeading).some((h) => textOf(h) === PVP.tiersHeading))
+      problems.push(`/pvp/ [data-tiers] has no heading ${q(PVP.tiersHeading)}`);
+    const items = findAll(block, hasAttr('data-tier'));
+    const names = items.map((t) => t.attrs['data-tier']);
+    const want = PVP.tiers.map(([n]) => n);
+    if (names.join(',') !== want.join(',')) problems.push(`/pvp/ [data-tier] values are ${q(names)}, want ${q(want)}`);
+    for (const [name, min] of PVP.tiers) {
+      const item = items.find((t) => t.attrs['data-tier'] === name);
+      if (!item) continue;
+      if (!findAll(item, (el) => textOf(el) === name).length)
+        problems.push(`/pvp/ tier ${name} does not show its name ${q(name)} in its own element`);
+      if (!findAll(item, (el) => textOf(el) === min).length)
+        problems.push(`/pvp/ tier ${name} does not show its minimum ${q(min)} in its own element (text ${q(blockText(item))})`);
+    }
+    return problems;
+  });
+}
+
+/** U4-AC5: four [data-fact] items in [data-facts], each a value and a label in their own elements. */
+function pvpFacts(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const block = one(dom(p), hasAttr('data-facts'), '[data-facts]', '/pvp/');
+    if (typeof block === 'string') return [block];
+    const facts = findAll(block, hasAttr('data-fact'));
+    if (facts.length !== PVP.facts.length) problems.push(`/pvp/ [data-facts] has ${facts.length} [data-fact], want ${PVP.facts.length}`);
+    PVP.facts.forEach(([value, label], i) => {
+      const f = facts[i];
+      if (!f) return;
+      const hasValue = findAll(f, (el) => textOf(el) === value).length > 0;
+      const hasLabel = findAll(f, (el) => textOf(el) === label).length > 0;
+      if (!hasValue || !hasLabel)
+        problems.push(`/pvp/ fact ${i + 1} is ${q(blockText(f))}, want value ${q(value)} and label ${q(label)} each in its own element`);
+    });
+    return problems;
+  });
+}
+
+/** U4-AC6: WHAT YOU CAN PLAY, six [data-mode] cards in order with title heading and exact description. */
+function pvpModes(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const block = one(dom(p), hasAttr('data-modes'), '[data-modes]', '/pvp/');
+    if (typeof block === 'string') return [block];
+    if (!findAll(block, isHeading).some((h) => textOf(h) === PVP.modesHeading))
+      problems.push(`/pvp/ [data-modes] has no heading ${q(PVP.modesHeading)}`);
+    const cards = findAll(block, hasAttr('data-mode'));
+    if (cards.length !== PVP.modes.length) problems.push(`/pvp/ [data-modes] has ${cards.length} [data-mode], want ${PVP.modes.length}`);
+    PVP.modes.forEach(([title, desc], i) => {
+      const c = cards[i];
+      if (!c) return;
+      const titles = findAll(c, isHeading).map((h) => textOf(h));
+      if (!titles.includes(title)) problems.push(`/pvp/ mode ${i + 1} has no heading ${q(title)} (headings: ${q(titles)})`);
+      if (!findAll(c, (el) => textOf(el) === desc).length) problems.push(`/pvp/ mode ${q(title)} has no description ${q(desc)}`);
+    });
+    return problems;
+  });
+}
+
+/** U4-AC7: the join line, exactly one COPY IP; no "store credit" (any case) or "Chromabit SMP" on /pvp/. */
+function pvpJoin(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const root = dom(p);
+    if (!withText(root, PVP.join).length) problems.push(`/pvp/ has no join line ${q(PVP.join)}`);
+    problems.push(...copyButtonIn(root, '/pvp/')[0]);
+    const credit = occurrence(p.html, app(p), 'store credit', { ci: true });
+    if (credit) problems.push(`/pvp/ mentions "store credit": ${credit}`);
+    const smp = occurrence(p.html, app(p), SMP_NAME);
+    if (smp) problems.push(`/pvp/ mentions ${q(SMP_NAME)}: ${smp}`);
+    return problems;
+  });
+}
+
+/** U4-AC8: on every page the nav is HOME PVP STORE AUCTIONS FAQ, PVP has BETA, PVP active only on /pvp/; footer links PVP. */
+function navLinks(dist) {
+  return eachPage(
+    ALL_ROUTES,
+    (p) => {
+      const problems = [];
+      const r = p.route;
+      const nav = siteNav(p);
+      if (!nav) problems.push(`${r} has no nav <header>`);
+      else {
+        const links = findAll(nav, (el) => el.tag === 'a' && !hasClass('site-nav-brand')(el));
+        const got = links.map((a) => [a.attrs.href ?? '', textOf(a, isBetaMarker)]);
+        if (q(got) !== q(NAV_LINKS)) problems.push(`${r} nav links are ${q(got)}, want ${q(NAV_LINKS)}`);
+        for (const a of links) {
+          const marks = findAll(a, isBetaMarker);
+          if (a.attrs.href === '/pvp/') {
+            if (marks.length !== 1) problems.push(`${r} nav PVP link has ${marks.length} BETA markers, want 1`);
+            else if (textOf(marks[0]) !== 'BETA') problems.push(`${r} nav PVP BETA marker text is ${q(textOf(marks[0]))}, want "BETA"`);
+          } else if (marks.length) problems.push(`${r} nav link ${a.attrs.href} has a BETA marker (only PVP has one)`);
+        }
+        const active = links.filter((a) => a.attrs['aria-current'] === 'page').map((a) => a.attrs.href);
+        if (r === PVP.route) {
+          if (active.join(',') !== '/pvp/') problems.push(`/pvp/ nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
+        } else {
+          if (active.includes('/pvp/')) problems.push(`${r} nav marks PVP as the current page`);
+          if (active.length > 1) problems.push(`${r} nav has ${active.length} aria-current="page" links`);
+        }
+      }
+      const footer = siteFooter(p);
+      if (!footer) problems.push(`${r} has no <footer>`);
+      else {
+        const pvp = findAll(footer, (el) => el.tag === 'a' && el.attrs.href === '/pvp/');
+        if (pvp.length !== 1) problems.push(`${r} footer has ${pvp.length} links to /pvp/, want 1`);
+        else if (textOf(pvp[0]) !== 'PVP') problems.push(`${r} footer /pvp/ link label is ${q(textOf(pvp[0]))}, want "PVP"`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** U4-AC9: dist/sitemap.xml lists https://chromabit.us/pvp/ once. */
+function sitemapPvp(dist) {
+  const file = join(dist, 'sitemap.xml');
+  if (!existsSync(file)) return ['dist/sitemap.xml missing'];
+  const locs = [...readFileSync(file, 'utf-8').matchAll(/<loc>\s*([^<]*?)\s*<\/loc>/g)].map((m) => decode(m[1]));
+  const n = locs.filter((l) => l === SITEMAP_PVP).length;
+  return n === 1 ? [] : [`dist/sitemap.xml lists ${SITEMAP_PVP} ${n} times, want 1`];
+}
+
+/**
+ * U4-AC10: every href starting with a single "/" on every page (a, link, ...)
+ * resolves to a file in dist: query and fragment dropped, percent-decoded,
+ * "/x/" -> x/index.html, "/x" -> the file x or x/index.html (GitHub Pages
+ * serves a directory's index.html for both).
+ */
+function internalLinks(dist) {
+  return eachPage(
+    ALL_ROUTES,
+    (p) => {
+      const problems = [];
+      const seen = new Set();
+      for (const el of findAll(dom(p), (el) => typeof el.attrs.href === 'string')) {
+        const href = el.attrs.href.trim();
+        if (!href.startsWith('/') || href.startsWith('//') || seen.has(href)) continue;
+        seen.add(href);
+        let path = href.replace(/[?#].*$/, '');
+        try {
+          path = decodeURIComponent(path);
+        } catch {
+          problems.push(`${p.route} <${el.tag} href=${q(href)}> is not a valid URL path`);
+          continue;
+        }
+        const isFile = (f) => existsSync(f) && statSync(f).isFile();
+        const target = join(dist, path);
+        const ok = path.endsWith('/') ? isFile(join(target, 'index.html')) : isFile(target) || isFile(join(target, 'index.html'));
+        if (!ok) problems.push(`${p.route} <${el.tag} href=${q(href)}> does not resolve to a file in dist`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
+/** U4-AC11 (U3 review F4): the landing JOIN link opened in a new tab has rel containing noopener. */
+function homeJoinRel(dist) {
+  return eachPage(
+    ['/'],
+    (p) => {
+      const problems = [];
+      for (const a of findAll(dom(p), (el) => el.tag === 'a' && 'data-discord-join' in el.attrs)) {
+        if ((a.attrs.target ?? '').toLowerCase() !== '_blank') continue;
+        const rel = (a.attrs.rel ?? '').toLowerCase().split(/\s+/);
+        if (!rel.includes('noopener')) problems.push(`/ JOIN link has target="_blank" and rel=${q(a.attrs.rel ?? '')}, want rel containing "noopener"`);
+      }
+      return problems;
+    },
+    dist,
+  );
+}
+
 /** Ordered list of [name, fn(dist) -> problems[]]. Append new checks at the end. */
 export const CHECKS = [
   ['pages-prerendered', pagesPrerendered],
@@ -876,6 +1274,18 @@ export const CHECKS = [
   ['home-removed', homeRemoved],
   ['smp-page', smpPage],
   ['ld-json-parses', ldJsonParses],
+  // U4: /pvp/ and the network nav
+  ['pvp-page', pvpPage],
+  ['pvp-masthead', pvpMasthead],
+  ['pvp-board', pvpBoard],
+  ['pvp-tiers', pvpTiers],
+  ['pvp-facts', pvpFacts],
+  ['pvp-modes', pvpModes],
+  ['pvp-join', pvpJoin],
+  ['nav-links', navLinks],
+  ['sitemap-pvp', sitemapPvp],
+  ['internal-links', internalLinks],
+  ['home-join-rel', homeJoinRel],
 ];
 
 // -------------------------------------------------------------------- main --
