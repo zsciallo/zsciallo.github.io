@@ -20,9 +20,9 @@ const FACTS = [
 const MODES = [
   ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
   ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
-  ['Prismatic Arena', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'],
+  ['Prismatic Arena', 'A shrinking ring, a new augment each round, and a gold shop between fights. Last team standing wins.'],
   ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
-  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 together.'],
+  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
   ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
 ];
 

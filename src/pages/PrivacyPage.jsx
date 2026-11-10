@@ -116,6 +116,7 @@ export function PrivacyPage() {
                 <li><strong>Google Fonts</strong> serves the fonts used on these pages.</li>
                 <li><strong>mcsrvstat.us</strong> supplies the live player count.</li>
                 <li><strong>Discord</strong> supplies our community member count.</li>
+                <li><strong>mc-heads.net</strong> serves the player head images on the PVP pages. It receives a Java player's public UUID in the image address and your IP address like any image host; no Bedrock identifier is sent.</li>
               </ul>
               <p>
                 Each of these receives your IP address as a normal part of serving you the

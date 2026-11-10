@@ -1,5 +1,5 @@
-import { useState } from 'preact/hooks';
-import { boardView, selectBoardKey, tabList } from '../../lib/pvp';
+import { useEffect, useState } from 'preact/hooks';
+import { boardQuery, boardView, builtinTierColour, selectBoardKey, tabList } from '../../lib/pvp';
 import defaultHead from '../../assets/pvp-default-head.svg';
 import { ArcadeButton } from '../ArcadeButton';
 
@@ -25,7 +25,8 @@ function Player({ row }) {
   return (
     <div class="pvp-player">
       <span class="pvp-head">
-        <img src={row.headUrl ?? defaultHead} width="24" height="24" alt="" loading="lazy" decoding="async" onError={hideBroken} />
+        <img src={row.headUrl ?? defaultHead} width="24" height="24" alt="" loading="lazy" decoding="async"
+          referrerpolicy="no-referrer" onError={hideBroken} />
       </span>
       <span class="pvp-who">
         {/* Text, never markup: names come from the game. */}
@@ -36,7 +37,11 @@ function Player({ row }) {
   );
 }
 
+/** The feed ladder's colour, else the built-in ladder's (a feed without `ladder` still colours the badges). */
+const badgeColour = (tier) => tier.colour ?? builtinTierColour(tier.label.split(' ')[0]);
+
 function Row({ row, kind }) {
+  const colour = row.tier ? badgeColour(row.tier) : null;
   return (
     <tr data-row data-top={row.top ?? undefined}>
       <td class="pvp-c-rank"><span class="pvp-rank">{row.rank}</span></td>
@@ -47,7 +52,7 @@ function Row({ row, kind }) {
         <>
           <td class="pvp-c-tier">
             {row.tier ? (
-              <span class="pvp-tier" style={row.tier.colour ? { color: row.tier.colour } : undefined}>{row.tier.label}</span>
+              <span class="pvp-tier" style={colour ? { color: colour } : undefined}>{row.tier.label}</span>
             ) : (
               <span class="pvp-tier pvp-tier--none">-</span>
             )}
@@ -92,14 +97,16 @@ export function Leaderboard({ doc }) {
   const view = boardView(doc, key);
   const classes = COLUMN_CLASS[view.kind];
 
-  function pick(next) {
-    setRequested(next);
-    // Shareable without a reload or a history entry per click.
+  // Keep the address bar in step with the board on screen: shareable after a
+  // tab click without a reload or a history entry per click, and a bad
+  // ?board= (a soon or unknown board) is cleared on load. Other parameters stay.
+  useEffect(() => {
     const url = new URL(location.href);
-    if (next === 'overall') url.searchParams.delete('board');
-    else url.searchParams.set('board', next);
-    history.replaceState(history.state, '', url);
-  }
+    const query = boardQuery(doc, requested);
+    if (query) url.searchParams.set('board', key);
+    else url.searchParams.delete('board');
+    if (url.href !== location.href) history.replaceState(history.state, '', url);
+  }, [doc, requested]);
 
   return (
     <section class="pvp-board" data-board aria-label="Leaderboards">
@@ -114,7 +121,7 @@ export function Leaderboard({ doc }) {
             data-board-tab={t.key}
             aria-pressed={t.key === key ? 'true' : 'false'}
             disabled={t.soon}
-            onClick={() => pick(t.key)}
+            onClick={() => setRequested(t.key)}
           >
             {t.label}
           </ArcadeButton>

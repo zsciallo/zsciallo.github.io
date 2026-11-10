@@ -132,6 +132,22 @@ export function selectBoardKey(doc, requested) {
   return tabList(doc).some((t) => t.key === requested && !t.soon) ? requested : 'overall';
 }
 
+/**
+ * The query string the address bar should carry for `requested`: '' for the
+ * default board (and so for any unknown or soon request), else '?board=<key>'.
+ * The page replaces the URL with it on load, so a bad ?board= does not linger.
+ */
+export function boardQuery(doc, requested) {
+  const key = selectBoardKey(doc, requested);
+  return key === 'overall' ? '' : `?board=${encodeURIComponent(key)}`;
+}
+
+/** The built-in ladder's hex for a tier name (case-insensitive), or null. */
+export function builtinTierColour(name) {
+  const want = String(name ?? '').toLowerCase();
+  return LADDER.find((t) => t.name.toLowerCase() === want)?.colour ?? null;
+}
+
 function feedBoard(doc, key) {
   const boards = isObject(doc) && Array.isArray(doc.boards) ? doc.boards : [];
   return boards.find((b) => isObject(b) && b.key === key) ?? null;
