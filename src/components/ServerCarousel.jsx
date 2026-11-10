@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { useReducedMotion } from 'motion/react';
 
 // Every image dropped into src/assets/serverImages is picked up
 // automatically at build time. Captions come from any .json file in the same
@@ -28,7 +29,14 @@ function ZoomIcon() {
   );
 }
 
+/**
+ * Player builds, rotating: the SMP card's picture on the landing page. Card
+ * size, so no arrows or dots; it advances on its own (not for visitors who
+ * asked for less motion), pauses under the pointer, swipes on touch, and a
+ * click opens the lightbox.
+ */
 export function ServerCarousel() {
+  const still = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [zoomed, setZoomed] = useState(false);
@@ -37,10 +45,10 @@ export function ServerCarousel() {
   const dialogRef = useRef(null);
 
   useEffect(() => {
-    if (paused || zoomed || images.length < 2) return;
+    if (still || paused || zoomed || images.length < 2) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % images.length), 5000);
     return () => clearInterval(id);
-  }, [paused, zoomed]);
+  }, [still, paused, zoomed]);
 
   // showModal() puts the lightbox in the browser's top layer, above any
   // ancestor transforms that would otherwise trap a position:fixed overlay.
@@ -61,7 +69,7 @@ export function ServerCarousel() {
 
   return (
     <div
-      class="carousel reveal"
+      class="carousel carousel--banner"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
@@ -104,22 +112,6 @@ export function ServerCarousel() {
 
       <span class="carousel-zoom-hint"><ZoomIcon /> Click to enlarge</span>
 
-      {images.length > 1 && (
-        <>
-          <button class="carousel-arrow prev" onClick={() => go(-1)} aria-label="Previous image">‹</button>
-          <button class="carousel-arrow next" onClick={() => go(1)} aria-label="Next image">›</button>
-          <div class="carousel-dots">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                class={`carousel-dot${i === index ? ' active' : ''}`}
-                onClick={() => setIndex(i)}
-                aria-label={`Go to image ${i + 1}`}
-              />
-            ))}
-          </div>
-        </>
-      )}
 
       {zoomed && (
         <dialog
