@@ -944,15 +944,24 @@ export const PVP = {
     // Spec amendment U4-copy (2026-11-10): the arena has no fixed round count, and 2v2v2 takes teams of two.
     // U4-copy-2: augments are offered in rounds 1-10 only, so not "each round".
     ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
-    ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
+    // U7 (run 20261111-kit-playtest, owner 2026-11-11): the KitPVP currency is shown as Prism Coins, not Tokens.
+    ['Tournaments', 'Double elimination. 1000, 500 and 250 Prism Coins for the top three, and the Champion title.'],
     ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
-    ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
+    ['Cosmetics', 'Earn Prism Coins by playing and spend them on trails, hats and titles.'],
   ],
   /** Owner ruling 2026-11-10: section labels removed; these texts appear nowhere on /pvp/. */
   labelsForbidden: ['THE CLIMB', 'MORE THAN DUELS', 'JOIN AND PLACE'],
   /** U4-copy, U4-copy-2: texts that must appear nowhere on /pvp/ (raw HTML or visible text). */
   modesForbidden: ['Ten rounds', 'each round'],
   join: 'Connect to play.chromabit.us and pick Kit PVP in the hub.',
+  /**
+   * U7 (run 20261111-kit-playtest, owner 2026-11-11): display-only rename. The
+   * KitPVP currency is "Prism Coins" (was "Tokens") and the KitPVP crate is the
+   * "Spectrum Crate" (was "Prism Crate"). The SMP's Prism Shards are unchanged.
+   */
+  currency: 'Prism Coins',
+  currencyOld: /\btokens?\b/i,
+  crateOld: /\bprism crates?\b/i,
   /** Production must not ship sample data or a fixture build. */
   sampleMarker: 'Sample_',
   fixtureBase: '/pvp-fixture',
@@ -1157,6 +1166,32 @@ function pvpModes(dist) {
     for (const gone of PVP.modesForbidden) {
       const hit = occurrence(p.html, app(p), gone);
       if (hit) problems.push(`/pvp/ mentions ${q(gone)}: ${hit}`);
+    }
+    return problems;
+  });
+}
+
+/**
+ * U7 (run 20261111-kit-playtest): /pvp/ names the KitPVP currency "Prism Coins"
+ * in its visible text, and says "Tokens" (any case, as a word) nowhere: not in
+ * the visible text of the page, not in the raw HTML (meta, JSON-LD). No "Prism
+ * Crate" either (it is the Spectrum Crate now). CSS custom properties are not
+ * prose, so the raw HTML is read for the capitalised word only.
+ */
+function pvpCurrency(dist) {
+  return onPvp(dist, (p) => {
+    const problems = [];
+    const text = textOf(bodyEl(p));
+    if (!text.includes(PVP.currency)) problems.push(`/pvp/ visible text does not name the currency ${q(PVP.currency)}`);
+    const raw = norm(decode(p.html));
+    for (const [hay, re, where] of [
+      [text, PVP.currencyOld, 'visible text'],
+      [raw, /\bTokens?\b/, 'HTML'],
+      [text, PVP.crateOld, 'visible text'],
+      [raw, /\bPrism Crates?\b/, 'HTML'],
+    ]) {
+      const m = re.exec(hay);
+      if (m) problems.push(`/pvp/ ${where} says ${q(m[0])}: ${excerpt(hay, m.index, m[0].length)}`);
     }
     return problems;
   });
@@ -1885,7 +1920,7 @@ export const LLMS = {
   /**
    * Numbers allowed in llms.txt (facts already on the site): 10 placement
    * matches, level 2, 3 divisions / best of three, 7 tiers, port 19132, Java
-   * 26.3, tournament Tokens 1000/500/250, Heartwood 9 zones / 4 difficulties /
+   * 26.3, tournament Prism Coins 1000/500/250, Heartwood 9 zones / 4 difficulties /
    * 3 phases; 80,000 only while the built FAQ states it. Digits are read after
    * URLs are removed; commas inside a number are dropped (1,000 = 1000).
    * Number words count too (two..ninety, hundred, thousand, million); "one" is
@@ -3127,6 +3162,8 @@ export const CHECKS = [
   ['pvp-facts', pvpFacts],
   ['pvp-modes', pvpModes],
   ['pvp-join', pvpJoin],
+  // U7 (run 20261111-kit-playtest): Tokens renamed to Prism Coins
+  ['pvp-currency', pvpCurrency],
   ['nav-links', navLinks],
   ['sitemap-pvp', sitemapPvp],
   ['internal-links', internalLinks],

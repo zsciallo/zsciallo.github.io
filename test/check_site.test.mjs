@@ -208,9 +208,10 @@ const MODE_ROWS = [
   // Spec amendment U4-copy (2026-11-10): no fixed round count; 2v2v2 takes teams of two.
   // U4-copy-2: augments only in rounds 1-10, so not "each round".
   ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
-  ['Tournaments', 'Double elimination. 1000, 500 and 250 Tokens for the top three, and the Champion title.'],
+  // U7 (run 20261111-kit-playtest, owner 2026-11-11): the KitPVP currency is shown as Prism Coins, not Tokens.
+  ['Tournaments', 'Double elimination. 1000, 500 and 250 Prism Coins for the top three, and the Champion title.'],
   ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
-  ['Cosmetics', 'Earn Tokens by playing and spend them on trails, hats and titles.'],
+  ['Cosmetics', 'Earn Prism Coins by playing and spend them on trails, hats and titles.'],
 ];
 const PVP_MODES =
   '<section class="modes" data-modes><h2>WHAT YOU CAN PLAY</h2>' +
@@ -588,6 +589,7 @@ try {
       'pvp-facts',
       'pvp-modes',
       'pvp-join',
+      'pvp-currency',
       'nav-links',
       'sitemap-pvp',
       'internal-links',
@@ -1243,6 +1245,35 @@ ${r.out}`,
 ${r.out}`);
   }
 
+  // U7 (run 20261111-kit-playtest, owner 2026-11-11) pvp-currency: Prism Coins shown, no Tokens, no Prism Crate.
+  expectFails('U7 currency: the old Tournaments copy (Tokens) fails', mutate(P, '250 Prism Coins for the top three', '250 Tokens for the top three'), {
+    'pvp-modes': '/pvp/ mode "Tournaments" has no description',
+    'pvp-currency': '/pvp/ visible text says "Tokens"',
+  });
+  expectFails('U7 currency: the old Cosmetics copy (Earn Tokens) fails', mutate(P, 'Earn Prism Coins by playing', 'Earn Tokens by playing'), {
+    'pvp-modes': '/pvp/ mode "Cosmetics" has no description',
+    'pvp-currency': '/pvp/ visible text says "Tokens"',
+  });
+  expectFails('U7 currency: both old lines (the page before the rename) fail', edit(mutate(P, '250 Prism Coins for the top three', '250 Tokens for the top three'), P, 'Earn Prism Coins by playing', 'Earn Tokens by playing'), {
+    'pvp-modes': '/pvp/ mode "Tournaments" has no description',
+    'pvp-currency': '/pvp/ visible text does not name the currency "Prism Coins"',
+  });
+  expectFail('U7 currency: lower-case "tokens" in visible text fails', mutate(P, '</main>', '<p>Spend your tokens in the shop.</p></main>'), 'pvp-currency', '/pvp/ visible text says "tokens"');
+  expectFail('U7 currency: singular "Token" fails', mutate(P, '</main>', '<p>One Token per win.</p></main>'), 'pvp-currency', '/pvp/ visible text says "Token"');
+  expectFail('U7 currency: "Tokens" in the head only fails', mutate(P, PVP_CANON, `${PVP_CANON}<meta name="keywords" content="Tokens">`), 'pvp-currency', '/pvp/ HTML says "Tokens"');
+  expectFail('U7 crate: "Prism Crate" in visible text fails', mutate(P, '</main>', '<p>Open a Prism Crate.</p></main>'), 'pvp-currency', '/pvp/ visible text says "Prism Crate"');
+  {
+    const r = runOn(mutate(P, '</main>', '<p>Open a Spectrum Crate. SMP players earn Prism Shards.</p></main>'));
+    check('U7 crate: "Spectrum Crate" and "Prism Shards" pass', r.code === 0, `exit ${r.code}:
+${r.out}`);
+  }
+  {
+    // CSS custom properties and class names are not prose: lower-case "tokens" in markup passes.
+    const r = runOn(mutate(P, '<section class="modes" data-modes>', '<section class="modes tokens" data-modes>'));
+    check('U7 currency: lower-case "tokens" in markup (not text) passes', r.code === 0, `exit ${r.code}:
+${r.out}`);
+  }
+
   // U4-AC7 pvp-join
   expectFail('U4-AC7 join line', mutate(P, 'and pick Kit PVP in the hub.', 'and pick PVP.'), 'pvp-join', '/pvp/ has no join line');
   expectFail('U4-AC7 no copy button', mutate(P, ' data-copy-ip>', '>'), 'pvp-join', '/pvp/ has 0 [data-copy-ip] buttons, want 1');
@@ -1830,7 +1861,7 @@ ${r.out}`);
   expectFail('U8 llms: a number word that is not a site fact (six)', ll('ranked leaderboards.', 'ranked leaderboards across six modes.'), 'seo-llms', '"six (6)"');
   expectFail('U8 llms: "1v1" states a 1', ll('ranked leaderboards.', 'ranked leaderboards, 1v1 duels.'), 'seo-llms', 'states numbers that are not site facts: ["1"]');
   expectFail('U8 llms: a year', ll('ranked leaderboards.', 'ranked leaderboards since 2026.'), 'seo-llms', '["2026"]');
-  passes('U8 llms: allowlisted numbers pass (1000, 500 and 250 Tokens; 9 zones, 4 difficulties, 3 phases; best of three; 1,000)', ll('ranked leaderboards.', 'ranked leaderboards. Tournaments pay 1000, 500 and 250 Tokens (1,000 for first). Heartwood: 9 zones, 4 difficulties, 3 phases.'));
+  passes('U8 llms: allowlisted numbers pass (1000, 500 and 250 Prism Coins; 9 zones, 4 difficulties, 3 phases; best of three; 1,000)', ll('ranked leaderboards.', 'ranked leaderboards. Tournaments pay 1000, 500 and 250 Prism Coins (1,000 for first). Heartwood: 9 zones, 4 difficulties, 3 phases.'));
   passes('U8 llms: 80,000 passes while the built FAQ states it', ll('survival with a player-run market.', 'survival with a player-run market. You start with $80,000.'));
   expectFails('U8 llms: 80,000 fails once the FAQ no longer states it', edit(faqSite((gs) => {
     // Both FAQ answers that state 80,000 (starting money, the claim-block cap).
