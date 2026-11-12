@@ -4,6 +4,7 @@ import { fetchTicker, percent } from '../lib/market';
 import { ArcadeButton } from './ArcadeButton';
 import { CopyIpButton } from './CopyIpButton';
 import { ServerCarousel } from './ServerCarousel';
+import pvpShot from '../assets/pvp-banner.webp';
 
 /** Resolve `load()` once on mount; null until then, and null for good on any failure. */
 function useOnce(load) {
@@ -93,33 +94,13 @@ function TopMovers() {
   );
 }
 
-/**
- * Stand-in art for the PVP banner until a real screenshot exists: crossed
- * swords over the seven tier colours, on the site's dither. To swap in a
- * picture, replace this component's markup with
- * <img src={pvpShot} alt="..." /> (the .mode-banner img rule covers it).
- */
-function PvpArt() {
-  return (
-    <div class="pvp-art" aria-hidden="true">
-      <span class="pvp-art-sword pvp-art-sword--a" />
-      <span class="pvp-art-sword pvp-art-sword--b" />
-      <span class="pvp-art-tiers">
-        {TIER_NAMES.map((t) => (
-          <i key={t} style={{ background: `var(--tier-${t})` }} />
-        ))}
-      </span>
-    </div>
-  );
-}
-
 /** The landing page's two modes, PVP first. */
 export function ModeCards() {
   return (
     <div class="mode-grid">
       <article class="card mode-card mode-card--pvp reveal" data-mode-card="pvp">
         <div class="mode-banner mode-banner--pvp" data-banner="pvp">
-          <PvpArt />
+          <img src={pvpShot} alt="The ChromaPVP hub" width="1600" height="982" loading="lazy" decoding="async" />
         </div>
         <div class="mode-body">
           <h3 class="mode-title">CHROMAPVP <span class="beta-tag">BETA</span></h3>
