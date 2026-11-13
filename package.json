@@ -14,7 +14,8 @@
     "test:cards": "node test/card_style_check.mjs",
     "test:visual": "node test/visual_check.mjs",
     "test:headings": "node test/rendered_headings_check.mjs",
-    "test:store": "node test/store_modes.test.mjs && node test/store_mode_check.mjs"
+    "test:store": "node test/store_modes.test.mjs && node test/store_mode_check.mjs",
+    "test:images": "node test/image_crop.test.mjs && node test/image_crop_check.mjs"
   },
   "dependencies": {
     "dompurify": "^3.4.16",

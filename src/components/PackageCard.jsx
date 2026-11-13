@@ -10,6 +10,8 @@ import { spring } from '../lib/motion';
 import { freeKeysFor, preTaxPrice } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { DealBadge } from './DealBadge';
+import { cropAttrs } from '../lib/imageCrop';
+import imageCrops from '../data/imageCrops.json';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -52,7 +54,7 @@ export function PackageCard({ pkg, sales, busy, cartQty = 0, freeKeySpend = null
       <DealBadge pkg={pkg} sales={sales} />
       {pkg.image && (
         <div class="pkg-image-wrap">
-          <img class="pkg-image" src={pkg.image} alt="" loading="lazy" />
+          <img class="pkg-image" src={pkg.image} alt="" loading="lazy" {...cropAttrs(pkg.image, imageCrops)} />
         </div>
       )}
       <div class="pkg-body">

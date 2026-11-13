@@ -3256,6 +3256,19 @@ html:not(.js) .sound-toggle {
   flex-shrink: 0;
 }
 
+/* Images cropped to their art (src/lib/imageCrop.js: an inline object-view-box
+   and the cropped aspect-ratio). Same height as before, the width follows the
+   art so it fills the frame undistorted; renders, not pixel art, so smooth. */
+.pkg-image[data-cropped],
+.pkg-modal-image[data-cropped] {
+  width: auto;
+  image-rendering: auto;
+}
+
+.cart-item-img[data-cropped] {
+  image-rendering: auto;
+}
+
 .cart-item-info {
   flex: 1;
   min-width: 0;

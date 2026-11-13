@@ -5,6 +5,8 @@ import { ArcadeButton } from './ArcadeButton';
 import { FREE_KEY, freeKeysFor, nextFreeKey, preTaxPrice } from '../lib/freeKeys';
 import { freeKey as freeKeySound } from '../lib/sound';
 import { MAX_QUANTITY } from '../lib/tebex';
+import { cropAttrs } from '../lib/imageCrop';
+import imageCrops from '../data/imageCrops.json';
 
 export const WELCOME_CODE = 'WELCOME20';
 
@@ -216,7 +218,7 @@ export function CartDrawer({
               if (free > 0 && qty === 0) {
                 return (
                   <div class="cart-item cart-item--free" key={item.id}>
-                    {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
+                    {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" {...cropAttrs(item.image, imageCrops)} />}
                     <div class="cart-item-info">
                       <p class="cart-item-name">{item.name}</p>
                       <p class="cart-item-sub cart-item-sub--free">{free} FREE · SPEND REWARD</p>
@@ -239,7 +241,7 @@ export function CartDrawer({
 
               return (
                 <div class="cart-item" key={item.id}>
-                  {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
+                  {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" {...cropAttrs(item.image, imageCrops)} />}
                   <div class="cart-item-info">
                     <p class="cart-item-name">{item.name}</p>
                     {recurring && (
