@@ -33,7 +33,11 @@ export function buildModes(rawCategories) {
   }
   if (modes.length === 0) return { modes: [], shared: [] };
   modes.sort(byOrder);
-  const shared = tops.filter(hasPackages).map((c) => c.id);
+  // Everything else that sells (a top-level category with its own packages, an
+  // orphan whose parent is missing, a category nested deeper than one level) is
+  // shown in every mode, so nothing sold can become unreachable.
+  const inMode = new Set(modes.flatMap((m) => m.categoryIds));
+  const shared = list.filter((c) => hasPackages(c) && !inMode.has(c.id)).map((c) => c.id);
   return { modes, shared };
 }
 

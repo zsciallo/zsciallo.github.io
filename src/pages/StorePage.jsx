@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useLayoutEffect } from 'preact/hooks';
 import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { capture } from '../lib/funnel';
@@ -84,8 +84,10 @@ export function StorePage() {
 
   // Priority on load: a valid ?mode=, then the remembered mode, then the pop-up.
   // An unknown ?mode= is dropped from the address bar. Runs again after a
-  // re-price only if the current mode went missing from the catalog.
-  useEffect(() => {
+  // re-price only if the current mode went missing from the catalog. A layout
+  // effect, so the mode is settled before the browser paints: no frame shows
+  // another mode's cards or misses the pop-up (the prerender never runs it).
+  useLayoutEffect(() => {
     if (!modeList.length || modeList.some((m) => m.key === mode)) return;
     const asked = new URLSearchParams(window.location.search).get('mode');
     const next = resolveMode(modeList, asked, localStorage.getItem(MODE_KEY));
@@ -757,7 +759,7 @@ export function StorePage() {
         onClose={() => setCartOpen(false)}
       />
 
-      {modeAsked && !mode && modeList.length > 0 && <ModePrompt modes={modeList} onPick={chooseMode} />}
+      {modeAsked && !mode && !purchaseComplete && modeList.length > 0 && <ModePrompt modes={modeList} onPick={chooseMode} />}
 
       {slotOpen && (
         <KeyRoll
