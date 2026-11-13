@@ -3883,10 +3883,25 @@ html.js .reveal.is-visible {
 
 /* --- Store modes: the PVP | SMP switch and the first-visit pop-up -------- */
 
-/* The switch reuses the edition toggle's look; this only places it. */
+/* The switch is a row of the site's buttons. The bottom margin also covers
+   the login line's negative top margin, so the two never touch. */
 .mode-switch {
-  max-width: 320px;
-  margin: 0 auto 1.4rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0 0 3.25rem;
+}
+
+.mode-switch-opt {
+  min-width: 7rem;
+}
+
+.mode-switch-opt.btn-secondary {
+  color: var(--muted);
+}
+
+.mode-switch-opt.btn-secondary:hover {
+  color: var(--text);
 }
 
 /* A flat surface card (it carries .card), sized like the purchase-type popup. */
