@@ -29,17 +29,29 @@
 //   by margin * max(box width, box height) on every side, then clamped to the
 //   canvas [0, w] x [0, h]. margin 0 means no growth (not the default).
 //
-// cropStyle(url, crops, margin) -> null when cropFor is null, else a plain style
-//   object { aspectRatio: "<w> / <h>", objectViewBox: "inset(<top>px <right>px
-//   <bottom>px <left>px)" } built from cropBox(entry, margin): each inset is the
-//   distance from that canvas edge to the grown box, rounded to whole pixels;
-//   aspectRatio is the grown box's width / height. margin undefined -> 0.06.
+// cropFrame(url, crops, margin) -> null when cropFor is null, else the inline
+//   styles of a clipped frame that shows exactly the grown box at any size, in
+//   every engine (no object-view-box, which only Chromium has):
+//     { frame: { aspectRatio: "<bw> / <bh>" },
+//       img:   { width: "<W/bw*100>%", height: "<H/bh*100>%",
+//                left: "<-bx/bw*100>%", top: "<-by/bh*100>%" } }
+//   (bx, by, bw, bh) = cropBox(entry, margin), (W, H) = the canvas; percentages
+//   rounded to 4 decimals (the tests compare the number, so "-109.396%" and
+//   "-109.3960%" are both right). margin undefined -> 0.06. The render sites
+//   wrap the <img> in <span class="crop-frame" data-crop-frame> with the frame
+//   style, and the <img> (data-cropped="true") gets the img style.
+//   (Round 1 pinned cropStyle -> { aspectRatio, objectViewBox: "inset(...)" };
+//   replaced in round 2 because object-view-box does nothing in Firefox and
+//   Safari/iOS. See test/image_crop_check.mjs for the rendered geometry.)
 //
 // src/data/imageCrops.json is such a table, written by tools/image_crops.py. It
 // has an entry for each of the five live Prism Token images (their URLs are read
 // from test/fixtures/image-crops/tebex-categories.json, category 3501348, the
 // live catalogue of 2026-11-12), and no entry for any other package image of
-// that catalogue (AC7: nothing else on the page changes).
+// that catalogue (AC7: nothing else on the page changes). Each committed box must
+// hold the art as measured independently (test/fixtures/image-crops/art-boxes.json,
+// alpha >= 250 of the live files, never read from the table) and exceed it by at
+// most 12 px per edge, so a box that cuts art off or takes in the soft shadow fails.
 
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -111,8 +123,8 @@ try {
 } catch (e) {
   check('src/lib/imageCrop.js imports in plain Node', false, `${e?.message ?? e} (a pure ES module: no JSX, no DOM, no imports Node cannot resolve)`);
 }
-const { cropFor, cropBox, cropStyle } = lib;
-for (const [name, fn] of Object.entries({ cropFor, cropBox, cropStyle })) check(`exports ${name}()`, typeof fn === 'function', `typeof ${name} is ${typeof fn}`);
+const { cropFor, cropBox, cropFrame } = lib;
+for (const [name, fn] of Object.entries({ cropFor, cropBox, cropFrame })) check(`exports ${name}()`, typeof fn === 'function', `typeof ${name} is ${typeof fn}`);
 
 // ------------------------------------------------------------------ tables --
 
@@ -181,38 +193,89 @@ test('cropBox: does not mutate the (frozen) entry', () => {
   return eq(e, ENTRY_A);
 });
 
-// --------------------------------------------------------------- cropStyle --
+// --------------------------------------------------------------- cropFrame --
+// Replaces round 1's cropStyle cases one for one (object-view-box insets ->
+// frame aspect-ratio plus img size/offset percentages); see the report table.
 
-test('cropStyle: a miss gives null', () => eq(cropStyle('https://cdn.example.test/none.png', CROPS), null));
-test('cropStyle: null url and a malformed entry give null', () => all(eq(cropStyle(null, CROPS), null), eq(cropStyle(A, one({ w: 2000, h: 2000, box: [1500, 700, 700, 1200] })), null)));
-test('cropStyle: worked example, default margin: insets from each canvas edge and the grown aspect ratio', () => {
-  const s = cropStyle(A, CROPS);
-  if (!s || typeof s !== 'object') return `got ${q(s)}`;
-  return all(eq(s.objectViewBox, 'inset(652px 452px 752px 652px)'), eq(s.aspectRatio, '896 / 596'));
+/** Round to 4 decimals, the spec's precision for the img percentages. */
+const r4 = (n) => Math.round(n * 1e4) / 1e4;
+/** "12.5%" -> 12.5; anything else (no %, exponent, empty) -> NaN. */
+function pctOf(s) {
+  const m = typeof s === 'string' && s.match(/^(-?\d+(?:\.\d+)?)%$/);
+  return m ? Number(m[1]) : NaN;
+}
+/** The frame object for a grown box { x, y, w, h } on a W x H canvas, as numbers. */
+const frameOf = (b, W, H) => ({ width: r4((W / b.w) * 100), height: r4((H / b.h) * 100), left: r4((-b.x / b.w) * 100), top: r4((-b.y / b.h) * 100) });
+/** Each img percentage parses as "<number>%" and equals the 4-decimal value. */
+function pctEq(img, want) {
+  if (!img || typeof img !== 'object') return `img ${q(img)}`;
+  // Equal to the 4-decimal value (1e-9 only absorbs float noise in the parse; "-0%" equals 0).
+  const bad = ['width', 'height', 'left', 'top'].filter((k) => !(Math.abs(pctOf(img[k]) - want[k]) < 1e-9));
+  return bad.length ? `img ${q(img)}, want ${bad.map((k) => `${k} ${want[k]}%`).join(', ')} (4 decimals)` : true;
+}
+const shapeOk = (f) => {
+  if (!f || typeof f !== 'object') return `got ${q(f)}`;
+  if (Object.getPrototypeOf(f) !== Object.prototype) return 'not a plain object';
+  if (q(Object.keys(f).sort()) !== q(['frame', 'img'])) return `keys ${q(Object.keys(f))}, want frame and img`;
+  if (!f.frame || q(Object.keys(f.frame)) !== q(['aspectRatio']) || typeof f.frame.aspectRatio !== 'string') return `frame ${q(f.frame)}, want { aspectRatio: "<w> / <h>" }`;
+  if (!f.img || q(Object.keys(f.img).sort()) !== q(['height', 'left', 'top', 'width']) || !Object.values(f.img).every((v) => typeof v === 'string')) return `img ${q(f.img)}, want string width, height, left, top`;
+  return true;
+};
+
+test('cropFrame: a miss gives null', () => eq(cropFrame('https://cdn.example.test/none.png', CROPS), null));
+test('cropFrame: null url, a missing table and a malformed entry give null', () => all(eq(cropFrame(null, CROPS), null), eq(cropFrame(A, null), null), eq(cropFrame(A, one({ w: 2000, h: 2000, box: [1500, 700, 700, 1200] })), null)));
+test('cropFrame: a plain { frame: { aspectRatio }, img: { width, height, left, top } } of strings', () => shapeOk(cropFrame(A, CROPS)));
+test('cropFrame: worked example, default margin: frame "896 / 596", img 223.2143% x 335.5705% at -72.7679%, -109.396%', () => {
+  const f = cropFrame(A, CROPS);
+  const s = shapeOk(f);
+  return s !== true ? s : all(eq(f.frame.aspectRatio, '896 / 596'), pctEq(f.img, { width: 223.2143, height: 335.5705, left: -72.7679, top: -109.396 }));
 });
-test('cropStyle: an explicit margin is used (0 -> the box itself)', () => {
-  const s = cropStyle(A, CROPS, 0);
-  if (!s || typeof s !== 'object') return `got ${q(s)}`;
-  return all(eq(s.objectViewBox, 'inset(700px 500px 800px 700px)'), eq(s.aspectRatio, '800 / 500'));
+test('cropFrame: an explicit margin is used (0 -> the box itself: "800 / 500", 250% x 400% at -87.5%, -140%)', () => {
+  const f = cropFrame(A, CROPS, 0);
+  const s = shapeOk(f);
+  return s !== true ? s : all(eq(f.frame.aspectRatio, '800 / 500'), pctEq(f.img, { width: 250, height: 400, left: -87.5, top: -140 }));
 });
-test('cropStyle: fractional insets are rounded to whole pixels', () => {
-  const s = cropStyle(B, CROPS);
-  if (!s || typeof s !== 'object') return `got ${q(s)}`;
-  return eq(s.objectViewBox, 'inset(669px 434px 739px 704px)');
+test('cropFrame: margin undefined is the 0.06 default', () => eq(cropFrame(A, CROPS, undefined), cropFrame(A, CROPS, 0.06)));
+test('cropFrame: a clamped edge sits at 0% (box clamped at the left: "858 / 496", 116.5501% x 201.6129% at 0%, -91.129%)', () => {
+  const f = cropFrame(A, one({ w: 1000, h: 1000, box: [10, 500, 810, 900] }));
+  const s = shapeOk(f);
+  return s !== true ? s : all(eq(f.frame.aspectRatio, '858 / 496'), pctEq(f.img, { width: 116.5501, height: 201.6129, left: 0, top: -91.129 }));
 });
-test('cropStyle: the fractional aspect ratio is the grown box (862.4 / 592.4) within 0.5%', () => {
-  const s = cropStyle(B, CROPS);
-  const r = ratioOf(s?.aspectRatio);
-  return Math.abs(r / (862.4 / 592.4) - 1) <= 0.005 ? true : `aspectRatio ${q(s?.aspectRatio)} (${r}), want "<w> / <h>" of the grown box, ${862.4 / 592.4}`;
+test('cropFrame: a non-square canvas uses W for width/left and H for height/top (1600 x 900: 178.5714% x 113.0653% at -39.2857%, -6.5327%)', () => {
+  const f = cropFrame(A, one({ w: 1600, h: 900, box: [400, 100, 1200, 800] }));
+  const s = shapeOk(f);
+  return s !== true ? s : all(eq(f.frame.aspectRatio, '896 / 796'), pctEq(f.img, { width: 178.5714, height: 113.0653, left: -39.2857, top: -6.5327 }));
 });
-test('cropStyle: a clamped edge has a 0px inset', () => {
-  const s = cropStyle(A, one({ w: 1000, h: 1000, box: [10, 500, 810, 900] }));
-  return s ? all(eq(s.objectViewBox, 'inset(452px 142px 52px 0px)'), eq(s.aspectRatio, '858 / 496')) : `got ${q(s)}`;
+test('cropFrame: a fractional box is built from cropBox (percentages = 4-decimal rounding of cropBox) and its aspect ratio is the grown box (862.4 / 592.4) within 0.5%', () => {
+  const f = cropFrame(B, CROPS);
+  const s = shapeOk(f);
+  if (s !== true) return s;
+  const r = ratioOf(f.frame.aspectRatio);
+  return all(pctEq(f.img, frameOf(cropBox(ENTRY_B), 2000, 2000)), Math.abs(r / (862.4 / 592.4) - 1) <= 0.005 ? true : `aspectRatio ${q(f.frame.aspectRatio)} (${r}), want the grown box ${862.4 / 592.4}`);
 });
-test('cropStyle: a plain object with string aspectRatio and objectViewBox', () => {
-  const s = cropStyle(A, CROPS);
-  return s && Object.getPrototypeOf(s) === Object.prototype && typeof s.aspectRatio === 'string' && typeof s.objectViewBox === 'string' ? true : `got ${q(s)}`;
+test('cropFrame: the percentages put exactly the grown box in the frame (round trip to source px within 0.05 px, worked, clamped and fractional examples)', () => {
+  const cases = [[A, CROPS, ENTRY_A], [B, CROPS, ENTRY_B], [A, one({ w: 1000, h: 1000, box: [10, 500, 810, 900] }), { w: 1000, h: 1000, box: [10, 500, 810, 900] }], [A, one({ w: 1600, h: 900, box: [400, 100, 1200, 800] }), { w: 1600, h: 900, box: [400, 100, 1200, 800] }]];
+  for (const [url, table, e] of cases) {
+    const f = cropFrame(url, table);
+    if (!f?.img) return `cropFrame(${url}) is ${q(f)}`;
+    const [w, h, l, t] = ['width', 'height', 'left', 'top'].map((k) => pctOf(f.img[k]));
+    // The img is the whole canvas at w% x h% of the frame, offset by l%, t%: the frame's [0, 100%] maps to source [-l/w*W, (100-l)/w*W].
+    const shown = { x: (-l / w) * e.w, y: (-t / h) * e.h, w: (100 / w) * e.w, h: (100 / h) * e.h };
+    const r = near(shown, cropBox(e), 0.05);
+    if (r !== true) return `${q(e.box)} on ${e.w}x${e.h}: the frame shows ${r}`;
+  }
+  return true;
 });
+test('cropFrame: does not mutate the (frozen) table', () => {
+  cropFrame(A, CROPS, 0.25);
+  return eq(CROPS[A], ENTRY_A);
+});
+{
+  // "No object-view-box anywhere": Firefox and Safari/iOS ignore it, so a crop built on it shows nothing there.
+  const files = ['src/lib/imageCrop.js', 'src/components/PackageCard.jsx', 'src/components/PackageModal.jsx', 'src/components/CartDrawer.jsx', 'src/index.css'];
+  const hits = files.filter((f) => existsSync(join(ROOT, f)) && /object-?view-?box/i.test(readFileSync(join(ROOT, f), 'utf-8')));
+  check('cropFrame: no object-view-box left in the crop lib, the three render sites or index.css', !hits.length, `object-view-box / objectViewBox in ${hits.join(', ')}`);
+}
 
 // ---------------------------------------------- src/data/imageCrops.json (AC6) --
 
@@ -261,6 +324,54 @@ for (const p of PRISM) {
     if (!(y1 - y0 >= 380 && y1 - y0 <= 650)) probs.push(`box height ${y1 - y0}, want 380..650`);
   }
   check('AC6 imageCrops.json: the 3,000 box is the coin piles without the shadow (x0 >= 650, width 600-1000, height 380-650)', !probs.length, probs.join('; '));
+}
+
+// ---- AC6 against the independently measured art (review r1 U2-F1) --------------
+// test/fixtures/image-crops/art-boxes.json: alpha >= 250 bounding box of each live
+// file, measured by the test writer from the downloaded images. Never derived from
+// imageCrops.json, so a wrong table cannot vouch for itself.
+const ART_FILE = join(ROOT, 'test', 'fixtures', 'image-crops', 'art-boxes.json');
+const ARTS = JSON.parse(readFileSync(ART_FILE, 'utf-8')).images;
+/** A crop box may exceed the art by this much per edge (anti-aliased rims below alpha 250, about 4 px on the live files). */
+export const ART_SLACK = 12;
+/** Problems of a table box against the art: it must contain the art and exceed it by at most ART_SLACK px per edge. */
+export function artProblems(box, art, slack = ART_SLACK) {
+  if (!Array.isArray(box) || box.length !== 4) return [`box ${q(box)}`];
+  const out = [];
+  const edges = [
+    ['left', art[0] - box[0]],
+    ['top', art[1] - box[1]],
+    ['right', box[2] - art[2]],
+    ['bottom', box[3] - art[3]],
+  ];
+  for (const [edge, over] of edges) {
+    if (over < 0) out.push(`cuts ${-over} px of art off at the ${edge} (box ${q(box)}, art ${q(art)})`);
+    else if (over > slack) out.push(`reaches ${over} px past the art at the ${edge}, max ${slack} (box ${q(box)}, art ${q(art)}: shadow or empty canvas)`);
+  }
+  return out;
+}
+
+check('AC6 (setup) art-boxes.json covers the five Prism Token packages with the same URLs as the catalogue fixture', PRISM.every((p) => ARTS[p.id]?.url === p.url && Array.isArray(ARTS[p.id].art)) && Object.keys(ARTS).length === PRISM.length, q(PRISM.map((p) => [p.id, ARTS[p.id]?.url === p.url])));
+
+for (const p of PRISM) {
+  const e = Object.prototype.hasOwnProperty.call(table, p.url) ? table[p.url] : undefined;
+  const art = ARTS[p.id]?.art;
+  check(`AC6 imageCrops.json: the "${p.name}" box holds all of the independently measured art and exceeds it by at most ${ART_SLACK} px per edge`, !!e && !!art && !artProblems(e.box, art).length, !e ? `no entry for ${p.url}` : !art ? 'no measured art' : artProblems(e.box, art).join('; '));
+}
+
+{
+  // Proof that the check above bites (the two counter-examples from review r1 U2-F1, plus each image's shadow box).
+  const art26 = ARTS[7808728].art;
+  const cases = [
+    // [1000, 700, 1500, 1200] for 26,000: cuts the art (left of the pile from x 883, the top from y 426, the right to x 1709, the bottom to y 1540).
+    ['[1000, 700, 1500, 1200] for 26,000 (cuts art off)', [1000, 700, 1500, 1200], art26, /cuts/],
+    // [300, 400, 1720, 1560] for 26,000: holds the art but takes in the soft shadow to its left (extent 0.71, so the 0.9 rule alone lets it through).
+    ['[300, 400, 1720, 1560] for 26,000 (includes the shadow)', [300, 400, 1720, 1560], art26, /reaches/],
+    ...PRISM.map((p) => [`the alpha >= 64 shadow box of "${p.name}"`, ARTS[p.id].shadow, ARTS[p.id].art, /reaches/]),
+  ];
+  const missed = cases.filter(([, box, art, why]) => !artProblems(box, art).some((x) => why.test(x))).map(([label]) => label);
+  const tight = PRISM.filter((p) => artProblems(ARTS[p.id].art, ARTS[p.id].art).length).map((p) => p.name);
+  check('AC6 (proof) the art check rejects a box that cuts art off ([1000, 700, 1500, 1200] for 26,000) or includes the shadow ([300, 400, 1720, 1560]; each shadow box), and accepts the art box itself', !missed.length && !tight.length, [missed.length && `not rejected: ${missed.join(', ')}`, tight.length && `the art box itself rejected for ${tight.join(', ')}`].filter(Boolean).join('; '));
 }
 
 {

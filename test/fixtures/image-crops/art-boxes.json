@@ -1,0 +1,11 @@
+{
+  "_about": "Where the art is in each live Prism Token image (Tebex category 3501348, the 2026-11-12 files at these CDN URLs, all 2000x2000 RGBA). art = bounding box of the pixels with alpha >= 250, [x0, y0, x1, y1] in source px, x1/y1 exclusive. Measured with Pillow from the downloaded files in round 1 and re-measured from the same files in round 2 (identical). This is the tests' independent truth: it is NOT read from src/data/imageCrops.json and tools/image_crops.py never reads it. shadow = bounding box of alpha >= 64 (art plus the soft drop shadow, which runs out to the left and below); a crop box that reaches into it is not tight. Tests: test/image_crop.test.mjs (each committed box must contain art and exceed it by at most 12 px per edge) and test/image_crop_check.mjs (the CDN stub serves a 2000x2000 PNG that is opaque exactly on art, and AC1 measures coverage and cut-off against art).",
+  "canvas": [2000, 2000],
+  "images": {
+    "7808723": { "name": "3,000 Prism Coins", "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/97f63dcb4b306e3148c3037c3ce25ea70283e732.png", "art": [748, 719, 1519, 1206], "shadow": [417, 718, 1520, 1219] },
+    "7808725": { "name": "5,500 Prism Coins", "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/f348b6c385973eec4190cb2703cd1fb75e9daeff.png", "art": [676, 623, 1678, 1315], "shadow": [256, 622, 1680, 1317] },
+    "7808726": { "name": "12,000 Prism Coins", "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/076246cbe236076cc9e9c10698831bc5312437ef.png", "art": [595, 514, 1846, 1458], "shadow": [114, 512, 1848, 1459] },
+    "7808728": { "name": "26,000 Prism Coins", "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/eb6ece0a838d1e6ffcfa531124a3cc234163341f.png", "art": [883, 426, 1709, 1540], "shadow": [228, 424, 1709, 1541] },
+    "7808729": { "name": "70,000 Prism Coins", "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/10ede1df10747d76667efad569d223dc75fe41c7.png", "art": [469, 271, 1900, 1712], "shadow": [133, 270, 1902, 1725] }
+  }
+}

@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 // Prism Token image crop browser check (run 20261112-store-modes, unit U2): the
 // five Prism Token package images are 2000x2000 transparent canvases with the
-// art in the middle; the store crops each image to its art (CSS object-view-box
-// from the committed table src/data/imageCrops.json) so it fills its frame.
+// art in the middle; the store crops each image to its art so it fills its frame.
+// The crop is a clipped frame, the same in every engine (round 2, review r1
+// U2-F2: object-view-box only works in Chromium, so Firefox and Safari/iOS saw no
+// change): the <img> sits in <span class="crop-frame" data-crop-frame> (overflow
+// hidden, aspect-ratio of the grown art box) and is the whole canvas, sized and
+// offset in % so that exactly the grown box shows (src/lib/imageCrop.js cropFrame,
+// table src/data/imageCrops.json).
 //
 //   npm run build && node test/image_crop_check.mjs [--dist <distDir>]
 //   (npm script: "test:images": "node test/image_crop.test.mjs && node test/image_crop_check.mjs")
@@ -21,37 +26,49 @@
 // with each package given its live image URL (by package id) in memory. The CDN
 // (dunb17ur4ymx4.cloudfront.net) is stubbed: each Prism Token URL gets a generated
 // 2000x2000 RGBA PNG, transparent except for an opaque block where that image's
-// art is (ART below, measured from the live files: alpha >= 250 bounding box),
-// and every other URL a 160x160 opaque PNG (all live SMP images are square). The
-// checks are geometric: they read layout boxes, computed styles and the committed
-// crop table, never pixels. The cart gets the small stateful Tebex basket of
-// store_mode_check (its lines carry the package image, as Tebex's do).
+// art is, and every other URL a 160x160 opaque PNG (all live SMP images are
+// square). The art boxes come from test/fixtures/image-crops/art-boxes.json (the
+// alpha >= 250 bounding box of each live file, measured by the test writer),
+// NEVER from imageCrops.json: coverage and "nothing cut off" are measured against
+// where the art really is, so a table box that cuts art off fails here (review r1
+// U2-F1). The cart gets the small stateful Tebex basket of store_mode_check (its
+// lines carry the package image, as Tebex's do).
 //
-// Geometry: for an <img>, the drawn source region is its computed object-view-box
-// (inset(t r b l) of the natural size; `none` = the whole canvas), placed in the
-// element's content box by its computed object-fit and object-position. The art
-// box (from imageCrops.json for that URL, or ART when the table has no entry)
-// is mapped through that onto the screen.
+// Geometry, from layout boxes only (getBoundingClientRect and computed lengths,
+// so it does not depend on how an engine paints): the img's content box is where
+// the whole canvas is drawn (object-fit applied); the art lands at ART scaled into
+// it. What can be seen of the canvas is that drawn rect clipped by every ancestor
+// whose computed overflow is not visible (the frame first). The frame's padding
+// box is the visible region the art must fill.
 //
 // What is checked (one PASS/FAIL line each, then RESULT):
 //   AC1 store card (?mode=pvp, 1280): each of the five Prism Token <img.pkg-image>
-//       has data-cropped="true" and an inline object-view-box; the art's on-screen
-//       box covers >= 70% of the image content box in its larger axis; the art is
-//       not cut off; the content box is >= 96px tall; image-rendering is auto.
-//   AC2 the content box aspect equals the drawn view box's aspect within 2%, the
-//       horizontal and vertical scale agree within 2% (no distortion), and the
-//       inline aspect-ratio matches the view box.
+//       has data-cropped="true", sits directly in span.crop-frame[data-crop-frame]
+//       with overflow hidden, is position absolute with an inline %-width/height/
+//       left/top, uses no object-view-box (inline or computed); nothing of the
+//       canvas shows outside the frame; the art covers >= 70% of the frame in its
+//       larger axis; >= 99% of the art is visible (nothing cut off); the frame is
+//       96px tall (unless capped by the card's inner width, then shorter, aspect
+//       kept); image-rendering is auto.
+//   AC2 the img's rendered width/height equals the canvas ratio within 1% (and
+//       the x and y scales agree within 1%: no distortion); the frame's
+//       width/height equals the grown box's (imageCrops.json box grown by 6% of its
+//       larger side, clamped) within 2%, and its inline aspect-ratio matches it.
 //   AC3 an SMP package whose URL has no entry (?mode=smp, a fixture-only URL):
-//       no data-cropped, no style attribute, object-view-box none, 96x96 on the
-//       card, 110x110 in the pop-up, image-rendering pixelated (today's CSS).
+//       a bare <img> (no crop-frame parent), no data-cropped, no style attribute,
+//       object-view-box none, 96x96 on the card, 110x110 in the pop-up,
+//       image-rendering pixelated (today's CSS).
 //   AC4 the package pop-up (img.pkg-modal-image) of each Prism Token package and
-//       the cart thumbnail (img.cart-item-img) of a Prism Token line: cropped,
-//       the same object-view-box as the card, coverage >= 70%, no distortion.
-//   AC5 at a true 400px, ?mode=pvp: the five images are cropped, document
-//       scrollWidth <= 400, each image inside its .pkg-image-wrap and its .pkg-card.
+//       the cart thumbnail (img.cart-item-img) of a Prism Token line: the same
+//       AC1/AC2 checks (pop-up frame 110px tall unless capped; cart frame inside
+//       the 40px square slot, centred, larger side >= 32px), and the same source
+//       region shown as on the card (within 10 source px per edge).
+//   AC5 at a true 400px, ?mode=pvp: the five images are cropped (AC1/AC2 hold),
+//       document scrollWidth <= 400, each frame inside its .pkg-image-wrap and
+//       its .pkg-card, and nothing of the canvas shows outside its card.
 //   AC7 every SMP card of the live catalogue (?mode=smp) and every card of the
-//       flat fixture: no [data-cropped] anywhere, each .pkg-image 96x96, no inline
-//       style, pixelated.
+//       flat fixture: no [data-cropped] and no crop frame anywhere, each .pkg-image
+//       a bare 96x96 <img>, no inline style, pixelated.
 // Each scenario first proves the harness worked (store rendered, categories stub
 // hit, the Prism images requested from the CDN stub and loaded at 2000x2000), so
 // a red run fails on the feature, not on the harness.
@@ -65,6 +82,7 @@ import { FIX, FREEZE, FROZEN_TIME, HEAD_PNG, ROOT, VITE, encodePng, fileOr404, f
 const HEIGHT = 900;
 const CDN = 'dunb17ur4ymx4.cloudfront.net';
 const LIVE_FIX = join(ROOT, 'test', 'fixtures', 'image-crops', 'tebex-categories.json');
+const ART_FIX = join(ROOT, 'test', 'fixtures', 'image-crops', 'art-boxes.json');
 const FLAT_FIX = join(ROOT, 'test', 'fixtures', 'card-style', 'tebex-categories.json');
 const CROPS_FILE = join(ROOT, 'src', 'data', 'imageCrops.json');
 const PRISM_CATEGORY = 3501348;
@@ -74,16 +92,15 @@ const BASKET_IDENT = 'cropcheck1';
 /** A URL no crop table can know: the AC3 fallback package's image. */
 const NO_ENTRY_URL = `https://${CDN}/packages/images/0000000000000000000000000000000000000000.png`;
 const NO_ENTRY_PKG = 7564223; // VIP
-/** The art of each live Prism Token image (alpha >= 250 bounding box of the 2026-11-12 files, x1/y1 exclusive). */
-const ART = {
-  7808723: [748, 719, 1519, 1206], // 3,000: two coin piles (soft shadow to x about 400 not included)
-  7808725: [676, 623, 1678, 1315], // 5,500
-  7808726: [595, 514, 1846, 1458], // 12,000
-  7808728: [883, 426, 1709, 1540], // 26,000
-  7808729: [469, 271, 1900, 1712], // 70,000: a chest of coins
-};
+/** Where the art of each live Prism Token image is (alpha >= 250 bounding box, x1/y1 exclusive), by package id. Independent of imageCrops.json. */
+const ART = Object.fromEntries(Object.entries(JSON.parse(readFileSync(ART_FIX, 'utf-8')).images).map(([id, v]) => [id, v.art]));
 const MIN_COVER = 0.7;
 const ASPECT_TOL = 0.02;
+const CANVAS_TOL = 0.01;
+/** The margin the spec grows the art box by (cropBox default). */
+const MARGIN = 0.06;
+/** The same crop on every surface: the source region shown may differ by this many source px per edge. */
+const SAME_SRC_TOL = 10;
 
 let passed = 0;
 let failed = 0;
@@ -121,12 +138,20 @@ function loadCrops() {
   }
 }
 const CROPS = loadCrops();
-/** The art box used for coverage: the committed entry's box, else the measured ART. */
+/** Where the art really is for this URL: always the independent ART, never the table (round 1 used the table's box here; review r1 U2-F1). */
 function artFor(url) {
-  const e = CROPS && Object.prototype.hasOwnProperty.call(CROPS, url) ? CROPS[url] : null;
-  if (e && Array.isArray(e.box) && e.box.length === 4) return { box: e.box, from: 'imageCrops.json' };
   const p = PRISM_BY_URL.get(url);
-  return p ? { box: ART[p.id], from: 'measured ART (no imageCrops.json entry)' } : null;
+  return p ? ART[p.id] : null;
+}
+/** The grown box the frame should show, { x, y, w, h } in source px: the table's box grown by MARGIN x its larger side, clamped. Only for the frame's aspect (AC2). */
+function grownFor(url) {
+  const e = CROPS && Object.prototype.hasOwnProperty.call(CROPS, url) ? CROPS[url] : null;
+  if (!e || !Array.isArray(e.box) || e.box.length !== 4) return null;
+  const [x0, y0, x1, y1] = e.box;
+  const g = MARGIN * Math.max(x1 - x0, y1 - y0);
+  const l = Math.max(0, x0 - g);
+  const t = Math.max(0, y0 - g);
+  return { x: l, y: t, w: Math.min(e.w, x1 + g) - l, h: Math.min(e.h, y1 + g) - t };
 }
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -232,6 +257,12 @@ const LIB = `window.__ic = {
   names() { return this.all('.pkg-card').map((c) => (c.querySelector('.pkg-name')?.textContent || '').trim()); },
   box(e) { const r = e.getBoundingClientRect(); return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }; },
   px(v) { return parseFloat(v) || 0; },
+  /** The padding box (what overflow clips to) or, with pad = true, the content box of an element, as { left, top, right, bottom, width, height }. */
+  inner(e, pad) { const cs = getComputedStyle(e); const r = e.getBoundingClientRect(); const p = (k) => this.px(cs[k]);
+    const l = r.left + p('borderLeftWidth') + (pad ? p('paddingLeft') : 0), t = r.top + p('borderTopWidth') + (pad ? p('paddingTop') : 0);
+    const rr = r.right - p('borderRightWidth') - (pad ? p('paddingRight') : 0), b = r.bottom - p('borderBottomWidth') - (pad ? p('paddingBottom') : 0);
+    return { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t }; },
+  cut(a, b) { const l = Math.max(a.left, b.left), t = Math.max(a.top, b.top), r = Math.min(a.right, b.right), bt = Math.min(a.bottom, b.bottom); return { left: l, top: t, right: Math.max(l, r), bottom: Math.max(t, bt), width: Math.max(0, r - l), height: Math.max(0, bt - t) }; },
   /** Lengths of an inset(...) object-view-box, as [top, right, bottom, left] in source px, or null for none. */
   inset(v, nw, nh) {
     if (!v || v === 'none') return null;
@@ -242,15 +273,19 @@ const LIB = `window.__ic = {
     return [len(t, nh), len(r, nw), len(b, nh), len(l, nw)];
   },
   pos(s, free) { return s.endsWith('%') ? parseFloat(s) / 100 * free : s.endsWith('px') ? parseFloat(s) : s === 'left' || s === 'top' ? 0 : s === 'right' || s === 'bottom' ? free : free / 2; },
-  /** Everything the checks need about how an <img> draws its source, and where the art box lands. */
+  /**
+   * Everything the checks need about an <img>, from layout boxes: where the canvas is drawn (its content box,
+   * object-fit applied), what of it can be seen (clipped by every ancestor whose overflow is not visible), its
+   * crop frame (the parent [data-crop-frame], or null), and where the art box lands and how much of it shows.
+   */
   measure(img, art) {
-    const cs = getComputedStyle(img); const r = img.getBoundingClientRect(); const p = (k) => this.px(cs[k]);
-    const cx = r.left + p('borderLeftWidth') + p('paddingLeft'); const cy = r.top + p('borderTopWidth') + p('paddingTop');
-    const cw = r.width - p('borderLeftWidth') - p('paddingLeft') - p('paddingRight') - p('borderRightWidth');
-    const ch = r.height - p('borderTopWidth') - p('paddingTop') - p('paddingBottom') - p('borderBottomWidth');
+    const cs = getComputedStyle(img);
+    const c = this.inner(img, true); const cx = c.left, cy = c.top, cw = c.width, ch = c.height;
     const nw = img.naturalWidth, nh = img.naturalHeight;
-    const ovb = cs.objectViewBox ?? cs.getPropertyValue('object-view-box') ?? 'none';
+    const ovbRaw = cs.objectViewBox ?? cs.getPropertyValue('object-view-box');
+    const ovb = ovbRaw == null || ovbRaw === '' ? 'none' : ovbRaw;
     const ins = this.inset(ovb, nw, nh);
+    // If an object-view-box were in use (only Chromium has it), the drawn source is that inset; the checks fail on it anyway.
     const view = ins && ins !== 'unparsed' ? { x: ins[3], y: ins[0], w: nw - ins[1] - ins[3], h: nh - ins[0] - ins[2] } : { x: 0, y: 0, w: nw, h: nh };
     const fit = cs.objectFit; let sx, sy;
     if (fit === 'fill') { sx = cw / view.w; sy = ch / view.h; }
@@ -259,20 +294,45 @@ const LIB = `window.__ic = {
     else if (fit === 'scale-down') { sx = sy = Math.min(1, cw / view.w, ch / view.h); }
     else { sx = sy = Math.min(cw / view.w, ch / view.h); }
     const dw = view.w * sx, dh = view.h * sy;
-    const [px, py = '50%'] = (cs.objectPosition || '50% 50%').split(/\\s+/);
-    const dx = cx + this.pos(px, cw - dw), dy = cy + this.pos(py, ch - dh);
+    const [opx, opy = '50%'] = (cs.objectPosition || '50% 50%').split(/\\s+/);
+    const dx = cx + this.pos(opx, cw - dw), dy = cy + this.pos(opy, ch - dh);
+    const drawn = { left: dx, top: dy, right: dx + dw, bottom: dy + dh, width: dw, height: dh };
+    // What of the canvas can be seen: the drawn rect (within the img's content box) clipped by each overflow ancestor.
+    let seen = this.cut(drawn, c);
+    for (let e = img.parentElement; e && e !== document.documentElement; e = e.parentElement) {
+      const ecs = getComputedStyle(e); const ox = ecs.overflowX !== 'visible', oy = ecs.overflowY !== 'visible';
+      if (!ox && !oy) continue;
+      const p = this.inner(e, false);
+      seen = this.cut(seen, { left: ox ? p.left : -1e9, right: ox ? p.right : 1e9, top: oy ? p.top : -1e9, bottom: oy ? p.bottom : 1e9 });
+    }
+    const par = img.parentElement;
+    const isFrame = !!(par && par.hasAttribute('data-crop-frame'));
+    let frame = null;
+    if (isFrame) {
+      const fcs = getComputedStyle(par);
+      frame = { tag: par.tagName, cls: String(par.className || ''), box: this.inner(par, false), rect: this.box(par), overflowX: fcs.overflowX, overflowY: fcs.overflowY, position: fcs.position, display: fcs.display, inlineAspect: par.style.aspectRatio || '' };
+    }
+    // The region the art must fill: the frame's padding box, or the img's content box when there is no frame.
+    const ref = frame ? frame.box : c;
     let a = null;
     if (art) {
-      const ax0 = dx + (art[0] - view.x) * sx, ay0 = dy + (art[1] - view.y) * sy, ax1 = dx + (art[2] - view.x) * sx, ay1 = dy + (art[3] - view.y) * sy;
-      // What of the art is visible: inside the view box (that is the drawn rect) and inside the content box.
-      const vx0 = Math.max(ax0, dx, cx), vy0 = Math.max(ay0, dy, cy), vx1 = Math.min(ax1, dx + dw, cx + cw), vy1 = Math.min(ay1, dy + dh, cy + ch);
-      const vw = Math.max(0, vx1 - vx0), vh = Math.max(0, vy1 - vy0);
-      a = { cover: Math.max(vw / cw, vh / ch), shown: (vw * vh) / Math.max(1e-9, (ax1 - ax0) * (ay1 - ay0)) };
+      const A = { left: dx + (art[0] - view.x) * sx, top: dy + (art[1] - view.y) * sy, right: dx + (art[2] - view.x) * sx, bottom: dy + (art[3] - view.y) * sy };
+      A.width = A.right - A.left; A.height = A.bottom - A.top;
+      const v = this.cut(this.cut(A, seen), ref);
+      a = { cover: Math.max(v.width / ref.width, v.height / ref.height), shown: (v.width * v.height) / Math.max(1e-9, A.width * A.height) };
     }
+    // The source region visible in the reference region (to compare surfaces): screen -> source px.
+    const vis = this.cut(seen, ref);
+    const src = { x0: view.x + (vis.left - dx) / sx, y0: view.y + (vis.top - dy) / sy, x1: view.x + (vis.right - dx) / sx, y1: view.y + (vis.bottom - dy) / sy };
+    // How far the visible canvas reaches past the frame (> 0.5 px means the frame does not clip).
+    const outside = frame ? Math.max(frame.box.left - seen.left, frame.box.top - seen.top, seen.right - frame.box.right, seen.bottom - frame.box.bottom) : 0;
+    const st = img.style;
     return {
-      cropped: img.getAttribute('data-cropped'), style: img.getAttribute('style'), inlineOvb: img.style.objectViewBox || img.style.getPropertyValue('object-view-box') || '',
-      inlineAspect: img.style.aspectRatio || '', rendering: cs.imageRendering, ovb, unparsed: ins === 'unparsed', fit,
-      nw, nh, cw, ch, view, sx, sy, art: a, rect: this.box(img), complete: img.complete, src: img.currentSrc || img.src,
+      cropped: img.getAttribute('data-cropped'), style: img.getAttribute('style'), inlineOvb: st.objectViewBox || st.getPropertyValue('object-view-box') || '',
+      inline: { width: st.width, height: st.height, left: st.left, top: st.top }, position: cs.position,
+      parentTag: par ? par.tagName : null, parentCls: par ? String(par.className || '') : '', isFrame, frame,
+      rendering: cs.imageRendering, ovb, unparsed: ins === 'unparsed', fit,
+      nw, nh, cw, ch, view, sx, sy, art: a, src, seen, outside, rect: this.box(img), complete: img.complete, currentSrc: img.currentSrc || img.src,
     };
   },
 };`;
@@ -385,7 +445,9 @@ async function storeLoaded(page, label) {
 /** Scrolls every visible `sel` image into view and waits until each has loaded. */
 async function loadImages(page, sel) {
   // loading="lazy": each image only loads once it is near the viewport, so wait for each one in turn before moving on.
-  await page.ev(`(async () => { for (const i of window.__ic.all(${q(sel)})) { i.scrollIntoView({ block: 'center' }); for (let t = 0; t < 50 && !(i.complete && i.naturalWidth > 0); t++) await new Promise((r) => setTimeout(r, 100)); } scrollTo(0, 0); })()`);
+  // Scroll the crop frame, not the img inside it: the frame (overflow hidden) is a scroll container, and
+  // img.scrollIntoView() would scroll the frame itself and shift the crop (a harness artefact, not a user action).
+  await page.ev(`(async () => { for (const i of window.__ic.all(${q(sel)})) { (i.closest('[data-crop-frame]') || i).scrollIntoView({ block: 'center' }); for (let t = 0; t < 50 && !(i.complete && i.naturalWidth > 0); t++) await new Promise((r) => setTimeout(r, 100)); } scrollTo(0, 0); })()`);
   await page.until(`window.__ic.all(${q(sel)}).every((i) => i.complete && i.naturalWidth > 0)`, 8000);
   await page.idle();
 }
@@ -404,43 +466,93 @@ async function prismReady(page, label) {
 
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
 const r1 = (v) => Math.round(v * 10) / 10;
-/** Problems of a cropped image: marked, inline crop, coverage, nothing cut off, no distortion, optional element-aspect and min height. */
-function cropProblems(m, { minHeight = null, elementAspect = true, rendering = true } = {}) {
+const PCT = /^-?\d+(?:\.\d+)?%$/;
+const clips = (v) => v === 'hidden' || v === 'clip';
+const dims = (b) => `${r1(b.width)}x${r1(b.height)}`;
+/** No object-view-box, inline or computed (Firefox and Safari/iOS ignore it, so nothing may rely on it). */
+function ovbProblems(m) {
+  return m.inlineOvb || m.ovb !== 'none' ? [`uses object-view-box (inline ${q(m.inlineOvb)}, computed ${q(m.ovb)}), which only Chromium renders`] : [];
+}
+/**
+ * AC1 problems of a cropped image: marked, in a clipping span.crop-frame, positioned by inline percentages,
+ * nothing of the canvas outside the frame, the art (independent ART) fills >= 70% of the frame in its larger
+ * axis and >= 99% of it is visible, smooth. height: the frame's height on this surface (96 card, 110 pop-up),
+ * unless capped by capWidth (then shorter).
+ */
+function ac1Problems(m, { height = null, capWidth = null } = {}) {
+  if (!m) return ['no image'];
   const out = [];
   if (m.cropped !== 'true') out.push(`data-cropped is ${q(m.cropped)}, want "true"`);
-  if (!m.inlineOvb) out.push('no inline object-view-box style');
-  if (m.unparsed) out.push(`computed object-view-box ${q(m.ovb)} is not an inset()`);
-  if (!m.art) out.push('no art box for this URL');
+  out.push(...ovbProblems(m));
+  const f = m.frame;
+  if (!f) out.push(`not in a crop frame (parent <${String(m.parentTag).toLowerCase()} class="${m.parentCls}">, want <span class="crop-frame" data-crop-frame>)`);
   else {
-    if (!(m.art.cover >= MIN_COVER)) out.push(`the art covers ${pct(m.art.cover)} of the ${r1(m.cw)}x${r1(m.ch)} image in its larger axis, want >= ${pct(MIN_COVER)} (object-view-box ${m.ovb})`);
-    if (!(m.art.shown >= 0.99)) out.push(`only ${pct(m.art.shown)} of the art is visible (cut off by the crop)`);
+    if (f.tag !== 'SPAN' || !/(^|\s)crop-frame(\s|$)/.test(f.cls)) out.push(`the frame is <${f.tag.toLowerCase()} class="${f.cls}">, want <span class="crop-frame">`);
+    if (!clips(f.overflowX) || !clips(f.overflowY)) out.push(`frame overflow ${f.overflowX} / ${f.overflowY}, want hidden (it must clip the canvas)`);
+    if (height != null) {
+      const capped = capWidth != null && f.box.width >= capWidth - 1;
+      if (!(Math.abs(f.box.height - height) <= 0.5 || (capped && f.box.height < height))) out.push(`frame ${dims(f.box)}, want ${height}px tall (shorter only when capped by the ${capWidth == null ? '?' : r1(capWidth)}px inner width)`);
+    }
+    if (capWidth != null && f.box.width > capWidth + 0.5) out.push(`frame ${r1(f.box.width)}px wide, more than the ${r1(capWidth)}px inner width it sits in`);
   }
-  if (minHeight != null && !(m.ch >= minHeight - 0.5)) out.push(`image is ${r1(m.ch)}px tall, want >= ${minHeight}px`);
-  if (Math.abs(m.sx / m.sy - 1) > ASPECT_TOL) out.push(`drawn with x scale ${m.sx.toFixed(4)} and y scale ${m.sy.toFixed(4)} (distorted)`);
-  if (elementAspect) {
-    const ea = m.cw / m.ch;
-    const va = m.view.w / m.view.h;
-    if (Math.abs(ea / va - 1) > ASPECT_TOL) out.push(`element aspect ${ea.toFixed(4)} (${r1(m.cw)}x${r1(m.ch)}), the grown box aspect ${va.toFixed(4)} (${r1(m.view.w)}x${r1(m.view.h)})`);
-    const mm = m.inlineAspect.match(/^\s*([\d.]+)\s*\/\s*([\d.]+)\s*$/);
-    if (!mm) out.push(`inline aspect-ratio ${q(m.inlineAspect)}, want "<w> / <h>"`);
-    else if (Math.abs(Number(mm[1]) / Number(mm[2]) / va - 1) > ASPECT_TOL) out.push(`inline aspect-ratio ${m.inlineAspect} is not the drawn box ${r1(m.view.w)} / ${r1(m.view.h)}`);
+  if (m.outside > 0.5) out.push(`the canvas shows ${r1(m.outside)}px outside the frame (not clipped)`);
+  if (m.position !== 'absolute') out.push(`img position ${m.position}, want absolute`);
+  const badInline = ['width', 'height', 'left', 'top'].filter((k) => !PCT.test(m.inline[k] || ''));
+  if (badInline.length) out.push(`img inline ${badInline.map((k) => `${k} ${q(m.inline[k])}`).join(', ')}, want percentages of the frame`);
+  if (!m.art) out.push('no measured art for this URL');
+  else {
+    if (!(m.art.cover >= MIN_COVER)) out.push(`the art covers ${pct(m.art.cover)} of the ${f ? `${dims(f.box)} frame` : `${r1(m.cw)}x${r1(m.ch)} image`} in its larger axis, want >= ${pct(MIN_COVER)}`);
+    if (!(m.art.shown >= 0.99)) out.push(`only ${pct(m.art.shown)} of the art is visible (cut off)`);
   }
-  if (rendering && m.rendering !== 'auto') out.push(`image-rendering ${m.rendering}, want auto (smooth: these are renders)`);
+  if (m.rendering !== 'auto') out.push(`image-rendering ${m.rendering}, want auto (smooth: these are renders)`);
   return out;
 }
-/** Problems of an uncropped image: exactly today's rendering. */
-function plainProblems(m, size) {
+/** AC2 problems: the img is the canvas undistorted (ratio within 1%), the frame has the grown box's ratio (within 2%) and says so inline. */
+function ac2Problems(m, url) {
+  if (!m) return ['no image'];
+  const out = [];
+  const ca = m.nw / m.nh;
+  const ia = m.cw / m.ch;
+  if (Math.abs(ia / ca - 1) > CANVAS_TOL) out.push(`the img renders ${r1(m.cw)}x${r1(m.ch)} (ratio ${ia.toFixed(4)}), the canvas is ${m.nw}x${m.nh} (${ca.toFixed(4)}): stretched`);
+  if (Math.abs(m.sx / m.sy - 1) > CANVAS_TOL) out.push(`drawn with x scale ${m.sx.toFixed(4)} and y scale ${m.sy.toFixed(4)} (distorted)`);
+  const g = grownFor(url);
+  if (!g) out.push(`no imageCrops.json entry for ${url}`);
+  else if (!m.frame) out.push('no crop frame');
+  else {
+    const ga = g.w / g.h;
+    const fa = m.frame.box.width / m.frame.box.height;
+    if (Math.abs(fa / ga - 1) > ASPECT_TOL) out.push(`frame ${dims(m.frame.box)} (ratio ${fa.toFixed(4)}), the grown box ${r1(g.w)}x${r1(g.h)} (${ga.toFixed(4)})`);
+    const mm = m.frame.inlineAspect.match(/^\s*([\d.]+)\s*\/\s*([\d.]+)\s*$/);
+    if (!mm) out.push(`frame inline aspect-ratio ${q(m.frame.inlineAspect)}, want "<w> / <h>"`);
+    else if (Math.abs(Number(mm[1]) / Number(mm[2]) / ga - 1) > ASPECT_TOL) out.push(`frame inline aspect-ratio ${m.frame.inlineAspect} is not the grown box ${r1(g.w)} / ${r1(g.h)}`);
+  }
+  return out;
+}
+/** The same source region shows as on the card (AC4). */
+function sameSrc(m, card, label) {
+  if (!m || !card) return [`no ${card ? label : 'card'} image to compare`];
+  const d = Math.max(...['x0', 'y0', 'x1', 'y1'].map((k) => Math.abs(m.src[k] - card.src[k])));
+  const s = (o) => `[${['x0', 'y0', 'x1', 'y1'].map((k) => Math.round(o.src[k])).join(', ')}]`;
+  return d > SAME_SRC_TOL ? [`${label} shows source ${s(m)}, the card ${s(card)} (differs by ${Math.round(d)} px, max ${SAME_SRC_TOL})`] : [];
+}
+/** Problems of an uncropped image: exactly today's markup and rendering (bare <img> in its wrap). */
+function plainProblems(m, size, wrapCls) {
   const out = [];
   if (m.cropped !== null) out.push(`data-cropped=${q(m.cropped)}`);
+  if (m.isFrame || /(^|\s)crop-frame(\s|$)/.test(m.parentCls)) out.push('wrapped in a crop frame');
+  else if (wrapCls && !new RegExp(`(^|\\s)${wrapCls}(\\s|$)`).test(m.parentCls)) out.push(`parent <${String(m.parentTag).toLowerCase()} class="${m.parentCls}">, want the bare img in .${wrapCls}`);
   if (m.style !== null && m.style.trim() !== '') out.push(`style=${q(m.style)}`);
-  if (m.ovb !== 'none') out.push(`object-view-box ${m.ovb}`);
+  out.push(...ovbProblems(m));
   if (Math.abs(m.rect.width - size) > 0.5 || Math.abs(m.rect.height - size) > 0.5) out.push(`${r1(m.rect.width)}x${r1(m.rect.height)}, want ${size}x${size}`);
   if (m.rendering !== 'pixelated') out.push(`image-rendering ${m.rendering}, want pixelated`);
   return out;
 }
 
-const measureExpr = (imgExpr, url) => `(() => { const i = ${imgExpr}; return i ? window.__ic.measure(i, ${q(artFor(url)?.box ?? null)}) : null; })()`;
+/** Measures an img (with the independent ART for its URL) plus the content box of its closest `wrapSel`, the rect of its closest `.pkg-card`/`.cart-item`. */
+const measureExpr = (imgExpr, url, wrapSel = null) =>
+  `(() => { const i = ${imgExpr}; if (!i) return null; const m = window.__ic.measure(i, ${q(artFor(url))}); const w = ${q(wrapSel)} && i.closest(${q(wrapSel ?? '')}); m.wrap = w ? window.__ic.inner(w, true) : null; const c = i.closest('.pkg-card, .cart-item'); m.card = c ? window.__ic.box(c) : null; return m; })()`;
 const cardImg = (name) => `(window.__ic.card(${q(name)}) || document.createElement('i')).querySelector('img.pkg-image')`;
+const inside = (a, b, tol = 0.5) => !!(a && b) && a.left >= b.left - tol && a.right <= b.right + tol && a.top >= b.top - tol && a.bottom <= b.bottom + tol;
 
 // ------------------------------------------------------------- scenarios --
 
@@ -448,7 +560,8 @@ async function supportsViewBox(b, origin) {
   const page = await openPage(b, origin);
   try {
     await page.goto('/store/?mode=pvp');
-    need('(setup) this Chrome supports CSS object-view-box', (await page.ev(`CSS.supports('object-view-box', 'inset(1px 2px 3px 4px)')`)) ? [] : ['CSS.supports is false: the geometry below cannot be measured']);
+    // Not a dependency of the crop: it makes "computed object-view-box is none" meaningful (an engine without it always says none).
+    need('(setup) this Chrome supports CSS object-view-box, so the "no object-view-box" checks can see one', (await page.ev(`CSS.supports('object-view-box', 'inset(1px 2px 3px 4px)')`)) ? [] : ['CSS.supports is false']);
   } finally {
     await page.close();
   }
@@ -463,14 +576,16 @@ async function pvpCards(b, origin) {
     await prismReady(page, L);
     await page.until(`window.__ic.all('.pkg-card img.pkg-image[data-cropped="true"]').length === ${PRISM.length}`, 3000);
     for (const p of PRISM) {
-      const m = await page.ev(measureExpr(cardImg(p.name), p.url));
+      const m = await page.ev(measureExpr(cardImg(p.name), p.url, '.pkg-image-wrap'));
       if (!m) {
         check(`AC1 ${p.name}: card image`, ['no img.pkg-image']);
         continue;
       }
-      const all = cropProblems(m, { minHeight: 96, elementAspect: false });
-      check(`AC1 ${p.name}: the card image is cropped to its art (>= 70% of its larger axis, nothing cut off, >= 96px tall, smooth)`, all.length ? [...all, `art box from ${artFor(p.url).from}`] : []);
-      check(`AC2 ${p.name}: the card image keeps the grown box's aspect ratio (element and inline aspect-ratio within 2%, no distortion)`, cropProblems(m, { elementAspect: true, rendering: false }).filter((x) => /aspect|distorted/.test(x) || /data-cropped|inline object-view-box/.test(x)));
+      check(`AC1 ${p.name}: the card image is cropped to its art in a clipping frame (art >= 70% of the frame's larger axis, nothing cut off, frame 96px tall, smooth, no object-view-box)`, [
+        ...ac1Problems(m, { height: 96, capWidth: m.wrap?.width ?? null }),
+        m.frame && !inside(m.frame.box, m.wrap) && `the frame ${dims(m.frame.box)} is not inside the .pkg-image-wrap content box`,
+      ]);
+      check(`AC2 ${p.name}: the card image is not distorted (img = canvas ratio within 1%) and the frame has the grown box's ratio (within 2%)`, ac2Problems(m, p.url));
     }
   } finally {
     await page.close();
@@ -485,16 +600,18 @@ async function pvpModal(b, origin) {
     await storeLoaded(page, L);
     await prismReady(page, L);
     for (const p of PRISM) {
-      const card = await page.ev(measureExpr(cardImg(p.name), p.url));
+      const card = await page.ev(measureExpr(cardImg(p.name), p.url, '.pkg-image-wrap'));
       const opened = await page.ev(`(() => { const c = window.__ic.card(${q(p.name)}); if (!c) return false; c.click(); return true; })()`);
       const shown = await page.until(`(() => { const i = window.__ic.all('img.pkg-modal-image')[0]; return !!(i && i.complete && i.naturalWidth > 0); })()`, 5000);
       need(`AC4 (setup) ${p.name}: the pop-up opens with its image`, [!opened && 'no card to click', !shown && 'no loaded img.pkg-modal-image within 5 s']);
       await sleep(300);
-      const m = await page.ev(measureExpr(`window.__ic.all('img.pkg-modal-image')[0]`, p.url));
-      check(`AC4 ${p.name}: the pop-up image is cropped the same way as the card (coverage >= 70%, aspect kept)`, [
-        ...cropProblems(m),
-        m.src !== p.url && `pop-up image ${m.src}, want ${p.url}`,
-        card && m.ovb !== card.ovb && `pop-up object-view-box ${m.ovb}, card ${card.ovb}`,
+      const m = await page.ev(measureExpr(`window.__ic.all('img.pkg-modal-image')[0]`, p.url, '.pkg-modal-image-wrap'));
+      check(`AC4 ${p.name}: the pop-up image is cropped the same way as the card (same source region, frame 110px tall, art >= 70%, nothing cut off, not distorted)`, [
+        ...ac1Problems(m, { height: 110, capWidth: m?.wrap?.width ?? null }),
+        ...ac2Problems(m, p.url),
+        m && m.currentSrc !== p.url && `pop-up image ${m.currentSrc}, want ${p.url}`,
+        m?.frame && !inside(m.frame.box, m.wrap) && `the frame ${dims(m.frame.box)} is not inside the .pkg-modal-image-wrap content box`,
+        ...sameSrc(m, card, 'the pop-up'),
       ]);
       await page.ev(`(() => { const x = document.querySelector('.pkg-modal-close'); if (x) x.click(); })()`);
       await page.until(`!window.__ic.all('img.pkg-modal-image').length`, 3000);
@@ -514,7 +631,7 @@ async function pvpCart(b, origin) {
     await page.goto('/store/?mode=pvp');
     await storeLoaded(page, L);
     await prismReady(page, L);
-    const card = await page.ev(measureExpr(cardImg(p.name), p.url));
+    const card = await page.ev(measureExpr(cardImg(p.name), p.url, '.pkg-image-wrap'));
     const clicked = await page.ev(`(() => { const c = window.__ic.card(${q(p.name)}); const b = c && c.querySelector('.pkg-cart-btn'); if (!b) return false; b.click(); return true; })()`);
     const one = await page.until(`${count} === '1'`, 8000);
     need(`AC4 (setup) ${p.name} is added to the cart`, [!clicked && `no ${p.name} card with .pkg-cart-btn`, page.st.hits.adds < 1 && 'the basket stub got no add', !one && `cart badge ${q(await page.ev(count))}, want "1"`]);
@@ -523,12 +640,28 @@ async function pvpCart(b, origin) {
     need('AC4 (setup) the cart drawer shows the line with its thumbnail', shown ? [] : ['no loaded .cart-drawer.open .cart-item-img within 6 s']);
     await sleep(400);
     const m = await page.ev(measureExpr(`document.querySelector('.cart-drawer.open .cart-item-img')`, p.url));
-    const row = await page.ev(`(() => { const i = document.querySelector('.cart-drawer.open .cart-item-img'); const r = i.closest('.cart-item').getBoundingClientRect(); const e = i.getBoundingClientRect(); return { inside: e.left >= r.left - 0.5 && e.right <= r.right + 0.5 && e.top >= r.top - 0.5 && e.bottom <= r.bottom + 0.5 }; })()`);
-    check(`AC4 ${p.name}: the cart thumbnail is cropped the same way as the card (coverage >= 70%, no distortion, inside its row)`, [
-      // The thumbnail is a fixed 40px square (today's CSS); the crop is drawn inside it with object-fit, so only the drawn aspect is checked.
-      ...cropProblems(m, { elementAspect: false }),
-      card && m.ovb !== card.ovb && `cart object-view-box ${m.ovb}, card ${card.ovb}`,
-      !row.inside && 'the thumbnail overflows its .cart-item',
+    // The 40px square thumbnail slot: the nearest ancestor of the frame, below .cart-item, whose box is 40x40.
+    const slot = await page.ev(`(() => { const i = document.querySelector('.cart-drawer.open .cart-item-img'); const f = i && i.parentElement; if (!f || !f.hasAttribute('data-crop-frame')) return null;
+      for (let e = f.parentElement; e && !e.classList.contains('cart-item'); e = e.parentElement) { const r = e.getBoundingClientRect(); if (Math.abs(r.width - 40) <= 0.5 && Math.abs(r.height - 40) <= 0.5) return window.__ic.box(e); }
+      return 'none'; })()`);
+    const f = m?.frame;
+    const slotProblems = !f
+      ? []
+      : slot === 'none' || !slot
+        ? ['no 40x40 thumbnail slot around the frame (between it and .cart-item)']
+        : [
+            !inside(f.rect, slot) && `the frame ${dims(f.rect)} does not fit in the 40x40 slot`,
+            Math.abs((f.rect.left + f.rect.right) / 2 - (slot.left + slot.right) / 2) > 1 || Math.abs((f.rect.top + f.rect.bottom) / 2 - (slot.top + slot.bottom) / 2) > 1 ? `the frame is not centred in its slot (frame ${q(f.rect)}, slot ${q(slot)})` : null,
+            // At least as large as the 32px box round 1 drew the crop into (the slot's content box today).
+            !(Math.max(f.box.width, f.box.height) >= 31.5) && `the frame is ${dims(f.box)}, want its larger side >= 32px`,
+          ];
+    check(`AC4 ${p.name}: the cart thumbnail is cropped the same way as the card (same source region, frame centred in the 40px slot, art >= 70%, nothing cut off, not distorted, inside its row)`, [
+      ...ac1Problems(m),
+      ...ac2Problems(m, p.url),
+      ...slotProblems,
+      f && !inside(f.rect, m.card) && 'the frame overflows its .cart-item',
+      m && !inside(m.seen, m.card) && 'the visible canvas overflows its .cart-item',
+      ...sameSrc(m, card, 'the cart thumbnail'),
     ]);
   } finally {
     await page.close();
@@ -544,15 +677,26 @@ async function narrow(b, origin) {
     await storeLoaded(page, L);
     await prismReady(page, L);
     await page.until(`window.__ic.all('.pkg-card img.pkg-image[data-cropped="true"]').length === ${PRISM.length}`, 3000);
-    const got = await page.ev(`(() => { const out = []; const W = innerWidth; const sw = document.documentElement.scrollWidth; if (sw > W) out.push('document scrollWidth ' + sw + ' > ' + W);
-      for (const p of ${q(PRISM)}) { const c = window.__ic.card(p.name); const i = c && c.querySelector('img.pkg-image'); if (!i) { out.push(p.name + ': no image'); continue; }
-        if (i.getAttribute('data-cropped') !== 'true') out.push(p.name + ': not cropped (no data-cropped="true")');
-        const e = i.getBoundingClientRect(); const in_ = (r) => e.left >= r.left - 0.5 && e.right <= r.right + 0.5 && e.top >= r.top - 0.5 && e.bottom <= r.bottom + 0.5;
-        if (!in_(c.getBoundingClientRect())) out.push(p.name + ': the image overflows its card');
-        const w = i.closest('.pkg-image-wrap'); if (!w || !in_(w.getBoundingClientRect())) out.push(p.name + ': the image overflows its .pkg-image-wrap');
-        if (e.left < -0.5 || e.right > W + 0.5) out.push(p.name + ': the image spans ' + Math.round(e.left) + '..' + Math.round(e.right)); }
-      return out; })()`);
-    check('AC5 400px: the cropped Prism images fit their cards and the page has no horizontal scroll', got);
+    const out = [];
+    const sw = await page.ev('document.documentElement.scrollWidth');
+    if (sw > 400) out.push(`document scrollWidth ${sw} > 400`);
+    for (const p of PRISM) {
+      const m = await page.ev(measureExpr(cardImg(p.name), p.url, '.pkg-image-wrap'));
+      if (!m) {
+        out.push(`${p.name}: no image`);
+        continue;
+      }
+      const probs = [
+        ...ac1Problems(m, { height: 96, capWidth: m.wrap?.width ?? null }),
+        ...ac2Problems(m, p.url),
+        m.frame && !inside(m.frame.box, m.wrap) && 'the frame overflows its .pkg-image-wrap',
+        m.frame && !inside(m.frame.rect, m.card) && 'the frame overflows its card',
+        m.frame && (m.frame.rect.left < -0.5 || m.frame.rect.right > 400.5) && `the frame spans ${Math.round(m.frame.rect.left)}..${Math.round(m.frame.rect.right)}`,
+        !inside(m.seen, m.card) && 'the visible canvas overflows its card',
+      ].filter(Boolean);
+      out.push(...probs.map((x) => `${p.name}: ${x}`));
+    }
+    check('AC5 400px: the cropped Prism images fit their cards (frames inside wrap and card, cropped as at 1280) and the page has no horizontal scroll', out);
   } finally {
     await page.close();
   }
@@ -569,12 +713,12 @@ async function noEntry(b, origin) {
     const src = await page.ev(`${cardImg(name)}?.getAttribute('src') ?? null`);
     need(`${L}: (setup) the ${name} card shows the fixture-only URL, served by the CDN stub`, [src !== NO_ENTRY_URL && `src ${q(src)}, want ${NO_ENTRY_URL}`, !page.st.hits.images[NO_ENTRY_URL] && 'the CDN stub never served it']);
     const m = await page.ev(measureExpr(cardImg(name), NO_ENTRY_URL));
-    check(`AC3 ${name} (no crop entry): the card image renders as today (no data-cropped, no style, 96x96, pixelated)`, plainProblems(m, 96));
+    check(`AC3 ${name} (no crop entry): the card image renders as today (bare img in .pkg-image-wrap, no data-cropped, no style, 96x96, pixelated)`, plainProblems(m, 96, 'pkg-image-wrap'));
     await page.ev(`window.__ic.card(${q(name)}).click()`);
     const shown = await page.until(`(() => { const i = window.__ic.all('img.pkg-modal-image')[0]; return !!(i && i.complete && i.naturalWidth > 0); })()`, 5000);
     need(`AC3 (setup) ${name}: the pop-up opens with its image`, shown ? [] : ['no loaded img.pkg-modal-image within 5 s']);
     await sleep(300);
-    check(`AC3 ${name} (no crop entry): the pop-up image renders as today (no data-cropped, no style, 110x110, pixelated)`, plainProblems(await page.ev(measureExpr(`window.__ic.all('img.pkg-modal-image')[0]`, NO_ENTRY_URL)), 110));
+    check(`AC3 ${name} (no crop entry): the pop-up image renders as today (bare img in .pkg-modal-image-wrap, no data-cropped, no style, 110x110, pixelated)`, plainProblems(await page.ev(measureExpr(`window.__ic.all('img.pkg-modal-image')[0]`, NO_ENTRY_URL)), 110, 'pkg-modal-image-wrap'));
   } finally {
     await page.close();
   }
@@ -590,8 +734,9 @@ async function others(b, origin, label, variant, path, expected) {
     const got = await page.ev(`window.__ic.all('.pkg-card').map((c) => { const i = c.querySelector('img.pkg-image'); return { name: (c.querySelector('.pkg-name')?.textContent || '').trim(), m: i ? window.__ic.measure(i, null) : null }; })`);
     const missing = expected.filter((n) => !got.some((g) => g.name === n && g.m));
     need(`${label}: (setup) every expected card shows a loaded image`, missing.length ? [`no image on ${missing.join(', ')}`] : got.filter((g) => g.m && !(g.m.complete && g.m.nw > 0)).map((g) => `${g.name}: image not loaded`));
-    check(`AC7 ${label}: no [data-cropped] anywhere on the page`, (await page.ev(`document.querySelectorAll('[data-cropped]').length`)) ? [`${await page.ev(`document.querySelectorAll('[data-cropped]').length`)} element(s) with data-cropped`] : []);
-    check(`AC7 ${label}: every card image renders as today (96x96, no style, pixelated)`, got.filter((g) => g.m).flatMap((g) => plainProblems(g.m, 96).map((x) => `${g.name}: ${x}`)));
+    const marked = await page.ev(`({ cropped: document.querySelectorAll('[data-cropped]').length, frames: document.querySelectorAll('[data-crop-frame], .crop-frame').length })`);
+    check(`AC7 ${label}: no [data-cropped] and no crop frame anywhere on the page`, [marked.cropped && `${marked.cropped} element(s) with data-cropped`, marked.frames && `${marked.frames} crop frame(s)`]);
+    check(`AC7 ${label}: every card image renders as today (bare 96x96 img in .pkg-image-wrap, no style, pixelated)`, got.filter((g) => g.m).flatMap((g) => plainProblems(g.m, 96, 'pkg-image-wrap').map((x) => `${g.name}: ${x}`)));
   } finally {
     await page.close();
   }
@@ -613,6 +758,8 @@ async function main() {
   const i = args.indexOf('--dist');
   const dist = resolve(i >= 0 ? args[i + 1] : join(ROOT, 'dist'));
   check('(setup) the fixture has the five Prism Token packages with CDN image URLs', PRISM.length === 5 && PRISM.every((p) => ART[p.id] && new URL(p.url).hostname === CDN) ? [] : [q(PRISM)]);
+  const artUrls = JSON.parse(readFileSync(ART_FIX, 'utf-8')).images;
+  check('(setup) art-boxes.json measures the same five URLs (the art is independent of imageCrops.json)', PRISM.every((p) => artUrls[p.id]?.url === p.url) && Object.keys(artUrls).length === 5 ? [] : [q(PRISM.map((p) => [p.id, artUrls[p.id]?.url === p.url]))]);
   const chrome = findChrome();
   if (!chrome) return check('chrome-found', ['no Chrome: set CHROME to chrome.exe']);
   if (!existsSync(join(dist, 'store', 'index.html'))) return check('dist-built', [`${dist} has no store/index.html: build first (npm run build)`]);
@@ -629,7 +776,7 @@ async function main() {
     if (!(await waitReady(`${origin}/`, 30_000))) return check('preview-server', [`vite preview did not answer on ${origin}: ${JSON.stringify(log.slice(-300))}`]);
     b = await launchChrome(chrome, profile);
     let supported = true;
-    await run('object-view-box', async () => {
+    await run('object-view-box support', async () => {
       try {
         await supportsViewBox(b, origin);
       } catch (e) {
