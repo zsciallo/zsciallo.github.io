@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
 import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
 import { ArcadeButton } from './ArcadeButton';
-import { FREE_KEY, freeKeysFor, nextFreeKey, preTaxPrice } from '../lib/freeKeys';
+import { FREE_KEY, countsForFreeKey, freeKeysFor, nextFreeKey, preTaxPrice } from '../lib/freeKeys';
 import { freeKey as freeKeySound } from '../lib/sound';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { CropImage } from './CropImage';
@@ -211,8 +211,9 @@ export function CartDrawer({
               const qty = item.in_basket.quantity - free;
               const unit = item.in_basket.price;
               // A quantity change here moves the spend, so the stepper can
-              // shout FREE KEY! when it crosses the next minimum.
-              const rewardAt = (q) => freeKeysFor(freeKeySpend + (q - qty) * unit / rate);
+              // shout FREE KEY! when it crosses the next minimum. A line that
+              // earns no free keys (PVP) moves nothing, so it never shouts.
+              const rewardAt = countsForFreeKey(item.id) ? (q) => freeKeysFor(freeKeySpend + (q - qty) * unit / rate) : null;
 
               if (free > 0 && qty === 0) {
                 return (

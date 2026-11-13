@@ -17,7 +17,7 @@ import { UsernameModal } from '../components/UsernameModal';
 import { PackageModal } from '../components/PackageModal';
 import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
-import { FREE_KEY, usdRate } from '../lib/freeKeys';
+import { FREE_KEY, countsForFreeKey, usdRate } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
@@ -433,6 +433,10 @@ export function StorePage() {
   // popup, so it must not also sit in the grid as a package of its own.
   const pairedIds = pairedSubscriptionIds(config.subscriptionPairs);
   const shownPackages = (category) => category.packages.filter((pkg) => !pairedIds.has(pkg.id));
+  // Free keys are an SMP reward: their banner hides in a mode where nothing
+  // shown counts toward one (PVP). No mode or no ineligible list: as before.
+  const keyPromoShown = !mode || FREE_KEY.ineligible.size === 0
+    || categories.some((c) => shownPackages(c).some((pkg) => countsForFreeKey(pkg.id)));
 
   // A pair is one product to the buyer, so either half in the cart - or refused
   // for this player - has to block the other. Otherwise subscribing leaves the
@@ -601,16 +605,18 @@ export function StorePage() {
               )}
             </p>
 
-            <div class="store-promo store-promo--key">
-              <span class="store-promo-tag">FREE KEYS</span>
-              <span class="store-promo-text">
-                Get a <strong>free Chroma Key</strong> when you spend <strong>US${FREE_KEY.minimums[0]}</strong>
-                {store.packagesById[FREE_KEY.packageId]?.currency && store.packagesById[FREE_KEY.packageId].currency !== 'USD' && (
-                  <> (about {formatPrice(FREE_KEY.minimums[0] * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
-                )}, and another every US$10 after that,
-                up to {FREE_KEY.max} per order. Added automatically.
-              </span>
-            </div>
+            {keyPromoShown && (
+              <div class="store-promo store-promo--key">
+                <span class="store-promo-tag">FREE KEYS</span>
+                <span class="store-promo-text">
+                  Get a <strong>free Chroma Key</strong> when you spend <strong>US${FREE_KEY.minimums[0]}</strong>
+                  {store.packagesById[FREE_KEY.packageId]?.currency && store.packagesById[FREE_KEY.packageId].currency !== 'USD' && (
+                    <> (about {formatPrice(FREE_KEY.minimums[0] * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
+                  )}, and another every US$10 after that,
+                  up to {FREE_KEY.max} per order. Added automatically.
+                </span>
+              </div>
+            )}
 
             {!username && (
               <div class="store-promo">
