@@ -66,6 +66,11 @@
 //   AC5 at a true 400px, ?mode=pvp: the five images are cropped (AC1/AC2 hold),
 //       document scrollWidth <= 400, each frame inside its .pkg-image-wrap and
 //       its .pkg-card, and nothing of the canvas shows outside its card.
+//   posthoc AC4 (review A-O1, old Safari fallback) every [data-crop-frame] has
+//       the inline custom property --crop-h equal to its size: 96px on the five
+//       cards, 110px in each pop-up, 32px in the cart (set by CropImage.jsx; the
+//       @supports not (aspect-ratio: 1) rule is a source check in
+//       test/image_crop.test.mjs).
 //   AC7 every SMP card of the live catalogue (?mode=smp) and every card of the
 //       flat fixture: no [data-cropped] and no crop frame anywhere, each .pkg-image
 //       a bare 96x96 <img>, no inline style, pixelated.
@@ -551,6 +556,8 @@ function plainProblems(m, size, wrapCls) {
 /** Measures an img (with the independent ART for its URL) plus the content box of its closest `wrapSel`, the rect of its closest `.pkg-card`/`.cart-item`. */
 const measureExpr = (imgExpr, url, wrapSel = null) =>
   `(() => { const i = ${imgExpr}; if (!i) return null; const m = window.__ic.measure(i, ${q(artFor(url))}); const w = ${q(wrapSel)} && i.closest(${q(wrapSel ?? '')}); m.wrap = w ? window.__ic.inner(w, true) : null; const c = i.closest('.pkg-card, .cart-item'); m.card = c ? window.__ic.box(c) : null; return m; })()`;
+/** posthoc AC4: the inline --crop-h of the img's [data-crop-frame] parent (trimmed), or null without a frame. */
+const cropHExpr = (imgExpr) => `(() => { const i = ${imgExpr}; const f = i && i.parentElement; return f && f.hasAttribute('data-crop-frame') ? f.style.getPropertyValue('--crop-h').trim() : null; })()`;
 const cardImg = (name) => `(window.__ic.card(${q(name)}) || document.createElement('i')).querySelector('img.pkg-image')`;
 const inside = (a, b, tol = 0.5) => !!(a && b) && a.left >= b.left - tol && a.right <= b.right + tol && a.top >= b.top - tol && a.bottom <= b.bottom + tol;
 
@@ -587,6 +594,9 @@ async function pvpCards(b, origin) {
       ]);
       check(`AC2 ${p.name}: the card image is not distorted (img = canvas ratio within 1%) and the frame has the grown box's ratio (within 2%)`, ac2Problems(m, p.url));
     }
+    // posthoc AC4 (old Safari fallback): every frame on the page carries its size for @supports not (aspect-ratio: 1).
+    const hs = await page.ev(`[...document.querySelectorAll('[data-crop-frame]')].map((f) => f.style.getPropertyValue('--crop-h').trim())`);
+    check('posthoc AC4 every card [data-crop-frame] carries the inline custom property --crop-h: 96px', hs.length === PRISM.length && hs.every((h) => h === '96px') ? [] : [`${hs.length} frame(s) (want ${PRISM.length}), --crop-h ${q(hs)}`]);
   } finally {
     await page.close();
   }
@@ -613,6 +623,8 @@ async function pvpModal(b, origin) {
         m?.frame && !inside(m.frame.box, m.wrap) && `the frame ${dims(m.frame.box)} is not inside the .pkg-modal-image-wrap content box`,
         ...sameSrc(m, card, 'the pop-up'),
       ]);
+      const h = await page.ev(cropHExpr(`window.__ic.all('img.pkg-modal-image')[0]`));
+      check(`posthoc AC4 ${p.name}: the pop-up [data-crop-frame] carries the inline custom property --crop-h: 110px`, h === '110px' ? [] : [`--crop-h ${q(h)}`]);
       await page.ev(`(() => { const x = document.querySelector('.pkg-modal-close'); if (x) x.click(); })()`);
       await page.until(`!window.__ic.all('img.pkg-modal-image').length`, 3000);
       await sleep(300);
@@ -663,6 +675,8 @@ async function pvpCart(b, origin) {
       m && !inside(m.seen, m.card) && 'the visible canvas overflows its .cart-item',
       ...sameSrc(m, card, 'the cart thumbnail'),
     ]);
+    const h = await page.ev(cropHExpr(`document.querySelector('.cart-drawer.open .cart-item-img')`));
+    check(`posthoc AC4 ${p.name}: the cart [data-crop-frame] carries the inline custom property --crop-h: 32px`, h === '32px' ? [] : [`--crop-h ${q(h)}`]);
   } finally {
     await page.close();
   }

@@ -277,6 +277,53 @@ test('cropFrame: does not mutate the (frozen) table', () => {
   check('cropFrame: no object-view-box left in the crop lib, the three render sites or index.css', !hits.length, `object-view-box / objectViewBox in ${hits.join(', ')}`);
 }
 
+// ------------------------------------- posthoc AC4: old Safari fallback (A-O1) --
+// An engine without aspect-ratio (Safari 14, Chrome < 88) gives the frame height
+// auto, and with only an absolutely positioned child it collapses to 0 px. The
+// fix: CropImage.jsx puts --crop-h: <size>px on every [data-crop-frame] (checked
+// in the browser by test/image_crop_check.mjs), and src/index.css has
+//   @supports not (aspect-ratio: 1) { .crop-frame { height: var(--crop-h); } }
+// Headless Chrome supports aspect-ratio, so the rule itself is checked as source text.
+/** The body of each `@supports not (aspect-ratio: 1) { ... }` block in a CSS text (comments stripped, braces balanced). */
+function supportsNotAspectBlocks(css) {
+  const text = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const out = [];
+  const re = /@supports\s+not\s*\(\s*aspect-ratio\s*:\s*1\s*\)\s*\{/g;
+  for (let m; (m = re.exec(text)); ) {
+    let depth = 1;
+    let i = re.lastIndex;
+    for (; i < text.length && depth; i++) depth += text[i] === '{' ? 1 : text[i] === '}' ? -1 : 0;
+    out.push(text.slice(re.lastIndex, i - 1));
+  }
+  return out;
+}
+/** Whether a block body has a rule whose selector list holds `.crop-frame` itself and whose declarations set height: var(--crop-h). */
+function cropHeightRule(body) {
+  const rules = body.match(/[^{}]+\{[^{}]*\}/g) ?? [];
+  return rules.some((r) => {
+    const [sel, decl] = r.split('{');
+    const sels = sel.split(',').map((s) => s.trim());
+    return sels.includes('.crop-frame') && /(^|[;\s])height\s*:\s*var\(\s*--crop-h\s*[,)]/.test(decl);
+  });
+}
+{
+  const css = readFileSync(join(ROOT, 'src', 'index.css'), 'utf-8');
+  const blocks = supportsNotAspectBlocks(css);
+  check('posthoc AC4 src/index.css has an @supports not (aspect-ratio: 1) block that gives .crop-frame height: var(--crop-h)', blocks.some(cropHeightRule), blocks.length ? `${blocks.length} block(s), none with a .crop-frame { height: var(--crop-h) } rule: ${q(blocks.map((b) => b.trim().slice(0, 200)))}` : 'no @supports not (aspect-ratio: 1) block');
+  // Proof that the parser bites: the right rule is found, near misses are not.
+  const cases = [
+    ['@supports not (aspect-ratio: 1) { .crop-frame { height: var(--crop-h); } }', true],
+    ['@supports not (aspect-ratio: 1) {\n  .crop-frame {\n    height: var(--crop-h, 96px);\n  }\n}', true],
+    ['@supports (aspect-ratio: 1) { .crop-frame { height: var(--crop-h); } }', false],
+    ['@supports not (aspect-ratio: 1) { .crop-frame { min-height: var(--crop-h); } }', false],
+    ['@supports not (aspect-ratio: 1) { .crop-frame > img { height: var(--crop-h); } }', false],
+    ['.crop-frame { height: var(--crop-h); }', false],
+    ['/* @supports not (aspect-ratio: 1) { .crop-frame { height: var(--crop-h); } } */', false],
+  ];
+  const wrong = cases.filter(([c, want]) => supportsNotAspectBlocks(c).some(cropHeightRule) !== want).map(([c]) => c);
+  check('posthoc AC4 (proof) the @supports rule check accepts the rule and rejects its near misses', !wrong.length, `misjudged: ${q(wrong)}`);
+}
+
 // ---------------------------------------------- src/data/imageCrops.json (AC6) --
 
 check('fixture (setup): five Prism Token packages with CDN image URLs', PRISM.length === 5 && PRISM.every((p) => /^https:\/\/dunb17ur4ymx4\.cloudfront\.net\/packages\/images\/[0-9a-f]{40}\.png$/.test(p.url ?? '')), q(PRISM));
