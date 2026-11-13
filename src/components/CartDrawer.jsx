@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { QuantityStepper } from './QuantityStepper';
 import { SUBSCRIPTION, renewalLabel } from '../lib/packageType';
 import { ArcadeButton } from './ArcadeButton';
-import { FREE_KEY, freeKeysFor, nextFreeKey, preTaxPrice } from '../lib/freeKeys';
+import { FREE_KEY, countsForFreeKey, freeKeysFor, nextFreeKey, preTaxPrice } from '../lib/freeKeys';
 import { freeKey as freeKeySound } from '../lib/sound';
 import { MAX_QUANTITY } from '../lib/tebex';
+import { CropImage } from './CropImage';
 
 export const WELCOME_CODE = 'WELCOME20';
 
@@ -210,13 +211,14 @@ export function CartDrawer({
               const qty = item.in_basket.quantity - free;
               const unit = item.in_basket.price;
               // A quantity change here moves the spend, so the stepper can
-              // shout FREE KEY! when it crosses the next minimum.
-              const rewardAt = (q) => freeKeysFor(freeKeySpend + (q - qty) * unit / rate);
+              // shout FREE KEY! when it crosses the next minimum. A line that
+              // earns no free keys (PVP) moves nothing, so it never shouts.
+              const rewardAt = countsForFreeKey(item.id) ? (q) => freeKeysFor(freeKeySpend + (q - qty) * unit / rate) : null;
 
               if (free > 0 && qty === 0) {
                 return (
                   <div class="cart-item cart-item--free" key={item.id}>
-                    {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
+                    {item.image && <CropImage class="cart-item-img" slot="cart-item-slot" src={item.image} size={32} loading="lazy" />}
                     <div class="cart-item-info">
                       <p class="cart-item-name">{item.name}</p>
                       <p class="cart-item-sub cart-item-sub--free">{free} FREE · SPEND REWARD</p>
@@ -239,7 +241,7 @@ export function CartDrawer({
 
               return (
                 <div class="cart-item" key={item.id}>
-                  {item.image && <img class="cart-item-img" src={item.image} alt="" loading="lazy" />}
+                  {item.image && <CropImage class="cart-item-img" slot="cart-item-slot" src={item.image} size={32} loading="lazy" />}
                   <div class="cart-item-info">
                     <p class="cart-item-name">{item.name}</p>
                     {recurring && (

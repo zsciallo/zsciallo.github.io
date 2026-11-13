@@ -23,6 +23,10 @@ export const FREE_KEY = {
   // USD of real spend each free key needs, in order.
   minimums: [10.99, 20.99, 30.99],
   max: 3,
+  // Package ids that earn no free keys (the PVP packages: the promo is an SMP
+  // reward). Filled from the backend's `ineligiblePackageIds`; empty means
+  // every package counts, as before the list existed.
+  ineligible: new Set(),
 };
 
 /** Overwrite the promo numbers with the backend's (`rules` from /store/offers or the sync response). */
@@ -32,6 +36,26 @@ export function applyRules(rules) {
   FREE_KEY.price = Number(rules.priceUsd) || FREE_KEY.price;
   FREE_KEY.minimums = rules.minimumsUsd.map(Number);
   FREE_KEY.max = rules.max || FREE_KEY.minimums.length;
+  const ids = rules.ineligiblePackageIds;
+  FREE_KEY.ineligible = new Set(Array.isArray(ids) ? ids.map(Number) : []);
+}
+
+/** Whether a package (id as a number or numeric string) moves the free-key progress. */
+export function countsForFreeKey(packageId) {
+  return !FREE_KEY.ineligible.has(Number(packageId));
+}
+
+/**
+ * The basket's spend toward free keys, in USD: its total less the lines that
+ * earn none (their in-basket price x quantity), never below 0. Used until the
+ * backend has measured the basket, or when it can't.
+ */
+export function eligibleSpend(basket, rate) {
+  if (!basket) return 0;
+  const excluded = (basket.packages || [])
+    .filter((p) => !countsForFreeKey(p.id))
+    .reduce((sum, p) => sum + (p.in_basket?.price ?? 0) * (p.in_basket?.quantity ?? 0), 0);
+  return Math.max(0, (basket.total_price - excluded) / rate);
 }
 
 /** Coupon codes the backend mints for this promo; bookkeeping, never shown as a promo code. */

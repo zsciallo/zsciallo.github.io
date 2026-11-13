@@ -10,17 +10,18 @@ import { contentFor } from '../lib/storeContent';
 import { ArcadeButton } from './ArcadeButton';
 import { m } from 'motion/react';
 import { spring } from '../lib/motion';
-import { freeKeysFor, preTaxPrice } from '../lib/freeKeys';
+import { countsForFreeKey, freeKeysFor, preTaxPrice } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { DealBadge } from './DealBadge';
 import { dealFor } from '../lib/deal';
+import { CropImage } from './CropImage';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
 }
 
 /** Full popout view of a package: image, price, and complete description. */
-export function PackageModal({ pkg, sales, busy, cartQty = 0, freeKeySpend = null, rate = 1, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
+export function PackageModal({ pkg, sales, busy, cartQty = 0, freeKeySpend: cartSpend = null, rate = 1, owned = false, requires = null, onBuy, onAddToCart, onClose }) {
   const deal = dealFor(pkg, sales);
   const onSale = Boolean(deal);
   const allowQuantity = !pkg.disable_quantity;
@@ -37,6 +38,8 @@ export function PackageModal({ pkg, sales, busy, cartQty = 0, freeKeySpend = nul
   const [closing, setClosing] = useState(false);
   const [qty, setQty] = useState(1);
   const sendQty = Math.min(qty, Math.max(1, room));
+  // A package that earns no free keys (PVP) predicts none: no chip, no shout.
+  const freeKeySpend = countsForFreeKey(pkg.id) ? cartSpend : null;
   const freeGain = freeKeySpend == null ? 0
     : freeKeysFor(freeKeySpend + sendQty * preTaxPrice(pkg) / rate) - freeKeysFor(freeKeySpend);
 
@@ -111,7 +114,7 @@ export function PackageModal({ pkg, sales, busy, cartQty = 0, freeKeySpend = nul
 
         {pkg.image && (
           <div class="pkg-modal-image-wrap">
-            <img class="pkg-modal-image" src={pkg.image} alt="" />
+            <CropImage class="pkg-modal-image" src={pkg.image} size={110} />
           </div>
         )}
 

@@ -11,7 +11,7 @@ import {
   removeGiftCard,
 } from '../lib/tebex';
 import { resolveType, isRecurring } from '../lib/packageType';
-import { FREE_KEY, isMintedFreeKeyCode } from '../lib/freeKeys';
+import { FREE_KEY, applyRules, eligibleSpend, isMintedFreeKeyCode } from '../lib/freeKeys';
 import { syncFreeKeys } from '../lib/storeApi';
 
 const BASKET_KEY = 'chromabit_basket';
@@ -103,6 +103,7 @@ export function useTebexBasket(token, username, rate = 1) {
     }
     const synced = await syncFreeKeys(b.ident);
     if (synced?.basket?.ident === b.ident) {
+      if (synced.rules) applyRules(synced.rules);
       setPromo({ ident: b.ident, keys: synced.keys, spendUsd: synced.spendUsd });
       store(synced.basket);
       return synced.basket;
@@ -390,9 +391,9 @@ export function useTebexBasket(token, username, rate = 1) {
   // The backend's answer for *this* basket, if it has one.
   const settled = promo && basket && promo.ident === basket.ident ? promo : null;
   // Real spend toward the next free key, in USD. The backend measures it; with
-  // the API down the total stands in (no free keys are in the basket then, so
-  // the total is the spend).
-  const freeKeySpend = settled ? settled.spendUsd : basket ? basket.total_price / rate : 0;
+  // the API down the total less the lines that earn no keys stands in (no free
+  // keys are in the basket then, so that is the spend).
+  const freeKeySpend = settled ? settled.spendUsd : eligibleSpend(basket, rate);
   // Free keys in the basket: what the backend granted, never more than the
   // Chroma Keys actually there.
   const chromaQty = items.find((p) => p.id === FREE_KEY.packageId)?.in_basket?.quantity ?? 0;

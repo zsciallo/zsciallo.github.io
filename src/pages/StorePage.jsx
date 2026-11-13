@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useLayoutEffect } from 'preact/hooks';
 import config from '../config.json';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { capture } from '../lib/funnel';
@@ -17,7 +17,7 @@ import { UsernameModal } from '../components/UsernameModal';
 import { PackageModal } from '../components/PackageModal';
 import { PurchaseTypeModal } from '../components/PurchaseTypeModal';
 import { CartFab, CartDrawer, WELCOME_CODE } from '../components/CartDrawer';
-import { FREE_KEY, usdRate } from '../lib/freeKeys';
+import { FREE_KEY, countsForFreeKey, usdRate } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { PurchaseModal } from '../components/PurchaseModal';
 import { Footer } from '../components/Footer';
@@ -25,9 +25,22 @@ import { NavBar } from '../components/NavBar';
 import { MotionRoot } from '../lib/motion';
 import { ArcadeButton } from '../components/ArcadeButton';
 import { KeyRoll } from '../components/KeyRoll';
+import { ModeSwitch } from '../components/store/ModeSwitch';
+import { ModePrompt } from '../components/store/ModePrompt';
+import { resolveMode, categoriesForMode } from '../lib/storeModes';
 
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
+const MODE_KEY = 'chromabit_store_mode';
+const isKeyCategory = (c) => /key/i.test(c.name);
+
+/** Rewrites the query string in place (no history entry), keeping the other parameters. */
+function setModeParam(key) {
+  const url = new URL(window.location.href);
+  if (key) url.searchParams.set('mode', key);
+  else url.searchParams.delete('mode');
+  if (url.href !== window.location.href) history.replaceState(history.state, '', url);
+}
 
 // Tebex's refusal for a package the player can't buy. It does NOT mean they own
 // it: the same message comes back for a package gated behind a rank they don't
@@ -59,7 +72,40 @@ export function StorePage() {
   const store = useTebexStore(config.tebexToken, cart.basket?.ident);
   useEffect(() => setFx(usdRate(store.packagesById)), [store.packagesById]);
   const [activeCat, setActiveCat] = useState(null); // null = all categories
-  useScrollReveal([store.categories, activeCat]);
+  // The store mode (PVP, SMP: the top-level Tebex categories). null until it is
+  // known, and for good on a flat catalog with no modes. modeAsked is set once
+  // the URL and the remembered pick have been read, so the first-visit pop-up
+  // only opens when neither names a mode.
+  const [mode, setMode] = useState(null);
+  const [modeAsked, setModeAsked] = useState(false);
+  const modeList = store.modes.modes;
+  const categories = categoriesForMode(store.categories, store.modes, mode);
+  useScrollReveal([store.categories, activeCat, mode]);
+
+  // Priority on load: a valid ?mode=, then the remembered mode, then the pop-up.
+  // An unknown ?mode= is dropped from the address bar. Runs again after a
+  // re-price only if the current mode went missing from the catalog. A layout
+  // effect, so the mode is settled before the browser paints: no frame shows
+  // another mode's cards or misses the pop-up (the prerender never runs it).
+  useLayoutEffect(() => {
+    if (!modeList.length || modeList.some((m) => m.key === mode)) return;
+    const asked = new URLSearchParams(window.location.search).get('mode');
+    const next = resolveMode(modeList, asked, localStorage.getItem(MODE_KEY));
+    if (next) chooseMode(next);
+    else {
+      setMode(null);
+      if (asked != null) setModeParam(null);
+    }
+    setModeAsked(true);
+  }, [store.modes]);
+
+  function chooseMode(key) {
+    localStorage.setItem(MODE_KEY, key);
+    setModeParam(key);
+    // ALL of the new mode: a category from the other one would show nothing.
+    if (key !== mode) setActiveCat(null);
+    setMode(key);
+  }
 
   const [pending, setPending] = useState(null); // { pkg, mode: 'buy' | 'cart', quantity, type }
   const [busyPkgId, setBusyPkgId] = useState(null);
@@ -387,6 +433,10 @@ export function StorePage() {
   // popup, so it must not also sit in the grid as a package of its own.
   const pairedIds = pairedSubscriptionIds(config.subscriptionPairs);
   const shownPackages = (category) => category.packages.filter((pkg) => !pairedIds.has(pkg.id));
+  // Free keys are an SMP reward: their banner hides in a mode where nothing
+  // shown counts toward one (PVP). No mode or no ineligible list: as before.
+  const keyPromoShown = !mode || FREE_KEY.ineligible.size === 0
+    || categories.some((c) => shownPackages(c).some((pkg) => countsForFreeKey(pkg.id)));
 
   // A pair is one product to the buyer, so either half in the cart - or refused
   // for this player - has to block the other. Otherwise subscribing leaves the
@@ -402,8 +452,8 @@ export function StorePage() {
   // nothing to own twice and no limit to trip - and only ones with room for
   // all three under Tebex's per-line cap, since a roll can land one key thrice.
   const ROLL_SIZE = 3;
-  const randomPool = store.categories
-    .filter((c) => /key/i.test(c.name))
+  const randomPool = categories
+    .filter(isKeyCategory)
     .flatMap(shownPackages)
     .filter((pkg) => pkg.type !== 'subscription'
       && !limitCount(pkg.user_limit)
@@ -535,6 +585,8 @@ export function StorePage() {
 
         <section class="store-section" aria-label="Store packages">
           <div class="container">
+            {modeList.length > 0 && <ModeSwitch modes={modeList} active={mode} onSelect={chooseMode} />}
+
             {/* Always rendered, so there's a visible account control before the
                 buyer ever reaches a Buy button - not just a modal that ambushes
                 them at checkout. */}
@@ -553,16 +605,18 @@ export function StorePage() {
               )}
             </p>
 
-            <div class="store-promo store-promo--key">
-              <span class="store-promo-tag">FREE KEYS</span>
-              <span class="store-promo-text">
-                Get a <strong>free Chroma Key</strong> when you spend <strong>US${FREE_KEY.minimums[0]}</strong>
-                {store.packagesById[FREE_KEY.packageId]?.currency && store.packagesById[FREE_KEY.packageId].currency !== 'USD' && (
-                  <> (about {formatPrice(FREE_KEY.minimums[0] * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
-                )}, and another every US$10 after that,
-                up to {FREE_KEY.max} per order. Added automatically.
-              </span>
-            </div>
+            {keyPromoShown && (
+              <div class="store-promo store-promo--key">
+                <span class="store-promo-tag">FREE KEYS</span>
+                <span class="store-promo-text">
+                  Get a <strong>free Chroma Key</strong> when you spend <strong>US${FREE_KEY.minimums[0]}</strong>
+                  {store.packagesById[FREE_KEY.packageId]?.currency && store.packagesById[FREE_KEY.packageId].currency !== 'USD' && (
+                    <> (about {formatPrice(FREE_KEY.minimums[0] * fx.shownRate, store.packagesById[FREE_KEY.packageId].currency)})</>
+                  )}, and another every US$10 after that,
+                  up to {FREE_KEY.max} per order. Added automatically.
+                </span>
+              </div>
+            )}
 
             {!username && (
               <div class="store-promo">
@@ -611,7 +665,7 @@ export function StorePage() {
               </div>
             )}
 
-            {store.categories.length > 1 && (
+            {categories.length > 1 && (
               <nav class="store-tabs" aria-label="Package categories">
                 <ArcadeButton
                   type="button"
@@ -623,7 +677,7 @@ export function StorePage() {
                 >
                   ALL
                 </ArcadeButton>
-                {store.categories.map((c) => (
+                {categories.map((c) => (
                   <ArcadeButton
                     key={c.id}
                     type="button"
@@ -636,23 +690,26 @@ export function StorePage() {
                     {c.name.toUpperCase()}
                   </ArcadeButton>
                 ))}
-                {/* Looks like a disabled tab on purpose: a hidden feature. */}
-                <ArcadeButton
-                  type="button"
-                  size="sm"
-                  class="store-tab store-tab--random"
-                  variant="secondary"
-                  aria-label="Roll three random crate keys"
-                  title={randomPool.length ? 'Feeling lucky?' : 'Nothing left to roll'}
-                  disabled={!randomPool.length}
-                  onClick={openRoll}
-                >
-                  RANDOM?
-                </ArcadeButton>
+                {/* Looks like a disabled tab on purpose: a hidden feature. Only
+                    in a mode that sells keys (a flat catalog always has it). */}
+                {(!modeList.length || categories.some(isKeyCategory)) && (
+                  <ArcadeButton
+                    type="button"
+                    size="sm"
+                    class="store-tab store-tab--random"
+                    variant="secondary"
+                    aria-label="Roll three random crate keys"
+                    title={randomPool.length ? 'Feeling lucky?' : 'Nothing left to roll'}
+                    disabled={!randomPool.length}
+                    onClick={openRoll}
+                  >
+                    RANDOM?
+                  </ArcadeButton>
+                )}
               </nav>
             )}
 
-            {store.categories
+            {categories
               .filter((c) => activeCat == null || c.id === activeCat)
               .filter((c) => c.packages.some((p) => !pairedIds.has(p.id)))
               .map((category) => (
@@ -707,6 +764,8 @@ export function StorePage() {
         onRemoveGiftCard={handleRemoveGiftCard}
         onClose={() => setCartOpen(false)}
       />
+
+      {modeAsked && !mode && !purchaseComplete && modeList.length > 0 && <ModePrompt modes={modeList} onPick={chooseMode} />}
 
       {slotOpen && (
         <KeyRoll

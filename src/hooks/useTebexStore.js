@@ -2,15 +2,18 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { fetchCategories } from '../lib/tebex';
 import { fetchOffers } from '../lib/storeApi';
 import { applyRules } from '../lib/freeKeys';
+import { buildModes } from '../lib/storeModes';
 
-const EMPTY = { loading: false, error: true, categories: [], packagesById: {}, salesById: {}, offers: null };
+const NO_MODES = { modes: [], shared: [] };
+const EMPTY = { loading: false, error: true, categories: [], modes: NO_MODES, packagesById: {}, salesById: {}, offers: null };
 
 /**
  * Loads the webstore catalog (categories + packages) from the Tebex
- * Headless API. Returns { loading, error, categories, packagesById, salesById, offers }
+ * Headless API. Returns { loading, error, categories, modes, packagesById, salesById, offers }
  * where categories are sorted by their configured order and empty ones are
- * dropped. packagesById is a flat lookup, since basket entries carry only a
- * package id.
+ * dropped. modes is lib/storeModes buildModes() of the raw list: the top-level
+ * Tebex categories (PVP, SMP) the store page filters by, empty for a flat list.
+ * packagesById is a flat lookup, since basket entries carry only a package id.
  *
  * Pass `basketIdent` once one exists and the catalog re-fetches with that
  * player's pricing, so rank upgrade discounts show up. The re-fetch keeps the
@@ -38,6 +41,9 @@ export function useTebexStore(token, basketIdent) {
     Promise.all([fetchCategories(token, basketIdent), offers.current])
       .then(([data, offer]) => {
         if (cancelled) return;
+        // Read before the empty-category filter: the mode parents (PVP, SMP)
+        // hold no packages of their own and would be dropped by it.
+        const modes = buildModes(data);
         const categories = data
           .filter((c) => c.packages && c.packages.length > 0)
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -47,7 +53,7 @@ export function useTebexStore(token, basketIdent) {
         const salesById = {};
         Object.entries(offer?.sales || {}).forEach(([id, sale]) => { salesById[Number(id)] = sale.amount; });
         if (offer?.freeKeys) applyRules(offer.freeKeys);
-        setState({ loading: false, error: false, categories, packagesById, salesById, offers: offer });
+        setState({ loading: false, error: false, categories, modes, packagesById, salesById, offers: offer });
       })
       .catch(() => {
         // A failed re-price shouldn't wipe a catalog that's already rendering;

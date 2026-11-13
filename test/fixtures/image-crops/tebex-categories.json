@@ -1,0 +1,807 @@
+{
+  "data": [
+    {
+      "id": 3399286,
+      "name": "Battle Pass",
+      "slug": "battle-pass",
+      "description": "",
+      "parent": {
+        "id": 3501357,
+        "name": "SMP",
+        "slug": "smp",
+        "description": "",
+        "tiered": false,
+        "packages": [],
+        "order": 7,
+        "display_type": "grid",
+        "image_url": null,
+        "dynamic": false
+      },
+      "tiered": false,
+      "packages": [
+        {
+          "id": 7581943,
+          "ident": "pkg_3399286_7581943",
+          "name": "Battle Pass",
+          "slug": null,
+          "description": "<p>⭐ CHROMA PASS - SEASON 2: SHARDFALL</p>\n<p>You keep every Free Pass reward and retroactively unlock the Chroma reward on every tier you've already passed.</p>\n<p>Unlocks the premium reward track on the ChromaBit Pass for Season 2.</p>\n<p>50 tiers, and every single tier pays out. You also keep claiming the free</p>\n<p>track, so everything below is what you walk away with.</p>\n<p>THE CRUX - TIER 50</p>\n<p>Chromatic Spear - the Season 2 signature weapon, and the only way to get it.</p>\n<p>Ships finished with Sharpness 7, Lunge 3, Knockback 2, Looting 4, Unbreaking 3,</p>\n<p>Mending, Prismdrain and Chromabound.</p>\n<p>Comes with a Warden Spawner, 3x Chroma Key and $1,000,000.</p>\n<p>CRATE KEYS</p>\n<p>23x Chroma Key</p>\n<p>24x Spawner Key</p>\n<p>23x Shard Key</p>\n<p>SPAWNERS - 47 IN TOTAL</p>\n<p>Warden, Shulker, 3x Wither Skeleton, Evoker, Ghast, 3x Enderman, 3x Blaze,</p>\n<p>Iron Golem, Copper Golem, Breeze, Guardian, Witch, Magma Cube, Slime, Drowned,</p>\n<p>Creeper, Cave Spider, Spider, 4x Skeleton, 4x Zombie, and a starter farm</p>\n<p>set of chickens, cows and rabbits.</p>\n<p>SHARDS - HELD IN THE OFF HAND</p>\n<p>Shard of Strength (mythic)</p>\n<p>Shard of Haste (legendary)</p>\n<p>Shard of Embers (epic)</p>\n<p>Shard of Night (rare)</p>\n<p>ENCHANTMENTS</p>\n<p>Telepathy IV</p>\n<p>Vein Miner III</p>\n<p>Lifesteal IV</p>\n<p>Double Strike III</p>\n<p>Soulbound III</p>\n<p>Plus 5 random books - Fabled, Legendary, Ultimate and Elite.</p>\n<p>ENCHANTING UTILITY</p>\n<p>4x White Scroll</p>\n<p>Scroll of Binding</p>\n<p>Transmog Scroll</p>\n<p>2x StatTrak</p>\n<p>ARMOUR TRIMS</p>\n<p>All 18 vanilla trim patterns, handed out in pairs across the season:</p>\n<p>Coast, Sentry, Dune, Wild, Ward, Wayfinder, Eye, Vex, Tide, Snout, Rib,</p>\n<p>Spire, Shaper, Silence, Raiser, Host, Flow and Bolt.</p>\n<p>IN GAME CURENCY AND EXTRAS</p>\n<p>$1,500,000 total</p>\n<p>Elytra</p>\n<p>Beacon</p>\n<p>+25% Points Booster for 24 hours</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/967d90d71557b33805b798b129164b9ad18005df.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "967d90d71557b33805b798b129164b9ad18005df.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/967d90d71557b33805b798b129164b9ad18005df.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3399286,
+            "name": "Battle Pass"
+          },
+          "base_price": 4.49,
+          "sales_tax": 0,
+          "total_price": 4.49,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": true,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": {
+            "limit": 1,
+            "period_length": 4,
+            "period_unit": "weekly"
+          },
+          "created_at": "2026-07-26T17:33:51+00:00",
+          "updated_at": "2026-08-25T16:12:44+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7631864,
+          "ident": "pkg_3399286_7631864",
+          "name": "Battle Pass Subscription",
+          "slug": null,
+          "description": "<p>⭐ CHROMA PASS - SEASON 2: SHARDFALL</p>\n<p>You keep every Free Pass reward and retroactively unlock the Chroma reward on every tier you've already passed.</p>\n<p>Unlocks the premium reward track on the ChromaBit Pass for Season 2.</p>\n<p>50 tiers, and every single tier pays out. You also keep claiming the free</p>\n<p>track, so everything below is what you walk away with.</p>\n<p>THE CRUX - TIER 50</p>\n<p>Chromatic Spear - the Season 2 signature weapon, and the only way to get it.</p>\n<p>Ships finished with Sharpness 7, Lunge 3, Knockback 2, Looting 4, Unbreaking 3,</p>\n<p>Mending, Prismdrain and Chromabound.</p>\n<p>Comes with a Warden Spawner, 3x Chroma Key and $1,000,000.</p>\n<p>CRATE KEYS</p>\n<p>23x Chroma Key</p>\n<p>24x Spawner Key</p>\n<p>23x Shard Key</p>\n<p>SPAWNERS - 47 IN TOTAL</p>\n<p>Warden, Shulker, 3x Wither Skeleton, Evoker, Ghast, 3x Enderman, 3x Blaze,</p>\n<p>Iron Golem, Copper Golem, Breeze, Guardian, Witch, Magma Cube, Slime, Drowned,</p>\n<p>Creeper, Cave Spider, Spider, 4x Skeleton, 4x Zombie, and a starter farm</p>\n<p>set of chickens, cows and rabbits.</p>\n<p>SHARDS - HELD IN THE OFF HAND</p>\n<p>Shard of Strength (mythic)</p>\n<p>Shard of Haste (legendary)</p>\n<p>Shard of Embers (epic)</p>\n<p>Shard of Night (rare)</p>\n<p>ENCHANTMENTS</p>\n<p>Telepathy IV</p>\n<p>Vein Miner III</p>\n<p>Lifesteal IV</p>\n<p>Double Strike III</p>\n<p>Soulbound III</p>\n<p>Plus 5 random books - Fabled, Legendary, Ultimate and Elite.</p>\n<p>ENCHANTING UTILITY</p>\n<p>4x White Scroll</p>\n<p>Scroll of Binding</p>\n<p>Transmog Scroll</p>\n<p>2x StatTrak</p>\n<p>ARMOUR TRIMS</p>\n<p>All 18 vanilla trim patterns, handed out in pairs across the season:</p>\n<p>Coast, Sentry, Dune, Wild, Ward, Wayfinder, Eye, Vex, Tide, Snout, Rib,</p>\n<p>Spire, Shaper, Silence, Raiser, Host, Flow and Bolt.</p>\n<p>IN GAME CURENCY AND EXTRAS</p>\n<p>$1,500,000 total</p>\n<p>Elytra</p>\n<p>Beacon</p>\n<p>+25% Points Booster for 24 hours</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/94fe21e852e3d45b72f1fc802a8e4f4ee42c6031.webp",
+          "media": [
+            {
+              "type": "image",
+              "name": "94fe21e852e3d45b72f1fc802a8e4f4ee42c6031.webp",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/94fe21e852e3d45b72f1fc802a8e4f4ee42c6031.webp",
+              "primary": true
+            }
+          ],
+          "type": "subscription",
+          "category": {
+            "id": 3399286,
+            "name": "Battle Pass"
+          },
+          "base_price": 2.99,
+          "sales_tax": 0,
+          "total_price": 2.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": true,
+          "disable_gifting": false,
+          "expiry_period": {
+            "count": 4,
+            "unit": "week"
+          },
+          "expiration_date": null,
+          "user_limit": {
+            "limit": 1,
+            "period_length": 4,
+            "period_unit": "weekly"
+          },
+          "created_at": "2026-08-21T00:16:28+00:00",
+          "updated_at": "2026-08-27T12:16:49+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        }
+      ],
+      "order": 0,
+      "display_type": "grid",
+      "image_url": null,
+      "dynamic": false
+    },
+    {
+      "id": 3385106,
+      "name": "Crate Keys",
+      "slug": null,
+      "description": "",
+      "parent": {
+        "id": 3501357,
+        "name": "SMP",
+        "slug": "smp",
+        "description": "",
+        "tiered": false,
+        "packages": [],
+        "order": 7,
+        "display_type": "grid",
+        "image_url": null,
+        "dynamic": false
+      },
+      "tiered": false,
+      "packages": [
+        {
+          "id": 7557969,
+          "ident": "pkg_3385106_7557969",
+          "name": "Chroma Key",
+          "slug": null,
+          "description": "<p>- One Chroma Key that can be used to open the Chroma Crate at spawn!<br />\n<strong>Chroma Crate grants [1x] of the following rewards:</strong><br />\n ◈ CHROMA</p>\n<p>- Chromatic Sword</p>\n<p>◈  MYTHIC</p>\n<p>- Chromatic Helmet</p>\n<p>- Chromatic Chestplate</p>\n<p>- Chromatic Leggings</p>\n<p>- Chromatic Boots</p>\n<p>- Chromatic Elytra</p>\n<p>- $750,000</p>\n<p>- Chroma Key x3</p>\n<p>◈  LEGENDARY</p>\n<p>- Chromatic Pickaxe</p>\n<p>- Chromatic Axe</p>\n<p>- Chromatic Shovel</p>\n<p>- $600,000</p>\n<p>- Chroma Key x2</p>\n<p>◈  EPIC</p>\n<p>- Corrupted Helmet</p>\n<p>- Corrupted Chestplate</p>\n<p>- Corrupted Leggings</p>\n<p>- Corrupted Boots</p>\n<p>- Corrupted Blade</p>\n<p>- Corrupted Elytra</p>\n<p>- $500,000</p>\n<p>- Chroma Key</p>\n<p>◈ RARE</p>\n<p>- Elytra</p>\n<p>- Corrupted Pickaxe</p>\n<p>- Corrupted Axe</p>\n<p>- Corrupted Shovel</p>\n<p>- $400,000</p>\n<p>- Mending Book</p>\n<p>- Netherite Ingot x2</p>\n<p>UNCOMMON — 26.9%</p>\n<p>- $300,000</p>\n<p>- Netherite Scrap x3</p>\n<p>- Efficiency V Book</p>\n<p>- Fortune III Book</p>\n<p>- Diamond Block x4</p>\n<p>◈ COMMON</p>\n<p>- $250,000</p>\n<p>- Heavy Core</p>\n<p>- All 18 Armor Trims — Sentry, Dune, Coast, Wild, Ward, Eye, Vex, Tide, Snout, Rib, Spire, Wayfinder, Shaper, Silence, Raiser, Host, Flow, Bolt</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/588c65f1c70b06349909129efd4f737eb1e6fe21.webp",
+          "media": [
+            {
+              "type": "image",
+              "name": "588c65f1c70b06349909129efd4f737eb1e6fe21.webp",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/588c65f1c70b06349909129efd4f737eb1e6fe21.webp",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3385106,
+            "name": "Crate Keys"
+          },
+          "base_price": 0.89,
+          "sales_tax": 0,
+          "total_price": 0.89,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-07-13T20:02:29+00:00",
+          "updated_at": "2026-11-13T04:09:20+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7557992,
+          "ident": "pkg_3385106_7557992",
+          "name": "Spawner Key",
+          "slug": null,
+          "description": "<p>[1x] SPAWNER CRATE KEY - use at /warp crates<br />\n<strong>Grants 1 of the following:</strong><br />\nChroma: 1x WARDEN SPAWNER  <br />\nLegendary: Witch x4, Wither Skeleton x2, Shulker x2, Evoker x2, Iron Golem x1<br />\nEpic: Creeper x8, Breeze x7, Blaze x5, Enderman x5, Ghast x5, Slime x4, Witch x3, Evoker x1, Shulker x1<br />\nRare: Creeper x6, Breeze x5, Blaze x4, Enderman x4, Ghast x4, Witch x2, Wither Skeleton x1, Auto Sell Chest<br />\nUncommon: Creeper x4, Breeze x3, Blaze x3, Enderman x3, Ghast x3,  Magma Cube x3, Slime x3<br />\nCommon: Creeper x3, Breeze x2, Blaze x2, Enderman x2, Ghast x2, Magma Cube x2, Slime x2, Witch x1</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/47f2af82abd75ed2a9a2cb4bace8d4c3f018c554.webp",
+          "media": [
+            {
+              "type": "image",
+              "name": "47f2af82abd75ed2a9a2cb4bace8d4c3f018c554.webp",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/47f2af82abd75ed2a9a2cb4bace8d4c3f018c554.webp",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3385106,
+            "name": "Crate Keys"
+          },
+          "base_price": 0.69,
+          "sales_tax": 0,
+          "total_price": 0.69,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-07-13T20:18:49+00:00",
+          "updated_at": "2026-11-02T19:56:55+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7620947,
+          "ident": "pkg_3385106_7620947",
+          "name": "Shard Key",
+          "slug": null,
+          "description": "<p>Shards are minerals you carry in your off hand for a passive effect that</p>\n<p>lasts as long as you hold them. No cooldowns, no charges, no right-clicking - put it in the slot and it works.</p>\n<p><strong>THE 12 SHARDS</strong></p>\n<p>Shard of Strength      Strength II</p>\n<p>Shard of Haste         Haste II</p>\n<p>Shard of Swiftness     Speed II</p>\n<p>Shard of Vitality      Absorption II</p>\n<p>Shard of Vigor         Health Boost II</p>\n<p>Shard of Healing       Regeneration I</p>\n<p>Shard of Embers        Fire Resistance</p>\n<p>Shard of the Tides     Water Breathing + Dolphin's Grace</p>\n<p>Shard of Night         Night Vision</p>\n<p>Shard of the Feather   Slow Falling</p>\n<p>Shard of Hunger        Saturation</p>\n<p>Shard of Luck          Luck</p>\n<p>ALSO INSIDE</p>\n<p>Scrolls of Binding - apply to any weapon, tool or armor piece and you will never lose it on death.</p>\n<p>Stat Trackers - BlockTrak, StatTrak, MobTrak and FishTrak. Apply one and your gear starts counting blocks mined, players killed, mobs killed or fish caught.</p>\n<p>MILESTONES</p>\n<p>A free Shard Key every 10 opens.</p>\n<p>A guaranteed Shard of Strength every 40 opens.</p>\n<p>Both milestones repeat, and they track across every key you ever open.</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/dd7799dd12c1a6f364bbecf12a32e0723f5add42.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "dd7799dd12c1a6f364bbecf12a32e0723f5add42.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/dd7799dd12c1a6f364bbecf12a32e0723f5add42.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3385106,
+            "name": "Crate Keys"
+          },
+          "base_price": 0.79,
+          "sales_tax": 0,
+          "total_price": 0.79,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-08-14T21:24:43+00:00",
+          "updated_at": "2026-11-02T19:57:08+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7793665,
+          "ident": "pkg_3385106_7793665",
+          "name": "Prism Key",
+          "slug": null,
+          "description": "<p>Pulled from website api</p>\n<p>Pulled from website api</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/674bec1b49370c7e7c132dc9323b7bbeee6c8143.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "674bec1b49370c7e7c132dc9323b7bbeee6c8143.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/674bec1b49370c7e7c132dc9323b7bbeee6c8143.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3385106,
+            "name": "Crate Keys"
+          },
+          "base_price": 1.67,
+          "sales_tax": 0,
+          "total_price": 1.67,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-11-06T07:57:13+00:00",
+          "updated_at": "2026-11-06T10:20:01+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        }
+      ],
+      "order": 1,
+      "display_type": "list",
+      "image_url": null,
+      "dynamic": false
+    },
+    {
+      "id": 3389615,
+      "name": "Premium Ranks",
+      "slug": "premium-ranks",
+      "description": "<p><br />Premium in-game ranks that will give you some QOL perks as well as specialty items.   </p>",
+      "parent": {
+        "id": 3501357,
+        "name": "SMP",
+        "slug": "smp",
+        "description": "",
+        "tiered": false,
+        "packages": [],
+        "order": 7,
+        "display_type": "grid",
+        "image_url": null,
+        "dynamic": false
+      },
+      "tiered": false,
+      "packages": [
+        {
+          "id": 7564223,
+          "ident": "pkg_3389615_7564223",
+          "name": "VIP",
+          "slug": null,
+          "description": "<p><strong>VIP Rank Perks:</strong></p>\n<ul>\n<li>\n<p>1 Daily Premium Kit. /kit vip</p>\n</li>\n<li>\n<p>10 total homes. /sethome</p>\n</li>\n<li>\n<p>+1% Shop Buy Discount!</p>\n</li>\n<li>\n<p>2 Player Warps. /pwarp</p>\n</li>\n<li>\n<p>+25% mcMMO XP Boost!</p>\n</li>\n<li>\n<p>2 Spawner storage pages.</p>\n</li>\n<li>\n<p>Green [VIP] chat tag.</p>\n</li>\n<li>\n<p>/nick (nickname)</p>\n</li>\n<li>\n<p>/near  /back</p>\n</li>\n</ul>\n<p><strong>Welcome bonus: $25,000 + 1,000 claim blocks.</strong></p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/1410274cbccf1cee78f54c07109419757331b7b6.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "1410274cbccf1cee78f54c07109419757331b7b6.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/1410274cbccf1cee78f54c07109419757331b7b6.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3389615,
+            "name": "Premium Ranks"
+          },
+          "base_price": 2.99,
+          "sales_tax": 0,
+          "total_price": 2.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": true,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": {
+            "limit": 1,
+            "period_length": null,
+            "period_unit": null
+          },
+          "created_at": "2026-07-17T03:09:59+00:00",
+          "updated_at": "2026-07-30T17:06:31+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7564226,
+          "ident": "pkg_3389615_7564226",
+          "name": "VIP+",
+          "slug": null,
+          "description": "<p><em>Everything included in VIP, plus</em><br />\n<strong>VIP+ Rank Perks:</strong></p>\n<ul>\n<li>\n<p>1 Daily Premium Kit. /kit vipplus</p>\n</li>\n<li>\n<p>15 total homes. /sethome</p>\n</li>\n<li>\n<p>+2% Shop Buy Discount!</p>\n</li>\n<li>\n<p>4 Player Warps. /pwarp</p>\n</li>\n<li>\n<p>+50% mcMMO XP Boost!</p>\n</li>\n<li>\n<p>3 Spawner storage pages.</p>\n</li>\n<li>\n<p>Cyan [VIP+] chat tag.</p>\n</li>\n<li>\n<p>/nick (nickname)</p>\n</li>\n<li>\n<p>NEW Colored chat!</p>\n</li>\n<li>\n<p>NEW /enderchest  /heal  /repair  /itemname</p>\n</li>\n</ul>\n<p><strong>Welcome bonus: $150,000 + 2,000 claim blocks</strong></p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/3d60df0ae7342d54407b86e4a26c867754419241.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "3d60df0ae7342d54407b86e4a26c867754419241.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/3d60df0ae7342d54407b86e4a26c867754419241.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3389615,
+            "name": "Premium Ranks"
+          },
+          "base_price": 3.99,
+          "sales_tax": 0,
+          "total_price": 3.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": true,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": {
+            "limit": 1,
+            "period_length": null,
+            "period_unit": null
+          },
+          "created_at": "2026-07-17T03:10:55+00:00",
+          "updated_at": "2026-08-25T05:58:20+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7564228,
+          "ident": "pkg_3389615_7564228",
+          "name": "MVP",
+          "slug": null,
+          "description": "<p><em>Everything in VIP+, plus:</em><br />\n<strong>MVP Rank Perks:</strong></p>\n<ul>\n<li>\n<p>1 Daily Premium Kit. /kit mvp</p>\n</li>\n<li>\n<p>20 total homes. /sethome</p>\n</li>\n<li>\n<p>+3% Shop Buy Discount!</p>\n</li>\n<li>\n<p>8 Player Warps. /pwarp</p>\n</li>\n<li>\n<p>+50% mcMMO XP, halved cooldowns, Lucky perk &amp; longer abilities!</p>\n</li>\n<li>\n<p>5 Spawner storage pages.</p>\n</li>\n<li>\n<p>Gold [MVP] chat tag.</p>\n</li>\n<li>\n<p>Colored chat!</p>\n</li>\n<li>\n<p>/enderchest  /heal  /repair  /itemname</p>\n</li>\n<li>\n<p>NEW Magic chat formatting!</p>\n</li>\n<li>\n<p>NEW /nick others</p>\n</li>\n<li>\n<p>NEW /workbench  /feed  /fix all  /condense</p>\n</li>\n</ul>\n<p><strong>Welcome bonus: $375,000  + 3,000 claim blocks.</strong></p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/79321d3c94b5d75f10b32ce63e4853e27cf8717c.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "79321d3c94b5d75f10b32ce63e4853e27cf8717c.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/79321d3c94b5d75f10b32ce63e4853e27cf8717c.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3389615,
+            "name": "Premium Ranks"
+          },
+          "base_price": 7.99,
+          "sales_tax": 0,
+          "total_price": 7.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": true,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": {
+            "limit": 1,
+            "period_length": null,
+            "period_unit": null
+          },
+          "created_at": "2026-07-17T03:11:39+00:00",
+          "updated_at": "2026-09-26T23:05:15+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7663601,
+          "ident": "pkg_3389615_7663601",
+          "name": "MVP+",
+          "slug": null,
+          "description": "<p><em>Everything in MVP, plus:</em><br />\n<br />\n<strong>MVP+ KIT</strong><br />\n`/kit mvpplus`</p>\n<p>Claim once every 24 hours:</p>\n<p>- 1x Chroma Key</p>\n<p>- 1x Shard Key</p>\n<p>- 1,000 Prism Shards</p>\n<p><strong>MVP+ PERKS</strong></p>\n<p>- 25 homes</p>\n<p>- 250 upgradeable hoppers</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/df9f809358eaaa7fbe102daac3df17b65767c801.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "df9f809358eaaa7fbe102daac3df17b65767c801.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/df9f809358eaaa7fbe102daac3df17b65767c801.png",
+              "primary": true
+            }
+          ],
+          "type": "subscription",
+          "category": {
+            "id": 3389615,
+            "name": "Premium Ranks"
+          },
+          "base_price": 10.99,
+          "sales_tax": 0,
+          "total_price": 10.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": true,
+          "disable_gifting": false,
+          "expiry_period": {
+            "count": 1,
+            "unit": "month"
+          },
+          "expiration_date": null,
+          "user_limit": {
+            "limit": 1,
+            "period_length": 1,
+            "period_unit": "monthly"
+          },
+          "created_at": "2026-09-08T19:17:52+00:00",
+          "updated_at": "2026-09-08T19:29:54+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        }
+      ],
+      "order": 2,
+      "display_type": "list",
+      "image_url": null,
+      "dynamic": false
+    },
+    {
+      "id": 3389625,
+      "name": "Claim Blocks",
+      "slug": "claim-blocks",
+      "description": "",
+      "parent": {
+        "id": 3501357,
+        "name": "SMP",
+        "slug": "smp",
+        "description": "",
+        "tiered": false,
+        "packages": [],
+        "order": 7,
+        "display_type": "grid",
+        "image_url": null,
+        "dynamic": false
+      },
+      "tiered": false,
+      "packages": [
+        {
+          "id": 7564235,
+          "ident": "pkg_3389625_7564235",
+          "name": "1000 Claim Blocks",
+          "slug": null,
+          "description": "<p>1000 Claim Blocks to help you keep your base safe!</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/08b8f119bc9faa64ead7219135dd942e7fc54f89.gif",
+          "media": [
+            {
+              "type": "image",
+              "name": "08b8f119bc9faa64ead7219135dd942e7fc54f89.gif",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/08b8f119bc9faa64ead7219135dd942e7fc54f89.gif",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3389625,
+            "name": "Claim Blocks"
+          },
+          "base_price": 0.49,
+          "sales_tax": 0,
+          "total_price": 0.49,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-07-17T03:16:07+00:00",
+          "updated_at": "2026-08-25T05:56:01+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        }
+      ],
+      "order": 3,
+      "display_type": "grid",
+      "image_url": "https://dunb17ur4ymx4.cloudfront.net/categories/images/3d5f499f270825d3c984d7e9369a85a39be274fc.gif",
+      "dynamic": false
+    },
+    {
+      "id": 3389629,
+      "name": "Sell Chest",
+      "slug": "sell-chest",
+      "description": "",
+      "parent": {
+        "id": 3501357,
+        "name": "SMP",
+        "slug": "smp",
+        "description": "",
+        "tiered": false,
+        "packages": [],
+        "order": 7,
+        "display_type": "grid",
+        "image_url": null,
+        "dynamic": false
+      },
+      "tiered": false,
+      "packages": [
+        {
+          "id": 7564237,
+          "ident": "pkg_3389629_7564237",
+          "name": "Auto Sell Chest",
+          "slug": null,
+          "description": "<p>[1x] Auto Sell Chest</p>\n<p>  Automatically sells chest contents to the server shop on an upgradable interval. Place it at your farm and let it run!</p>\n<p>  Upgradeable price multiplier increases payouts over time!</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/dfff8b72b55d65878704072e2db190618b72948b.gif",
+          "media": [
+            {
+              "type": "image",
+              "name": "dfff8b72b55d65878704072e2db190618b72948b.gif",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/dfff8b72b55d65878704072e2db190618b72948b.gif",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3389629,
+            "name": "Sell Chest"
+          },
+          "base_price": 9.99,
+          "sales_tax": 0,
+          "total_price": 9.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-07-17T03:18:10+00:00",
+          "updated_at": "2026-09-04T21:00:22+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        }
+      ],
+      "order": 4,
+      "display_type": "grid",
+      "image_url": "https://dunb17ur4ymx4.cloudfront.net/categories/images/5988e501c5593c9c0bcaf5c73520a6ebe832623a.gif",
+      "dynamic": false
+    },
+    {
+      "id": 3501345,
+      "name": "PVP",
+      "slug": "pvp",
+      "description": "",
+      "parent": null,
+      "tiered": false,
+      "packages": [],
+      "order": 5,
+      "display_type": "grid",
+      "image_url": null,
+      "dynamic": false
+    },
+    {
+      "id": 3501348,
+      "name": "Prism Coins",
+      "slug": "prism-tokens",
+      "description": "",
+      "parent": {
+        "id": 3501345,
+        "name": "PVP",
+        "slug": "pvp",
+        "description": "",
+        "tiered": false,
+        "packages": [],
+        "order": 5,
+        "display_type": "grid",
+        "image_url": null,
+        "dynamic": false
+      },
+      "tiered": false,
+      "packages": [
+        {
+          "id": 7808723,
+          "ident": "pkg_3501348_7808723",
+          "name": "3,000 Prism Coins",
+          "slug": null,
+          "description": "<p>Pulled from api</p>\n<p>Pulled from api</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/97f63dcb4b306e3148c3037c3ce25ea70283e732.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "97f63dcb4b306e3148c3037c3ce25ea70283e732.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/97f63dcb4b306e3148c3037c3ce25ea70283e732.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3501348,
+            "name": "Prism Coins"
+          },
+          "base_price": 2.99,
+          "sales_tax": 0,
+          "total_price": 2.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-11-13T04:00:23+00:00",
+          "updated_at": "2026-11-13T04:11:28+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7808725,
+          "ident": "pkg_3501348_7808725",
+          "name": "5,500 Prism Coins",
+          "slug": null,
+          "description": "<p>Pulled from api</p>\n<p>Pulled from api</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/f348b6c385973eec4190cb2703cd1fb75e9daeff.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "f348b6c385973eec4190cb2703cd1fb75e9daeff.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/f348b6c385973eec4190cb2703cd1fb75e9daeff.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3501348,
+            "name": "Prism Coins"
+          },
+          "base_price": 4.99,
+          "sales_tax": 0,
+          "total_price": 4.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-11-13T04:03:47+00:00",
+          "updated_at": "2026-11-13T04:11:19+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7808726,
+          "ident": "pkg_3501348_7808726",
+          "name": "12,000 Prism Coins",
+          "slug": null,
+          "description": "<p>Pulled from api</p>\n<p>Pulled from api</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/076246cbe236076cc9e9c10698831bc5312437ef.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "076246cbe236076cc9e9c10698831bc5312437ef.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/076246cbe236076cc9e9c10698831bc5312437ef.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3501348,
+            "name": "Prism Coins"
+          },
+          "base_price": 9.99,
+          "sales_tax": 0,
+          "total_price": 9.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-11-13T04:04:24+00:00",
+          "updated_at": "2026-11-13T04:11:11+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7808728,
+          "ident": "pkg_3501348_7808728",
+          "name": "26,000 Prism Coins",
+          "slug": null,
+          "description": "<p>Pulled from api</p>\n<p>Pulled from api</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/eb6ece0a838d1e6ffcfa531124a3cc234163341f.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "eb6ece0a838d1e6ffcfa531124a3cc234163341f.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/eb6ece0a838d1e6ffcfa531124a3cc234163341f.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3501348,
+            "name": "Prism Coins"
+          },
+          "base_price": 19.99,
+          "sales_tax": 0,
+          "total_price": 19.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-11-13T04:04:54+00:00",
+          "updated_at": "2026-11-13T04:10:53+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        },
+        {
+          "id": 7808729,
+          "ident": "pkg_3501348_7808729",
+          "name": "70,000 Prism Coins",
+          "slug": null,
+          "description": "<p>Pulled from api</p>\n<p>Pulled from api</p>\n",
+          "image": "https://dunb17ur4ymx4.cloudfront.net/packages/images/10ede1df10747d76667efad569d223dc75fe41c7.png",
+          "media": [
+            {
+              "type": "image",
+              "name": "10ede1df10747d76667efad569d223dc75fe41c7.png",
+              "url": "https://dunb17ur4ymx4.cloudfront.net/packages/images/10ede1df10747d76667efad569d223dc75fe41c7.png",
+              "primary": true
+            }
+          ],
+          "type": "single",
+          "category": {
+            "id": 3501348,
+            "name": "Prism Coins"
+          },
+          "base_price": 49.99,
+          "sales_tax": 0,
+          "total_price": 49.99,
+          "currency": "USD",
+          "discount": 0,
+          "disable_quantity": false,
+          "disable_gifting": false,
+          "expiration_date": null,
+          "user_limit": null,
+          "created_at": "2026-11-13T04:05:18+00:00",
+          "updated_at": "2026-11-13T04:10:44+00:00",
+          "order": 0,
+          "creator_meta_data": null,
+          "vip_status": null
+        }
+      ],
+      "order": 6,
+      "display_type": "grid",
+      "image_url": null,
+      "dynamic": false
+    },
+    {
+      "id": 3501357,
+      "name": "SMP",
+      "slug": "smp",
+      "description": "",
+      "parent": null,
+      "tiered": false,
+      "packages": [],
+      "order": 7,
+      "display_type": "grid",
+      "image_url": null,
+      "dynamic": false
+    }
+  ]
+}
