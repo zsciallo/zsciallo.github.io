@@ -51,8 +51,9 @@
 //   pvp-only   ?mode=smp: banner shown with US$9.99 (AC3); switch to PVP:
 //              banner hidden (AC3); the Prism Coins card stepper typed to 5 (14.95)
 //              shouts no FREE KEY! and shows no chip (AC1); added to the cart:
-//              progress 0 and "$9.99 MORE" (AC1/AC2); the cart line typed to 10
-//              shouts no FREE KEY! (AC1) and the progress stays 0; the package
+//              no free-key box (posthoc AC2, was: progress 0 and "$9.99 MORE");
+//              the cart line typed to 10 shouts no FREE KEY! (AC1) and there is
+//              still no box (posthoc AC2, was: the progress stays 0); the package
 //              modal's stepper typed to 5 shouts no FREE KEY!, no chip (AC1).
 //   smp-only   (today's behaviour, green on the base by design) the Sell Chest card
 //              typed to 2 (15.98) shouts FREE KEY! with "+1 FREE KEY"; added x1:
@@ -63,8 +64,8 @@
 //              settled); one more PVP from its card: still 80; the PVP line +
 //              (3 -> 4, would reach 10.98 counted whole) shouts no FREE KEY!
 //              (AC1); the Sell Chest line + shouts FREE KEY! (AC1 SMP as today).
-//   pvp-restore saved basket PVP x3 only, the sync held 6 s: progress 0 before it
-//              answers (AC1/AC2).
+//   pvp-restore saved basket PVP x3 only, the sync held 6 s: no free-key box
+//              before it answers (posthoc AC2, was: progress 0).
 //   sync-fail  saved mixed basket, the sync answers 500: progress 80, "$2.00
 //              MORE" (AC2 fallback); one more PVP added (sync 500 again): still 80.
 //   banner     ?mode=pvp hidden, SMP shown (US$9.99), PVP hidden again (AC3).
@@ -79,6 +80,41 @@
 //   400px      (AC5, a regression guard: green on the base) saved mixed basket,
 //              cart open at a true 400px: document scrollWidth <= 400, the
 //              drawer and its progress inside 0..400.
+//
+// Post-hoc review fixes (run 20261112-store-modes, unit posthoc; review
+// reports/posthoc-reviewer.md B-O1..B-O3, owner 2026-11-13):
+//   sync-rules (2 scenarios: /store/offers 404, and offers without
+//              ineligiblePackageIds) the list reaches the site only through the
+//              sync response (useTebexBasket settle -> applyRules). Before any
+//              sync the banner shows in PVP (harness: proves offers brought no
+//              list). After one Prism Coins is added and synced: banner hidden
+//              (posthoc AC1), the Prism Coins card typed to 5 shows no chip and
+//              shouts no FREE KEY! (AC1), the PVP-only cart has no free-key box
+//              (AC2), the cart line typed to 5 shouts no FREE KEY! (AC1).
+//   pvp+key    (AC2 guard, green on the base) saved basket Prism Coins x1 +
+//              Chroma Key x1: the box is shown (the Chroma Key itself counts).
+//   promo memory (AC3, B-O2 banner flicker). localStorage
+//              chromabit_store_keypromo = JSON { "<modeKey>": true|false }.
+//              "Visible" (window.__fk.shown): the element has a non-empty
+//              border box (getBoundingClientRect width and height > 0) and its
+//              computed visibility is not hidden. Opacity is not looked at. A
+//              requestAnimationFrame sampler installed before the document
+//              parses checks every .store-promo--key in every frame, so the
+//              prerendered HTML's first paint counts.
+//     (a) remembered pvp + {"pvp":false}, categories held 3 s: no frame, before
+//         or after the load, shows a visible banner; the same with ?mode=pvp
+//         and no remembered mode.
+//     (b) (guard, green on the base) nothing in the key, ?mode=smp and, in a
+//         second run, a remembered smp, categories held: the banner is visible
+//         while the store is still loading and after. A third run: remembered
+//         pvp with {"pvp":true} (offers and sync without the list, so PVP keeps
+//         the banner after load): visible while loading and after.
+//     (c) ?mode=pvp with the ineligible rules: after load the key holds
+//         pvp:false; switched to SMP: smp:true (pvp still false) and the banner
+//         is visible. A wrong seeded {"smp":false} with ?mode=smp: after load
+//         the banner is visible and the key holds smp:true.
+//     (d) (guard, green on the base) the key holds "not json{", ?mode=smp,
+//         categories held: visible while loading, the store loads, visible after.
 //
 // The FREE KEY! recorder counts any .qty-levelup with .qty-levelup--key (or the
 // text FREE KEY) at the stepper's place; where a "no FREE KEY!" check passes, the
@@ -95,6 +131,7 @@ const HEIGHT = 900;
 const MODES_FIX = join(ROOT, 'test', 'fixtures', 'store-modes', 'tebex-categories.json');
 const FLAT_FIX = join(ROOT, 'test', 'fixtures', 'card-style', 'tebex-categories.json');
 const MODE_KEY = 'chromabit_store_mode';
+const PROMO_KEY = 'chromabit_store_keypromo';
 const BASKET_IDENT = 'freekeyscope1';
 
 const raw = (file) => JSON.parse(readFileSync(file, 'utf-8'));
@@ -106,6 +143,7 @@ const ALL_PKGS = MODES_DATA.flatMap((c) => c.packages ?? []);
 const byName = (n) => ALL_PKGS.find((p) => p.name === n);
 const PRISM = byName('3,000 Prism Coins'); // PVP, 2.99
 const CHEST = byName('Sell Chest'); // SMP, 7.99
+const KEY = byName('Chroma Key'); // SMP, 4.99, the free-key package itself
 
 const BASE_RULES = { packageId: 7557969, priceUsd: 0.99, minimumsUsd: [9.99, 19.99, 29.99], max: 3 };
 const NEW_RULES = { ...BASE_RULES, ineligiblePackageIds: PVP_IDS };
@@ -206,7 +244,18 @@ function route(req, origin, st) {
   if (host === 'headless.tebex.io') {
     if (/\/categories$/.test(u.pathname)) {
       st.hits.categories++;
-      return json(st.body);
+      const answer = () => {
+        st.hits.categoriesAnswered++;
+        return json(st.body);
+      };
+      // Held back (the AC3 load-time checks): every request until `holdCategories` ms after the first
+      // (the restored basket re-prices with a second request that replaces the first), built when sent.
+      if (st.holdCategories) {
+        st.catHoldUntil ??= Date.now() + st.holdCategories;
+        const wait = st.catHoldUntil - Date.now();
+        if (wait > 0) return { later: wait, make: answer };
+      }
+      return answer();
     }
     if (st.basket) {
       if (req.method === 'GET' && u.pathname.endsWith(`/baskets/${BASKET_IDENT}`)) return json({ data: basketDoc(st) });
@@ -267,6 +316,11 @@ const LIB = `(() => {
     chip(scope) { const c = scope && scope.querySelector('.pkg-freekey-chip'); return c && this.vis(c) ? this.text(c) : null; },
     progress() { const b = document.querySelector('.cart-drawer .cart-keys-bar'); const t = document.querySelector('.cart-drawer .cart-keys-text'); return b ? { now: b.getAttribute('aria-valuenow'), text: this.text(t) } : null; },
     banner() { const b = this.first('.store-promo--key'); return b ? this.text(b) : null; },
+    /** Visible (posthoc AC3): a non-empty border box and computed visibility not hidden (display: none has no box). */
+    shown(e) { if (!e || !e.isConnected) return false; const r = e.getBoundingClientRect(); if (!(r.width > 0 && r.height > 0)) return false; return getComputedStyle(e).visibility !== 'hidden'; },
+    promoShown() { return [...document.querySelectorAll('.store-promo--key')].some((e) => this.shown(e)); },
+    promoMemory() { const v = localStorage.getItem(${JSON.stringify(PROMO_KEY)}); if (v == null) return { raw: null }; try { return { raw: v, value: JSON.parse(v) }; } catch { return { raw: v, bad: true }; } },
+    cartKeys() { return !!document.querySelector('.cart-drawer .cart-keys'); },
     badge() { return (document.querySelector('.cart-fab-badge')?.textContent || '').trim(); },
   });
   new MutationObserver((ms) => {
@@ -280,12 +334,12 @@ const LIB = `(() => {
   }).observe(document, { childList: true, subtree: true });
 })();`;
 
-async function openPage(b, origin, { width = 1280, fixture = MODES_FIX, init = '', lines = [], offers = NEW_RULES, sync = 'new', holdFirstSync = 0 } = {}) {
+async function openPage(b, origin, { width = 1280, fixture = MODES_FIX, init = '', lines = [], offers = NEW_RULES, sync = 'new', holdFirstSync = 0, holdCategories = 0 } = {}) {
   const { browserContextId } = await b.send('Target.createBrowserContext', { disposeOnDetach: true });
   const { targetId } = await b.send('Target.createTarget', { url: 'about:blank', browserContextId });
   const { sessionId } = await b.send('Target.attachToTarget', { targetId, flatten: true });
   const s = (m, p) => b.send(m, p, sessionId);
-  const st = { body: raw(fixture), basket: { lines: lines.map(([p, n]) => lineOf(p, n)) }, offers, sync, holdFirstSync, hits: { categories: 0, offers: 0, adds: 0, puts: [], sync: 0, syncAnswered: 0, syncAborted: 0 } };
+  const st = { body: raw(fixture), basket: { lines: lines.map(([p, n]) => lineOf(p, n)) }, offers, sync, holdFirstSync, holdCategories, hits: { categories: 0, categoriesAnswered: 0, offers: 0, adds: 0, puts: [], sync: 0, syncAnswered: 0, syncAborted: 0 } };
   const inflight = new Set();
   const syncIds = new Set();
   let lastNet = Date.now();
@@ -390,6 +444,31 @@ async function openPage(b, origin, { width = 1280, fixture = MODES_FIX, init = '
 /** A saved basket for Steve (Java), so the store restores it from the stub. */
 const SEED_BASKET = `try { if (!sessionStorage.getItem('__basket')) { localStorage.setItem('chromabit_username', 'Steve'); localStorage.setItem('chromabit_platform', 'java'); localStorage.setItem('chromabit_basket', JSON.stringify({ ident: ${q(BASKET_IDENT)}, username: 'Steve', at: ${FROZEN_TIME} })); sessionStorage.setItem('__basket', '1'); } } catch {}`;
 const remember = (v) => `try { if (!sessionStorage.getItem('__seeded')) { localStorage.setItem(${q(MODE_KEY)}, ${q(v)}); sessionStorage.setItem('__seeded', '1'); } } catch {}`;
+/** Seeds chromabit_store_keypromo with a raw string (once per context, before the app runs). */
+const rememberPromo = (rawValue) => `try { if (!sessionStorage.getItem('__seededPromo')) { localStorage.setItem(${q(PROMO_KEY)}, ${q(rawValue)}); sessionStorage.setItem('__seededPromo', '1'); } } catch {}`;
+/**
+ * posthoc AC3: a requestAnimationFrame loop installed before the document parses
+ * (rAF runs before every paint, so each painted frame is sampled, the
+ * prerendered HTML's first one included). Records the frames that show a
+ * visible .store-promo--key, and how many frames were sampled while the store
+ * was still loading (a visible .store-status-msg, no .pkg-card) and after the
+ * first card.
+ */
+const PROMO_SAMPLER = `(() => {
+  const f = (window.__promo = { frames: 0, loading: 0, afterCards: 0, seen: [] });
+  const tick = () => {
+    f.frames++;
+    const L = window.__fk;
+    if (L) {
+      const cards = !!document.querySelector('.pkg-card');
+      if (cards) f.afterCards++;
+      else if (L.vis(document.querySelector('.store-status-msg'))) f.loading++;
+      if (L.promoShown() && f.seen.length < 10) f.seen.push({ frame: f.frames, cards, loading: !cards });
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();`;
 
 // --------------------------------------------------------------- helpers --
 
@@ -439,10 +518,20 @@ async function addFromCard(page, label, name, badge) {
     !shown && `cart badge ${q(await page.ev('window.__fk.badge()'))}, want ${q(String(badge))}`,
   ]);
 }
-async function openCart(page, label, lines) {
+/**
+ * Opens the cart and waits for its lines and (unless `progress` is false) the
+ * free-key progress. `progress: false` is for a PVP-only cart, where posthoc AC2
+ * removes the box: the scenario then fails on the AC2 check, not here.
+ */
+async function openCart(page, label, lines, { progress = true } = {}) {
   await clickSel(page, '.cart-fab');
-  const ok = await page.until(`document.querySelectorAll('.cart-drawer.open .cart-item').length >= ${lines} && !!window.__fk.progress()`, 5000);
-  need(`${label}: (harness) the cart is open with ${lines} line(s) and the free-key progress`, ok ? [] : [`open drawer lines ${await page.ev(`document.querySelectorAll('.cart-drawer.open .cart-item').length`)}, progress ${q(await page.ev('window.__fk.progress()'))}`]);
+  const ok = await page.until(`document.querySelectorAll('.cart-drawer.open .cart-item').length >= ${lines}${progress ? ' && !!window.__fk.progress()' : ''}`, 5000);
+  need(`${label}: (harness) the cart is open with ${lines} line(s)${progress ? ' and the free-key progress' : ''}`, ok ? [] : [`open drawer lines ${await page.ev(`document.querySelectorAll('.cart-drawer.open .cart-item').length`)}, progress ${q(await page.ev('window.__fk.progress()'))}`]);
+}
+/** posthoc AC2: waits up to `ms` for the drawer to have no .cart-keys; returns the problems. */
+async function noKeyBox(page, ms = 4000) {
+  const gone = await page.until('!window.__fk.cartKeys()', ms);
+  return gone ? [] : [`.cart-drawer .cart-keys is rendered (progress ${q(await page.ev('window.__fk.progress()'))})`];
 }
 /** Waits up to `ms` for the progress to read `exp` ({ now, text }); returns the last reading. */
 async function progressBecomes(page, exp, ms = 4000) {
@@ -498,14 +587,13 @@ async function pvpOnly(b, origin) {
     check(`AC1 the ${PRISM.name} card shows no free-key chip at 5`, card.chip ? [`.pkg-freekey-chip ${q(card.chip)}`] : []);
 
     await addFromCard(page, L, PRISM.name, 5);
-    await openCart(page, L, 1);
-    const p0 = await progressBecomes(page, { now: '0', ...more(9.99) });
-    check(`AC1/AC2 a PVP-only basket (5 x ${money(PRISM.total_price)} = ${money(5 * PRISM.total_price)}) leaves the progress at 0, "$9.99 MORE"`, progressProblems(p0, { now: '0', ...more(9.99) }));
+    await openCart(page, L, 1, { progress: false });
+    // posthoc AC2 (owner 2026-11-13): was "leaves the progress at 0, $9.99 MORE"; the box is now hidden when no line counts.
+    check(`posthoc AC2 a PVP-only basket (5 x ${money(PRISM.total_price)} = ${money(5 * PRISM.total_price)}) shows no free-key box (.cart-drawer .cart-keys)`, await noKeyBox(page));
 
     const line = await typeOnLine(page, L, PRISM.name, 10);
     check(`AC1 the ${PRISM.name} cart line typed 5 -> 10 (${money(10 * PRISM.total_price)}) shouts no FREE KEY!`, keyShouts(line).length ? [`shouts ${q(line)}`] : []);
-    const p1 = await progressBecomes(page, { now: '0', ...more(9.99) });
-    check('AC1 after the PVP line went to 10 the progress is still 0, "$9.99 MORE"', progressProblems(p1, { now: '0', ...more(9.99) }));
+    check('posthoc AC2 after the PVP line went to 10 there is still no free-key box', await noKeyBox(page));
 
     // The package modal's stepper.
     await clickSel(page, '.cart-close');
@@ -596,10 +684,14 @@ async function pvpRestore(b, origin) {
     await storeLoaded(page, L);
     await page.untilNode(() => page.st.hits.sync > 0, 6000);
     await clickSel(page, '.cart-fab');
-    const ok = await page.until(`document.querySelectorAll('.cart-drawer.open .cart-item').length === 1 && !!window.__fk.progress()`, 3000);
+    // No wait for the progress: posthoc AC2 removes the box from a PVP-only cart.
+    const ok = await page.until(`document.querySelectorAll('.cart-drawer.open .cart-item').length === 1`, 3000);
+    await sleep(300);
+    const box = await page.ev('window.__fk.cartKeys()');
     const early = await page.ev('window.__fk.progress()');
-    need(`${L}: (harness) the saved PVP x3 basket is in the open cart while the sync is unanswered`, [!ok && 'no open cart with one line and the progress', page.st.hits.syncAnswered > 0 && 'the sync was already answered']);
-    check(`AC1/AC2 before the sync answers, a PVP-only basket (${money(3 * PRISM.total_price)}) leaves the progress at 0, "$9.99 MORE"`, progressProblems(early, { now: '0', ...more(9.99) }));
+    need(`${L}: (harness) the saved PVP x3 basket is in the open cart while the sync is unanswered`, [!ok && 'no open cart with one line', page.st.hits.syncAnswered > 0 && 'the sync was already answered']);
+    // posthoc AC2 (owner 2026-11-13): was "leaves the progress at 0, $9.99 MORE"; the box is now hidden when no line counts.
+    check(`posthoc AC2 before the sync answers, a PVP-only basket (${money(3 * PRISM.total_price)}) shows no free-key box (.cart-drawer .cart-keys)`, box ? [`.cart-drawer .cart-keys is rendered (progress ${q(early)})`] : []);
   } finally {
     await page.close();
   }
@@ -721,9 +813,151 @@ async function narrow(b, origin) {
   }
 }
 
+// ------------------------------------------------- posthoc (review fixes) --
+
+/**
+ * posthoc AC1 (review B-O1): the ineligible list arrives only with the sync
+ * response, so FREE_KEY.ineligible is filled by useTebexBasket settle ->
+ * applyRules(synced.rules). Green on the base by design; red when that call is removed.
+ */
+async function syncRules(b, origin, offers) {
+  const L = offers ? 'sync-rules, offers without the field' : 'sync-rules, offers down';
+  const page = await openPage(b, origin, { offers, sync: 'new' });
+  try {
+    await page.goto('/store/?mode=pvp');
+    await storeLoaded(page, L);
+    // Before any sync the page has no ineligible list (offers brought none), so the banner shows in PVP as today.
+    if (page.st.hits.sync === 0) {
+      const before = await page.until('window.__fk.promoShown()', 3000);
+      need(`${L}: (harness) before any sync the page has no ineligible list (the FREE KEYS banner shows in PVP)`, before || page.st.hits.sync > 0 ? [] : ['no visible .store-promo--key before the first sync']);
+    }
+    await addFromCard(page, L, PRISM.name, 1);
+    const hidden = await page.until('!window.__fk.promoShown()', 3000);
+    check(`posthoc AC1 ${L}: once the sync brings ineligiblePackageIds the FREE KEYS banner is hidden in PVP`, hidden ? [] : [`visible .store-promo--key: ${q(await page.ev('window.__fk.banner()'))}`]);
+    const card = await typeOnCard(page, L, PRISM.name, 5);
+    check(`posthoc AC1 ${L}: the ${PRISM.name} card typed to 5 (${money(5 * PRISM.total_price)}) shows no free-key chip`, card.chip ? [`.pkg-freekey-chip ${q(card.chip)}`] : []);
+    check(`posthoc AC1 ${L}: the ${PRISM.name} card typed to 5 shouts no FREE KEY!`, keyShouts(card.shouts).length ? [`shouts ${q(card.shouts)}`] : []);
+    await openCart(page, L, 1, { progress: false });
+    check(`posthoc AC2 ${L}: the PVP-only cart shows no free-key box`, await noKeyBox(page));
+    const line = await typeOnLine(page, L, PRISM.name, 5);
+    check(`posthoc AC1 ${L}: the ${PRISM.name} cart line typed 1 -> 5 (${money(5 * PRISM.total_price)}) shouts no FREE KEY!`, keyShouts(line).length ? [`shouts ${q(line)}`] : []);
+  } finally {
+    await page.close();
+  }
+}
+
+/** posthoc AC2 guard (green on the base): the Chroma Key itself counts, so a PVP + Chroma Key cart keeps the box. */
+async function pvpPlusKey(b, origin) {
+  const L = 'pvp+key';
+  const page = await openPage(b, origin, { lines: [[PRISM, 1], [KEY, 1]] });
+  try {
+    await page.goto('/store/?mode=pvp');
+    await storeLoaded(page, L);
+    await page.untilNode(() => page.st.hits.syncAnswered > 0, 6000);
+    await openCart(page, L, 2, { progress: false });
+    const shown = await page.until('window.__fk.cartKeys() && !!window.__fk.progress()', 4000);
+    check(`posthoc AC2 a cart with ${PRISM.name} x1 and ${KEY.name} x1 (the key counts) shows the free-key box with its progress`, shown ? [] : [`.cart-keys ${await page.ev('window.__fk.cartKeys()')}, progress ${q(await page.ev('window.__fk.progress()'))}`]);
+  } finally {
+    await page.close();
+  }
+}
+
+const HOLD = 3000;
+/** Proves the categories response is still held and the store shows its loading state. */
+async function stillLoading(page, label) {
+  const loading = await page.until(`window.__fk.vis(document.querySelector('.store-status-msg')) && !document.querySelector('.pkg-card')`, 2000);
+  need(`${label}: (harness) the store is still loading (categories requested, not answered; loading message, no card)`, [
+    page.st.hits.categories < 1 && 'the categories stub was never requested',
+    page.st.hits.categoriesAnswered > 0 && 'the categories were already answered',
+    !loading && 'no visible .store-status-msg without cards',
+  ]);
+}
+
+/** posthoc AC3 (a): a remembered "pvp": false paints no frame with a visible banner, before or after the load. */
+async function promoNoFlash(b, origin, { path, init, label }) {
+  const L = `promo memory (a) ${label}`;
+  const page = await openPage(b, origin, { init: `${init}\n${PROMO_SAMPLER}`, holdCategories: HOLD });
+  try {
+    await page.goto(path, { idle: false });
+    await stillLoading(page, L);
+    await storeLoaded(page, L);
+    const on = await page.until(`document.querySelector('[data-mode="pvp"]')?.getAttribute('aria-checked') === 'true'`, 3000);
+    await sleep(800);
+    const f = await page.ev('window.__promo');
+    need(`${L}: (harness) PVP is the active mode and the frame sampler ran while loading and after the cards`, [
+      !on && '[data-mode="pvp"] is not aria-checked',
+      !f && 'no window.__promo',
+      f && f.loading < 3 && `only ${f.loading} frame(s) sampled while loading`,
+      f && f.afterCards < 5 && `only ${f.afterCards} frame(s) sampled after the first card`,
+    ]);
+    check(`posthoc AC3 (a) ${label}, {"pvp":false} remembered: no painted frame (prerender, loading, loaded) shows a visible FREE KEYS banner`, f.seen.length ? [`frames with a visible .store-promo--key: ${q(f.seen)}`] : []);
+  } finally {
+    await page.close();
+  }
+}
+
+/** posthoc AC3 (b) and (d), guards: the banner is visible while the store loads and after. */
+async function promoShownWhileLoading(b, origin, { path, init, label, tag, mode = 'smp', opts = {} }) {
+  const L = `promo memory (${tag}) ${label}`;
+  const page = await openPage(b, origin, { ...opts, init, holdCategories: HOLD });
+  try {
+    await page.goto(path, { idle: false });
+    await stillLoading(page, L);
+    const during = await page.ev('window.__fk.promoShown()');
+    check(`posthoc AC3 (${tag}) ${label}: the FREE KEYS banner is visible while the store is loading`, during ? [] : ['no visible .store-promo--key during the load']);
+    await storeLoaded(page, L);
+    const on = await page.until(`document.querySelector('[data-mode="${mode}"]')?.getAttribute('aria-checked') === 'true'`, 3000);
+    need(`${L}: (harness) ${mode.toUpperCase()} is the active mode after the load`, on ? [] : [`[data-mode="${mode}"] is not aria-checked`]);
+    const after = await page.until('window.__fk.promoShown()', 3000);
+    check(`posthoc AC3 (${tag}) ${label}: the FREE KEYS banner is visible after the load`, after ? [] : ['no visible .store-promo--key after the load']);
+  } finally {
+    await page.close();
+  }
+}
+
+/** posthoc AC3 (c): the key is written per mode once the catalogue has loaded, and a wrong value is corrected. */
+async function promoWrites(b, origin) {
+  const L = 'promo memory (c)';
+  const page = await openPage(b, origin);
+  const memo = () => page.ev('window.__fk.promoMemory()');
+  const isMap = (m) => !!m && !m.bad && m.value && typeof m.value === 'object' && !Array.isArray(m.value);
+  try {
+    await page.goto('/store/?mode=pvp');
+    await storeLoaded(page, L);
+    await page.until(`(() => { const m = window.__fk.promoMemory(); return !!m.value && m.value.pvp === false; })()`, 4000);
+    const m1 = await memo();
+    check(`posthoc AC3 (c) after a load in PVP with the ineligible rules, ${PROMO_KEY} holds "pvp": false`, isMap(m1) ? want('pvp', m1.value.pvp, false) ?? [] : [`${PROMO_KEY} = ${q(m1.raw)}, want a JSON object`]);
+    await switchMode(page, L, 'smp');
+    await page.until(`(() => { const m = window.__fk.promoMemory(); return !!m.value && m.value.smp === true; })()`, 4000);
+    const m2 = await memo();
+    check(`posthoc AC3 (c) after switching to SMP, ${PROMO_KEY} holds "smp": true and still "pvp": false`, isMap(m2) ? [want('smp', m2.value.smp, true), want('pvp', m2.value.pvp, false)] : [`${PROMO_KEY} = ${q(m2.raw)}, want a JSON object`]);
+    check('posthoc AC3 (c) after switching to SMP the FREE KEYS banner is visible', (await page.until('window.__fk.promoShown()', 3000)) ? [] : ['no visible .store-promo--key']);
+  } finally {
+    await page.close();
+  }
+
+  const L2 = 'promo memory (c) wrong {"smp":false}';
+  const page2 = await openPage(b, origin, { init: rememberPromo(JSON.stringify({ smp: false })) });
+  try {
+    await page2.goto('/store/?mode=smp');
+    need(`${L2}: (harness) the seeded value is in localStorage`, (await page2.ev('window.__fk.promoMemory().raw')) ? [] : [`${PROMO_KEY} is empty`]);
+    await storeLoaded(page2, L2);
+    const shown = await page2.until('window.__fk.promoShown()', 3000);
+    check('posthoc AC3 (c) a wrong remembered {"smp":false}: after the load in SMP the FREE KEYS banner is visible', shown ? [] : ['no visible .store-promo--key after the load']);
+    await page2.until(`(() => { const m = window.__fk.promoMemory(); return !!m.value && m.value.smp === true; })()`, 4000);
+    const m = await page2.ev('window.__fk.promoMemory()');
+    check(`posthoc AC3 (c) a wrong remembered {"smp":false} is corrected: ${PROMO_KEY} holds "smp": true after the load`, isMap(m) ? want('smp', m.value.smp, true) ?? [] : [`${PROMO_KEY} = ${q(m.raw)}, want a JSON object`]);
+  } finally {
+    await page2.close();
+  }
+}
+
 // ------------------------------------------------------------------ main --
 
+/** `--only <text>`: run just the scenarios whose name contains it (a debugging aid; the npm script runs all). */
+let ONLY = null;
 async function run(name, fn) {
+  if (ONLY && !name.includes(ONLY)) return;
   try {
     await fn();
   } catch (e) {
@@ -736,7 +970,10 @@ async function main() {
   const args = process.argv.slice(2);
   const i = args.indexOf('--dist');
   const dist = resolve(i >= 0 ? args[i + 1] : join(ROOT, 'dist'));
+  const o = args.indexOf('--only');
+  if (o >= 0) ONLY = args[o + 1];
   if (!PRISM || !CHEST || !PVP_IDS.includes(PRISM.id)) return check('fixture', ['the store-modes fixture has no "3,000 Prism Coins" under PVP or no "Sell Chest"']);
+  if (!KEY || KEY.id !== BASE_RULES.packageId || PVP_IDS.includes(KEY.id)) return check('fixture', ['the store-modes fixture has no SMP "Chroma Key" with the rules\' packageId']);
   const chrome = findChrome();
   if (!chrome) return check('chrome-found', ['no Chrome: set CHROME to chrome.exe']);
   if (!existsSync(join(dist, 'store', 'index.html'))) return check('dist-built', [`${dist} has no store/index.html: build first (npm run build)`]);
@@ -761,6 +998,18 @@ async function main() {
     await run('no-field', () => noField(b, origin));
     await run('api-down', () => apiDown(b, origin));
     await run('400px', () => narrow(b, origin));
+    // posthoc (review fixes, owner 2026-11-13)
+    await run('sync-rules, offers down', () => syncRules(b, origin, null));
+    await run('sync-rules, offers without the field', () => syncRules(b, origin, BASE_RULES));
+    await run('pvp+key', () => pvpPlusKey(b, origin));
+    await run('promo memory (a) remembered pvp', () => promoNoFlash(b, origin, { label: 'remembered pvp, /store/', path: '/store/', init: `${remember('pvp')}\n${rememberPromo('{"pvp":false}')}` }));
+    await run('promo memory (a) ?mode=pvp', () => promoNoFlash(b, origin, { label: '?mode=pvp, no remembered mode', path: '/store/?mode=pvp', init: rememberPromo('{"pvp":false}') }));
+    await run('promo memory (b) ?mode=smp', () => promoShownWhileLoading(b, origin, { tag: 'b', label: 'nothing remembered, ?mode=smp', path: '/store/?mode=smp', init: '' }));
+    await run('promo memory (b) remembered smp', () => promoShownWhileLoading(b, origin, { tag: 'b', label: 'nothing remembered for the banner, remembered smp', path: '/store/', init: remember('smp') }));
+    await run('promo memory (b) remembered pvp true', () => promoShownWhileLoading(b, origin, { tag: 'b', label: 'remembered pvp with {"pvp":true}, offers and sync without the field', path: '/store/', init: `${remember('pvp')}
+${rememberPromo('{"pvp":true}')}`, mode: 'pvp', opts: { offers: BASE_RULES, sync: 'old' } }));
+    await run('promo memory (c)', () => promoWrites(b, origin));
+    await run('promo memory (d)', () => promoShownWhileLoading(b, origin, { tag: 'd', label: `${PROMO_KEY} = "not json{", ?mode=smp`, path: '/store/?mode=smp', init: rememberPromo('not json{') }));
   } finally {
     if (b) await b.close();
     preview.kill();

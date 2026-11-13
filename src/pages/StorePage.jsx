@@ -32,6 +32,39 @@ import { resolveMode, categoriesForMode } from '../lib/storeModes';
 const USERNAME_KEY = 'chromabit_username';
 const PLATFORM_KEY = 'chromabit_platform';
 const MODE_KEY = 'chromabit_store_mode';
+// Whether each mode last showed the FREE KEYS banner: { pvp: false, smp: true }.
+// Read before the catalog loads (here and by the inline script in
+// store/index.html, which must agree), so a mode without free keys never
+// flashes the prerendered banner.
+const KEY_PROMO_KEY = 'chromabit_store_keypromo';
+
+/** The remembered banner verdict for the mode the page is about to show. Shown unless false is remembered. */
+function rememberedKeyPromo() {
+  try {
+    const asked = new URLSearchParams(window.location.search).get('mode') || localStorage.getItem(MODE_KEY);
+    return JSON.parse(localStorage.getItem(KEY_PROMO_KEY))?.[asked] !== false;
+  } catch {
+    return true; // prerender, storage blocked or unparsable
+  }
+}
+
+/** Remember one mode's verdict, keeping the other modes'. */
+function rememberKeyPromo(key, shown) {
+  try {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(KEY_PROMO_KEY));
+    } catch {
+      // unparsable: start over
+    }
+    const next = saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+    if (next[key] === shown) return;
+    localStorage.setItem(KEY_PROMO_KEY, JSON.stringify({ ...next, [key]: shown }));
+  } catch {
+    // storage blocked: nothing remembered, the banner shows while loading
+  }
+}
+
 const isKeyCategory = (c) => /key/i.test(c.name);
 
 /** Rewrites the query string in place (no history entry), keeping the other parameters. */
@@ -437,6 +470,23 @@ export function StorePage() {
   // shown counts toward one (PVP). No mode or no ineligible list: as before.
   const keyPromoShown = !mode || FREE_KEY.ineligible.size === 0
     || categories.some((c) => shownPackages(c).some((pkg) => countsForFreeKey(pkg.id)));
+  // Until the catalog is in and its mode settled, nothing says which mode this
+  // is, so the remembered verdict stands in. The banner stays rendered (as
+  // prerendered) and an attribute on <html> hides it, the same switch the head
+  // script flips before first paint.
+  const [keyPromoRemembered] = useState(rememberedKeyPromo);
+  const keyPromoPending = store.loading || (modeList.length > 0 && !modeAsked);
+  const keyPromoVisible = keyPromoPending ? keyPromoRemembered : keyPromoShown;
+  useLayoutEffect(() => {
+    if (keyPromoVisible) document.documentElement.removeAttribute('data-keypromo');
+    else document.documentElement.setAttribute('data-keypromo', 'off');
+  }, [keyPromoVisible]);
+  // Written once the catalog is in with a mode, again on each switch, and
+  // whenever the verdict changes (the ineligible list can arrive later, with a
+  // basket sync), so a wrong remembered value is corrected.
+  useEffect(() => {
+    if (!store.loading && mode) rememberKeyPromo(mode, keyPromoShown);
+  }, [store.loading, mode, keyPromoShown]);
 
   // A pair is one product to the buyer, so either half in the cart - or refused
   // for this player - has to block the other. Otherwise subscribing leaves the
@@ -605,7 +655,7 @@ export function StorePage() {
               )}
             </p>
 
-            {keyPromoShown && (
+            {(keyPromoPending || keyPromoShown) && (
               <div class="store-promo store-promo--key">
                 <span class="store-promo-tag">FREE KEYS</span>
                 <span class="store-promo-text">
