@@ -2,7 +2,7 @@
   "source": {
     "repo": "mc-server",
     "ref": "origin/main",
-    "commit": "79ec03706b9bbc7b2300f3a100531c89b284e671"
+    "commit": "87e1471f7c23fea5d8f886df3c10088438649bd3"
   },
   "vanillaIcons": [
     "amethyst_cluster",
@@ -3429,6 +3429,56 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    "7808723": {
+      "kind": "prism_coins",
+      "summary": "3,000 Prism Coins for ChromaPVP",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "3,000 Prism Coins added to your ChromaPVP balance. Spend them in game on crates, cosmetics, supplies, permanent upgrades and extra stash pages."
+        }
+      ]
+    },
+    "7808725": {
+      "kind": "prism_coins",
+      "summary": "5,500 Prism Coins for ChromaPVP",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "5,500 Prism Coins added to your ChromaPVP balance. Spend them in game on crates, cosmetics, supplies, permanent upgrades and extra stash pages."
+        }
+      ]
+    },
+    "7808726": {
+      "kind": "prism_coins",
+      "summary": "12,000 Prism Coins for ChromaPVP",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "12,000 Prism Coins added to your ChromaPVP balance. Spend them in game on crates, cosmetics, supplies, permanent upgrades and extra stash pages."
+        }
+      ]
+    },
+    "7808728": {
+      "kind": "prism_coins",
+      "summary": "26,000 Prism Coins for ChromaPVP",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "26,000 Prism Coins added to your ChromaPVP balance. Spend them in game on crates, cosmetics, supplies, permanent upgrades and extra stash pages."
+        }
+      ]
+    },
+    "7808729": {
+      "kind": "prism_coins",
+      "summary": "70,000 Prism Coins for ChromaPVP",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "70,000 Prism Coins added to your ChromaPVP balance. Spend them in game on crates, cosmetics, supplies, permanent upgrades and extra stash pages."
         }
       ]
     }
