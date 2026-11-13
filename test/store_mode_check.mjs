@@ -94,7 +94,7 @@ const FLAT_FIX = join(ROOT, 'test', 'fixtures', 'card-style', 'tebex-categories.
 const CONFIG = JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8'));
 /** Subscription halves of a pair live behind their partner's pop-up and never get a card. */
 const PAIRED = new Set(Object.values(CONFIG.subscriptionPairs ?? {}).map(Number));
-export const TITLE = 'WHICH MODE ARE YOU SHOPPING FOR?';
+export const TITLE = 'WHICH MODE?';
 export const MODE_KEY = 'chromabit_store_mode';
 const BASKET_IDENT = 'modecheck1';
 

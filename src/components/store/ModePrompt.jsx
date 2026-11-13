@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks';
 
-export const MODE_PROMPT_TITLE = 'WHICH MODE ARE YOU SHOPPING FOR?';
+export const MODE_PROMPT_TITLE = 'WHICH MODE?';
 
 /**
  * First-visit question: which mode the buyer is shopping for. One button per
