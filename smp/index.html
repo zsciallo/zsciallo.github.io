@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // The nav bar is the first text painted - hero content is still faded out
+    // at that point - so a webfont swapping in under it reads as a flicker on
+    // every navigation. Reveal it once Teko, Jersey 10 and VT323 have loaded, or after
+    // 1.5s if the font never arrives.
+    (function () {
+      var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
+      el.classList.add('js');
+      if (!document.fonts || !document.fonts.load) return ready();
+      // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
+      // no webfont face to wait on, and the request would resolve instantly.
+      addEventListener('DOMContentLoaded', function () {
+        Promise.all([document.fonts.load('700 1rem Teko'), document.fonts.load('400 1rem "Jersey 10"'), document.fonts.load('400 1rem VT323')]).then(ready, ready);
+      });
+      setTimeout(ready, 1500);
+    })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/server-icon-old-2.png">
+
+  <link rel="preconnect" href="https://api.mcsrvstat.us" crossorigin>
+  <link rel="dns-prefetch" href="https://api.mcsrvstat.us">
+  <link rel="preconnect" href="https://discord.com" crossorigin>
+
+  <title>Economy SMP | Chromabit</title>
+  <meta name="description" content="Chromabit Economy SMP: survival with an auction house, the market's top movers and the Season 4 Heartwood dungeon, 9 zones each with its own boss.">
+  <meta name="keywords" content="Economy SMP, Economy SMP Minecraft, Economy SMP server, Minecraft economy server, Minecraft server prizes, Chromabit">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <meta name="author" content="Chromabit Network">
+  <meta name="theme-color" content="#0c0718">
+  <link rel="canonical" href="https://chromabit.us/smp/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chromabit Network">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://chromabit.us/smp/">
+  <meta property="og:title" content="Economy SMP | Chromabit">
+  <meta property="og:description" content="A player-run economy SMP for Java and Bedrock with an auction house and server events. Join Chromabit.">
+  <meta property="og:image" content="https://chromabit.us/og-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Chromabit logo above the words CHROMABIT NETWORK, Ranked PVP + Economy SMP for Java + Bedrock, and play.chromabit.us">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Economy SMP | Chromabit">
+  <meta name="twitter:description" content="Trade, build and compete on the Chromabit Economy SMP. play.chromabit.us">
+  <meta name="twitter:image" content="https://chromabit.us/og-preview.png">
+  <meta name="twitter:image:alt" content="The Chromabit logo above the words CHROMABIT NETWORK, Ranked PVP + Economy SMP for Java + Bedrock, and play.chromabit.us">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://chromabit.us/#organization","name":"Chromabit Network","alternateName":"Chromabit","url":"https://chromabit.us/","logo":{"@type":"ImageObject","url":"https://chromabit.us/logo-512.png","width":512,"height":512},"sameAs":["https://discord.gg/WebRPAgE4e"]},{"@type":"WebSite","@id":"https://chromabit.us/#website","name":"Chromabit Network","alternateName":"Chromabit","url":"https://chromabit.us/","description":"Chromabit is a Minecraft network for Java and Bedrock: ranked kit PVP on one shared ladder, and a survival server with a player-run economy. Join at play.chromabit.us.","inLanguage":"en","publisher":{"@id":"https://chromabit.us/#organization"}},{"@type":"WebPage","@id":"https://chromabit.us/smp/#webpage","url":"https://chromabit.us/smp/","name":"Economy SMP","description":"Chromabit Economy SMP: survival with an auction house, the market's top movers and the Season 4 Heartwood dungeon, 9 zones each with its own boss.","inLanguage":"en","isPartOf":{"@id":"https://chromabit.us/#website"},"publisher":{"@id":"https://chromabit.us/#organization"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://chromabit.us/og-preview.png","width":1200,"height":630},"breadcrumb":{"@id":"https://chromabit.us/smp/#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://chromabit.us/smp/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://chromabit.us/"},{"@type":"ListItem","position":2,"name":"Economy SMP","item":"https://chromabit.us/smp/"}]}]}</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Jersey+10&family=VT323&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/assets/smp-B6v6Tdnd.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/funnel-_cpiv7LC.js">
+  <link rel="modulepreload" crossorigin href="/assets/useScrollReveal-1JYkqzkH.js">
+  <link rel="modulepreload" crossorigin href="/assets/ArcadeButton-BnJquO2h.js">
+  <link rel="modulepreload" crossorigin href="/assets/CopyIpButton-X2zZFVii.js">
+  <link rel="modulepreload" crossorigin href="/assets/market-CkD0zppq.js">
+  <link rel="modulepreload" crossorigin href="/assets/ItemIcon-C1ZKqlWz.js">
+  <link rel="stylesheet" crossorigin href="/assets/funnel-DTw6EdWM.css">
+</head>
+
+<body>
+  <div id="app"><header class="site-nav"><nav aria-label="Primary" class="site-nav-inner"><a href="/" class="site-nav-brand"><img src="/server-icon-old-2.png" alt width="30" height="30"/><span>CHROMABIT</span></a><button type="button" aria-pressed="true" aria-label="Sound on" title="Mute sounds" class="sound-toggle"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M2 7h3l5-4v14l-5-4H2z"></path><rect x="12" y="8" width="2" height="4"></rect><rect x="15" y="5" width="2" height="2"></rect><rect x="17" y="7" width="2" height="6"></rect><rect x="15" y="13" width="2" height="2"></rect></svg></button><button type="button" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open menu" class="nav-toggle"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><ul id="site-nav-links" class="site-nav-links"><li style="--i:0;"><a href="/" tabindex="0">HOME<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:1;"><a href="/pvp/" tabindex="0">PVP<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:2;"><a href="/store/" tabindex="0">STORE<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:3;"><a href="/auctions/" tabindex="0">AUCTIONS<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:4;"><a href="/faq/" tabindex="0">FAQ<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li></ul></nav></header><main><section aria-label="Chromabit SMP" class="page-hero container smp-hero"><p class="section-eyebrow">CHROMABIT SMP · SURVIVAL ECONOMY</p><h1 class="hero-title hero-title--inline">MINE IT. PRICE IT. <span class="accent">TRADE IT.</span></h1></section><section aria-label="Economy SMP" class="smp-body container"><div data-section="dungeon" class="dungeon reveal"><p class="section-eyebrow">SEASON 4 DUNGEON</p><h2 class="section-title dungeon-title">HEARTWOOD</h2><div class="fact-grid"><div data-fact="true" class="card fact"><b class="fact-figure">9</b><span class="fact-line">zones, each with its own boss</span></div><div data-fact="true" class="card fact"><b class="fact-figure">4</b><span class="fact-line">difficulties, from Easy to Very Hard</span></div><div data-fact="true" class="card fact"><b class="fact-figure">3</b><span class="fact-line">phases to the final boss, The Rotroot Heart</span></div><div data-fact="true" class="card fact"><b class="fact-figure">9</b><span class="fact-line">armour sets, one from every zone</span></div></div></div><section aria-label="Today's biggest market moves" class="tape"><div class="tape-head"><h2 class="tape-title">TODAY’S TOP MOVERS</h2></div><div class="tape-row tape-row--up"><span class="tape-label">GAINERS</span><div class="tape-viewport"><span class="tape-idle">reading the market…</span></div></div><div class="tape-row tape-row--down"><span class="tape-label">LOSERS</span><div class="tape-viewport"><span class="tape-idle">reading the market…</span></div></div></section><div class="smp-actions"><a href="/auctions/" data-arcade="true" tabindex="0" style="--edge:5px;" class="btn btn-primary">OPEN THE AUCTION HOUSE</a><button data-arcade="true" type="button" data-copy-ip="true" tabindex="0" style="--edge:5px;" class="btn btn-secondary copy-ip"><span style="opacity:1;transform:none;" class="copy-ip-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>COPY IP</span></button></div></section></main><footer><nav aria-label="Footer" class="footer-nav"><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/smp/">ECONOMY SMP</a><a href="/faq/">FAQ</a><a href="/auctions/">AUCTIONS</a><a href="/store/">STORE</a><a href="https://discord.gg/WebRPAgE4e" target="_blank" rel="noopener">DISCORD</a><a href="/privacy/">PRIVACY</a></nav>© 2026 Chromabit LLC  ·  play.chromabit.us</footer></div>
+</body>
+
+</html>

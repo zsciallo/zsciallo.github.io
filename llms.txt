@@ -1,0 +1,37 @@
+# Chromabit Network
+
+> Chromabit is a Minecraft network for Java and Bedrock: ranked kit PVP on one shared ladder, and a survival server with a player-run economy. Join at play.chromabit.us.
+
+The network has ChromaPVP, ranked kit PVP, and an Economy SMP, survival with a player-run market. Java and Bedrock players join at the same address.
+
+## Join
+
+- Java Edition: connect to play.chromabit.us. Any Java version up to 26.3 connects.
+- Bedrock Edition: the same address, play.chromabit.us, port 19132.
+- There is no whitelist and no application.
+
+## ChromaPVP: ranked kit PVP
+
+- The only ranked competitive PVP for Java and Bedrock. Java and Bedrock players queue into the same matches and share one ladder.
+- Ranked kits: Sword and Mace.
+- Play 10 placement matches on a kit to get a rank. Every ranked duel is best of three. Ranked opens at level 2.
+- Seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma.
+- Modes: Duels, FFA Pit, Prismatic Arena, Tournaments, Parties, Cosmetics.
+- Tournaments: Double elimination. 1000, 500 and 250 Prism Coins for the top three, and the Champion title.
+- To play, connect to play.chromabit.us and pick Kit PVP in the hub.
+
+## Economy SMP
+
+- Survival with a player-run market. Claims, custom spawners, King of the Hill.
+- The auction house has price history, current floors, trade volume and active listings for every item traded.
+- Season 4 dungeon, Heartwood: 9 zones, each with its own boss; 4 difficulties, from Easy to Very Hard; 3 phases to the final boss, The Rotroot Heart; 9 armour sets, one from every zone.
+
+## Pages
+
+- [Chromabit Network | Ranked PVP and Economy SMP for Java + Bedrock](https://chromabit.us/): Chromabit is a Minecraft network for Java and Bedrock: ranked kit PVP on one shared ladder, and a survival server with a player-run economy. Join at play.chromabit.us.
+- [Ranked PVP Leaderboards | Chromabit](https://chromabit.us/pvp/): ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.
+- [Economy SMP | Chromabit](https://chromabit.us/smp/): Chromabit Economy SMP: survival with an auction house, the market's top movers and the Season 4 Heartwood dungeon, 9 zones each with its own boss.
+- [FAQ | Chromabit](https://chromabit.us/faq/): Server address for Java and Bedrock, versions, ranks, the auction house, events, claims and rules. Every answer checked against the server config.
+- [Store | Chromabit](https://chromabit.us/store/): The official Chromabit store. Buy ranks, crate keys, and more. Every purchase directly supports Chromabit.
+- [Auction House | Chromabit SMP](https://chromabit.us/auctions/): Live auction house market data for Chromabit Economy SMP. Price history, current floors, trade volume and active listings for every item traded on the server.
+- [Privacy Policy | Chromabit](https://chromabit.us/privacy/): How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments, and your choices.

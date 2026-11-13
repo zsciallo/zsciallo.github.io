@@ -1,0 +1,1 @@
+import{aA as e}from"./funnel-_cpiv7LC.js";function r({eyebrow:c,title:i,sub:s}){return e("div",{class:"reveal",children:[c&&e("p",{class:"section-eyebrow",children:c}),e("h2",{class:"section-title",children:i}),s&&e("p",{class:"section-sub",children:s})]})}export{r as S};
