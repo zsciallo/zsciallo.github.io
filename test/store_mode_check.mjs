@@ -61,6 +61,22 @@
 //       options sit inside 0..400.
 //   AC9 card order and every price (Intl en-US currency of total_price, the way
 //       PackageCard prints it) match the fixture in each mode.
+// Round 2 (review r1 findings, two more variants: `nokeys` gives Creative two
+// sub-categories and no key category, `orphan` adds a non-empty category whose
+// parent is missing from the list and one nested under an SMP sub-category):
+//   F1/AC4 Creative's tab row is ALL + CREATIVE RANKS + PLOT UPGRADES with no
+//       RANDOM?, and SMP still has RANDOM? in the same run.
+//   F3/AC7 (amended: every non-empty category outside a mode is shared) the
+//       orphan's and the deep category's packages show in PVP and in SMP and
+//       create no mode option.
+//   F4/AC2 (amended: the mode question waits for the purchase-complete pop-up)
+//       /store/?checkout=complete with nothing remembered: while .purchase-modal
+//       is shown there is no [data-mode-prompt] in the DOM and focus put on its
+//       first button stays inside it through a Tab; after DONE the mode pop-up
+//       appears with focus inside it; ?checkout= is stripped.
+//   F2/AC4 with a remembered pvp, a requestAnimationFrame sampler installed
+//       before the app runs never sees an SMP card or a .store-tabs row in any
+//       frame (rAF runs before every paint).
 // Each scenario first proves the harness worked (the store rendered, the Tebex
 // categories stub was hit) before it asserts on the feature, so a red run fails
 // on the feature, not on the harness.
@@ -115,6 +131,20 @@ const VARIANTS = {
     { id: 3600011, name: 'Creative Ranks', slug: 'creative-ranks', parent: parentObj(CREATIVE), order: 10, packages: [pkg(7900010, 'Builder', 3.49)] },
     EVENTS,
     { id: 3600021, name: 'Event Passes', slug: 'event-passes', parent: parentObj(EVENTS), order: 12, packages: [] },
+  ],
+  // Review r1 F1: a third mode with two non-empty sub-categories and no key category.
+  nokeys: (d) => [
+    ...d,
+    CREATIVE,
+    { id: 3600011, name: 'Creative Ranks', slug: 'creative-ranks', parent: parentObj(CREATIVE), order: 10, packages: [pkg(7900010, 'Builder', 3.49)] },
+    { id: 3600012, name: 'Plot Upgrades', slug: 'plot-upgrades', parent: parentObj(CREATIVE), order: 10.5, packages: [pkg(7900011, 'Bigger Plot', 1.99)] },
+  ],
+  // Review r1 F3 (AC7 amendment): a non-empty orphan (its parent "Retired" is not in
+  // the list) and a non-empty category under an SMP sub-category (two levels deep).
+  orphan: (d) => [
+    ...d,
+    { id: 3600040, name: 'Legacy Bundles', slug: 'legacy-bundles', parent: parentObj({ id: 3999990, name: 'Retired', slug: 'retired', order: 30 }), order: 2.5, packages: [pkg(7900040, 'Legacy Bundle', 4.99)] },
+    { id: 3600050, name: 'Event Extras', slug: 'event-extras', parent: parentObj({ id: 3399286, name: 'Battle Pass', slug: 'battle-pass', order: 0 }), order: 0.5, packages: [pkg(7900050, 'Event Extra', 2.49)] },
   ],
 };
 function catalogue(file, variant) {
@@ -729,6 +759,137 @@ async function narrow(b, origin) {
   }
 }
 
+// --------------------------------------------- review r1 findings (round 2) --
+
+/** F1: RANDOM? only in a mode with a key category, tested where the tab row is visible. */
+async function noKeyMode(b, origin) {
+  const L = 'mode without a key category';
+  const page = await openPage(b, origin, { variant: 'nokeys' });
+  try {
+    await page.goto('/store/?mode=creative');
+    await storeLoaded(page, L);
+    await needSwitch(page, L);
+    await checkActive(page, `${L}: ?mode=creative opens the third mode`, 'creative', ['pvp', 'smp', 'creative']);
+    const cards = await page.until(`JSON.stringify(window.__sm.names()) === ${q(q(['Builder', 'Bigger Plot']))} && window.__sm.names()`, 5000);
+    need(`AC4 (setup) ${L}: Creative shows its two categories' packages`, cards ? [] : [`cards ${q(await page.ev('window.__sm.names()'))}, want ["Builder","Bigger Plot"]`]);
+    const tabs = await page.until(`window.__sm.tabs().length > 0 && window.__sm.tabs()`, 3000);
+    need(`AC4 (setup) ${L}: the tab row is shown (two categories)`, tabs ? [] : ['no rendered .store-tabs .store-tab in Creative']);
+    check('AC4 a mode with two categories lists ALL and its categories in the tab row', want('tabs', tabs.filter((t) => !t.random).map((t) => t.text), ['ALL', 'CREATIVE RANKS', 'PLOT UPGRADES']) ?? []);
+    check('AC4 no RANDOM? in a mode with a visible tab row and no key category', (await page.ev(`!!document.querySelector('.store-tab--random')`)) ? ['.store-tab--random rendered in Creative (no key category)'] : []);
+    await clickSel(page, '[data-mode="smp"]');
+    await cardsBecome(page, names(SMP_CARDS));
+    const smp = await page.until(`window.__sm.tabs().some((t) => t.random)`, 3000);
+    check('AC4 in the same run SMP (Crate Keys) still shows RANDOM?', smp ? [] : ['no rendered .store-tab--random in SMP after switching from Creative']);
+  } finally {
+    await page.close();
+  }
+}
+
+/** F3: a non-empty orphan and a two-levels-deep category show in every mode. */
+async function orphanCategory(b, origin) {
+  const L = 'orphan and deep categories';
+  const extra = ['Legacy Bundle', 'Event Extra'];
+  const page = await openPage(b, origin, { variant: 'orphan' });
+  try {
+    await page.goto('/store/');
+    await storeLoaded(page, L);
+    await needPrompt(page, L);
+    check(`AC1 ${L} do not create modes`, want('[data-mode-option] keys', await page.ev(`[...window.__sm.prompt().querySelectorAll('[data-mode-option]')].map((o) => o.getAttribute('data-mode-option'))`), ['pvp', 'smp']) ?? []);
+    await clickSel(page, '[data-mode-option="pvp"]');
+    await page.until(`!window.__sm.prompt()`, 3000);
+    const pv = [...names(PVP_CARDS), ...extra].sort();
+    await page.until(`${q(q(pv))} === JSON.stringify(window.__sm.names().sort())`, 5000);
+    check(`AC7 ${L}: their packages show in PVP`, want('cards', (await page.ev('window.__sm.names()')).sort(), pv) ?? []);
+    await needSwitch(page, L);
+    await clickSel(page, '[data-mode="smp"]');
+    const sm = [...names(SMP_CARDS), ...extra].sort();
+    await page.until(`${q(q(sm))} === JSON.stringify(window.__sm.names().sort())`, 5000);
+    check(`AC7 ${L}: their packages show in SMP`, want('cards', (await page.ev('window.__sm.names()')).sort(), sm) ?? []);
+  } finally {
+    await page.close();
+  }
+}
+
+/** F4 (AC2 amendment): ?checkout=complete with nothing remembered shows the purchase-complete pop-up first and alone. */
+async function checkoutFirst(b, origin) {
+  const L = '?checkout=complete, nothing remembered';
+  const page = await openPage(b, origin);
+  const inPurchase = `(() => { const m = document.querySelector('.purchase-modal'); const a = document.activeElement; return !!(m && a && a !== document.body && m.contains(a)); })()`;
+  const promptFocus = `(() => { const p = document.querySelector('[data-mode-prompt]'); return !!(p && p.contains(document.activeElement)); })()`;
+  try {
+    await page.goto('/store/?checkout=complete');
+    const shown = await page.until(`!!window.__sm.first('.purchase-modal')`, 10_000);
+    need(`${L}: the purchase-complete pop-up (.purchase-modal) is shown`, [page.st.hits.categories < 1 && 'the Tebex categories stub was never requested', !shown && 'no rendered .purchase-modal in 10 s']);
+    // The switch shows once the modes are known, so by then the mode question would be up.
+    await needSwitch(page, L);
+    await sleep(1000);
+    const stripped = await page.until(`!new URLSearchParams(location.search).has('checkout')`, 3000);
+    check(`AC5 ${L}: ?checkout=complete is stripped from the URL`, stripped ? [] : [`location.search ${q(await page.ev('location.search'))}`]);
+    check(`AC2 ${L}: the mode pop-up is not rendered while the purchase-complete pop-up is shown`, [
+      (await page.ev(`!!document.querySelector('[data-mode-prompt]')`)) && '[data-mode-prompt] is in the DOM together with .purchase-modal',
+      !(await page.ev(`!!window.__sm.first('.purchase-modal')`)) && '.purchase-modal is no longer shown',
+    ]);
+    // PurchaseModal does not move focus itself; put focus on its first control and check nothing pulls it out, then Tab.
+    await page.ev(`(() => { const e = document.querySelector('.purchase-modal button'); if (e) e.focus(); return !!e; })()`);
+    await sleep(300);
+    const focusProblems = [];
+    if (!(await page.ev(inPurchase))) focusProblems.push(`focus on the purchase-complete pop-up's first button did not stay there (now on ${await page.ev(`(() => { const a = document.activeElement; return a ? a.tagName + (a.closest('[data-mode-prompt]') ? ' inside [data-mode-prompt]' : '') : null; })()`)})`);
+    const before = await page.ev(`document.activeElement ? document.activeElement.outerHTML.slice(0, 60) : null`);
+    await page.key('Tab', 'Tab', 9);
+    await sleep(200);
+    if (!(await page.ev(inPurchase))) focusProblems.push(`Tab moved focus out of the purchase-complete pop-up (to ${await page.ev(`(() => { const a = document.activeElement; return a ? a.tagName + (a.closest('[data-mode-prompt]') ? ' inside [data-mode-prompt]' : '') : null; })()`)})`);
+    else if ((await page.ev(`document.activeElement.outerHTML.slice(0, 60)`)) === before) focusProblems.push('Tab did not move focus to the next control of the purchase-complete pop-up');
+    check(`AC2 ${L}: focus is usable inside the purchase-complete pop-up (stays there, Tab moves within it)`, focusProblems);
+    // Close it with DONE.
+    const done = await page.ev(`(() => { const e = [...document.querySelectorAll('.purchase-modal .modal-actions button')].find((x) => window.__sm.text(x) === 'DONE'); if (!e) return false; e.click(); return true; })()`);
+    const gone = await page.until(`!document.querySelector('.purchase-modal')`, 3000);
+    need(`AC2 (setup) ${L}: DONE closes the purchase-complete pop-up`, [!done && 'no DONE button in .purchase-modal .modal-actions', !gone && '.purchase-modal still in the DOM 3 s after DONE']);
+    const after = await page.until(`!!window.__sm.prompt()`, 5000);
+    check(`AC2 ${L}: the mode pop-up appears after the purchase-complete pop-up is closed`, after ? [] : ['no rendered [data-mode-prompt] within 5 s of closing']);
+    await sleep(400);
+    check(`AC2 ${L}: focus is inside the mode pop-up once it appears`, (await page.ev(promptFocus)) ? [] : [`focus on ${await page.ev('document.activeElement ? document.activeElement.tagName : null')}, not inside [data-mode-prompt]`]);
+  } finally {
+    await page.close();
+  }
+}
+
+/**
+ * F2: with a remembered mode, no frame is painted with the other mode's cards or
+ * a category tab row. A requestAnimationFrame loop installed before the app runs
+ * samples the DOM once per frame (rAF runs before every paint), so DOM that is
+ * replaced before the next frame (a layout effect) is not counted, DOM that
+ * survives into a frame (a passive effect after paint) is.
+ */
+async function noFlash(b, origin) {
+  const L = 'remembered pvp, first frames';
+  const sampler = `(() => {
+    const bad = new Set(${q(names(SMP_CARDS))}); const good = new Set(${q(names(PVP_CARDS))});
+    const f = (window.__flash = { frames: 0, firstGood: 0, seen: [] });
+    const tick = () => {
+      f.frames++;
+      const ns = [...document.querySelectorAll('.pkg-card .pkg-name')].map((e) => e.textContent.trim());
+      const wrong = ns.filter((n) => bad.has(n));
+      const tabs = !!document.querySelector('.store-tabs');
+      if (!f.firstGood && ns.some((n) => good.has(n))) f.firstGood = f.frames;
+      if ((wrong.length || tabs) && f.seen.length < 10) f.seen.push({ frame: f.frames, wrong: wrong.slice(0, 3), tabs });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();`;
+  const page = await openPage(b, origin, { init: `${remember('pvp')}\n${sampler}` });
+  try {
+    await page.goto('/store/');
+    await storeLoaded(page, L);
+    check(`${L}: PVP cards shown`, cardProblems(await cardsBecome(page, names(PVP_CARDS)), PVP_CARDS));
+    await sleep(500);
+    const f = await page.ev('window.__flash');
+    need(`${L}: (harness) the frame sampler ran before and after the PVP cards appeared`, [!f && 'no window.__flash', f && !f.firstGood && 'the sampler never saw a PVP card', f && f.frames - f.firstGood < 5 && `only ${f.frames - f.firstGood} frames after the first PVP card`]);
+    check('AC4/AC5 a remembered mode paints no frame with the other mode\'s cards or a category tab row', f.seen.length ? [`painted frames: ${q(f.seen)}`] : []);
+  } finally {
+    await page.close();
+  }
+}
+
 // ------------------------------------------------------------------ main --
 
 async function run(name, fn) {
@@ -771,6 +932,10 @@ async function main() {
     await run('shared', () => sharedCategory(b, origin));
     await run('third', () => thirdMode(b, origin));
     await run('400px', () => narrow(b, origin));
+    await run('no key mode', () => noKeyMode(b, origin));
+    await run('orphan', () => orphanCategory(b, origin));
+    await run('checkout first', () => checkoutFirst(b, origin));
+    await run('no flash', () => noFlash(b, origin));
   } finally {
     if (b) await b.close();
     preview.kill();

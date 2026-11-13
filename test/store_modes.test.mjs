@@ -28,6 +28,10 @@
 //   packages, sorted by their `order`. shared = ids of top-level categories that
 //   have packages of their own, only when at least one mode exists. A flat list
 //   (no parent/child structure) -> { modes: [], shared: [] }.
+//   AC7 amendment (review r1 F3): when at least one mode exists, shared also
+//   holds every other category with packages that is not a mode's
+//   sub-category: an orphan (parent missing from the list) and a category
+//   nested deeper than one level. They never create modes.
 //
 // resolveMode(modes, urlValue, storedValue) -> a mode key or null
 //   A urlValue matching a mode key (case-insensitively) wins, else a matching
@@ -223,6 +227,43 @@ test('AC7 buildModes: shared lists every top-level category with packages (any o
   return eq(Array.isArray(shared) ? [...shared].sort((a, b) => a - b) : shared, [3600001, 3600002]);
 });
 
+// AC7 amendment (review r1 F3, 2026-11-12): when modes exist, every category with
+// packages that is not one of a mode's sub-categories is shared, so nothing sold
+// can become unreachable: an orphan (its parent is missing from the list) and a
+// category nested deeper than one level (its parent is itself a sub-category).
+const RETIRED = { id: 3999990, name: 'Retired', slug: 'retired', order: 30 }; // never in the list
+const ORPHAN = child(3600040, 'Legacy Bundles', RETIRED, 2.5, pkgs('Legacy Bundle'));
+const CRATE_KEYS_PARENT = { id: 3385106, name: 'Crate Keys', slug: null, order: 1 }; // an SMP sub-category
+const DEEP = child(3600050, 'Key Bundles', CRATE_KEYS_PARENT, 0.5, pkgs('Key Bundle'));
+const sortedIds = (a) => (Array.isArray(a) ? [...a].sort((x, y) => x - y) : a);
+const F3_RAW = () => deepFreeze([...clone(LIVE), clone(ORPHAN), clone(DEEP)]);
+
+test('AC7 buildModes: a non-empty category whose parent is missing from the list is shared, not a mode', () => {
+  const r = buildModes(deepFreeze([...clone(LIVE), clone(ORPHAN)]));
+  return all(eq(modeFields(r), [PVP, SMP]), eq(sortedIds(r?.shared), [3600040]));
+});
+
+test('AC7 buildModes: a non-empty category two levels deep is shared and is in no mode\'s categoryIds', () => {
+  const r = buildModes(deepFreeze([...clone(LIVE), clone(DEEP)]));
+  return all(eq(modeFields(r), [PVP, SMP]), eq(sortedIds(r?.shared), [3600050]));
+});
+
+test('AC7 buildModes: orphan and deep categories together are both shared, alongside a shared top-level one', () => {
+  const r = buildModes(deepFreeze([...clone(LIVE), clone(ORPHAN), clone(DEEP), clone(GIFT)]));
+  return all(eq(modeFields(r), [PVP, SMP]), eq(sortedIds(r?.shared), [3600001, 3600040, 3600050]));
+});
+
+test('AC1/AC7 buildModes: a parent whose only non-empty descendants are grandchildren is not a mode; the grandchild is shared', () => {
+  const quests = top(3600060, 'Quests', 'quests', 14);
+  const chapters = child(3600061, 'Chapters', quests, 15, []); // empty sub-category
+  const deep = child(3600062, 'Chapter One', { id: 3600061, name: 'Chapters', slug: null, order: 15 }, 16, pkgs('Chapter One'));
+  const r = buildModes(deepFreeze([...clone(LIVE), quests, chapters, deep]));
+  return all(eq(modeFields(r), [PVP, SMP]), eq(sortedIds(r?.shared), [3600062]));
+});
+
+test('AC7 buildModes: an orphan or deep category alone (no mode in the list) is still the flat fallback', () =>
+  eq(shape(buildModes(deepFreeze([clone(ORPHAN), clone(DEEP)]))), { modes: [], shared: [] }));
+
 test('buildModes: never mutates its input (deep-frozen) and leaves it as it was', () => {
   const input = live();
   const before = q(input);
@@ -300,6 +341,30 @@ test('AC1 categoriesForMode: the third mode gets its own category only', () => {
   const raw = deepFreeze([...clone(LIVE), clone(CREATIVE), clone(CREATIVE_RANKS)]);
   const cats = visible(raw);
   return sameObjects(categoriesForMode(cats, buildModes(raw), 'creative'), cats.filter((c) => c.id === 3600011));
+});
+test('AC7 categoriesForMode: an orphan and a deep category are returned for every mode key, in input order (same objects)', () => {
+  const raw = F3_RAW();
+  const cats = visible(raw); // order puts Key Bundles (0.5) and Legacy Bundles (2.5) between SMP categories
+  const modes = buildModes(raw);
+  const extra = new Set([3600040, 3600050]);
+  return all(
+    sameObjects(categoriesForMode(cats, modes, 'pvp'), cats.filter((c) => c.id === 3501348 || extra.has(c.id))),
+    sameObjects(categoriesForMode(cats, modes, 'smp'), cats.filter((c) => c.id !== 3501348)),
+  );
+});
+test('AC7 categoriesForMode: orphan and deep categories keep the given order when the input is reversed', () => {
+  const raw = F3_RAW();
+  const cats = [...visible(raw)].reverse();
+  const modes = buildModes(raw);
+  return all(
+    sameObjects(categoriesForMode(cats, modes, 'pvp'), cats.filter((c) => [3501348, 3600040, 3600050].includes(c.id))),
+    sameObjects(categoriesForMode(cats, modes, 'smp'), cats.filter((c) => c.id !== 3501348)),
+  );
+});
+test('AC1/AC7 categoriesForMode: a third mode also gets the orphan and deep categories', () => {
+  const raw = deepFreeze([...clone(LIVE), clone(CREATIVE), clone(CREATIVE_RANKS), clone(ORPHAN), clone(DEEP)]);
+  const cats = visible(raw);
+  return sameObjects(categoriesForMode(cats, buildModes(raw), 'creative'), cats.filter((c) => [3600011, 3600040, 3600050].includes(c.id)));
 });
 test('categoriesForMode: never mutates the categories array it was given', () => {
   const cats = Object.freeze(visible(live()));
