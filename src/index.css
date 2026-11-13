@@ -3269,6 +3269,14 @@ html:not(.js) .sound-toggle {
   flex-shrink: 0;
 }
 
+/* No aspect-ratio (Safari before 15): the frame would collapse to 0 tall, so
+   it takes the height CropImage.jsx puts in --crop-h instead. */
+@supports not (aspect-ratio: 1) {
+  .crop-frame {
+    height: var(--crop-h);
+  }
+}
+
 .crop-frame > img {
   position: absolute;
   max-width: none;
@@ -4832,6 +4840,13 @@ html.js .pkg-card.reveal {
 /* Store page banner. */
 .store-promo--key {
   border-color: rgba(255, 210, 122, 0.45);
+}
+
+/* Hidden in a mode remembered to have nothing that counts toward a free key.
+   Set before first paint by the inline script in store/index.html, then kept
+   in step by StorePage.jsx. */
+html[data-keypromo="off"] .store-promo--key {
+  display: none;
 }
 
 .store-promo--key .store-promo-tag {

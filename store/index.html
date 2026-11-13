@@ -21,6 +21,21 @@
       setTimeout(ready, 1500);
     })();
   </script>
+  <script>
+    // The FREE KEYS banner is prerendered, so a mode remembered to have no free
+    // keys (chromabit_store_keypromo, written by StorePage.jsx) hides it before
+    // first paint rather than flashing it until the catalog loads. The mode is
+    // ?mode= or else the remembered one, as StorePage.jsx reads it.
+    (function () {
+      try {
+        var mode = new URLSearchParams(location.search).get('mode') || localStorage.getItem('chromabit_store_mode');
+        var seen = JSON.parse(localStorage.getItem('chromabit_store_keypromo'));
+        if (seen && seen[mode] === false) document.documentElement.setAttribute('data-keypromo', 'off');
+      } catch (e) {
+        // storage blocked or unparsable: the banner shows
+      }
+    })();
+  </script>
 
   <link rel="icon" type="image/png" href="/server-icon-old-2.png">
   <!--seo-head-->

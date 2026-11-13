@@ -115,6 +115,9 @@ export function CartDrawer({
   const saved = subtotal - freeValue - total > 0.05 ? subtotal - freeValue - total : 0;
   // The basket is priced before tax; VAT goes on at checkout.
   const taxed = items.some((item) => packagesById[item.id]?.sales_tax > 0);
+  // The free-key box only means something when a line can move it: a cart of
+  // PVP items alone shows none. With no ineligible list every line counts.
+  const keysCount = items.some((item) => countsForFreeKey(item.id));
 
   // A key landing gets its moment: the box flares, the new pips pop, the
   // jingle plays. Only on an increase the buyer caused, not on first load.
@@ -290,29 +293,31 @@ export function CartDrawer({
         {items.length > 0 && (
           <div class="cart-foot">
             {/* Progress toward the next free key, pips for each earned. */}
-            <div class={`cart-keys${celebrating ? ' is-celebrating' : ''}`} aria-live="polite">
-              <div class="cart-keys-head">
-                <span class="cart-keys-pips" aria-hidden="true">
-                  {Array.from({ length: FREE_KEY.max }, (_, i) => (
-                    <i key={i} class={[
-                      i < bonusKeys && 'is-earned',
-                      celebrating && i >= celebrating.from && i < bonusKeys && 'is-new',
-                    ].filter(Boolean).join(' ') || undefined} />
-                  ))}
-                </span>
-                <span class="cart-keys-text">
-                  {celebrating
-                    ? `FREE KEY${celebrating.gained > 1 ? 'S' : ''} EARNED!`
-                    : nextKeyIn == null
-                      ? `ALL ${FREE_KEY.max} FREE KEYS UNLOCKED`
-                      : `${formatPrice(nextKeyIn * shownRate, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
-                </span>
+            {keysCount && (
+              <div class={`cart-keys${celebrating ? ' is-celebrating' : ''}`} aria-live="polite">
+                <div class="cart-keys-head">
+                  <span class="cart-keys-pips" aria-hidden="true">
+                    {Array.from({ length: FREE_KEY.max }, (_, i) => (
+                      <i key={i} class={[
+                        i < bonusKeys && 'is-earned',
+                        celebrating && i >= celebrating.from && i < bonusKeys && 'is-new',
+                      ].filter(Boolean).join(' ') || undefined} />
+                    ))}
+                  </span>
+                  <span class="cart-keys-text">
+                    {celebrating
+                      ? `FREE KEY${celebrating.gained > 1 ? 'S' : ''} EARNED!`
+                      : nextKeyIn == null
+                        ? `ALL ${FREE_KEY.max} FREE KEYS UNLOCKED`
+                        : `${formatPrice(nextKeyIn * shownRate, currency)} MORE FOR ${bonusKeys > 0 ? 'ANOTHER' : 'A'} FREE KEY`}
+                  </span>
+                </div>
+                <div class="cart-keys-bar" role="progressbar" aria-label="Progress to next free Chroma Key"
+                  aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(keyProgress * 100)}>
+                  <span style={{ width: `${keyProgress * 100}%` }} />
+                </div>
               </div>
-              <div class="cart-keys-bar" role="progressbar" aria-label="Progress to next free Chroma Key"
-                aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(keyProgress * 100)}>
-                <span style={{ width: `${keyProgress * 100}%` }} />
-              </div>
-            </div>
+            )}
 
             {/* Stays open even with a coupon applied - a gift card can still go
                 on top of one. A second *coupon* is refused by the hook, since
