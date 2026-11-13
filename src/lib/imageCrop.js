@@ -6,6 +6,8 @@
 
 const isNum = (n) => typeof n === 'number' && Number.isFinite(n);
 const round2 = (n) => Math.round(n * 100) / 100;
+const round4 = (n) => Math.round(n * 1e4) / 1e4;
+const pct = (n) => `${round4(n * 100)}%`;
 
 /** The entry for that exact URL, or null when there is none or it is malformed. */
 export function cropFor(url, crops) {
@@ -32,23 +34,23 @@ export function cropBox(entry, margin = 0.06) {
   return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
-/** The inline style that shows only the (grown) art box, or null for an image with no crop. */
-export function cropStyle(url, crops, margin) {
+/**
+ * The inline styles of a crop frame, or null for an image with no crop.
+ * The frame (a clipping box) takes the grown art box's aspect ratio; the img
+ * inside is the whole canvas, sized and offset in percentages of the frame so
+ * exactly the grown box shows. Plain layout, so every engine renders it alike.
+ */
+export function cropFrame(url, crops, margin) {
   const entry = cropFor(url, crops);
   if (!entry) return null;
   const b = cropBox(entry, margin);
-  const top = Math.round(b.y);
-  const left = Math.round(b.x);
-  const right = Math.round(entry.w - (b.x + b.w));
-  const bottom = Math.round(entry.h - (b.y + b.h));
   return {
-    aspectRatio: `${round2(b.w)} / ${round2(b.h)}`,
-    objectViewBox: `inset(${top}px ${right}px ${bottom}px ${left}px)`,
+    frame: { aspectRatio: `${round2(b.w)} / ${round2(b.h)}` },
+    img: {
+      width: pct(entry.w / b.w),
+      height: pct(entry.h / b.h),
+      left: pct(-b.x / b.w),
+      top: pct(-b.y / b.h),
+    },
   };
-}
-
-/** The <img> attributes for a crop: { 'data-cropped', style }, or {} so an uncropped image renders as before. */
-export function cropAttrs(url, crops, margin) {
-  const style = cropStyle(url, crops, margin);
-  return style ? { 'data-cropped': 'true', style } : {};
 }

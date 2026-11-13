@@ -14,8 +14,7 @@ import { freeKeysFor, preTaxPrice } from '../lib/freeKeys';
 import { MAX_QUANTITY } from '../lib/tebex';
 import { DealBadge } from './DealBadge';
 import { dealFor } from '../lib/deal';
-import { cropAttrs } from '../lib/imageCrop';
-import imageCrops from '../data/imageCrops.json';
+import { CropImage } from './CropImage';
 
 function formatPrice(amount, currency) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(amount);
@@ -113,7 +112,7 @@ export function PackageModal({ pkg, sales, busy, cartQty = 0, freeKeySpend = nul
 
         {pkg.image && (
           <div class="pkg-modal-image-wrap">
-            <img class="pkg-modal-image" src={pkg.image} alt="" {...cropAttrs(pkg.image, imageCrops)} />
+            <CropImage class="pkg-modal-image" src={pkg.image} size={110} />
           </div>
         )}
 
