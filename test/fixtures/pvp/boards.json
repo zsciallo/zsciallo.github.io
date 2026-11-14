@@ -4,7 +4,7 @@
   "rankedPlayers": 777,
   "ladder": {
     "divisions": 3,
-    "placementMatches": 10,
+    "placementMatches": 2,
     "tiers": [
       {"name": "Tin", "min": 0, "colour": "#8A8F98"},
       {"name": "Bronze", "min": 1350, "colour": "#CD7F32"},
@@ -17,7 +17,7 @@
     "kits": [
       {"key": "sword", "label": "Sword"},
       {"key": "mace", "label": "Mace"},
-      {"key": "axe", "label": "Axe", "soon": true},
+      {"key": "axe", "label": "Axe"},
       {"key": "chaos", "label": "Chaos", "soon": true}
     ]
   },
@@ -40,7 +40,7 @@
     {"key": "mace", "label": "Mace", "kind": "rating", "rows": [
       {"rank": 1, "name": "Sample_03", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000003", "rating": 1861, "tier": "Mithril", "division": "II", "wins": 29, "losses": 18}
     ]},
-    {"key": "axe", "label": "Axe", "kind": "rating", "soon": true, "rows": []},
+    {"key": "axe", "label": "Axe", "kind": "rating", "rows": []},
     {"key": "chaos", "label": "Chaos", "kind": "rating", "soon": true, "rows": []},
     {"key": "tournament", "label": "Tournament Wins", "kind": "count", "rows": [
       {"rank": 1, "name": "Sample_01", "edition": "java", "uuid": "00000000-0000-4000-8000-000000000001", "value": 3},

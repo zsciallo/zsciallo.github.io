@@ -8,7 +8,7 @@
   "best": {"tier": "Mithril", "division": "I", "rating": 1912, "overallRank": 2},
   "kits": [
     {"key": "sword", "label": "Sword", "placed": true, "rating": 1912, "tier": "Mithril", "division": "I", "peak": 1930, "wins": 21, "losses": 9, "streak": 3, "rank": 1},
-    {"key": "mace", "label": "Mace", "placed": false, "games": 4, "placementMatches": 10, "wins": 2, "losses": 2}
+    {"key": "mace", "label": "Mace", "placed": false, "games": 1, "placementMatches": 2, "wins": 1, "losses": 0}
   ],
   "career": {"kills": 56, "deaths": 40, "bestStreak": 7, "tournamentWins": 1},
   "recent": [

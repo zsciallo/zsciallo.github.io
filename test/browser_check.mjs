@@ -23,8 +23,11 @@
 //     stops only that process;
 //   - runs headless Chrome (env CHROME, else the usual install paths; missing ->
 //     FAIL) with --headless=new --dump-dom --virtual-time-budget=6000 on
-//     /, /pvp/, /pvp/?board=sword, /pvp/?board=tournament, /pvp/?board=axe and
-//     /pvp/?board=nope, and asserts on the dumped DOM.
+//     /, /pvp/, /pvp/?board=sword, /pvp/?board=tournament, /pvp/?board=axe,
+//     /pvp/?board=chaos and /pvp/?board=nope, and asserts on the dumped DOM.
+//     (Run 20261114-pvp-copy: axe queues are live since mc-kit 285c6c0, so
+//     ?board=axe opens the axe board, empty in the fixture; chaos is the soon
+//     board that falls back to overall.)
 //
 // Text is compared like test/check_site.mjs (its parser and textOf/blockText:
 // entities decoded, whitespace collapsed, case-sensitive). Output: one
@@ -102,8 +105,11 @@ const q = JSON.stringify;
 // Written out from test/fixtures/pvp/boards.json (not computed by the code under test).
 
 const BOARD_KEYS = ['overall', 'sword', 'mace', 'axe', 'chaos', 'tournament'];
-const TAB_LABELS = { overall: 'OVERALL', sword: 'SWORD', mace: 'MACE', axe: 'AXE · SOON', chaos: 'CHAOS · SOON', tournament: 'TOURNAMENT WINS' };
-const SOON = new Set(['axe', 'chaos']);
+// Run 20261114-pvp-copy: AXE is live (mc-kit 285c6c0); CHAOS is the only soon tab.
+const TAB_LABELS = { overall: 'OVERALL', sword: 'SWORD', mace: 'MACE', axe: 'AXE', chaos: 'CHAOS · SOON', tournament: 'TOURNAMENT WINS' };
+const SOON = new Set(['chaos']);
+// Run 20261114-pvp-copy: placement is 2 matches (mc-kit 987dfac / chromatic-arena 4d7b015), was 10.
+const EMPTY_TEXT = 'No ranked players yet. Play 2 placement matches to appear here.';
 const RATING_COLUMNS = ['#', 'PLAYER', 'TIER', 'RATING', 'W - L', 'WIN %'];
 const COUNT_COLUMNS = ['#', 'PLAYER', 'TOURNAMENTS WON'];
 const HOSTILE = '<img src=x onerror=alert(1)>';
@@ -179,7 +185,7 @@ const PROFILES = {
     best: { label: 'Mithril I', rank: 2 },
     kits: [
       placed('sword', 'Sword', 'Mithril I', ['Rating 1912', 'Peak 1930', '21 wins, 9 losses', 'Win streak 3', '#1']),
-      placing('mace', 'Mace', ['Placing 4/10', '2 wins, 2 losses']),
+      placing('mace', 'Mace', ['Placing 1/2', '1 win, 0 losses']),
     ],
     career: ['56 kills', '40 deaths', 'Best streak 7', '1 tournament won'],
     recent: [
@@ -190,7 +196,7 @@ const PROFILES = {
   sample_10: {
     name: 'Sample_10', edition: 'java', uuid: '00000000-0000-4000-8000-000000000010',
     best: null,
-    kits: [placing('sword', 'Sword', ['Placing 6/10', '3 wins, 3 losses']), placing('mace', 'Mace', ['Placing 2/10', '0 wins, 2 losses'])],
+    kits: [placing('sword', 'Sword', ['Placing 1/2', '0 wins, 1 loss']), placing('mace', 'Mace', ['Placing 1/2', '1 win, 0 losses'])],
     career: ['14 kills', '9 deaths', 'Best streak 2', '0 tournaments won'],
     recent: [
       ['LOSS', 'Sword', '.Sample_05', 'bedrock', 'b-sample_05', ''],
@@ -326,6 +332,13 @@ function rowProblems(root, want, kind) {
     } else if (!hasText(row, w.value)) problems.push(`${at} does not show ${q(w.value)} in its own element`);
   });
   return problems;
+}
+
+/** Run 20261114-pvp-copy: a live board with no rows shows exactly one visible [data-board-empty] with EMPTY_TEXT. */
+function emptyShown(root) {
+  const shown = findAll(root, hasAttr('data-board-empty')).filter((el) => !isHidden(el));
+  if (shown.length !== 1) return [`${shown.length} visible [data-board-empty], want 1`];
+  return textOf(shown[0]) === EMPTY_TEXT ? [] : [`[data-board-empty] text ${q(textOf(shown[0]))}, want ${q(EMPTY_TEXT)}`];
 }
 
 /** With rows on screen, every [data-board-empty] is gone or hidden. */
@@ -773,7 +786,9 @@ async function main() {
       ['/pvp/', 'pvp overall'],
       ['/pvp/?board=sword', 'pvp sword'],
       ['/pvp/?board=tournament', 'pvp tournament'],
-      ['/pvp/?board=axe', 'pvp soon->overall'],
+      // Run 20261114-pvp-copy: chaos is the soon board now (was axe); axe opens its own (empty) board.
+      ['/pvp/?board=axe', 'pvp axe'],
+      ['/pvp/?board=chaos', 'pvp soon->overall'],
       ['/pvp/?board=nope', 'pvp unknown->overall'],
     ];
     for (const [path, label] of pages) {
@@ -800,17 +815,19 @@ async function main() {
         continue;
       }
 
-      const key = { 'pvp sword': 'sword', 'pvp tournament': 'tournament' }[label] ?? 'overall';
+      const key = { 'pvp sword': 'sword', 'pvp tournament': 'tournament', 'pvp axe': 'axe' }[label] ?? 'overall';
       check(`${label}: tabs (pressed ${key})`, tabProblems(root, key));
       const kind = key === 'tournament' ? 'count' : 'rating';
       check(`${label}: columns`, columnProblems(root, kind === 'count' ? COUNT_COLUMNS : RATING_COLUMNS));
-      check(`${label}: rows`, rowProblems(root, { overall: OVERALL, sword: SWORD, tournament: TOURNAMENT }[key], kind));
-      check(`${label}: empty state hidden`, emptyHidden(root));
+      check(`${label}: rows`, rowProblems(root, { overall: OVERALL, sword: SWORD, tournament: TOURNAMENT, axe: [] }[key], kind));
+      if (key === 'axe') check(`${label}: empty state shown`, emptyShown(root));
+      else check(`${label}: empty state hidden`, emptyHidden(root));
       check(`${label}: season strip`, seasonProblems(root));
       if (key === 'overall') check(`${label}: hostile name rendered as text`, xssProblems(root));
-      check(`${label}: Java heads have referrerpolicy="no-referrer"`, referrerProblems(root));
+      // The axe board has no rows in the fixture, so no heads to check.
+      if (key !== 'axe') check(`${label}: Java heads have referrerpolicy="no-referrer"`, referrerProblems(root));
       // U7-C: every row name links to its profile.
-      check(`${label}: row names link to /pvp/player/?name=<key>`, rowLinkProblems(root, { overall: OVERALL, sword: SWORD, tournament: TOURNAMENT }[key]));
+      check(`${label}: row names link to /pvp/player/?name=<key>`, rowLinkProblems(root, { overall: OVERALL, sword: SWORD, tournament: TOURNAMENT, axe: [] }[key]));
       // U7-B: the search block shows once players.json has loaded.
       if (label === 'pvp overall') check(`${label}: player search visible, empty`, searchProblems(root));
     }

@@ -904,23 +904,26 @@ export const PVP = {
   route: '/pvp/',
   title: 'Ranked PVP Leaderboards | Chromabit',
   description:
-    'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.',
+    'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword, Mace and Axe ladders, tournaments.',
   canonical: 'https://chromabit.us/pvp/',
   eyebrow: 'CHROMAPVP · RANKED KIT PVP',
   h1: 'RANKED. ON BOTH EDITIONS.',
   sub: 'The only ranked competitive PVP for Java and Bedrock.',
   /** [key, label, soon] in feed order. */
+  // Run 20261114-pvp-copy: axe queues are live (mc-kit 285c6c0 dropped `soon` from kits/axe.yml),
+  // so the AXE tab is enabled; CHAOS is the only soon tab.
   tabs: [
     ['overall', 'OVERALL', false],
     ['sword', 'SWORD', false],
     ['mace', 'MACE', false],
-    ['axe', 'AXE · SOON', true],
+    ['axe', 'AXE', false],
     ['chaos', 'CHAOS · SOON', true],
     ['tournament', 'TOURNAMENT WINS', false],
   ],
   defaultTab: 'overall',
-  empty: 'No ranked players yet. Play 10 placement matches to appear here.',
-  note: 'Updates every minute. Players appear after 10 placement matches.',
+  // Run 20261114-pvp-copy: seasons.yml placement-matches is 2 (mc-kit 987dfac / chromatic-arena 4d7b015, 2026-11-12), was 10.
+  empty: 'No ranked players yet. Play 2 placement matches to appear here.',
+  note: 'Updates every minute. Players appear after 2 placement matches.',
   tiersHeading: 'SEVEN TIERS',
   tiers: [
     ['Tin', 'START'],
@@ -932,7 +935,7 @@ export const PVP = {
     ['Chroma', '1950'],
   ],
   facts: [
-    ['10', 'placement matches before you get a rank'],
+    ['2', 'placement matches before you get a rank'],
     ['BO3', 'every ranked duel is best of three'],
     ['III · II · I', 'three divisions in every tier below Chroma'],
     ['LVL 2', 'ranked opens at level 2'],
@@ -940,19 +943,27 @@ export const PVP = {
   modesHeading: 'WHAT YOU CAN PLAY',
   modes: [
     ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
-    ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
+    // Run 20261114-pvp-copy: the Fallen Empire FFA map (arenas/ffa-yard.yml) has eight zones, was nine.
+    ['FFA Pit', 'Eight zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
     // Spec amendment U4-copy (2026-11-10): the arena has no fixed round count, and 2v2v2 takes teams of two.
     // U4-copy-2: augments are offered in rounds 1-10 only, so not "each round".
     ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
     // U7 (run 20261111-kit-playtest, owner 2026-11-11): the KitPVP currency is shown as Prism Coins, not Tokens.
     ['Tournaments', 'Double elimination. 1000, 500 and 250 Prism Coins for the top three, and the Champion title.'],
-    ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
+    // Run 20261114-pvp-copy: one Arena queue with formats 1v1 to 2v2v2; there is no separate 2v2v2 queue.
+    ['Parties', 'Bring up to three friends. Queue the Prismatic Arena as a pair.'],
     ['Cosmetics', 'Earn Prism Coins by playing and spend them on trails, hats and titles.'],
   ],
   /** Owner ruling 2026-11-10: section labels removed; these texts appear nowhere on /pvp/. */
   labelsForbidden: ['THE CLIMB', 'MORE THAN DUELS', 'JOIN AND PLACE'],
   /** U4-copy, U4-copy-2: texts that must appear nowhere on /pvp/ (raw HTML or visible text). */
   modesForbidden: ['Ten rounds', 'each round'],
+  /**
+   * Run 20261114-pvp-copy: statements the game made false; they must appear nowhere on /pvp/
+   * (raw HTML or visible text): 10 placement matches (now 2), nine FFA zones (now eight), a
+   * separate 2v2v2 queue (one Arena queue), AXE as a soon kit, a Sword-and-Mace-only ladder.
+   */
+  staleForbidden: ['10 placement matches', 'Nine zones', 'Queue Arena 2v2v2', 'AXE · SOON', 'Sword and Mace'],
   join: 'Connect to play.chromabit.us and pick Kit PVP in the hub.',
   /**
    * U7 (run 20261111-kit-playtest, owner 2026-11-11): display-only rename. The
@@ -1163,7 +1174,7 @@ function pvpModes(dist) {
       if (!titles.includes(title)) problems.push(`/pvp/ mode ${i + 1} has no heading ${q(title)} (headings: ${q(titles)})`);
       if (!findAll(c, (el) => textOf(el) === desc).length) problems.push(`/pvp/ mode ${q(title)} has no description ${q(desc)}`);
     });
-    for (const gone of PVP.modesForbidden) {
+    for (const gone of [...PVP.modesForbidden, ...PVP.staleForbidden]) {
       const hit = occurrence(p.html, app(p), gone);
       if (hit) problems.push(`/pvp/ mentions ${q(gone)}: ${hit}`);
     }
@@ -1365,11 +1376,12 @@ export const FAQ = {
     ],
     [
       'How does ranked work?',
-      'Play 10 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2.',
+      'Play 2 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2.',
       [],
     ],
     ['Can Bedrock players play ranked?', 'Yes. Java and Bedrock players queue into the same matches and share one ladder.', []],
-    ['Which kits are ranked?', 'Sword and Mace.', []],
+    // Run 20261114-pvp-copy: axe ranked queues are live (mc-kit 285c6c0).
+    ['Which kits are ranked?', 'Sword, Mace and Axe.', []],
     ['Where are the leaderboards?', 'On the PVP page of this site, and in game with /leaderboard.', [['/pvp/', 'PVP page']]],
     ['What happens when a season ends?', 'Each season has its own ladder. When a new season starts, everyone plays placement matches again.', []],
   ],
@@ -1896,7 +1908,8 @@ export const SEO = {
     ['seven tiers', /\b(seven|7) tiers\b/],
     ['Tin', /\btin\b/],
     ['Chroma', /\bchroma\b/],
-    ['10 placement matches', /\b(10|ten) placement matches\b/],
+    // Run 20261114-pvp-copy: placement is 2 matches (mc-kit 987dfac / chromatic-arena 4d7b015), was 10.
+    ['2 placement matches', /\b(2|two) placement matches\b/],
     ['best of three', /\bbest of (three|3)\b/],
     ['three divisions', /\b(three|3) divisions\b/],
   ],
@@ -1914,19 +1927,21 @@ export const SEO = {
 
 export const LLMS = {
   file: 'llms.txt',
-  must: ['play.chromabit.us', '19132', '26.3', 'Java', 'Bedrock'],
+  // Run 20261114-pvp-copy: the ranked kits and placement lines state the game's current facts.
+  must: ['play.chromabit.us', '19132', '26.3', 'Java', 'Bedrock', 'Sword, Mace and Axe.', 'Play 2 placement matches on a kit to get a rank.'],
   mustCi: ['ranked'],
-  forbidCi: ['store credit', 'ten rounds', 'each round'],
+  // Run 20261114-pvp-copy: also the stale ranked facts (placement was 10, ladders were Sword and Mace only).
+  forbidCi: ['store credit', 'ten rounds', 'each round', '10 placement matches', 'sword and mace'],
   /**
-   * Numbers allowed in llms.txt (facts already on the site): 10 placement
-   * matches, level 2, 3 divisions / best of three, 7 tiers, port 19132, Java
+   * Numbers allowed in llms.txt (facts already on the site): 2 placement
+   * matches (run 20261114-pvp-copy: was 10), level 2, 3 divisions / best of three, 7 tiers, port 19132, Java
    * 26.3, tournament Prism Coins 1000/500/250, Heartwood 9 zones / 4 difficulties /
    * 3 phases; 80,000 only while the built FAQ states it. Digits are read after
    * URLs are removed; commas inside a number are dropped (1,000 = 1000).
    * Number words count too (two..ninety, hundred, thousand, million); "one" is
    * not read as a number.
    */
-  numbers: ['10', '2', '3', '7', '19132', '26.3', '1000', '500', '250', '9', '4'],
+  numbers: ['2', '3', '7', '19132', '26.3', '1000', '500', '250', '9', '4'],
   conditional: { 80000: { route: '/faq/', text: '80,000' } },
 };
 

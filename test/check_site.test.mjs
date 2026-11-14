@@ -96,9 +96,10 @@ const PVP_FAQ = {
   title: 'PVP',
   items: [
     { q: 'What is ChromaPVP?', a: "ChromaPVP is the network's kit PVP server. Join play.chromabit.us and pick Kit PVP in the hub. It has ranked and unranked duels, the FFA pit, the Prismatic Arena and tournaments." },
-    { q: 'How does ranked work?', a: 'Play 10 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2.' },
+    // Run 20261114-pvp-copy: placement is 2 matches (mc-kit 987dfac / chromatic-arena 4d7b015), axe is ranked (mc-kit 285c6c0).
+    { q: 'How does ranked work?', a: 'Play 2 placement matches on a kit to get a rank. Ranked duels are best of three. There are seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma. Ranked opens at level 2.' },
     { q: 'Can Bedrock players play ranked?', a: 'Yes. Java and Bedrock players queue into the same matches and share one ladder.' },
-    { q: 'Which kits are ranked?', a: 'Sword and Mace.' },
+    { q: 'Which kits are ranked?', a: 'Sword, Mace and Axe.' },
     { q: 'Where are the leaderboards?', a: 'On the [PVP page](/pvp/) of this site, and in game with `/leaderboard`.' },
     { q: 'What happens when a season ends?', a: 'Each season has its own ladder. When a new season starts, everyone plays placement matches again.' },
   ],
@@ -171,7 +172,9 @@ const LD_FAQ = faqLd(goodFaq());
 
 // U4: /pvp/ as the spec describes it (prerendered: empty board, hidden season strip).
 const PVP_TITLE = 'Ranked PVP Leaderboards | Chromabit';
-const PVP_DESC = 'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.';
+// Run 20261114-pvp-copy: Sword, Mace and Axe ladders (was Sword and Mace); the AXE tab is live, CHAOS is the only
+// soon tab; 2 placement matches (was 10); FFA Pit has eight zones (was nine); Parties queue the one Arena (was 2v2v2).
+const PVP_DESC = 'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword, Mace and Axe ladders, tournaments.';
 const PVP_CANON = '<link rel="canonical" href="https://chromabit.us/pvp/">';
 const PVP_NAV = NAV.replace('<a href="/pvp/">', '<a href="/pvp/" aria-current="page" class="active">');
 const PVP_MAST =
@@ -184,11 +187,11 @@ const PVP_TABS =
   '<button type="button" data-board-tab="overall" aria-pressed="true">OVERALL</button>' +
   '<button type="button" data-board-tab="sword" aria-pressed="false">SWORD</button>' +
   '<button type="button" data-board-tab="mace" aria-pressed="false">MACE</button>' +
-  '<button type="button" data-board-tab="axe" aria-pressed="false" disabled>AXE &middot; SOON</button>' +
+  '<button type="button" data-board-tab="axe" aria-pressed="false">AXE</button>' +
   '<button type="button" data-board-tab="chaos" aria-pressed="false" disabled>CHAOS <span class="soon">&middot; SOON</span></button>' +
   '<button type="button" data-board-tab="tournament" aria-pressed="false">TOURNAMENT WINS</button></div>';
-const PVP_EMPTY = '<p class="board-empty" data-board-empty>No ranked players yet. Play 10 placement matches to appear here.</p>';
-const PVP_NOTE = '<p class="board-note">Updates every minute. Players appear after 10 placement matches.</p>';
+const PVP_EMPTY = '<p class="board-empty" data-board-empty>No ranked players yet. Play 2 placement matches to appear here.</p>';
+const PVP_NOTE = '<p class="board-note">Updates every minute. Players appear after 2 placement matches.</p>';
 
 const TIER_ROWS = [['Tin', 'START'], ['Bronze', '1350'], ['Silver', '1500'], ['Gold', '1600'], ['Emerald', '1700'], ['Mithril', '1800'], ['Chroma', '1950']];
 const PVP_TIERS =
@@ -196,7 +199,7 @@ const PVP_TIERS =
   TIER_ROWS.map(([n, m]) => `<li data-tier="${n}"><span class="tier-name">${n}</span><span class="tier-min">${m}</span></li>`).join('') +
   '</ol></section>';
 const FACT_ROWS = [
-  ['10', 'placement matches before you get a rank'],
+  ['2', 'placement matches before you get a rank'],
   ['BO3', 'every ranked duel is best of three'],
   ['III &middot; II &middot; I', 'three divisions in every tier below Chroma'],
   ['LVL 2', 'ranked opens at level 2'],
@@ -204,13 +207,13 @@ const FACT_ROWS = [
 const PVP_FACTS = `<ul class="facts" data-facts>${FACT_ROWS.map(([v, l]) => `<li data-fact><strong>${v}</strong><span>${l}</span></li>`).join('')}</ul>`;
 const MODE_ROWS = [
   ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
-  ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
+  ['FFA Pit', 'Eight zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
   // Spec amendment U4-copy (2026-11-10): no fixed round count; 2v2v2 takes teams of two.
   // U4-copy-2: augments only in rounds 1-10, so not "each round".
   ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
   // U7 (run 20261111-kit-playtest, owner 2026-11-11): the KitPVP currency is shown as Prism Coins, not Tokens.
   ['Tournaments', 'Double elimination. 1000, 500 and 250 Prism Coins for the top three, and the Champion title.'],
-  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
+  ['Parties', 'Bring up to three friends. Queue the Prismatic Arena as a pair.'],
   ['Cosmetics', 'Earn Prism Coins by playing and spend them on trails, hats and titles.'],
 ];
 const PVP_MODES =
@@ -257,10 +260,15 @@ const LLMS_TXT = `# Chromabit Network
 
 Join at play.chromabit.us. Bedrock uses the same address with port 19132. Java works on any version up to 26.3.
 
+## ChromaPVP
+
+- Kits: Sword, Mace and Axe.
+- Play 2 placement matches on a kit to get a rank.
+
 ## Pages
 
 - [Home](https://chromabit.us/): the network and how to join.
-- [PVP](https://chromabit.us/pvp/): ranked leaderboards. 10 placement matches, seven tiers, best of three, ranked from level 2.
+- [PVP](https://chromabit.us/pvp/): ranked leaderboards. 2 placement matches, seven tiers, best of three, ranked from level 2.
 - [Economy SMP](https://chromabit.us/smp/): survival with a player-run market.
 - [FAQ](https://chromabit.us/faq/): answers about the network.
 - [Store](https://chromabit.us/store/): ranks and crate keys.
@@ -318,7 +326,7 @@ const ldSub = (route, name) =>
 const PVP_ABOUT = {
   '@type': 'DefinedTermSet',
   name: 'Seven tiers',
-  description: 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma. Play 10 placement matches before you get a rank; every ranked duel is best of three.',
+  description: 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma. Play 2 placement matches before you get a rank; every ranked duel is best of three.',
 };
 const LD_PVP = JSON.stringify({
   '@context': 'https://schema.org',
@@ -1080,7 +1088,12 @@ ${r.out}`,
   }
   expectFail('U4-AC1 empty app div', mutate(P, '<div id="app">', '<div id="app"></div><div>'), 'pvp-page', '/pvp/ <div id="app"> is empty');
   expectFail('U4-AC1 title', mutate(P, `<title>${PVP_TITLE}</title>`, '<title>Leaderboards | Chromabit</title>'), 'pvp-page', '/pvp/ title is "Leaderboards | Chromabit"');
-  expectFail('U4-AC1 description off by one char', mutate(P, 'Mace ladders, tournaments.', 'Mace ladders, tournaments!'), 'pvp-page', '/pvp/ description is');
+  expectFail('U4-AC1 description off by one char', mutate(P, 'Axe ladders, tournaments.', 'Axe ladders, tournaments!'), 'pvp-page', '/pvp/ description is');
+  // Run 20261114-pvp-copy: the old "Sword and Mace ladders" description (axe was not ranked then) fails.
+  expectFails('U2 old description (Sword and Mace ladders)', mutate(P, PVP_DESC, PVP_DESC.replace('Sword, Mace and Axe ladders', 'Sword and Mace ladders')), {
+    'pvp-page': '/pvp/ description is',
+    'pvp-modes': '/pvp/ mentions "Sword and Mace"',
+  });
   // Since U8 the /pvp/ WebPage JSON-LD description is the meta description; without the meta it states text the page does not show (both, and only both).
   expectFails('U4-AC1 description missing', mutate(P, `<meta name="description" content="${PVP_DESC}">`, ''), {
     'pvp-page': '/pvp/ has no description',
@@ -1135,8 +1148,16 @@ ${r.out}`,
   );
   expectFail('U4-AC3 a tab missing', mutate(P, '<button type="button" data-board-tab="chaos" aria-pressed="false" disabled>CHAOS <span class="soon">&middot; SOON</span></button>', ''), 'pvp-board', '/pvp/ board tabs are');
   expectFail('U4-AC3 tab label', mutate(P, '>TOURNAMENT WINS<', '>TOURNAMENTS<'), 'pvp-board', '/pvp/ tab tournament label is "TOURNAMENTS", want "TOURNAMENT WINS"');
-  expectFail('U4-AC3 soon label', mutate(P, 'AXE &middot; SOON', 'AXE (SOON)'), 'pvp-board', '/pvp/ tab axe label is "AXE (SOON)"');
-  expectFail('U4-AC3 soon tab enabled', mutate(P, 'data-board-tab="axe" aria-pressed="false" disabled', 'data-board-tab="axe" aria-pressed="false"'), 'pvp-board', '/pvp/ tab axe is not disabled');
+  // Run 20261114-pvp-copy: chaos is the only soon tab, so it carries the soon cases (were on axe).
+  expectFail('U4-AC3 soon label', mutate(P, 'CHAOS <span class="soon">&middot; SOON</span>', 'CHAOS <span class="soon">(SOON)</span>'), 'pvp-board', '/pvp/ tab chaos label is "CHAOS (SOON)"');
+  expectFail('U4-AC3 soon tab enabled', mutate(P, 'data-board-tab="chaos" aria-pressed="false" disabled', 'data-board-tab="chaos" aria-pressed="false"'), 'pvp-board', '/pvp/ tab chaos is not disabled');
+  // Run 20261114-pvp-copy: axe queues are live (mc-kit 285c6c0): an AXE tab that is disabled, or still says SOON, fails.
+  expectFail('U2 axe tab disabled', mutate(P, 'data-board-tab="axe" aria-pressed="false">', 'data-board-tab="axe" aria-pressed="false" disabled>'), 'pvp-board', '/pvp/ tab axe is disabled');
+  expectFail('U2 axe tab labelled AXE (SOON)', mutate(P, '>AXE</button>', '>AXE (SOON)</button>'), 'pvp-board', '/pvp/ tab axe label is "AXE (SOON)", want "AXE"');
+  expectFails('U2 the old AXE · SOON tab fails', mutate(P, '<button type="button" data-board-tab="axe" aria-pressed="false">AXE</button>', '<button type="button" data-board-tab="axe" aria-pressed="false" disabled>AXE &middot; SOON</button>'), {
+    'pvp-board': '/pvp/ tab axe label is "AXE · SOON", want "AXE"',
+    'pvp-modes': '/pvp/ mentions "AXE · SOON"',
+  });
   expectFail('U4-AC3 live tab disabled', mutate(P, 'data-board-tab="mace" aria-pressed="false"', 'data-board-tab="mace" aria-pressed="false" disabled'), 'pvp-board', '/pvp/ tab mace is disabled');
   expectFail('U4-AC3 tab is a link', mutate(P, '<button type="button" data-board-tab="sword" aria-pressed="false">SWORD</button>', '<a href="?board=sword" data-board-tab="sword" aria-pressed="false">SWORD</a>'), 'pvp-board', '/pvp/ tab sword is a <a>');
   expectFail('U4-AC3 two pressed', mutate(P, 'data-board-tab="sword" aria-pressed="false"', 'data-board-tab="sword" aria-pressed="true"'), 'pvp-board', '/pvp/ has 2 tabs with aria-pressed="true"');
@@ -1147,7 +1168,7 @@ ${r.out}`,
     'pvp-board',
     '/pvp/ pressed tab is "sword", want "overall"',
   );
-  expectFail('U4-AC3 empty state text', mutate(P, 'Play 10 placement matches to appear here.', 'Check back later.'), 'pvp-board', '/pvp/ [data-board-empty] text is');
+  expectFail('U4-AC3 empty state text', mutate(P, 'Play 2 placement matches to appear here.', 'Check back later.'), 'pvp-board', '/pvp/ [data-board-empty] text is');
   expectFail('U4-AC3 empty state missing', mutate(P, ' data-board-empty', ''), 'pvp-board', '/pvp/ board has 0 [data-board-empty], want 1');
   expectFail('U4-AC3 empty state hidden in the prerender', mutate(P, ' data-board-empty', ' data-board-empty hidden'), 'pvp-board', '/pvp/ [data-board-empty] is hidden');
   expectFail(
@@ -1192,7 +1213,7 @@ ${r.out}`,
   expectFail('U4-AC5 divisions value', mutate(P, '<strong>III &middot; II &middot; I</strong>', '<strong>III II I</strong>'), 'pvp-facts', '/pvp/ fact 3 is');
   expectFail(
     'U4-AC5 order',
-    mutate(P, '<li data-fact><strong>10</strong><span>placement matches before you get a rank</span></li><li data-fact><strong>BO3</strong><span>every ranked duel is best of three</span></li>', '<li data-fact><strong>BO3</strong><span>every ranked duel is best of three</span></li><li data-fact><strong>10</strong><span>placement matches before you get a rank</span></li>'),
+    mutate(P, '<li data-fact><strong>2</strong><span>placement matches before you get a rank</span></li><li data-fact><strong>BO3</strong><span>every ranked duel is best of three</span></li>', '<li data-fact><strong>BO3</strong><span>every ranked duel is best of three</span></li><li data-fact><strong>2</strong><span>placement matches before you get a rank</span></li>'),
     'pvp-facts',
     '/pvp/ fact 1 is "BO3',
   );
@@ -1209,9 +1230,19 @@ ${r.out}`,
   expectFail('U4-AC6 title case', mutate(P, '<h3>Duels</h3>', '<h3>DUELS</h3>'), 'pvp-modes', '/pvp/ mode 1 has no heading "Duels"');
   expectFail('U4-AC6 title not a heading', mutate(P, '<h3>Parties</h3>', '<p>Parties</p>'), 'pvp-modes', '/pvp/ mode 5 has no heading "Parties"');
   expectFail('U4-AC6 description off by one char', mutate(P, 'and the Champion title.', 'and the Champion title!'), 'pvp-modes', '/pvp/ mode "Tournaments" has no description');
-  expectFail('U4-AC6 description split', mutate(P, '<p>Bring up to three friends. Queue Arena 2v2v2 as a pair.</p>', '<p>Bring up to three friends.</p><p>Queue Arena 2v2v2 as a pair.</p>'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  expectFail('U4-AC6 description split', mutate(P, '<p>Bring up to three friends. Queue the Prismatic Arena as a pair.</p>', '<p>Bring up to three friends.</p><p>Queue the Prismatic Arena as a pair.</p>'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
   // U4-copy: the old (factually wrong) copy fails, and "Ten rounds" anywhere on /pvp/ fails.
-  expectFail('U4-copy old Parties copy', mutate(P, 'Queue Arena 2v2v2 as a pair.', 'Queue Arena 2v2v2 together.'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  expectFail('U4-copy old Parties copy', mutate(P, 'Queue the Prismatic Arena as a pair.', 'Queue the Prismatic Arena together.'), 'pvp-modes', '/pvp/ mode "Parties" has no description');
+  // Run 20261114-pvp-copy: the copy the game made false fails, as a card and anywhere on /pvp/.
+  expectFail('U2 old Parties copy (separate 2v2v2 queue)', mutate(P, 'Queue the Prismatic Arena as a pair.', 'Queue Arena 2v2v2 as a pair.'), 'pvp-modes', '/pvp/ mode "Parties" has no description "Bring up to three friends. Queue the Prismatic Arena as a pair."');
+  expectFail('U2 Queue Arena 2v2v2 elsewhere on /pvp/', mutate(P, '</main>', '<p>Queue Arena 2v2v2 with a friend.</p></main>'), 'pvp-modes', '/pvp/ mentions "Queue Arena 2v2v2"');
+  expectFail('U2 old FFA Pit copy (nine zones)', mutate(P, 'Eight zones under the spawn.', 'Nine zones under the spawn.'), 'pvp-modes', '/pvp/ mode "FFA Pit" has no description "Eight zones under the spawn. Your gear drops where you die. Stash it or extract with it."');
+  expectFail('U2 Nine zones elsewhere on /pvp/', mutate(P, '</main>', '<p>Nine zones to fight in.</p></main>'), 'pvp-modes', '/pvp/ mentions "Nine zones"');
+  expectFails('U2 old note (10 placement matches)', mutate(P, 'Players appear after 2 placement matches.', 'Players appear after 10 placement matches.'), {
+    'pvp-board': '/pvp/ has no note',
+    'pvp-modes': '/pvp/ mentions "10 placement matches"',
+  });
+  expectFail('U2 Sword and Mace elsewhere on /pvp/', mutate(P, '</main>', '<p>Sword and Mace only.</p></main>'), 'pvp-modes', '/pvp/ mentions "Sword and Mace"');
   expectFail(
     'U4-copy old Prismatic Arena copy',
     mutate(P, 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.', 'Ten rounds, a shrinking ring, a new augment each round, and a gold shop between fights.'),
@@ -1375,7 +1406,7 @@ ${r.out}`);
   {
     // Curly apostrophe, double spaces and an &nbsp; in the page; extra whitespace in the JSON-LD: all normalised.
     const groups = goodFaq();
-    const site = faqSite((gs) => { pvpGroup(gs).items[0].a = pvpGroup(gs).items[0].a.replace("network's kit", 'network’s  kit'); }, faqLd(groups).replace('Sword and Mace.', ' Sword  and Mace. '));
+    const site = faqSite((gs) => { pvpGroup(gs).items[0].a = pvpGroup(gs).items[0].a.replace("network's kit", 'network’s  kit'); }, faqLd(groups).replace('Sword, Mace and Axe.', ' Sword,  Mace  and Axe. '));
     const [head, body] = site['faq/index.html'].split('</head>');
     site['faq/index.html'] = `${head}</head>${body.replace('Ranked duels are best', 'Ranked duels&nbsp;are best')}`;
     const r = runOn(site);
@@ -1415,9 +1446,12 @@ ${r.out}`);
     'faq-pvp-group',
     '/faq/ PVP questions are',
   );
-  expectFail('U5-AC1 answer off by one char', faqSite((gs) => { pvpGroup(gs).items[3].a = 'Sword and Mace!'; }), 'faq-pvp-group', '/faq/ answer to "Which kits are ranked?" is "Sword and Mace!"');
+  expectFail('U5-AC1 answer off by one char', faqSite((gs) => { pvpGroup(gs).items[3].a = 'Sword, Mace and Axe!'; }), 'faq-pvp-group', '/faq/ answer to "Which kits are ranked?" is "Sword, Mace and Axe!"');
+  // Run 20261114-pvp-copy: the answers the game made false fail.
+  expectFail('U2 old ranked kits answer (Sword and Mace)', faqSite((gs) => { pvpGroup(gs).items[3].a = 'Sword and Mace.'; }), 'faq-pvp-group', '/faq/ answer to "Which kits are ranked?" is "Sword and Mace.", want "Sword, Mace and Axe."');
+  expectFail('U2 old placement count (10)', faqSite((gs) => { pvpGroup(gs).items[1].a = pvpGroup(gs).items[1].a.replace('Play 2', 'Play 10'); }), 'faq-pvp-group', '/faq/ answer to "How does ranked work?" is "Play 10 placement matches'); 
   expectFail('U5-AC1 answer with an extra sentence', faqSite((gs) => { pvpGroup(gs).items[2].a += ' Crossplay is on.'; }), 'faq-pvp-group', '/faq/ answer to "Can Bedrock players play ranked?"');
-  expectFail('U5-AC1 answer number wrong', faqSite((gs) => { pvpGroup(gs).items[1].a = pvpGroup(gs).items[1].a.replace('Play 10', 'Play 5'); }), 'faq-pvp-group', '/faq/ answer to "How does ranked work?"');
+  expectFail('U5-AC1 answer number wrong', faqSite((gs) => { pvpGroup(gs).items[1].a = pvpGroup(gs).items[1].a.replace('Play 2', 'Play 5'); }), 'faq-pvp-group', '/faq/ answer to "How does ranked work?"');
   expectFail('U5-AC1 em dash in an answer', faqSite((gs) => { pvpGroup(gs).items[5].a = pvpGroup(gs).items[5].a.replace('own ladder. When', 'own ladder — when'); }), 'faq-pvp-group', 'has an em dash');
   expectFail('U5-AC1 leaderboards without the link', faqSite((gs) => { pvpGroup(gs).items[4].a = 'On the PVP page of this site, and in game with `/leaderboard`.'; }), 'faq-pvp-group', 'links in the answer to "Where are the leaderboards?" are []');
   expectFail('U5-AC1 leaderboards link to /pvp', faqSite((gs) => { pvpGroup(gs).items[4].a = pvpGroup(gs).items[4].a.replace('(/pvp/)', '(/pvp)'); }), 'faq-pvp-group', '[["/pvp","PVP page"]]');
@@ -1861,6 +1895,13 @@ ${r.out}`);
   expectFail('U8 llms: a number word that is not a site fact (six)', ll('ranked leaderboards.', 'ranked leaderboards across six modes.'), 'seo-llms', '"six (6)"');
   expectFail('U8 llms: "1v1" states a 1', ll('ranked leaderboards.', 'ranked leaderboards, 1v1 duels.'), 'seo-llms', 'states numbers that are not site facts: ["1"]');
   expectFail('U8 llms: a year', ll('ranked leaderboards.', 'ranked leaderboards since 2026.'), 'seo-llms', '["2026"]');
+  // Run 20261114-pvp-copy: axe is ranked (mc-kit 285c6c0) and placement is 2 (mc-kit 987dfac / chromatic-arena 4d7b015);
+  // the old facts fail, and 10 is no longer an allowed number.
+  expectFail('U2 llms: ranked kits without Axe', ll('- Kits: Sword, Mace and Axe.', '- Kits: Sword and Mace.'), 'seo-llms', 'does not contain "Sword, Mace and Axe."');
+  expectFail('U2 llms: "Sword and Mace" (any case)', ll('ranked leaderboards.', 'ranked leaderboards. sword and mace ladders.'), 'seo-llms', 'contains "sword and mace"');
+  expectFail('U2 llms: placement line missing', ll('- Play 2 placement matches on a kit to get a rank.\n', ''), 'seo-llms', 'does not contain "Play 2 placement matches on a kit to get a rank."');
+  expectFail('U2 llms: 10 placement matches', ll('ranked leaderboards. 2 placement matches', 'ranked leaderboards. 10 placement matches'), 'seo-llms', 'contains "10 placement matches"');
+  expectFail('U2 llms: 10 is not a site fact any more', ll('ranked leaderboards.', 'ranked leaderboards, top 10.'), 'seo-llms', 'states numbers that are not site facts: ["10"]');
   passes('U8 llms: allowlisted numbers pass (1000, 500 and 250 Prism Coins; 9 zones, 4 difficulties, 3 phases; best of three; 1,000)', ll('ranked leaderboards.', 'ranked leaderboards. Tournaments pay 1000, 500 and 250 Prism Coins (1,000 for first). Heartwood: 9 zones, 4 difficulties, 3 phases.'));
   passes('U8 llms: 80,000 passes while the built FAQ states it', ll('survival with a player-run market.', 'survival with a player-run market. You start with $80,000.'));
   expectFails('U8 llms: 80,000 fails once the FAQ no longer states it', edit(faqSite((gs) => {
@@ -2042,9 +2083,15 @@ ${r.out}`);
   expectFail('U8r3 about: no description fails', aboutLd((w) => { delete w.about.description; }), 'seo-jsonld', '/pvp/ WebPage about has no description');
   expectFail('U8r3 about: of a boilerplate @type fails', aboutLd((w) => { w.about['@type'] = 'WebSite'; }), 'seo-jsonld', '/pvp/ WebPage about is of @type ["WebSite"], whose strings are not fact-checked');
   expectFail('U8r3 about: of an owned-elsewhere @type fails', aboutLd((w) => { w.about['@type'] = 'FAQPage'; }), 'seo-jsonld', '/pvp/ WebPage about is of @type ["FAQPage"], whose strings are not fact-checked');
-  expectFail('U8r3 about: without best of three fails', aboutLd((w) => { w.about.description = 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma. Play 10 placement matches before you get a rank.'; }), 'seo-jsonld', '/pvp/ WebPage about.description does not state ["best of three"]');
-  expectFail('U8r3 about: without the placement matches fails', aboutLd((w) => { w.about.description = 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma; every ranked duel is best of three.'; }), 'seo-jsonld', 'does not state ["10 placement matches"]');
-  expectFail('U8r3 about: without the tiers fails', aboutLd((w) => { w.about.description = 'Three divisions in every tier. Play 10 placement matches before you get a rank; every ranked duel is best of three.'; }), 'seo-jsonld', 'does not state ["seven tiers","Tin","Chroma"]');
+  expectFail('U8r3 about: without best of three fails', aboutLd((w) => { w.about.description = 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma. Play 2 placement matches before you get a rank.'; }), 'seo-jsonld', '/pvp/ WebPage about.description does not state ["best of three"]');
+  expectFail('U8r3 about: without the placement matches fails', aboutLd((w) => { w.about.description = 'Seven tiers from Tin to Chroma, three divisions in every tier below Chroma; every ranked duel is best of three.'; }), 'seo-jsonld', 'does not state ["2 placement matches"]');
+  // Run 20261114-pvp-copy: the old count no longer satisfies the placement fact.
+  expectFails('U2 about: 10 placement matches fails', aboutLd((w) => { w.about.description = PVP_ABOUT.description.replace('Play 2 placement', 'Play 10 placement'); }), {
+    'seo-jsonld': 'does not state ["2 placement matches"]',
+    'seo-jsonld-visible-facts': 'WebPage about.description uses ["10"]',
+    'pvp-modes': '/pvp/ mentions "10 placement matches"',
+  });
+  expectFail('U8r3 about: without the tiers fails', aboutLd((w) => { w.about.description = 'Three divisions in every tier. Play 2 placement matches before you get a rank; every ranked duel is best of three.'; }), 'seo-jsonld', 'does not state ["seven tiers","Tin","Chroma"]');
   expectFail('U8r3 about: a planted invented fact fails', aboutLd((w) => { w.about.description = `${PVP_ABOUT.description} The top 100 players win prizes.`; }), 'seo-jsonld-visible-facts', '/pvp/ JSON-LD states what the page does not show: WebPage about.description uses ["100","win","prizes"]');
   expectFail('U8r3 about: an invented tier fails', aboutLd((w) => { w.about.description = PVP_ABOUT.description.replace('Tin to Chroma', 'Tin to Diamond to Chroma'); }), 'seo-jsonld-visible-facts', 'WebPage about.description uses ["diamond"]');
   expectFails('U8r3 about: a wrong count fails', aboutLd((w) => { w.about.description = PVP_ABOUT.description.replace('three divisions', 'five divisions'); }), {
@@ -2054,7 +2101,7 @@ ${r.out}`);
   expectFail('U8r3 about: the name keeps the whole-string rule', aboutLd((w) => { w.about.name = 'Ranked ladder'; }), 'seo-jsonld-visible-facts', '/pvp/ JSON-LD states what the page does not show: DefinedTermSet name "Ranked ladder"');
   expectFail('U8r3 about: nested terms keep the whole-string rule', aboutLd((w) => { w.about.hasDefinedTerm = [{ '@type': 'DefinedTerm', name: 'Tin' }, { '@type': 'DefinedTerm', name: 'Diamond' }]; }), 'seo-jsonld-visible-facts', 'DefinedTerm name "Diamond"');
   passes('U8r3 about: tiers as nested terms the page shows pass', aboutLd((w) => { w.about.hasDefinedTerm = TIER_ROWS.map(([t]) => ({ '@type': 'DefinedTerm', name: t })); }));
-  passes('U8r3 about: digits and words for the counts pass', aboutLd((w) => { w.about.description = 'Seven tiers, Tin to Chroma; 3 divisions below Chroma; 10 placement matches; best of three.'; }));
+  passes('U8r3 about: digits and words for the counts pass', aboutLd((w) => { w.about.description = 'Seven tiers, Tin to Chroma; 3 divisions below Chroma; 2 placement matches; best of three.'; }));
   expectFail('U8r3 about: a composed description elsewhere keeps the whole-string rule', subLd(S, '/smp/', 'Economy SMP', (g) => {
     g[0].about = { '@type': 'Thing', name: 'Economy SMP', description: 'Economy SMP with an auction house' };
   }), 'seo-jsonld-visible-facts', '/smp/ JSON-LD states what the page does not show: Thing description "Economy SMP with an auction house"');

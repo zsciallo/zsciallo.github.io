@@ -7,8 +7,8 @@
   "uuid": "00000000-0000-4000-8000-000000000010",
   "best": null,
   "kits": [
-    {"key": "sword", "label": "Sword", "placed": false, "games": 6, "placementMatches": 10, "wins": 3, "losses": 3},
-    {"key": "mace", "label": "Mace", "placed": false, "games": 2, "placementMatches": 10, "wins": 0, "losses": 2}
+    {"key": "sword", "label": "Sword", "placed": false, "games": 1, "placementMatches": 2, "wins": 0, "losses": 1},
+    {"key": "mace", "label": "Mace", "placed": false, "games": 1, "placementMatches": 2, "wins": 1, "losses": 0}
   ],
   "career": {"kills": 14, "deaths": 9, "bestStreak": 2, "tournamentWins": 0},
   "recent": [
