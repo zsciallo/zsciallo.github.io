@@ -139,7 +139,7 @@ const DEFAULT_BOARDS = [
   { key: 'overall', label: 'Overall' },
   { key: 'sword', label: 'Sword' },
   { key: 'mace', label: 'Mace' },
-  { key: 'axe', label: 'Axe', soon: true },
+  { key: 'axe', label: 'Axe' },
   { key: 'chaos', label: 'Chaos', soon: true },
   { key: 'tournament', label: 'Tournament Wins' },
 ];

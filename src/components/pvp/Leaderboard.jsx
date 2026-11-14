@@ -85,7 +85,7 @@ function Empty() {
           </li>
         ))}
       </ol>
-      <p class="pvp-empty-text" data-board-empty>No ranked players yet. Play 10 placement matches to appear here.</p>
+      <p class="pvp-empty-text" data-board-empty>No ranked players yet. Play 2 placement matches to appear here.</p>
     </div>
   );
 }
@@ -153,7 +153,7 @@ export function Leaderboard({ doc, index = null }) {
         {view.rows.length === 0 && <Empty />}
       </div>
 
-      <p class="pvp-note">Updates every minute. Players appear after 10 placement matches.</p>
+      <p class="pvp-note">Updates every minute. Players appear after 2 placement matches.</p>
     </section>
   );
 }

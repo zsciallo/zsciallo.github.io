@@ -57,7 +57,7 @@ export const PAGES = [
     entry: 'pvp/index.html',
     title: 'Ranked PVP Leaderboards | Chromabit',
     description:
-      'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.',
+      'ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword, Mace and Axe ladders, tournaments.',
     keywords: 'Minecraft ranked PVP, Minecraft PVP leaderboard, kit PVP server, Java and Bedrock PVP, ChromaPVP, Chromabit',
     ogDescription: 'Ranked kit PVP for Java and Bedrock on one ladder. Seven tiers from Tin to Chroma. Join at play.chromabit.us',
     twitterDescription: 'ChromaPVP ranked leaderboards for Java and Bedrock. play.chromabit.us',
@@ -251,7 +251,7 @@ function pvpLadderNode() {
     '@type': 'Thing',
     name: 'Seven tiers',
     description:
-      'Seven tiers from Tin to Chroma. Play 10 placement matches before you get a rank. Every ranked duel is best of three. Three divisions in every tier below Chroma. Ranked opens at level 2.',
+      'Seven tiers from Tin to Chroma. Play 2 placement matches before you get a rank. Every ranked duel is best of three. Three divisions in every tier below Chroma. Ranked opens at level 2.',
   };
 }
 
@@ -360,8 +360,8 @@ export function llmsTxt() {
     '## ChromaPVP: ranked kit PVP',
     '',
     '- The only ranked competitive PVP for Java and Bedrock. Java and Bedrock players queue into the same matches and share one ladder.',
-    '- Ranked kits: Sword and Mace.',
-    '- Play 10 placement matches on a kit to get a rank. Every ranked duel is best of three. Ranked opens at level 2.',
+    '- Ranked kits: Sword, Mace and Axe.',
+    '- Play 2 placement matches on a kit to get a rank. Every ranked duel is best of three. Ranked opens at level 2.',
     '- Seven tiers, from Tin to Chroma, with three divisions in every tier below Chroma.',
     `- Modes: ${PVP_MODES.map(([name]) => name).join(', ')}.`,
     ...PVP_MODES.filter(([name]) => name === 'Tournaments').map(([name, line]) => `- ${name}: ${line}`),
