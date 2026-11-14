@@ -13,7 +13,7 @@ import { PVP_MODES } from '../data/pvpModes';
 // From the arena's own config (chromatic-arena: ranked placement, best of
 // three, divisions, the level gate). Re-check them when ranked changes.
 const FACTS = [
-  ['10', 'placement matches before you get a rank'],
+  ['2', 'placement matches before you get a rank'],
   ['BO3', 'every ranked duel is best of three'],
   ['III · II · I', 'three divisions in every tier below Chroma'],
   ['LVL 2', 'ranked opens at level 2'],

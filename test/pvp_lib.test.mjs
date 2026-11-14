@@ -18,11 +18,12 @@
 //   doc with a non-empty `boards` array: one entry per board that has a string
 //   `key`, in feed order. soon = (board.soon === true). label =
 //   (board.label ?? key).toUpperCase(), plus ' · SOON' (space, U+00B7, space)
-//   when soon. So the live feed gives OVERALL, SWORD, MACE, AXE · SOON,
-//   CHAOS · SOON, TOURNAMENT WINS.
+//   when soon. So the live feed gives OVERALL, SWORD, MACE, AXE,
+//   CHAOS · SOON, TOURNAMENT WINS. (Run 20261114-pvp-copy: axe queues are live
+//   since mc-kit 285c6c0, so axe is no longer soon; chaos still is.)
 //   doc null / undefined / not an object / no boards array / empty boards ->
 //   the six defaults, in this order: overall OVERALL, sword SWORD, mace MACE,
-//   axe 'AXE · SOON' (soon), chaos 'CHAOS · SOON' (soon), tournament
+//   axe 'AXE' (not soon), chaos 'CHAOS · SOON' (soon), tournament
 //   'TOURNAMENT WINS'. (This is what the prerendered page shows.)
 //
 // selectBoardKey(doc, requested) -> string
@@ -224,7 +225,7 @@ const DEFAULT_TABS = [
   { key: 'overall', label: 'OVERALL', soon: false },
   { key: 'sword', label: 'SWORD', soon: false },
   { key: 'mace', label: 'MACE', soon: false },
-  { key: 'axe', label: 'AXE · SOON', soon: true },
+  { key: 'axe', label: 'AXE', soon: false },
   { key: 'chaos', label: 'CHAOS · SOON', soon: true },
   { key: 'tournament', label: 'TOURNAMENT WINS', soon: false },
 ];
@@ -268,19 +269,21 @@ test('tabList: label falls back to the key, soon only when === true', () =>
     { key: 'bow', label: 'BOW', soon: false },
     { key: 'axe', label: 'AXE', soon: false },
   ]));
+// Run 20261114-pvp-copy: chaos is now the only soon board, so it carries the separator check (was axe).
 test('tabList: SOON separator is space, U+00B7, space', () => {
-  const axe = (tabList(frozen()) ?? []).find((t) => t.key === 'axe');
-  return eq(axe && [...axe.label].map((c) => c.codePointAt(0).toString(16)), [...'AXE · SOON'].map((c) => c.codePointAt(0).toString(16)));
+  const chaos = (tabList(frozen()) ?? []).find((t) => t.key === 'chaos');
+  return eq(chaos && [...chaos.label].map((c) => c.codePointAt(0).toString(16)), [...'CHAOS · SOON'].map((c) => c.codePointAt(0).toString(16)));
 });
 
 // ---------------------------------------------------------- selectBoardKey --
 
-test('selectBoardKey: valid keys are kept', () => eq(['overall', 'sword', 'mace', 'tournament'].map((k) => selectBoardKey(frozen(), k)), ['overall', 'sword', 'mace', 'tournament']));
-test('selectBoardKey: soon keys fall back to overall', () => eq(['axe', 'chaos'].map((k) => selectBoardKey(frozen(), k)), ['overall', 'overall']));
+// Run 20261114-pvp-copy: axe is live (kept), chaos is the soon key (falls back).
+test('selectBoardKey: valid keys are kept', () => eq(['overall', 'sword', 'mace', 'axe', 'tournament'].map((k) => selectBoardKey(frozen(), k)), ['overall', 'sword', 'mace', 'axe', 'tournament']));
+test('selectBoardKey: soon keys fall back to overall', () => eq(['chaos'].map((k) => selectBoardKey(frozen(), k)), ['overall']));
 test('selectBoardKey: unknown, empty, null, undefined fall back to overall', () =>
   eq(['nope', '', null, undefined, 'SWORD', ' sword', 'constructor', '__proto__'].map((k) => selectBoardKey(frozen(), k)), Array(8).fill('overall')));
 test('selectBoardKey: feed down uses the default tabs', () =>
-  eq(['sword', 'tournament', 'axe', 'nope'].map((k) => selectBoardKey(null, k)), ['sword', 'tournament', 'overall', 'overall']));
+  eq(['sword', 'tournament', 'axe', 'chaos', 'nope'].map((k) => selectBoardKey(null, k)), ['sword', 'tournament', 'axe', 'overall', 'overall']));
 test('selectBoardKey: a key the feed does not have falls back', () => eq(selectBoardKey({ boards: [{ key: 'overall', rows: [] }] }, 'sword'), 'overall'));
 
 // -------------------------------------------------------------- boardQuery --
@@ -289,13 +292,13 @@ test('selectBoardKey: a key the feed does not have falls back', () => eq(selectB
 const { boardQuery } = lib;
 check('exports boardQuery()', typeof boardQuery === 'function', `typeof boardQuery is ${typeof boardQuery}`);
 test('boardQuery: valid non-default keys -> ?board=<key>', () =>
-  eq(['sword', 'mace', 'tournament'].map((k) => boardQuery(frozen(), k)), ['?board=sword', '?board=mace', '?board=tournament']));
+  eq(['sword', 'mace', 'axe', 'tournament'].map((k) => boardQuery(frozen(), k)), ['?board=sword', '?board=mace', '?board=axe', '?board=tournament']));
 test('boardQuery: overall (the default) -> ""', () => eq(boardQuery(frozen(), 'overall'), ''));
-test('boardQuery: soon keys -> ""', () => eq(['axe', 'chaos'].map((k) => boardQuery(frozen(), k)), ['', '']));
+test('boardQuery: soon keys -> ""', () => eq(['chaos'].map((k) => boardQuery(frozen(), k)), ['']));
 test('boardQuery: unknown, wrong case, empty, null, undefined -> ""', () =>
   eq(['nope', 'SWORD', ' sword', '', null, undefined, '__proto__'].map((k) => boardQuery(frozen(), k)), Array(7).fill('')));
 test('boardQuery: feed down uses the default tabs', () =>
-  eq(['sword', 'tournament', 'axe', 'nope'].map((k) => boardQuery(null, k)), ['?board=sword', '?board=tournament', '', '']));
+  eq(['sword', 'tournament', 'axe', 'chaos', 'nope'].map((k) => boardQuery(null, k)), ['?board=sword', '?board=tournament', '?board=axe', '', '']));
 test('boardQuery: a key the feed does not have -> ""', () => eq(boardQuery({ boards: [{ key: 'overall', rows: [] }] }, 'sword'), ''));
 test('boardQuery: the key is URL-encoded', () => eq(boardQuery({ boards: [{ key: 'overall', rows: [] }, { key: 'a&b c', rows: [] }] }, 'a&b c'), '?board=a%26b%20c'));
 test('boardQuery: agrees with selectBoardKey on every request', () => {
@@ -351,8 +354,11 @@ test('boardView sword: rows', () =>
     [2, 'Sample_06', 'Gold II', '10 - 30', '25%', 2],
   ]));
 test('boardView mace', () => eq(boardView(frozen(), 'mace')?.rows?.map((r) => [r.rank, r.name, r.edition, r.top]), [[1, 'Sample_03', 'java', 1]]));
+// Run 20261114-pvp-copy: chaos is the soon board now; axe is a live rating board (no rows yet in the fixture).
 test('boardView soon board: soon, label, no rows', () =>
-  fields(boardView(frozen(), 'axe'), { key: 'axe', label: 'AXE · SOON', kind: 'rating', soon: true, columns: RATING_COLUMNS, rows: [] }));
+  fields(boardView(frozen(), 'chaos'), { key: 'chaos', label: 'CHAOS · SOON', kind: 'rating', soon: true, columns: RATING_COLUMNS, rows: [] }));
+test('boardView axe: live rating board, not soon', () =>
+  fields(boardView(frozen(), 'axe'), { key: 'axe', label: 'AXE', kind: 'rating', soon: false, columns: RATING_COLUMNS, rows: [] }));
 
 test('boardView tournament: count board header', () =>
   fields(boardView(frozen(), 'tournament'), { key: 'tournament', label: 'TOURNAMENT WINS', kind: 'count', soon: false, columns: COUNT_COLUMNS }));
@@ -437,7 +443,8 @@ test('boardView: doc null, overall -> empty rating view', () =>
   fields(boardView(null, 'overall'), { key: 'overall', label: 'OVERALL', kind: 'rating', soon: false, columns: RATING_COLUMNS, rows: [] }));
 test('boardView: doc null, tournament -> empty count view', () =>
   fields(boardView(null, 'tournament'), { key: 'tournament', label: 'TOURNAMENT WINS', kind: 'count', soon: false, columns: COUNT_COLUMNS, rows: [] }));
-test('boardView: doc null, axe -> soon, empty', () => fields(boardView(null, 'axe'), { key: 'axe', label: 'AXE · SOON', soon: true, rows: [] }));
+test('boardView: doc null, chaos -> soon, empty', () => fields(boardView(null, 'chaos'), { key: 'chaos', label: 'CHAOS · SOON', soon: true, rows: [] }));
+test('boardView: doc null, axe -> live, empty', () => fields(boardView(null, 'axe'), { key: 'axe', label: 'AXE', soon: false, rows: [] }));
 test('boardView: doc undefined -> empty', () => fields(boardView(undefined, 'sword'), { key: 'sword', rows: [] }));
 test('boardView: board missing from the feed -> empty', () => fields(boardView({ boards: [{ key: 'overall', rows: [] }] }, 'mace'), { key: 'mace', label: 'MACE', rows: [] }));
 test('boardView: board with rows not an array -> empty', () => fields(boardView({ boards: [{ key: 'overall', rows: 'x' }] }, 'overall'), { rows: [] }));
@@ -612,7 +619,7 @@ test('profileView .Sample_02: header (dot kept, no head url)', () =>
 test('profileView .Sample_02: one placed kit, one placing', () =>
   eq(profileView(PROFILE('b-sample_02'), LADDER_DOC())?.kits?.map(kitView), [
     { key: 'sword', label: 'Sword', placed: true, tier: { label: 'Mithril I', colour: '#FF77E9' }, lines: ['Rating 1912', 'Peak 1930', '21 wins, 9 losses', 'Win streak 3', '#1'] },
-    { key: 'mace', label: 'Mace', placed: false, tier: null, lines: ['Placing 4/10', '2 wins, 2 losses'] },
+    { key: 'mace', label: 'Mace', placed: false, tier: null, lines: ['Placing 1/2', '1 win, 0 losses'] },
   ]));
 test('profileView .Sample_02: "1 tournament won" (singular)', () =>
   eq(profileView(PROFILE('b-sample_02'), LADDER_DOC())?.career?.lines, ['56 kills', '40 deaths', 'Best streak 7', '1 tournament won']));
@@ -629,8 +636,8 @@ test('profileView Sample_10: best null, Java head kept', () => {
 });
 test('profileView Sample_10: unplaced kits only', () =>
   eq(profileView(PROFILE('sample_10'), LADDER_DOC())?.kits?.map(kitView), [
-    { key: 'sword', label: 'Sword', placed: false, tier: null, lines: ['Placing 6/10', '3 wins, 3 losses'] },
-    { key: 'mace', label: 'Mace', placed: false, tier: null, lines: ['Placing 2/10', '0 wins, 2 losses'] },
+    { key: 'sword', label: 'Sword', placed: false, tier: null, lines: ['Placing 1/2', '0 wins, 1 loss'] },
+    { key: 'mace', label: 'Mace', placed: false, tier: null, lines: ['Placing 1/2', '1 win, 0 losses'] },
   ]));
 test('profileView Sample_10: "0 tournaments won" (plural), recent ratings empty', () => {
   const v = profileView(PROFILE('sample_10'), LADDER_DOC());

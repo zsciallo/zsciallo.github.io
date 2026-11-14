@@ -3,9 +3,9 @@
 // ItemList search engines read cannot drift from what the page shows.
 export const PVP_MODES = [
   ['Duels', 'Ranked or unranked 1v1 on the Mythic and Magic arenas. Build your own kit layout.'],
-  ['FFA Pit', 'Nine zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
+  ['FFA Pit', 'Eight zones under the spawn. Your gear drops where you die. Stash it or extract with it.'],
   ['Prismatic Arena', 'A shrinking ring, augment picks, and a gold shop between fights. Last team standing wins.'],
   ['Tournaments', 'Double elimination. 1000, 500 and 250 Prism Coins for the top three, and the Champion title.'],
-  ['Parties', 'Bring up to three friends. Queue Arena 2v2v2 as a pair.'],
+  ['Parties', 'Bring up to three friends. Queue the Prismatic Arena as a pair.'],
   ['Cosmetics', 'Earn Prism Coins by playing and spend them on trails, hats and titles.'],
 ];

@@ -9,7 +9,7 @@
     },
     "/pvp/": {
       "title": "Ranked PVP Leaderboards | Chromabit",
-      "description": "ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword and Mace ladders, tournaments.",
+      "description": "ChromaPVP ranked leaderboards for Java and Bedrock. Seven tiers from Tin to Chroma, Sword, Mace and Axe ladders, tournaments.",
       "descriptionFrozen": true
     },
     "/smp/": {
