@@ -26,7 +26,7 @@
   position: relative;
   z-index: 1;
   border-bottom: 1px solid var(--border);
-  background: rgba(12, 7, 24, 0.55);
+  background: color-mix(in srgb, var(--bg2) 55%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   margin-bottom: 1.5rem;
@@ -259,7 +259,7 @@
   color: var(--text);
   background: none;
   border: none;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
   cursor: pointer;
   transition: background 0.12s;
 }
@@ -305,7 +305,6 @@
 .market-row .num em {
   font-style: normal;
   color: var(--muted);
-  opacity: 0.6;
 }
 
 .market-when {
@@ -362,8 +361,7 @@
 }
 
 .market-ench {
-  color: var(--accent);
-  opacity: 0.8;
+  color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -376,8 +374,8 @@
   font-size: 0.80rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-2);
-  background: var(--border-pink);
+  color: var(--text-on-surface);
+  background: var(--surface-hover);
   border-radius: 3px;
 }
 
@@ -396,7 +394,18 @@
 
 .spark {
   display: block;
+  color: var(--muted-on-surface);
   overflow: visible;
+}
+
+/* The list sparkline is a scan aid, not a chart: neutral line (the detail
+   charts keep the series hues). CSS beats the svg presentation attributes. */
+.spark path {
+  stroke: currentColor;
+}
+
+.spark circle {
+  fill: currentColor;
 }
 
 .spark--empty {
@@ -509,7 +518,6 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
-  opacity: 0.7;
   word-break: break-all;
 }
 
@@ -533,7 +541,7 @@
 }
 
 .detail-ench li b {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .detail-contents li b {
@@ -558,7 +566,7 @@
 
 .mini-table h4 em {
   font-style: normal;
-  opacity: 0.55;
+  color: var(--muted);
 }
 
 /* ─── stat tiles ─── */
@@ -581,7 +589,7 @@
    gap around it, and the row clips the rings at its outer edge. */
 .stat {
   padding: 0.8rem 0.95rem;
-  box-shadow: 0 0 0 1px var(--divider);
+  box-shadow: 0 0 0 1px var(--divider-on-surface);
 }
 
 .stat-label {
@@ -606,7 +614,6 @@
 .stat-note {
   font-size: 0.84rem;
   color: var(--muted);
-  opacity: 0.8;
   margin-top: 0.15rem;
 }
 
@@ -671,8 +678,8 @@
 }
 
 .range-tab.active {
-  color: var(--text);
-  background: var(--accent-deep);
+  color: var(--on-accent);
+  background: var(--accent);
 }
 
 .chart-legend {
@@ -817,7 +824,6 @@
   font-size: 8.5px;
   letter-spacing: 0.12em;
   text-anchor: start;
-  opacity: 0.65;
 }
 
 .chart-crosshair line {
@@ -839,7 +845,7 @@
   transform: translateX(-50%);
   min-width: 172px;
   padding: 0.55rem 0.7rem;
-  background: rgba(12, 7, 24, 0.96);
+  background: color-mix(in srgb, var(--inset-on-surface) 96%, transparent);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55);
@@ -916,13 +922,13 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   white-space: nowrap;
 }
 
 .mini-table td {
   padding: 0.38rem 0.4rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   color: var(--text);
   white-space: nowrap;
 }
@@ -955,7 +961,6 @@
   font-size: 0.82rem;
   letter-spacing: 0.06em;
   color: var(--muted);
-  opacity: 0.7;
 }
 
 .mini-empty {
@@ -1039,7 +1044,7 @@
   font-size: 0.81rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-2);
+  color: var(--muted);
 }
 
 .explainer-body {
@@ -1047,7 +1052,7 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem 1.75rem;
   padding: 0.25rem 1rem 1.1rem;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
   margin-top: 0.1rem;
   padding-top: 1rem;
 }
@@ -1058,7 +1063,7 @@
   font-size: 0.82rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text);
   margin-bottom: 0.4rem;
 }
 
@@ -1143,7 +1148,13 @@
   font-size: 0.84rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text-on-surface);
+}
+
+/* No purple text on the selected card. */
+.pool-card.selected .pool-ticker,
+.pool-card.selected .market-tag {
+  color: var(--text-on-surface);
 }
 
 .pool-name {
@@ -1181,7 +1192,7 @@
 .pool-card-price em span {
   font-size: 0.81rem;
   font-weight: 400;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   letter-spacing: 0.06em;
 }
 
@@ -1197,13 +1208,13 @@
   flex-direction: column;
   align-items: flex-end;
   font-size: 0.84rem;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   white-space: nowrap;
 }
 
 .pool-card-depth em {
   font-style: normal;
-  opacity: 0.75;
+  color: var(--muted);
 }
 
 .pool-detail {
@@ -1277,8 +1288,8 @@
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.12em;
-  color: var(--accent-2);
-  background: var(--border-pink);
+  color: var(--text-on-surface);
+  background: var(--surface-hover);
   border-radius: 3px;
 }
 
@@ -1537,8 +1548,8 @@
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 3;
-  background: radial-gradient(circle at 50% 45%, var(--glow), transparent 70%), var(--bg3);
-  border-bottom: 1px solid var(--divider);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--text-on-surface) 6%, transparent), transparent 70%), var(--bg3);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 .listing-thumb .item-icon {
@@ -1553,7 +1564,7 @@
   font-family: var(--font-mono);
   font-size: 0.95rem;
   color: var(--text);
-  background: rgba(12, 7, 24, 0.75);
+  background: color-mix(in srgb, var(--inset-on-surface) 75%, transparent);
   border-radius: 4px;
 }
 
@@ -1608,7 +1619,7 @@
   border: 0;
   padding: 0;
   font: inherit;
-  color: var(--accent);
+  color: var(--text);
   cursor: pointer;
 }
 
@@ -1632,7 +1643,7 @@
 }
 
 .listing-facts dt {
-  opacity: 0.75;
+  color: var(--muted);
 }
 
 .listing-facts dd {
@@ -1727,8 +1738,8 @@
 
   .listing-meta {
     padding: 0.6rem 0.75rem 0.75rem;
-    border-top: 1px solid var(--divider);
-    background: var(--surface-inset);
+    border-top: 1px solid var(--divider-on-surface);
+    background: var(--inset-on-surface);
   }
 }
 

@@ -2792,17 +2792,37 @@ function visibleTextUnchanged(dist) {
 /**
  * The surface tokens and their spec values (plan Amendment 4, amended by
  * U9-states: --surface-hover #1a1330 -> #21193c, it was 1.044:1 against
- * --surface; new --surface-selected; --divider pinned as well).
+ * --surface; new --surface-selected; --divider pinned as well). Run
+ * 20261117-palette U1 (owner palette spec 2026-11-17): the :root values are the
+ * "Obsidian" theme's neutral greys (were #150f27, #0f0a1d, #21193c, #2c214f,
+ * #221838).
  */
 export const CARD_TOKENS = {
-  '--surface': '#150f27',
-  '--surface-inset': '#0f0a1d',
-  '--surface-hover': '#21193c',
-  '--surface-selected': '#2c214f',
+  '--surface': '#1c1e24',
+  '--surface-inset': '#090a0c',
+  '--surface-hover': '#272a32',
+  '--surface-selected': '#3a3e49',
   '--radius-card': '10px',
   '--radius-inset': '6px',
-  '--divider': '#221838',
+  '--divider': '#23252c',
 };
+/**
+ * Run 20261117-palette U1: the one other place the surface tokens may be
+ * declared, the light theme ("Quartz") block `[data-theme="light"]` (on <html>:
+ * also written `html[...]` or `:root[...]`, quoted or not), top level, with
+ * these values. It must declare each colour token below; a radius token it
+ * repeats must keep the :root value.
+ */
+export const CARD_TOKENS_LIGHT = {
+  '--surface': '#16181d',
+  '--surface-inset': '#e6e8ec',
+  '--surface-hover': '#23262d',
+  '--surface-selected': '#3a3e49',
+  '--divider': '#d3d6dc',
+};
+/** A selector naming the light theme block on the root element. */
+const LIGHT_BLOCK = /^(?:html|:root)?\[data-theme=(["']?)light\1\]$/;
+const isLightBlock = (r) => !r.at && r.selectors.length > 0 && r.selectors.every((s) => LIGHT_BLOCK.test(s.trim()));
 /** The frost gradient as index.css defines it, whitespace-free and with the minifier's short decimals. */
 const FROST_LITERAL = 'linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01))';
 
@@ -2906,7 +2926,10 @@ function cardSubject(selector) {
   return null;
 }
 
-/** U9: the built CSS defines the surface tokens (CARD_TOKENS) at :root with the spec values, and nowhere else with another value. */
+/**
+ * U9: the built CSS defines the surface tokens (CARD_TOKENS) at :root with the spec values, and nowhere else with another value.
+ * Run 20261117-palette U1: plus the light theme block (CARD_TOKENS_LIGHT), the one other declaration site, with its own values.
+ */
 function cardTokens(dist) {
   const css = builtCss(dist);
   if (css == null) return ['no built CSS under dist/assets'];
@@ -2916,8 +2939,12 @@ function cardTokens(dist) {
     const decls = rules.flatMap((r) => r.decls.filter(([p]) => p === name).map(([, v]) => ({ v: v.replace(/\s*!important$/, '').trim(), r })));
     const atRoot = decls.filter(({ r }) => !r.at && r.selectors.includes(':root'));
     if (!atRoot.length) problems.push(`${name} is not declared in a top-level :root rule`);
-    for (const { v, r } of decls)
-      if (v.toLowerCase() !== want) problems.push(`${name} is ${JSON.stringify(v)} in ${r.selectors.join(',')}${r.at ? ` (${r.at})` : ''}, want ${want}`);
+    const light = CARD_TOKENS_LIGHT[name];
+    if (light && !decls.some(({ r }) => isLightBlock(r))) problems.push(`${name} is not declared in a top-level [data-theme="light"] rule`);
+    for (const { v, r } of decls) {
+      const w = isLightBlock(r) ? (light ?? want) : want;
+      if (v.toLowerCase() !== w) problems.push(`${name} is ${JSON.stringify(v)} in ${r.selectors.join(',')}${r.at ? ` (${r.at})` : ''}, want ${w}`);
+    }
   }
   return [...new Set(problems)];
 }

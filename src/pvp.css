@@ -84,11 +84,11 @@
 }
 
 .pvp-tab.btn-secondary {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .pvp-tab.btn-secondary:not(:disabled):hover {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .pvp-board-card {
@@ -107,7 +107,7 @@
 
 .pvp-table th {
   padding: 0.35rem 0.7rem 0.45rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: none;
   font-size: 0.95rem;
@@ -120,7 +120,7 @@
 
 .pvp-table td {
   padding: 0.42rem 0.7rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -134,7 +134,7 @@
 }
 
 .pvp-table tbody tr:hover {
-  background-color: rgba(199, 125, 255, 0.05);
+  background-color: color-mix(in srgb, var(--text-on-surface) 4%, transparent);
 }
 
 .pvp-table .pvp-c-rating,
@@ -369,7 +369,7 @@
 
 .pvp-search-hit:hover,
 .pvp-search-hit:focus-visible {
-  background-color: rgba(199, 125, 255, 0.1);
+  background-color: var(--surface-hover);
 }
 
 .pvp-search-hit:focus-visible {
@@ -421,7 +421,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.7rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   font-family: var(--font-mono);
   font-size-adjust: none;
   font-size: 1.3rem;
@@ -445,14 +445,14 @@
   width: 24px;
   height: 24px;
   border-radius: 3px;
-  background: rgba(164, 147, 196, 0.12);
+  background: color-mix(in srgb, var(--muted-on-surface) 12%, transparent);
 }
 
 .pvp-ghost-bar {
   flex: 0 1 10rem;
   height: 0.55rem;
   border-radius: 2px;
-  background: rgba(164, 147, 196, 0.14);
+  background: color-mix(in srgb, var(--muted-on-surface) 14%, transparent);
 }
 
 .pvp-ghost-bar--short {
@@ -494,6 +494,17 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.025);
   color: var(--muted);
+}
+
+.pvp-rung[style*='--tier'] {
+  color: var(--tier);
+}
+
+/* The rungs sit on the page: Quartz takes a darker form of the same hue
+   (a straight sRGB mix with black keeps it) for the name. */
+[data-theme='light'] .pvp-rung[style*='--tier'] .pvp-rung-name,
+[data-theme='light'] .pvp-profile-best .pvp-tier[style*='--tier'] {
+  color: color-mix(in srgb, var(--tier) 48%, black);
 }
 
 .pvp-rung-name {
@@ -744,7 +755,7 @@
 
 .pvp-recent th {
   padding: 0.35rem 0.7rem 0.45rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: none;
   font-size: 0.95rem;
@@ -757,7 +768,7 @@
 
 .pvp-recent td {
   padding: 0.42rem 0.7rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -853,7 +864,7 @@
     column-gap: 0.5rem;
     row-gap: 0.1rem;
     padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider-on-surface);
   }
 
   .pvp-table--count tr {

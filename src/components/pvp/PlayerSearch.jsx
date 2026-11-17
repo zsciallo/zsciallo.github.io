@@ -82,7 +82,7 @@ export function PlayerSearch({ index }) {
                   <span class="pvp-name">{r.name}</span>
                   <EditionBadge edition={r.edition} />
                 </span>
-                <span class={`pvp-tier${colour ? '' : ' pvp-tier--unplaced'}`} style={colour ? { color: colour } : undefined}>
+                <span class={`pvp-tier${colour ? '' : ' pvp-tier--unplaced'}`} style={colour ? { '--tier': colour } : undefined}>
                   {r.tierLabel}
                 </span>
               </a>

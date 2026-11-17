@@ -14,6 +14,11 @@
     (function () {
       var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
       el.classList.add('js');
+      // Theme before first paint (src/lib/theme.js takes over): dark unless
+      // the visitor picked light with the nav toggle.
+      var t;
+      try { t = localStorage.getItem('chromabit:theme'); } catch (e) {}
+      el.dataset.theme = t === 'light' ? 'light' : 'dark';
       if (!document.fonts || !document.fonts.load) return ready();
       // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
       // no webfont face to wait on, and the request would resolve instantly.

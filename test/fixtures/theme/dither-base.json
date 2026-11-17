@@ -1,0 +1,10 @@
+{
+  "capturedFrom": "1043374",
+  "note": "Painted dither pixels (alpha >= 24) in the lower half of the viewport outside the centre column, base build, for theme_check dither (U2 A2).",
+  "region": {
+    "1280": 2221
+  },
+  "maxAlpha": {
+    "1280": 91
+  }
+}

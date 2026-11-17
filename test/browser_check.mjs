@@ -682,11 +682,14 @@ async function waitReady(url, ms) {
   return false;
 }
 
+/** Run 20261117-palette: render in the dark theme (Obsidian) explicitly, not whatever the host OS prefers (Blink preferredColorScheme 0 = dark). */
+const DARK = '--blink-settings=preferredColorScheme=0';
+
 function dump(chrome, url, profileRoot) {
   const profile = mkdtempSync(join(profileRoot, 'p-'));
   const r = spawnSync(
     chrome,
-    ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', `--user-data-dir=${profile}`, `--virtual-time-budget=${BUDGET_MS}`, '--dump-dom', url],
+    ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', DARK, `--user-data-dir=${profile}`, `--virtual-time-budget=${BUDGET_MS}`, '--dump-dom', url],
     { encoding: 'utf-8', timeout: CHROME_TIMEOUT_MS, maxBuffer: 256 * 1024 * 1024 },
   );
   const timedOut = r.error?.code === 'ETIMEDOUT';
@@ -702,7 +705,7 @@ function dumpAsync(chrome, url, profileRoot) {
   return new Promise((res) => {
     const child = spawn(
       chrome,
-      ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', `--user-data-dir=${profile}`, `--virtual-time-budget=${BUDGET_MS}`, '--dump-dom', url],
+      ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', DARK, `--user-data-dir=${profile}`, `--virtual-time-budget=${BUDGET_MS}`, '--dump-dom', url],
       { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] },
     );
     let out = '';

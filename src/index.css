@@ -6,47 +6,136 @@
   padding: 0;
 }
 
+/* Two themes (run 20261117-palette, owner spec 2026-11-17): neutral greys for
+   the page (60%) and the surfaces (30%), purple only as the accent (10%).
+   "Obsidian" (dark) is :root and the default; "Quartz" (light) is the
+   [data-theme="light"] block below. The head snippet of every page sets
+   data-theme on <html> before <body> is parsed (lib/theme.js owns it after).
+   Purple is for the primary CTA fill, the active nav marker, links, the
+   highlighted heading words, eyebrow labels, focus rings and selected markers.
+   Surfaces stay dark in both themes, so anything on a --surface* uses the
+   *-on-surface tokens; text on a purple fill uses --on-accent. */
 :root {
-  /* Chromabit "Frosted Purple" palette */
-  --accent: #c77dff;
-  /* primary purple accent */
-  --accent-2: #ff7de1;
-  /* pink accent */
-  --accent-deep: #9a4dff;
-  /* deep purple */
-  --positive: #5be3a0;
+  color-scheme: dark;
+
+  --accent: #C77DFF;
+  --accent-deep: #9A4DFF;
+  --accent-on-surface: #C77DFF;
+  /* text on a purple fill */
+  --on-accent: #120A1F;
   /* mint green (online / paid) */
+  --positive: #5BE3A0;
+  --positive-on-surface: #5BE3A0;
 
-  --bg: #0c0718;
-  /* page background */
-  --bg2: #16102a;
-  /* panel */
-  --bg3: #1d1636;
-  /* panel raised */
-  --text: #f3ecff;
-  --muted: #a493c4;
+  /* page background, panel, panel raised */
+  --bg: #0E0F12;
+  --bg2: #1C1E24;
+  --bg3: #272A32;
+  --text: #F2F3F5;
+  --muted: #9CA0AB;
+  --text-on-surface: #F2F3F5;
+  --muted-on-surface: #A6ABB6;
 
-  --border: #2a1e44;
-  --border-pink: rgba(255, 125, 225, 0.28);
+  --border: #32363F;
   --glow: rgba(199, 125, 255, 0.1);
-
-  --grad-cta: linear-gradient(100deg, #9a4dff 0%, #c77dff 45%, #ff7de1 100%);
-  --grad-text: linear-gradient(135deg, #c77dff, #ff7de1);
-  /* Frosted panel: modal, drawer and caption chrome only (cards are flat). */
-  --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
 
   /* Card surfaces ("C · Surface", U9): a soft solid fill, no border, no
      gradient, no shadow. Inset is a box nested inside a card or a modal.
      Hover (also keyboard focus) and selected (an open or chosen card) are
      two steps lighter; each must read at a glance. Dividers inside a card
      use --divider. */
-  --surface: #150f27;
-  --surface-inset: #0f0a1d;
-  --surface-hover: #21193c;
-  --surface-selected: #2c214f;
-  --divider: #221838;
+  --surface: #1C1E24;
+  --surface-inset: #090A0C;
+  --surface-hover: #272A32;
+  --surface-selected: #3A3E49;
+  --divider: #23252C;
+  /* A well sunk into a dark card: dark in both themes. */
+  --inset-on-surface: #090A0C;
   --radius-card: 10px;
   --radius-inset: 6px;
+
+  /* Arcade edges (see the shared block below): neutral bands, the primary
+     one under the purple buttons follows the accent. */
+  --edge-raised: #3A3E49;
+  --edge-dark: #1C1E24;
+  --edge-line: rgba(0, 0, 0, 0.75);
+
+  /* Page backdrop: the body gradient's top, the corner vignette, and the
+     dither dots (lib/ditherBg.js reads --dither-dot and --dither-alpha). */
+  --page-top: color-mix(in srgb, var(--bg2) 45%, var(--bg));
+  --page-bottom: var(--bg);
+  --vignette: rgba(0, 0, 0, 0.8);
+  --dither-dot: #B4B7BE;
+  --dither-alpha: 1;
+
+  /* Translucent nav bar: a frosted form of --surface. */
+  --nav-fill: color-mix(in srgb, var(--surface) 78%, transparent);
+  /* A rule between two parts of one card. Quartz's --divider is a page
+     line (light), so on a card it takes the hover step instead. */
+  --divider-on-surface: var(--divider);
+
+  /* The dark-surface palette, read by the Quartz surface rule below. */
+  --accent-deep-on-surface: #9A4DFF;
+  --on-accent-on-surface: #120A1F;
+  --edge-line-on-surface: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --accent: #7B2FE0;
+  --accent-deep: #5A1FB0;
+  --accent-on-surface: #C77DFF;
+  --on-accent: #FFFFFF;
+  --positive: #0B6B40;
+  --positive-on-surface: #5BE3A0;
+
+  --bg: #F2F3F5;
+  --bg2: #E6E8EC;
+  --bg3: #D3D6DC;
+  --text: #16181D;
+  --muted: #565B66;
+  --text-on-surface: #F2F3F5;
+  --muted-on-surface: #A6ABB6;
+
+  --border: #D3D6DC;
+  --glow: rgba(123, 47, 224, 0.12);
+
+  --surface: #16181D;
+  --surface-inset: #E6E8EC;
+  --surface-hover: #23262D;
+  --surface-selected: #3A3E49;
+  --divider: #D3D6DC;
+  --inset-on-surface: #0E0F12;
+
+  --edge-raised: #4A4F5A;
+  --edge-dark: #6B707C;
+  --edge-line: rgba(22, 24, 29, 0.35);
+
+  --page-top: var(--bg);
+  --page-bottom: var(--bg2);
+  --vignette: rgba(22, 24, 29, 0.07);
+  --dither-dot: #3A3D44;
+  --dither-alpha: 1;
+
+  --nav-fill: color-mix(in srgb, var(--surface) 92%, transparent);
+  --divider-on-surface: var(--surface-hover);
+
+  --accent-deep-on-surface: #9A4DFF;
+  --on-accent-on-surface: #120A1F;
+  --edge-line-on-surface: rgba(0, 0, 0, 0.75);
+}
+
+/* Shared by both themes: aliases resolve against the theme's own values. */
+:root {
+  /* the old pink second accent: one accent now */
+  --accent-2: var(--accent);
+  --border-pink: var(--border);
+
+  --grad-cta: var(--accent);
+  --grad-text: var(--accent);
+  /* Frosted panel: modal, drawer and caption chrome only (cards are flat). */
+  --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
 
   /* Type: pixel fonts everywhere except the flickering hero titles (Teko).
      Jersey 10 for labels, buttons, headings and reading text; VT323 for
@@ -64,21 +153,63 @@
 
   /* Arcade edges - the solid band under a raised control. Each has to read
      against what it sits on: cards on the page, buttons on a card.
-       primary  under the gradient buttons: a deeper magenta than any part
-                of their face, bright enough to show on a card
+       primary  under the purple buttons: the deep accent
        raised   under secondary buttons and small controls at rest
        dark     under the purchase-type options at rest
-       lit      any edge on hover */
-  --edge-primary: #9a2fb0;
-  --edge-raised: #54408a;
-  --edge-dark: #2e2150;
-  --edge-lit: #b03fc8;
-  /* Near-black line under a button's edge, so the edge reads as a separate
-     band against a card instead of melting into it. */
-  --edge-line: rgba(4, 2, 10, 0.75);
+       lit      any edge on hover
+       line     a dark line under the edge, so the edge reads as a separate
+                band against a card instead of melting into it
+     raised, dark and line are per theme (the blocks above). */
+  --edge-primary: var(--accent-deep);
+  --edge-lit: var(--accent);
 
   /* Height of the sticky site nav; anchors and the cart FAB clear it. */
   --nav-h: 56px;
+}
+
+/* Quartz keeps every surface dark (cards, wells, the nav, modals, the cart
+   drawer, the slot cabinet), so inside one the page tokens take their
+   on-surface values: whatever a rule inside reads as --text, --muted,
+   --accent, --border, --bg2 ... is right for a dark backdrop. In Obsidian
+   these are the same values already, so the rule is Quartz only. The five
+   pinned surface tokens are not redeclared: rules inside surfaces read
+   --inset-on-surface and --divider-on-surface directly. */
+[data-theme="light"] :is(.card, .faq-item, .tape, .pvp-search-results, .pkg-card,
+  .store-kit, .store-table-wrap, .market-table, .stat-row, .chart-card, .mini-table,
+  .explainer, .futures-intro, .pool-card, .listing-card, .pkg-modal, .modal-card,
+  .type-modal, .mode-modal, .cart-drawer, .slot-cabinet, .site-nav, .chart-tip,
+  .lightbox, .carousel-caption) {
+  color-scheme: dark;
+  --text: var(--text-on-surface);
+  --muted: var(--muted-on-surface);
+  --accent: var(--accent-on-surface);
+  --accent-deep: var(--accent-deep-on-surface);
+  --on-accent: var(--on-accent-on-surface);
+  --positive: var(--positive-on-surface);
+  --border: var(--surface-selected);
+  --bg2: var(--surface-hover);
+  --bg3: var(--surface-selected);
+  --accent-2: var(--accent);
+  --border-pink: var(--border);
+  --grad-cta: var(--accent);
+  --grad-text: var(--accent);
+  --glow: color-mix(in srgb, var(--accent) 10%, transparent);
+  --edge-primary: var(--accent-deep);
+  --edge-lit: var(--accent);
+  --edge-raised: var(--surface-selected);
+  --edge-dark: var(--surface);
+  --edge-line: var(--edge-line-on-surface);
+}
+
+/* The text colour itself is inherited from <body> already resolved (page
+   ink), so each Quartz surface sets its own. :where keeps it weak, so any
+   surface rule that names a colour still wins. */
+[data-theme="light"] :where(.card, .faq-item, .tape, .pvp-search-results, .pkg-card,
+  .store-kit, .store-table-wrap, .market-table, .stat-row, .chart-card, .mini-table,
+  .explainer, .futures-intro, .pool-card, .listing-card, .pkg-modal, .modal-card,
+  .type-modal, .mode-modal, .cart-drawer, .slot-cabinet, .site-nav, .chart-tip,
+  .lightbox, .carousel-caption) {
+  color: var(--text);
 }
 
 html {
@@ -92,7 +223,7 @@ body {
   /* The pixel faces have one weight; a synthesised bold smears them. */
   font-synthesis: none;
   background-color: var(--bg);
-  background-image: radial-gradient(120% 100% at 50% 0%, #150b29 0%, #0c0718 45%, #080411 100%);
+  background-image: radial-gradient(120% 100% at 50% 0%, var(--page-top) 0%, var(--bg) 45%, var(--page-bottom) 100%);
   background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
@@ -113,7 +244,7 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+  background: radial-gradient(ellipse at center, transparent 30%, var(--vignette) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -146,7 +277,7 @@ body::after {
   position: absolute;
   inset: -52px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(199, 125, 255, 0.14) 0%, rgba(199, 125, 255, 0.04) 55%, transparent 100%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--text) 8%, transparent) 0%, color-mix(in srgb, var(--text) 3%, transparent) 55%, transparent 100%);
   animation: pulse 3.5s ease-in-out infinite;
   z-index: -1;
 }
@@ -168,7 +299,7 @@ body::after {
 .logo {
   image-rendering: pixelated;
   border-radius: 8px;
-  filter: drop-shadow(0 0 22px rgba(255, 125, 225, 0.55)) drop-shadow(0 0 50px rgba(199, 125, 255, 0.2));
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
   animation: float 4s ease-in-out infinite;
   height: 192px;
   width: 192px;
@@ -195,7 +326,7 @@ body::after {
   letter-spacing: 0.04em;
   line-height: 0.9;
   color: var(--text);
-  text-shadow: 0 0 40px rgba(255, 125, 225, 0.4), 0 2px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: none;
 }
 
 .accent {
@@ -252,7 +383,7 @@ body::after {
   display: flex;
   align-items: stretch;
   min-height: 34px;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
 }
 
 .tape-head {
@@ -278,7 +409,6 @@ body::after {
   font-size: 0.80rem;
   letter-spacing: 0.06em;
   color: var(--muted);
-  opacity: 0.75;
 }
 
 /* Fixed width, not content width: GAINERS is a letter longer than LOSERS, and
@@ -293,7 +423,7 @@ body::after {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.14em;
-  border-right: 1px solid var(--divider);
+  border-right: 1px solid var(--divider-on-surface);
 }
 
 .tape-row--up .tape-label {
@@ -355,13 +485,13 @@ body::after {
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
-  border-right: 1px solid var(--divider);
+  border-right: 1px solid var(--divider-on-surface);
   transition: color 0.15s, background 0.15s;
 }
 
 .tape-cell:hover {
   color: var(--text);
-  background: rgba(199, 125, 255, 0.07);
+  background: var(--surface-hover);
 }
 
 .tape-cell .item-icon {
@@ -377,7 +507,6 @@ body::after {
 }
 
 .tape-price {
-  opacity: 0.85;
 }
 
 .tape-change {
@@ -400,7 +529,6 @@ body::after {
   font-size-adjust: cap-height 0.7;
   font-size: 0.82rem;
   color: var(--muted);
-  opacity: 0.6;
 }
 
 @media (max-width: 560px) {
@@ -511,7 +639,6 @@ body::after {
   font-size: 0.9rem;
   letter-spacing: 0.14em;
   color: var(--text);
-  opacity: 0.8;
   margin-top: 0.5em;
 }
 
@@ -521,14 +648,13 @@ body::after {
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   margin: 0.1em 0 0.3em;
 }
 
 .launch-sub {
   font-size: 0.85rem;
   color: var(--muted);
-  opacity: 0.85;
 }
 
 /* ─── SHARED CARD BASE ───
@@ -542,6 +668,14 @@ body::after {
   border-radius: var(--radius-card);
   position: relative;
   overflow: hidden;
+  color: var(--text-on-surface);
+}
+
+/* A highlighted word inside a card (the IP's "chromabit"). */
+.card .accent {
+  background: var(--accent-on-surface);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* Modal chrome keeps its frosted panel and top hairline (it also carries
@@ -565,7 +699,7 @@ body::after {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background: linear-gradient(90deg, transparent, var(--muted-on-surface), transparent);
   opacity: 0.7;
 }
 
@@ -607,11 +741,11 @@ body::after {
   display: flex;
   align-items: center;
   padding: 6px 16px;
-  background: rgba(199, 125, 255, 0.1);
-  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  border: 1px solid var(--surface-selected);
   border-radius: 5px;
   box-shadow: 0 3px 0 var(--edge-raised), 0 5px 0 var(--edge-line);
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: none;
   font-size: 1.35rem;
@@ -629,10 +763,10 @@ body::after {
 }
 
 .copy-btn:hover {
-  background: rgba(199, 125, 255, 0.2);
-  border-color: var(--accent);
-  box-shadow: 0 3px 0 var(--edge-lit), 0 5px 0 var(--edge-line);
-  color: var(--text);
+  background: var(--surface-selected);
+  border-color: var(--muted-on-surface);
+  box-shadow: 0 3px 0 var(--edge-raised), 0 5px 0 var(--edge-line);
+  color: var(--text-on-surface);
 }
 
 .copy-btn:focus-visible {
@@ -668,7 +802,7 @@ body::after {
   align-items: center;
   gap: 1rem;
   padding: 0.9rem 0;
-  border-bottom: 1px solid rgba(199, 125, 255, 0.1);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 .prize-row:last-child {
@@ -687,11 +821,11 @@ body::after {
 }
 
 .prize-icon.pink {
-  background: rgba(255, 125, 225, 0.12);
+  background: var(--surface-hover);
 }
 
 .prize-icon.lilac {
-  background: rgba(199, 125, 255, 0.12);
+  background: var(--surface-hover);
 }
 
 .prize-info {
@@ -763,7 +897,7 @@ body::after {
 .btn {
   --edge: 5px;
   --btn-edge: var(--edge-primary);
-  --btn-glow: rgba(199, 125, 255, 0.28);
+  --btn-glow: rgba(0, 0, 0, 0.25);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -824,7 +958,7 @@ body::after {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -846,38 +980,39 @@ body::after {
 
 .btn-primary {
   --btn-edge: var(--edge-primary);
+  --btn-glow: color-mix(in srgb, var(--accent) 28%, transparent);
   background: var(--grad-cta);
-  color: #fff;
-  text-shadow: 0 1px 0 rgba(40, 10, 70, 0.55);
+  color: var(--on-accent);
+  text-shadow: none;
 }
 
 .btn-primary:hover {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)),
     var(--grad-cta);
-  color: #fff;
+  color: var(--on-accent);
 }
 
+/* Secondary: a raised surface step, neutral at rest and on hover. */
 .btn-secondary {
   --btn-edge: var(--edge-raised);
   --btn-glow: rgba(0, 0, 0, 0.25);
-  background: var(--bg2);
-  color: var(--text);
+  background: var(--surface-hover);
+  color: var(--text-on-surface);
   box-shadow:
-    inset 0 0 0 2px var(--border),
+    inset 0 0 0 2px var(--surface-selected),
     0 var(--edge) 0 var(--btn-edge),
     0 calc(var(--edge) + 2px) 0 var(--edge-line),
     0 calc(var(--edge) + 8px) 22px var(--btn-glow);
 }
 
 .btn-secondary:hover {
-  --btn-edge: var(--edge-lit);
-  background: var(--bg3);
+  background: var(--surface-selected);
   box-shadow:
-    inset 0 0 0 2px var(--accent-deep),
+    inset 0 0 0 2px var(--muted-on-surface),
     0 var(--edge) 0 var(--btn-edge),
     0 calc(var(--edge) + 2px) 0 var(--edge-line),
-    0 calc(var(--edge) + 8px) 22px rgba(154, 77, 255, 0.25);
+    0 calc(var(--edge) + 8px) 22px var(--btn-glow);
 }
 
 /* Compact .btn for chrome-level controls - filter tabs, the log-in control -
@@ -922,7 +1057,7 @@ body::after {
   letter-spacing: 0.04em;
   line-height: 1;
   margin-bottom: 0.75rem;
-  text-shadow: 0 0 30px rgba(255, 125, 225, 0.3);
+  text-shadow: none;
 }
 
 .section-sub {
@@ -948,7 +1083,7 @@ h3 {
   align-items: center;
   justify-content: center;
   padding: 5vh 4vw;
-  background: rgba(8, 4, 17, 0.88);
+  background: color-mix(in srgb, var(--inset-on-surface) 88%, transparent);
   backdrop-filter: blur(4px);
   cursor: zoom-out;
   animation: lightboxIn 0.2s ease-out;
@@ -1009,17 +1144,17 @@ dialog.lightbox::backdrop {
   gap: 10px;
   padding: 5px 18px 4px 14px;
   border-radius: 999px;
-  background: var(--frost), rgba(12, 7, 24, 0.72);
+  background: var(--frost), color-mix(in srgb, var(--surface) 78%, transparent);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-pink);
-  color: #ffb3ec;
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 1.4rem;
   letter-spacing: 0.09em;
   line-height: 1.2;
   text-align: left;
-  text-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  text-shadow: none;
   pointer-events: none;
 }
 
@@ -1031,7 +1166,7 @@ dialog.lightbox::backdrop {
   border-radius: 1px;
   transform: rotate(45deg);
   background: var(--grad-cta);
-  box-shadow: 0 0 8px rgba(255, 125, 225, 0.6);
+  box-shadow: none;
 }
 
 .lightbox-close {
@@ -1045,7 +1180,7 @@ dialog.lightbox::backdrop {
   justify-content: center;
   border: 1px solid var(--border);
   border-radius: 50%;
-  background: rgba(22, 16, 42, 0.7);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
   color: var(--text);
   font-size: 1.6rem;
   line-height: 1;
@@ -1068,10 +1203,9 @@ footer {
   font-size-adjust: cap-height 0.63;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
-  opacity: 0.45;
   position: relative;
   z-index: 1;
-  border-top: 1px solid rgba(199, 125, 255, 0.08);
+  border-top: 1px solid var(--border);
 }
 
 @media (max-width: 480px) {
@@ -1116,7 +1250,7 @@ footer {
 .logo-sm {
   image-rendering: pixelated;
   border-radius: 8px;
-  filter: drop-shadow(0 0 16px rgba(255, 125, 225, 0.45));
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   height: 96px;
   width: 96px;
   display: block;
@@ -1204,9 +1338,14 @@ footer {
   -webkit-tap-highlight-color: transparent;
 }
 
-.faq-question:hover,
+.faq-question:hover {
+  color: var(--accent-on-surface);
+}
+
+/* Open = selected surface: the question is plain card text, the icon is
+   the marker. */
 .faq-item[data-open] .faq-question {
-  color: var(--accent-2);
+  color: var(--text-on-surface);
 }
 
 .faq-question:focus-visible {
@@ -1222,7 +1361,7 @@ footer {
   font-size-adjust: none;
   font-size: 1.9rem;
   line-height: 1;
-  color: var(--accent-2);
+  color: var(--muted-on-surface);
 }
 
 /* Closed until Motion runs: height 0 is the SSR style too. */
@@ -1233,9 +1372,9 @@ footer {
 .faq-answer {
   padding: 1rem 1.5rem 1.25rem;
   font-size: 0.92rem;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   line-height: 1.75;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
 }
 
 .faq-answer a {
@@ -1252,7 +1391,7 @@ footer {
   font-size-adjust: cap-height 0.7;
   font-size: 0.88em;
   color: var(--text);
-  background: rgba(199, 125, 255, 0.12);
+  background: var(--surface-hover);
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.05em 0.4em;
@@ -1345,11 +1484,11 @@ footer {
 }
 
 .store-tab.btn-secondary {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .store-tab.btn-secondary:hover {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .store-category {
@@ -1403,7 +1542,7 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 .pkg-image {
@@ -1437,7 +1576,7 @@ footer {
   font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--accent-2);
+  color: var(--text);
   display: flex;
   justify-content: center;
   align-items: baseline;
@@ -1479,12 +1618,11 @@ footer {
   font-size: 0.8rem;
   letter-spacing: 0.2em;
   color: var(--muted);
-  opacity: 0.7;
   transition: color 0.2s, opacity 0.2s;
 }
 
 .pkg-card:hover .pkg-details-hint {
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   opacity: 1;
 }
 
@@ -1503,7 +1641,7 @@ footer {
   top: 0.75rem;
   right: 0.75rem;
   z-index: 2;
-  background: rgba(12, 7, 24, 0.6);
+  background: color-mix(in srgb, var(--inset-on-surface) 60%, transparent);
   border: 1px solid var(--border);
   border-radius: 50%;
   width: 32px;
@@ -1754,7 +1892,7 @@ footer {
   gap: 0.55rem;
   min-width: 0;
   padding: 0.4rem 0.55rem;
-  background: var(--surface-inset);
+  background: var(--inset-on-surface);
   border: 0;
   border-radius: var(--radius-inset);
   font: inherit;
@@ -1808,7 +1946,7 @@ footer {
   font-weight: 600;
   line-height: 1;
   color: #fff;
-  text-shadow: 1px 1px 0 #1b0b33, -1px 1px 0 #1b0b33, 1px -1px 0 #1b0b33, -1px -1px 0 #1b0b33;
+  text-shadow: 1px 1px 0 var(--inset-on-surface), -1px 1px 0 var(--inset-on-surface), 1px -1px 0 var(--inset-on-surface), -1px -1px 0 var(--inset-on-surface);
 }
 
 .store-item-name {
@@ -1826,7 +1964,7 @@ footer {
 /* Enchanted and custom items. Custom weapons are 3D models with no flat sprite,
    so they show their vanilla base item; the glow marks them as more than that. */
 .store-icon--glow {
-  filter: drop-shadow(0 0 4px rgba(199, 125, 255, 0.8));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent-on-surface) 80%, transparent));
 }
 
 .store-icon--glyph {
@@ -1874,7 +2012,7 @@ footer {
 
 .store-kit {
   padding: 0.85rem;
-  background: var(--surface-inset);
+  background: var(--inset-on-surface);
   border-radius: var(--radius-inset);
 }
 
@@ -1891,7 +2029,7 @@ footer {
   font-size-adjust: cap-height 0.7;
   font-size: 0.85rem;
   color: var(--accent-2);
-  background: rgba(255, 125, 225, 0.08);
+  background: var(--surface-hover);
   border: 1px solid var(--border-pink);
   border-radius: 6px;
   padding: 0.15rem 0.5rem;
@@ -1926,7 +2064,7 @@ footer {
 
 .store-table-wrap {
   overflow-x: auto;
-  background: var(--surface-inset);
+  background: var(--inset-on-surface);
   border-radius: var(--radius-inset);
 }
 
@@ -1942,7 +2080,7 @@ footer {
   padding: 0.45rem 0.7rem;
   text-align: left;
   vertical-align: top;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 .store-table tbody tr:last-child th,
@@ -1967,7 +2105,7 @@ footer {
   font-family: var(--font-mono);
   font-size-adjust: cap-height 0.7;
   font-weight: 600;
-  color: var(--accent-2);
+  color: var(--text);
 }
 
 .store-table tbody tr:nth-child(even) {
@@ -1980,7 +2118,6 @@ footer {
 
 .store-table-empty {
   color: var(--muted);
-  opacity: 0.5;
 }
 
 @media (max-width: 480px) {
@@ -2094,7 +2231,6 @@ footer {
   letter-spacing: 0.12em;
   line-height: 1.35;
   color: var(--muted);
-  opacity: 0.7;
 }
 
 .rank-step + .rank-step::before {
@@ -2115,7 +2251,7 @@ footer {
 }
 
 .rank-step--current {
-  color: #12071f;
+  color: var(--on-accent-on-surface);
   font-weight: 600;
   opacity: 1;
   border-color: transparent;
@@ -2135,7 +2271,7 @@ footer {
   padding: 0.05rem 0.38rem;
   border: 1px solid var(--border-pink);
   border-radius: 5px;
-  background: rgba(255, 125, 225, 0.08);
+  background: var(--surface-hover);
   font-family: var(--font-mono);
   font-size-adjust: cap-height 0.7;
   font-size: 0.85rem;
@@ -2155,7 +2291,7 @@ footer {
   border-radius: 10px;
   background:
     linear-gradient(100deg, color-mix(in srgb, var(--rank-a) 11%, transparent), transparent 70%),
-    rgba(12, 7, 24, 0.45);
+    color-mix(in srgb, var(--inset-on-surface) 45%, transparent);
   transition: border-color 0.15s, transform 0.15s;
 }
 
@@ -2268,7 +2404,7 @@ footer {
 }
 
 .qty-btn:hover:not(:disabled) {
-  background: #2a2050;
+  background: var(--surface-selected);
 }
 
 .qty-btn:focus-visible {
@@ -2299,13 +2435,13 @@ footer {
   height: 30px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: rgba(4, 2, 10, 0.55);
+  background: color-mix(in srgb, var(--inset-on-surface) 55%, transparent);
   box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.45), var(--field-edge);
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 .qty-fx:not([data-tier='1']) .qty-field {
-  --field-edge-color: color-mix(in srgb, var(--tier) 70%, #120b22);
+  --field-edge-color: color-mix(in srgb, var(--tier) 70%, var(--inset-on-surface));
   border-color: color-mix(in srgb, var(--tier) 60%, var(--border));
   box-shadow:
     inset 0 2px 0 rgba(0, 0, 0, 0.45),
@@ -2348,8 +2484,8 @@ footer {
   font-size: 1.3rem;
   letter-spacing: 0.04em;
   text-shadow:
-    1px 0 0 #05020c, -1px 0 0 #05020c, 0 1px 0 #05020c, 0 -1px 0 #05020c,
-    0 2px 0 #05020c,
+    1px 0 0 var(--inset-on-surface), -1px 0 0 var(--inset-on-surface), 0 1px 0 var(--inset-on-surface), 0 -1px 0 var(--inset-on-surface),
+    0 2px 0 var(--inset-on-surface),
     0 0 8px color-mix(in srgb, var(--tier) 30%, transparent);
 }
 
@@ -2358,13 +2494,13 @@ footer {
 }
 
 .qty-fx[data-tier='max'] .qty-num {
-  background: linear-gradient(90deg, #ff7de1, #ffd27a, #5be3a0, #7dd3ff, #c77dff, #ff7de1);
+  background: linear-gradient(90deg, var(--accent), #ffd27a, #5be3a0, #7dd3ff, var(--accent), var(--accent));
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   text-shadow: none;
-  filter: drop-shadow(1px 0 0 #05020c) drop-shadow(-1px 0 0 #05020c) drop-shadow(0 2px 0 #05020c);
+  filter: drop-shadow(1px 0 0 var(--inset-on-surface)) drop-shadow(-1px 0 0 var(--inset-on-surface)) drop-shadow(0 2px 0 var(--inset-on-surface));
   animation: qtyRainbow 1.6s linear infinite;
 }
 
@@ -2572,7 +2708,7 @@ footer {
 }
 
 .qty-fx[data-tier='max'] .qty-levelup {
-  background: linear-gradient(90deg, #ff7de1, #ffd27a, #5be3a0, #7dd3ff, #c77dff);
+  background: linear-gradient(90deg, var(--accent), #ffd27a, #5be3a0, #7dd3ff, var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -2614,7 +2750,7 @@ footer {
 .qty-fx[data-tier='6'] .qty-field {
   background:
     linear-gradient(110deg, transparent 35%, rgba(200, 245, 255, 0.28) 50%, transparent 65%) 0 0 / 250% 100% no-repeat,
-    rgba(4, 2, 10, 0.55);
+    color-mix(in srgb, var(--inset-on-surface) 55%, transparent);
   animation: qtyShine 2.2s ease-in-out infinite;
 }
 
@@ -2632,7 +2768,7 @@ footer {
   background-clip: text;
   color: transparent;
   text-shadow: none;
-  filter: drop-shadow(1px 0 0 #05020c) drop-shadow(-1px 0 0 #05020c) drop-shadow(0 2px 0 #05020c);
+  filter: drop-shadow(1px 0 0 var(--inset-on-surface)) drop-shadow(-1px 0 0 var(--inset-on-surface)) drop-shadow(0 2px 0 var(--inset-on-surface));
 }
 
 .qty-fx[data-tier='7'] .qty-field {
@@ -2673,7 +2809,7 @@ footer {
   right: 5%;
   bottom: -18px;
   height: 80px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(199, 125, 255, 0.75), rgba(154, 77, 255, 0.3) 45%, transparent 72%);
+  background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--accent) 75%, transparent), color-mix(in srgb, var(--accent-deep) 30%, transparent) 45%, transparent 72%);
   filter: blur(3px);
   /* A slow breathe, not a strobe: nothing here flashes 3+ times a second. */
   animation: qtyAura 0.9s ease-in-out infinite alternate;
@@ -2690,8 +2826,8 @@ footer {
   width: var(--fs, 6px);
   height: var(--fs, 6px);
   margin-left: calc(var(--fs, 6px) / -2);
-  background: #c77dff;
-  box-shadow: 0 0 10px rgba(199, 125, 255, 0.9);
+  background: var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 90%, transparent);
   animation: qtyFlame 0.6s linear infinite;
   animation-delay: var(--fd);
 }
@@ -2700,19 +2836,19 @@ footer {
    it climbs, and burns out well above the stepper. */
 @keyframes qtyFlame {
   0% { translate: 0 0; scale: 1.4; background: #fff; opacity: 1; }
-  20% { background: #ff7de1; }
-  50% { background: #c77dff; opacity: 1; }
-  100% { translate: var(--fdx) calc(-64px * var(--fh)); scale: 0.25; background: #6a2fd0; opacity: 0; }
+  20% { background: var(--accent); }
+  50% { background: var(--accent); opacity: 1; }
+  100% { translate: var(--fdx) calc(-64px * var(--fh)); scale: 0.25; background: var(--accent-deep); opacity: 0; }
 }
 
 .qty-fx.is-on-fire .qty-field {
-  border-color: #c77dff;
+  border-color: var(--accent);
 }
 
 .qty-fx.is-on-fire .qty-combo {
   color: #fff;
-  background: linear-gradient(180deg, #ff7de1, #9a4dff);
-  box-shadow: 0 3px 0 #5b2a9e, 0 0 18px #c77dff;
+  background: linear-gradient(180deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 3px 0 var(--accent-deep), 0 0 18px var(--accent);
   animation: qtyFlicker 0.8s ease-in-out infinite alternate;
 }
 
@@ -2721,8 +2857,8 @@ footer {
 }
 
 .qty-burst--fire i {
-  background: #c77dff;
-  box-shadow: 0 0 10px #ff7de1;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2749,18 +2885,18 @@ footer {
   margin-left: 1.5rem;
   padding: 0;
   background: transparent;
-  border: 2px solid var(--border);
+  border: 2px solid var(--surface-selected);
   border-radius: 7px;
-  color: var(--accent);
+  color: var(--accent-on-surface);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: border-color 0.2s, background 0.2s, color 0.2s, scale 0.3s var(--ease-spring);
 }
 
 .sound-toggle:hover {
-  border-color: var(--accent-deep);
-  background: var(--glow);
-  color: var(--accent-2);
+  border-color: var(--muted-on-surface);
+  background: var(--surface-hover);
+  color: var(--accent-on-surface);
 }
 
 .sound-toggle:active {
@@ -2769,11 +2905,11 @@ footer {
 }
 
 .sound-toggle[aria-pressed='false'] {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .sound-toggle:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent-on-surface);
   outline-offset: 3px;
 }
 
@@ -2782,7 +2918,14 @@ footer {
   shape-rendering: crispEdges;
 }
 
-/* Order in the bar: brand, links (pushed right), sound, hamburger. */
+/* The theme switch sits right after the sound toggle, in the same shell (it
+   carries .sound-toggle too), half a gap closer so the pair reads as one
+   group. */
+.sound-toggle.theme-toggle {
+  margin-left: -0.5rem;
+}
+
+/* Order in the bar: brand, links (pushed right), sound, theme, hamburger. */
 .site-nav-inner {
   justify-content: flex-start;
 }
@@ -2898,7 +3041,7 @@ html:not(.js) .sound-toggle {
   gap: 0.25rem;
   padding: 0.85rem 0.95rem;
   text-align: left;
-  background: rgba(12, 7, 24, 0.4);
+  background: color-mix(in srgb, var(--inset-on-surface) 40%, transparent);
   border: 1px solid var(--border);
   border-radius: 9px;
   color: var(--text);
@@ -2934,7 +3077,7 @@ html:not(.js) .sound-toggle {
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   background: var(--accent);
-  color: #12071f;
+  color: var(--on-accent-on-surface);
 }
 
 .type-option-price {
@@ -2942,7 +3085,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.63;
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--accent-2);
+  color: var(--text);
 }
 
 .type-option-per {
@@ -2964,7 +3107,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.14em;
-  color: var(--accent);
+  color: var(--text);
   margin-top: 0.15rem;
 }
 
@@ -3002,18 +3145,18 @@ html:not(.js) .sound-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  border: 1px solid var(--surface-selected);
   border-radius: 7px;
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
 .pkg-cart-btn:hover {
-  border-color: var(--accent);
-  background: var(--glow);
-  color: var(--text);
+  border-color: var(--muted-on-surface);
+  background: var(--surface-selected);
+  color: var(--text-on-surface);
 }
 
 .pkg-cart-btn:disabled {
@@ -3087,7 +3230,7 @@ html:not(.js) .sound-toggle {
 .store-user-change {
   background: none;
   border: none;
-  color: var(--accent-2);
+  color: var(--text);
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
@@ -3109,14 +3252,14 @@ html:not(.js) .sound-toggle {
   justify-content: center;
   background: var(--frost), var(--bg2);
   border: 1px solid var(--border);
-  color: var(--accent-2);
+  color: var(--text);
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   transition: border-color 0.15s, color 0.15s;
 }
 
 .cart-fab:hover {
-  border-color: var(--accent);
+  border-color: var(--muted);
   color: var(--text);
 }
 
@@ -3128,9 +3271,9 @@ html:not(.js) .sound-toggle {
   height: 20px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--accent-deep);
-  border: 1px solid var(--accent);
-  color: var(--text);
+  background: var(--text);
+  border: 1px solid var(--text);
+  color: var(--bg);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 0.85rem;
@@ -3142,7 +3285,7 @@ html:not(.js) .sound-toggle {
 .cart-scrim {
   position: fixed;
   inset: 0;
-  background: rgba(8, 4, 17, 0.6);
+  background: color-mix(in srgb, var(--inset-on-surface) 60%, transparent);
   backdrop-filter: blur(3px);
   opacity: 0;
   pointer-events: none;
@@ -3238,7 +3381,7 @@ html:not(.js) .sound-toggle {
   align-items: center;
   gap: 0.9rem;
   padding: 0.9rem 0;
-  border-bottom: 1px solid rgba(199, 125, 255, 0.1);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 .cart-item:last-child {
@@ -3338,7 +3481,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.63;
   font-size: 1rem;
   letter-spacing: 0.04em;
-  color: var(--accent-2);
+  color: var(--text);
   white-space: nowrap;
 }
 
@@ -3379,7 +3522,7 @@ html:not(.js) .sound-toggle {
 }
 
 .cart-total span:last-child {
-  color: var(--accent-2);
+  color: var(--text-2);
   font-weight: 700;
 }
 
@@ -3392,7 +3535,7 @@ html:not(.js) .sound-toggle {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(8, 4, 17, 0.75);
+  background: color-mix(in srgb, var(--inset-on-surface) 75%, transparent);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
@@ -3497,7 +3640,7 @@ html:not(.js) .sound-toggle {
   top: 0.7rem;
   right: 0.7rem;
   z-index: 2;
-  background: rgba(12, 7, 24, 0.6);
+  background: color-mix(in srgb, var(--inset-on-surface) 60%, transparent);
   border: 1px solid var(--border);
   border-radius: 50%;
   width: 32px;
@@ -3551,7 +3694,7 @@ html:not(.js) .sound-toggle {
 }
 
 .modal-input:focus {
-  border-color: var(--accent);
+  border-color: var(--text-on-surface);
 }
 
 .modal-error {
@@ -3617,17 +3760,17 @@ html:not(.js) .sound-toggle {
   gap: 9px;
   padding: 4px 15px 3px 12px;
   border-radius: 999px;
-  background: var(--frost), rgba(12, 7, 24, 0.72);
+  background: var(--frost), color-mix(in srgb, var(--surface) 78%, transparent);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--border-pink);
-  color: #ffb3ec;
+  border: 1px solid var(--surface-selected);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 1.2rem;
   letter-spacing: 0.09em;
   line-height: 1.2;
   text-align: left;
-  text-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  text-shadow: none;
   pointer-events: none;
 }
 
@@ -3638,8 +3781,8 @@ html:not(.js) .sound-toggle {
   flex-shrink: 0;
   border-radius: 1px;
   transform: rotate(45deg);
-  background: var(--grad-cta);
-  box-shadow: 0 0 8px rgba(255, 125, 225, 0.6);
+  background: var(--muted-on-surface);
+  box-shadow: none;
 }
 
 .carousel-slide {
@@ -3661,8 +3804,8 @@ html:not(.js) .sound-toggle {
   gap: 5px;
   padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(12, 7, 24, 0.82);
-  color: var(--text);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 0.78rem;
@@ -3687,7 +3830,7 @@ html:not(.js) .sound-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(12, 7, 24, 0.6);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
   backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   color: var(--text);
@@ -3701,7 +3844,7 @@ html:not(.js) .sound-toggle {
 .carousel-arrow:hover {
   border-color: var(--accent);
   color: var(--accent-2);
-  background: rgba(12, 7, 24, 0.85);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
 }
 
 .carousel-arrow.prev {
@@ -3727,7 +3870,7 @@ html:not(.js) .sound-toggle {
   height: 9px;
   border-radius: 50%;
   border: 1px solid var(--accent);
-  background: rgba(12, 7, 24, 0.6);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
   padding: 0;
   cursor: pointer;
   transition: all 0.2s;
@@ -3866,7 +4009,7 @@ html.js .reveal.is-visible {
   font-size: 0.9rem;
   letter-spacing: 0.16em;
   color: var(--muted);
-  background: var(--bg);
+  background: var(--inset-on-surface);
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 0.5rem 0;
@@ -3905,11 +4048,11 @@ html.js .reveal.is-visible {
 }
 
 .mode-switch-opt.btn-secondary {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .mode-switch-opt.btn-secondary:hover {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 /* A flat surface card (it carries .card), sized like the purchase-type popup. */
@@ -3953,7 +4096,7 @@ html.js .reveal.is-visible {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: var(--text);
   border: 1px solid var(--border-pink);
   border-radius: 3px;
   padding: 0.1rem 0.35rem;
@@ -3979,10 +4122,10 @@ html.js .reveal.is-visible {
   max-width: 100%;
   margin: 0 auto 1.75rem;
   padding: 0.45rem 1.1rem 0.45rem 0.5rem;
-  border: 1px solid rgba(199, 125, 255, 0.22);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: linear-gradient(100deg, rgba(154, 77, 255, 0.16), rgba(255, 125, 225, 0.1));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 28px rgba(199, 125, 255, 0.12);
+  background: linear-gradient(100deg, color-mix(in srgb, var(--text) 6%, transparent), color-mix(in srgb, var(--text) 3%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 8px 28px rgba(0, 0, 0, 0.12);
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -3997,7 +4140,7 @@ html.js .reveal.is-visible {
   font-size: 0.8rem;
   letter-spacing: 0.18em;
   color: var(--bg);
-  background: var(--grad-cta);
+  background: var(--text);
   border-radius: 999px;
   padding: 0.2rem 0.75rem;
   white-space: nowrap;
@@ -4009,8 +4152,8 @@ html.js .reveal.is-visible {
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--accent-2);
-  background: rgba(255, 125, 225, 0.08);
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
   border: 1px dashed var(--border-pink);
   border-radius: 5px;
   padding: 0.1rem 0.45rem;
@@ -4033,7 +4176,7 @@ html.js .reveal.is-visible {
   font-size-adjust: cap-height 0.7;
   font-size: 0.81rem;
   letter-spacing: 0.1em;
-  color: var(--accent-2);
+  color: var(--muted);
   margin-top: 0.35rem;
 }
 
@@ -4093,7 +4236,7 @@ html.js .reveal.is-visible {
 }
 
 .cart-coupon-hint strong {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .cart-coupon-error {
@@ -4186,7 +4329,7 @@ html.js .reveal.is-visible {
   color: #fff;
   background: var(--grad-cta);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-  box-shadow: 0 3px 0 #6e2bbf, 0 0 18px rgba(255, 125, 225, 0.55), 0 0 40px rgba(199, 125, 255, 0.25);
+  box-shadow: 0 3px 0 var(--accent-deep), 0 0 18px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 40px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .pkg-deal--credit {
@@ -4387,10 +4530,10 @@ html.js .reveal.is-visible {
      lightbox (75), cart scrim (80), drawer (90) and modals (100) - those are
      meant to cover the page. */
   z-index: 70;
-  background: rgba(12, 7, 24, 0.72);
+  background: var(--nav-fill);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(199, 125, 255, 0.12);
+  border-bottom: 1px solid var(--surface-hover);
 }
 
 /* Held until Teko is loaded (the inline script in each page head sets
@@ -4422,7 +4565,7 @@ html.js.fonts-ready .site-nav-inner {
   align-items: center;
   gap: 0.6rem;
   text-decoration: none;
-  color: var(--text);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-weight: 500;
@@ -4433,15 +4576,21 @@ html.js.fonts-ready .site-nav-inner {
   transition: color 0.2s, text-shadow 0.2s;
 }
 
+.site-nav-brand:focus-visible {
+  outline: 2px solid var(--accent-on-surface);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
 .site-nav-brand:hover {
-  color: var(--accent);
-  text-shadow: 0 0 18px rgba(199, 125, 255, 0.45);
+  color: var(--accent-on-surface);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--accent-on-surface) 45%, transparent);
 }
 
 .site-nav-brand img {
   image-rendering: pixelated;
   border-radius: 6px;
-  filter: drop-shadow(0 0 10px rgba(255, 125, 225, 0.35));
+  filter: none;
 }
 
 .site-nav-links {
@@ -4455,7 +4604,7 @@ html.js.fonts-ready .site-nav-inner {
   position: relative;
   display: block;
   padding: 0.35rem 0;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   text-decoration: none;
   font-family: var(--font-hud);
   font-size-adjust: none;
@@ -4467,11 +4616,11 @@ html.js.fonts-ready .site-nav-inner {
 
 .site-nav-links a:hover,
 .site-nav-links a.active {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .site-nav-links a:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent-on-surface);
   outline-offset: 4px;
   border-radius: 2px;
 }
@@ -4484,7 +4633,7 @@ html.js.fonts-ready .site-nav-inner {
   right: 0;
   bottom: -2px;
   height: 2px;
-  background: var(--grad-cta);
+  background: var(--accent-on-surface);
   transform: scaleX(0);
   transform-origin: left center;
   pointer-events: none;
@@ -4492,7 +4641,7 @@ html.js.fonts-ready .site-nav-inner {
 
 .site-nav-links a.active .nav-bar {
   transform: scaleX(1);
-  box-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent-on-surface) 50%, transparent);
 }
 
 /* Hamburger: mobile only, and only where JS can open the panel it controls. */
@@ -4508,7 +4657,7 @@ html.js.fonts-ready .site-nav-inner {
   justify-content: center;
   gap: 5px;
   background: transparent;
-  border: 2px solid var(--border);
+  border: 2px solid var(--surface-selected);
   border-radius: 7px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
@@ -4516,22 +4665,22 @@ html.js.fonts-ready .site-nav-inner {
 
 .nav-toggle:hover,
 .nav-toggle.open {
-  border-color: var(--accent-deep);
-  background: var(--glow);
+  border-color: var(--muted-on-surface);
+  background: var(--surface-hover);
 }
 
 .nav-toggle-bar {
   width: 17px;
   height: 2px;
   border-radius: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 8px rgba(199, 125, 255, 0.45);
+  background: var(--accent-on-surface);
+  box-shadow: none;
   transition: transform 0.22s ease, opacity 0.18s ease, background 0.2s;
 }
 
 .nav-toggle:hover .nav-toggle-bar,
 .nav-toggle.open .nav-toggle-bar {
-  background: var(--accent-2);
+  background: var(--accent-on-surface);
 }
 
 .nav-toggle.open .nav-toggle-bar:nth-child(1) {
@@ -4562,8 +4711,8 @@ html.js.fonts-ready .site-nav-inner {
     padding: 0 1.25rem;
     /* Opaque, not frosted like the bar: anything fixed underneath it (the
        store's cart button) would otherwise ghost through. */
-    background: var(--bg);
-    border-bottom: 1px solid rgba(199, 125, 255, 0.12);
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface-hover);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
     display: none;
   }
@@ -4574,7 +4723,7 @@ html.js.fonts-ready .site-nav-inner {
   }
 
   .site-nav-links li + li {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--surface-hover);
   }
 
   .site-nav-links a {
@@ -4728,12 +4877,12 @@ html.js .pkg-card.reveal {
 
 .pkg-cart-btn:hover:not(:disabled) {
   translate: 0 -2px;
-  box-shadow: 0 7px 0 var(--edge-lit), 0 9px 0 var(--edge-line);
+  box-shadow: 0 7px 0 var(--edge-raised), 0 9px 0 var(--edge-line);
 }
 
 .pkg-cart-btn:active:not(:disabled) {
   translate: 0 5px;
-  box-shadow: 0 0 0 var(--edge-lit), 0 2px 0 var(--edge-line);
+  box-shadow: 0 0 0 var(--edge-raised), 0 2px 0 var(--edge-line);
   transition-duration: 0.06s;
 }
 
@@ -4797,16 +4946,16 @@ html.js .pkg-card.reveal {
 .qty-levelup--key {
   color: #ffd27a;
   font-size: 2.1rem;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.75), 0 0 18px #ffd27a, 0 0 42px #ff7de1;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.75), 0 0 18px #ffd27a, 0 0 42px var(--accent);
 }
 
 .qty-burst--key i {
   background: #ffd27a;
-  box-shadow: 0 0 10px #ff7de1;
+  box-shadow: 0 0 10px var(--accent);
 }
 
 .qty-burst--key i:nth-child(3n) {
-  background: #ff7de1;
+  background: var(--accent);
 }
 
 /* "+1 FREE KEY" beside the stepper on a card or in the package popup. */
@@ -4898,7 +5047,7 @@ html[data-keypromo="off"] .store-promo--key {
 
 .cart-keys-bar {
   height: 6px;
-  background: rgba(4, 2, 10, 0.6);
+  background: color-mix(in srgb, var(--inset-on-surface) 60%, transparent);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -4906,7 +5055,7 @@ html[data-keypromo="off"] .store-promo--key {
 .cart-keys-bar span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #ff7de1, #ffd27a);
+  background: linear-gradient(90deg, #e0a84a, #ffd27a);
   box-shadow: 0 0 8px rgba(255, 210, 122, 0.6);
   transition: width 0.45s var(--ease-spring);
 }
@@ -4977,8 +5126,7 @@ html[data-keypromo="off"] .store-promo--key {
 /* The tab is meant to look switched off, so it reads as a secret. ArcadeButton
    sets --edge inline, so the flat look overrides the shadow itself. */
 .store-tab--random.btn {
-  opacity: 0.4;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   box-shadow: none;
   outline: 2px dashed var(--border);
   outline-offset: -2px;
@@ -4994,7 +5142,7 @@ html[data-keypromo="off"] .store-promo--key {
     0 calc(var(--edge) + 2px) 0 var(--edge-line),
     0 0 18px rgba(255, 210, 122, 0.35);
   background:
-    linear-gradient(90deg, #ff7de1, #ffd27a, #5be3a0, #7dd3ff, #c77dff, #ff7de1) 0 0 / 300% 100%,
+    linear-gradient(90deg, var(--accent), #ffd27a, #5be3a0, #7dd3ff, var(--accent), var(--accent)) 0 0 / 300% 100%,
     var(--bg2);
   -webkit-background-clip: text, padding-box;
   background-clip: text, padding-box;
@@ -5025,10 +5173,10 @@ html[data-keypromo="off"] .store-promo--key {
   padding: 1.1rem 1.2rem 1.3rem;
   text-align: center;
   background:
-    linear-gradient(180deg, rgba(199, 125, 255, 0.14), rgba(12, 7, 24, 0) 40%),
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 6%, transparent), transparent 40%),
     var(--bg2);
-  border: 2px solid #4b2386;
-  box-shadow: 0 6px 0 #2a1450, 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(154, 77, 255, 0.25);
+  border: 2px solid var(--surface-selected);
+  box-shadow: 0 6px 0 var(--inset-on-surface), 0 24px 60px rgba(0, 0, 0, 0.55);
 }
 
 .slot-marquee {
@@ -5044,11 +5192,11 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 2.3rem;
   line-height: 1;
   letter-spacing: 0.08em;
-  background: linear-gradient(180deg, #fff1c2, #ffd27a 50%, #ff7de1);
+  background: linear-gradient(180deg, #fff1c2, #ffd27a 50%, #e0a84a);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 0 #2a1450) drop-shadow(0 0 10px rgba(255, 210, 122, 0.45));
+  filter: drop-shadow(0 2px 0 var(--inset-on-surface)) drop-shadow(0 0 10px rgba(255, 210, 122, 0.45));
 }
 
 /* Marquee bulbs: neighbours alternate once a second - a chase, never a
@@ -5071,7 +5219,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 @keyframes slotBulb {
-  50% { background: #5b2a9e; box-shadow: none; }
+  50% { background: var(--surface-selected); box-shadow: none; }
 }
 
 .slot-cabinet.is-rolling .slot-bulbs i {
@@ -5090,9 +5238,9 @@ html[data-keypromo="off"] .store-promo--key {
   display: flex;
   gap: 8px;
   padding: 10px;
-  background: #05020c;
+  background: var(--inset-on-surface);
   border-radius: 10px;
-  box-shadow: inset 0 0 0 2px #2a1e44, inset 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 0 3px #ffd27a33;
+  box-shadow: inset 0 0 0 2px var(--surface-selected), inset 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 0 3px #ffd27a33;
 }
 
 .slot-window {
@@ -5101,7 +5249,7 @@ html[data-keypromo="off"] .store-promo--key {
   height: 168px;
   overflow: hidden;
   border-radius: 8px;
-  background: linear-gradient(180deg, #120b22, #2a2050 50%, #120b22);
+  background: linear-gradient(180deg, var(--inset-on-surface), var(--surface-hover) 50%, var(--inset-on-surface));
 }
 
 /* The drum's curve: symbols darken toward the top and bottom edges. */
@@ -5110,7 +5258,7 @@ html[data-keypromo="off"] .store-promo--key {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(5, 2, 12, 0.85), transparent 30%, transparent 70%, rgba(5, 2, 12, 0.85));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--inset-on-surface) 85%, transparent), transparent 30%, transparent 70%, color-mix(in srgb, var(--inset-on-surface) 85%, transparent));
 }
 
 .slot-symbol {
@@ -5159,14 +5307,14 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .slot-hint--tense {
-  color: #ff7de1;
+  color: var(--accent-on-surface);
   font-size: 1.7rem;
   animation: rollTense 0.9s ease-in-out infinite alternate;
 }
 
 @keyframes rollTense {
   from { opacity: 0.7; }
-  to { opacity: 1; text-shadow: 0 0 14px #ff7de1; }
+  to { opacity: 1; text-shadow: 0 0 14px var(--accent-on-surface); }
 }
 
 /* Landed: the windows holding the match light up (all three on a no-match
@@ -5223,7 +5371,7 @@ html[data-keypromo="off"] .store-promo--key {
   line-height: 1;
   letter-spacing: 0.06em;
   color: var(--shout);
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.75), 0 0 20px var(--shout), 0 0 46px #ff7de1;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.75), 0 0 20px var(--shout), 0 0 46px var(--accent-on-surface);
 }
 
 .slot-jackpot--2 { --shout: #ff7de1; font-size: 2.4rem; }
@@ -5338,7 +5486,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .join-row + .join-row {
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
   padding-top: 0.7rem;
 }
 
@@ -5362,16 +5510,16 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 0.95rem;
   letter-spacing: 0.18em;
   line-height: 1.2;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .join-count {
   font-weight: 400;
-  color: var(--positive);
+  color: var(--positive-on-surface);
 }
 
 .join-label--discord {
-  color: var(--accent);
+  color: var(--accent-on-surface);
 }
 
 .join-label--down {
@@ -5379,7 +5527,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .join-label--down .join-count {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .join-addr {
@@ -5387,7 +5535,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size-adjust: none;
   font-size: clamp(1.6rem, 6vw, 2.1rem);
   line-height: 1;
-  color: var(--text);
+  color: var(--text-on-surface);
   letter-spacing: 0.02em;
   overflow-wrap: anywhere;
 }
@@ -5397,7 +5545,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size-adjust: none;
   font-size: 1.35rem;
   line-height: 1;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .join-foot {
@@ -5405,7 +5553,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size-adjust: none;
   font-size: 1.1rem;
   line-height: 1.2;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   text-align: center;
   text-wrap: balance;
 }
@@ -5414,9 +5562,11 @@ html[data-keypromo="off"] .store-promo--key {
   white-space: nowrap;
 }
 
-/* CHROMABIT NETWORK stays on one line on a desktop, as CHROMABIT SMP did. */
+/* CHROMABIT NETWORK stays on one line on a desktop, as CHROMABIT SMP did.
+   Flat in both themes: no glow behind the title, no drop under it. */
 .home-hero .hero-title {
   font-size: clamp(3rem, 10vw, 5.25rem);
+  text-shadow: none;
 }
 
 /* No lone "ladder." on its own line at phone width. */
@@ -5435,15 +5585,15 @@ html[data-keypromo="off"] .store-promo--key {
 .btn.copy-ip.is-copied {
   --btn-edge: rgba(91, 227, 160, 0.45);
   background: rgba(91, 227, 160, 0.16);
-  color: var(--positive);
+  color: var(--positive-on-surface);
   text-shadow: none;
 }
 
-/* ─── the claim, alone between two thin pink rules ─── */
+/* ─── the claim, alone between two thin rules ─── */
 .claim-band {
   padding: 1.6rem 0.5rem;
-  border-block: 1px solid var(--border-pink);
-  background: linear-gradient(90deg, transparent, rgba(255, 125, 225, 0.07), transparent);
+  border-block: 1px solid var(--border);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 4%, transparent), transparent);
   text-align: center;
 }
 
@@ -5455,7 +5605,7 @@ html[data-keypromo="off"] .store-promo--key {
   letter-spacing: 0.04em;
   line-height: 0.95;
   color: var(--text);
-  text-shadow: 0 0 30px rgba(255, 125, 225, 0.3), 0 2px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: none;
   text-wrap: balance;
 }
 
@@ -5489,8 +5639,8 @@ html[data-keypromo="off"] .store-promo--key {
   position: relative;
   aspect-ratio: 16 / 8;
   overflow: hidden;
-  background: var(--bg3);
-  border-bottom: 1px solid var(--divider);
+  background: var(--surface-hover);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 /* A real screenshot dropped in as the banner's only child. */
@@ -5515,10 +5665,10 @@ html[data-keypromo="off"] .store-promo--key {
   height: 100%;
 }
 
-/* Tabbing to the banner shows the same pink ring as the buttons, drawn inside
+/* Tabbing to the banner shows a purple ring like the buttons, drawn inside
    the frame because the banner clips anything outside it. */
 .carousel--banner .carousel-slide-btn:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent-on-surface);
   outline-offset: -4px;
 }
 
@@ -5560,23 +5710,25 @@ html[data-keypromo="off"] .store-promo--key {
   font-weight: 400;
   letter-spacing: 0.04em;
   line-height: 1;
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .mode-desc {
   font-size-adjust: none;
   font-size: 1.15rem;
   line-height: 1.3;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
+/* A well in the card: dark in both themes, so its text is card text. */
 .mode-live {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
   padding: 0.5rem 0.7rem;
   border-radius: var(--radius-inset);
-  background: var(--surface-inset);
+  background: var(--inset-on-surface);
+  color: var(--text-on-surface);
 }
 
 .mode-live[hidden] {
@@ -5589,7 +5741,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 0.9rem;
   font-weight: 400;
   letter-spacing: 0.18em;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .mode-live-rows {
@@ -5617,12 +5769,23 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .mode-live-rank {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .mode-live-tier,
 .mode-live-change {
   flex: none;
+}
+
+/* Tier labels (U2 B3). The page sets the tier's colour as --tier (one of the
+   seven --tier-* tokens, or the feed's hex). Chips, medals and borders show
+   it as it is; the label TEXT on a dark surface takes a lighter form of the
+   same hue (a straight sRGB mix with white keeps the hue) so every tier
+   reads at 4.5:1 on the rest, hover and selected fills. */
+.pvp-tier[style*='--tier'],
+.mode-live-tier[style*='--tier'] {
+  color: color-mix(in srgb, var(--tier) 58%, white);
+  border-color: var(--tier);
 }
 
 /* The ladder slot with no rows yet: the seven tiers as chips, the same box as
@@ -5658,7 +5821,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .mode-live-change--up {
-  color: var(--positive);
+  color: var(--positive-on-surface);
 }
 
 .mode-live-change--down {
@@ -5716,7 +5879,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 2.6rem;
   font-weight: 400;
   line-height: 1;
-  color: var(--accent-2);
+  color: var(--text-on-surface);
 }
 
 .fact-line {
