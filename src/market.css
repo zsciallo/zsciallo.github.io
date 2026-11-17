@@ -376,8 +376,8 @@
   font-size: 0.80rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-2);
-  background: var(--border-pink);
+  color: var(--accent-on-surface);
+  background: var(--surface-hover);
   border-radius: 3px;
 }
 
@@ -671,8 +671,8 @@
 }
 
 .range-tab.active {
-  color: var(--text);
-  background: var(--accent-deep);
+  color: var(--on-accent);
+  background: var(--accent);
 }
 
 .chart-legend {
@@ -1143,7 +1143,13 @@
   font-size: 0.84rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-on-surface);
+}
+
+/* No purple text on the selected card. */
+.pool-card.selected .pool-ticker,
+.pool-card.selected .market-tag {
+  color: var(--text-on-surface);
 }
 
 .pool-name {
@@ -1181,7 +1187,7 @@
 .pool-card-price em span {
   font-size: 0.81rem;
   font-weight: 400;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   letter-spacing: 0.06em;
 }
 
@@ -1197,7 +1203,7 @@
   flex-direction: column;
   align-items: flex-end;
   font-size: 0.84rem;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   white-space: nowrap;
 }
 
@@ -1277,8 +1283,8 @@
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.12em;
-  color: var(--accent-2);
-  background: var(--border-pink);
+  color: var(--accent-on-surface);
+  background: var(--surface-hover);
   border-radius: 3px;
 }
 

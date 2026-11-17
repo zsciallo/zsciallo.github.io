@@ -49,6 +49,8 @@
   --surface-hover: #272A32;
   --surface-selected: #3A3E49;
   --divider: #23252C;
+  /* A well sunk into a dark card: dark in both themes. */
+  --inset-on-surface: #090A0C;
   --radius-card: 10px;
   --radius-inset: 6px;
 
@@ -99,6 +101,7 @@
   --surface-hover: #23262D;
   --surface-selected: #3A3E49;
   --divider: #D3D6DC;
+  --inset-on-surface: #0E0F12;
 
   --edge-raised: #4A4F5A;
   --edge-dark: #6B707C;
@@ -1286,9 +1289,14 @@ footer {
   -webkit-tap-highlight-color: transparent;
 }
 
-.faq-question:hover,
+.faq-question:hover {
+  color: var(--accent-on-surface);
+}
+
+/* Open = selected surface: the question is plain card text, the icon is
+   the marker. */
 .faq-item[data-open] .faq-question {
-  color: var(--accent-2);
+  color: var(--text-on-surface);
 }
 
 .faq-question:focus-visible {
@@ -1304,7 +1312,7 @@ footer {
   font-size-adjust: none;
   font-size: 1.9rem;
   line-height: 1;
-  color: var(--accent-2);
+  color: var(--accent-on-surface);
 }
 
 /* Closed until Motion runs: height 0 is the SSR style too. */
@@ -5503,9 +5511,11 @@ html[data-keypromo="off"] .store-promo--key {
   white-space: nowrap;
 }
 
-/* CHROMABIT NETWORK stays on one line on a desktop, as CHROMABIT SMP did. */
+/* CHROMABIT NETWORK stays on one line on a desktop, as CHROMABIT SMP did.
+   Flat in both themes: no glow behind the title, no drop under it. */
 .home-hero .hero-title {
   font-size: clamp(3rem, 10vw, 5.25rem);
+  text-shadow: none;
 }
 
 /* No lone "ladder." on its own line at phone width. */
@@ -5544,7 +5554,7 @@ html[data-keypromo="off"] .store-promo--key {
   letter-spacing: 0.04em;
   line-height: 0.95;
   color: var(--text);
-  text-shadow: 0 0 30px rgba(255, 125, 225, 0.3), 0 2px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: none;
   text-wrap: balance;
 }
 
@@ -5659,15 +5669,15 @@ html[data-keypromo="off"] .store-promo--key {
   color: var(--muted-on-surface);
 }
 
-/* The inset is light in Quartz, so its text is page text, not card text. */
+/* A well in the card: dark in both themes, so its text is card text. */
 .mode-live {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
   padding: 0.5rem 0.7rem;
   border-radius: var(--radius-inset);
-  background: var(--surface-inset);
-  color: var(--text);
+  background: var(--inset-on-surface);
+  color: var(--text-on-surface);
 }
 
 .mode-live[hidden] {
@@ -5680,7 +5690,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 0.9rem;
   font-weight: 400;
   letter-spacing: 0.18em;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .mode-live-rows {
@@ -5708,7 +5718,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .mode-live-rank {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .mode-live-tier,
@@ -5749,7 +5759,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .mode-live-change--up {
-  color: var(--positive);
+  color: var(--positive-on-surface);
 }
 
 .mode-live-change--down {
