@@ -26,7 +26,7 @@
   position: relative;
   z-index: 1;
   border-bottom: 1px solid var(--border);
-  background: rgba(12, 7, 24, 0.55);
+  background: color-mix(in srgb, var(--bg2) 55%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   margin-bottom: 1.5rem;
@@ -259,7 +259,7 @@
   color: var(--text);
   background: none;
   border: none;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
   cursor: pointer;
   transition: background 0.12s;
 }
@@ -581,7 +581,7 @@
    gap around it, and the row clips the rings at its outer edge. */
 .stat {
   padding: 0.8rem 0.95rem;
-  box-shadow: 0 0 0 1px var(--divider);
+  box-shadow: 0 0 0 1px var(--divider-on-surface);
 }
 
 .stat-label {
@@ -839,7 +839,7 @@
   transform: translateX(-50%);
   min-width: 172px;
   padding: 0.55rem 0.7rem;
-  background: rgba(12, 7, 24, 0.96);
+  background: color-mix(in srgb, var(--inset-on-surface) 96%, transparent);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55);
@@ -916,13 +916,13 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   white-space: nowrap;
 }
 
 .mini-table td {
   padding: 0.38rem 0.4rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
   color: var(--text);
   white-space: nowrap;
 }
@@ -1047,7 +1047,7 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem 1.75rem;
   padding: 0.25rem 1rem 1.1rem;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
   margin-top: 0.1rem;
   padding-top: 1rem;
 }
@@ -1544,7 +1544,7 @@
   place-items: center;
   aspect-ratio: 4 / 3;
   background: radial-gradient(circle at 50% 45%, var(--glow), transparent 70%), var(--bg3);
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 .listing-thumb .item-icon {
@@ -1559,7 +1559,7 @@
   font-family: var(--font-mono);
   font-size: 0.95rem;
   color: var(--text);
-  background: rgba(12, 7, 24, 0.75);
+  background: color-mix(in srgb, var(--inset-on-surface) 75%, transparent);
   border-radius: 4px;
 }
 
@@ -1733,8 +1733,8 @@
 
   .listing-meta {
     padding: 0.6rem 0.75rem 0.75rem;
-    border-top: 1px solid var(--divider);
-    background: var(--surface-inset);
+    border-top: 1px solid var(--divider-on-surface);
+    background: var(--inset-on-surface);
   }
 }
 
