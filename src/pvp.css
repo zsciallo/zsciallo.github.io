@@ -84,11 +84,11 @@
 }
 
 .pvp-tab.btn-secondary {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .pvp-tab.btn-secondary:not(:disabled):hover {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .pvp-board-card {
@@ -502,7 +502,8 @@
 
 /* The rungs sit on the page: Quartz takes a darker form of the same hue
    (a straight sRGB mix with black keeps it) for the name. */
-[data-theme='light'] .pvp-rung[style*='--tier'] .pvp-rung-name {
+[data-theme='light'] .pvp-rung[style*='--tier'] .pvp-rung-name,
+[data-theme='light'] .pvp-profile-best .pvp-tier[style*='--tier'] {
   color: color-mix(in srgb, var(--tier) 48%, black);
 }
 

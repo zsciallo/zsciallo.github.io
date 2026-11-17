@@ -201,6 +201,17 @@
   --edge-line: var(--edge-line-on-surface);
 }
 
+/* The text colour itself is inherited from <body> already resolved (page
+   ink), so each Quartz surface sets its own. :where keeps it weak, so any
+   surface rule that names a colour still wins. */
+[data-theme="light"] :where(.card, .faq-item, .tape, .pvp-search-results, .pkg-card,
+  .store-kit, .store-table-wrap, .market-table, .stat-row, .chart-card, .mini-table,
+  .explainer, .futures-intro, .pool-card, .listing-card, .pkg-modal, .modal-card,
+  .type-modal, .mode-modal, .cart-drawer, .slot-cabinet, .site-nav, .chart-tip,
+  .lightbox, .carousel-caption) {
+  color: var(--text);
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--nav-h);
@@ -1473,11 +1484,11 @@ footer {
 }
 
 .store-tab.btn-secondary {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .store-tab.btn-secondary:hover {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .store-category {
@@ -3470,7 +3481,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.63;
   font-size: 1rem;
   letter-spacing: 0.04em;
-  color: var(--text-2);
+  color: var(--text);
   white-space: nowrap;
 }
 
@@ -3998,7 +4009,7 @@ html.js .reveal.is-visible {
   font-size: 0.9rem;
   letter-spacing: 0.16em;
   color: var(--muted);
-  background: var(--bg);
+  background: var(--inset-on-surface);
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 0.5rem 0;
@@ -4037,11 +4048,11 @@ html.js .reveal.is-visible {
 }
 
 .mode-switch-opt.btn-secondary {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .mode-switch-opt.btn-secondary:hover {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 /* A flat surface card (it carries .card), sized like the purchase-type popup. */
@@ -5115,7 +5126,7 @@ html[data-keypromo="off"] .store-promo--key {
 /* The tab is meant to look switched off, so it reads as a secret. ArcadeButton
    sets --edge inline, so the flat look overrides the shadow itself. */
 .store-tab--random.btn {
-  color: var(--muted);
+  color: var(--muted-on-surface);
   box-shadow: none;
   outline: 2px dashed var(--border);
   outline-offset: -2px;
