@@ -98,7 +98,13 @@
 //                 font size >= 24px. A card that still paints the root --muted
 //                 on a selected surface fails here. Text over an image or a
 //                 gradient is skipped (no single background), and so is text in
-//                 KEEP_COLOUR (information-carrying colours the owner kept).
+//                 KEEP_COLOUR (empty since U2: the tier labels must pass too).
+//                 U2 (reviewer F3): the opacity of the element and of every
+//                 ancestor is multiplied into the ink before compositing, so a
+//                 faded line (opacity .45) is measured as it is painted. Text
+//                 of a disabled control (:disabled, aria-disabled=true) is
+//                 measured at its colour without the fade, as before U2 (WCAG
+//                 1.4.3 exempts inactive components; the colour still counts).
 //   tokens-on-surface  (once) --muted-on-surface >= 4.5 and --text-on-surface
 //                 >= 7 against each of --surface, --surface-inset,
 //                 --surface-hover and --surface-selected (every card state).
@@ -162,8 +168,10 @@ export const LARGE_PX = 24;
  * where it renders. Kept as short as the pages require.
  */
 export const KEEP_COLOUR = [
-  // Tier colours (Mithril, Chroma, ...) on the tier labels: the PVP search hits (pvp-search) and the profile kit cards (profile).
-  { sel: '.pvp-tier', note: 'tier label colours (keep list: tier colours)' },
+  // U2 round 1 (owner rule "rank colours stay unless they fail contrast", reviewer F1):
+  // the U1 entry { sel: '.pvp-tier' } is removed. Tier label text on a surface
+  // must reach 4.5:1 on the rest, hover and selected fills like any text; the
+  // seven --tier-* values themselves stay pinned (test/theme_check.mjs tokens).
 ];
 
 // ---------------------------------------------------------------- states --
@@ -702,9 +710,10 @@ const INSPECT = (cfg) => `(() => {
       tseen.add(n);
       const el = n.parentElement;
       if (!el || !L.rendered(el) || (keep && el.closest(keep))) continue;
-      let faded = false;
-      for (let a = el; a && a !== document.body; a = a.parentElement) if (getComputedStyle(a).opacity === '0') { faded = true; break; }
-      if (faded) continue;
+      const inactive = !!el.closest(':disabled, [aria-disabled="true"]');
+      let fade = 1;
+      for (let a = el; a && a !== document.documentElement; a = a.parentElement) fade *= parseFloat(getComputedStyle(a).opacity);
+      if (fade === 0) continue;
       const range = document.createRange();
       range.selectNodeContents(n);
       const box = range.getBoundingClientRect();
@@ -712,6 +721,7 @@ const INSPECT = (cfg) => `(() => {
       let ink = L.inkOf(el);
       const bg = L.effBg(el, T.bg);
       if (!ink || !bg || ink[3] === 0) continue;
+      if (!inactive) ink = [ink[0], ink[1], ink[2], ink[3] * fade];
       if (ink[3] < 1) ink = L.over(ink, bg);
       const size = parseFloat(getComputedStyle(el).fontSize);
       const min = size >= cfg.largePx ? cfg.largeMin : cfg.textNodeMin;
@@ -1391,6 +1401,8 @@ async function selfTest(dist) {
     add('<div class="card planted-txt-ok" style="background:#3a3e49;border:0;border-radius:10px;margin:0"><span style="color:#a6abb6;font-size:14px">muted-on-surface on selected</span></div>');
     add('<div class="card planted-txt-big" style="background:#3a3e49;border:0;border-radius:10px;margin:0"><span style="color:#9ca0ab;font-size:28px">big</span></div>');
     add('<div class="card planted-txt-clip" style="background:#1c1e24;border:0;border-radius:10px;margin:0"><span style="background:#2a2d35;-webkit-background-clip:text;background-clip:text;color:transparent;font-size:14px">clipped dim word</span></div>');
+    // U2 (reviewer F3): --text-on-surface (16.2:1 on --surface) at opacity .25 in a faded wrapper paints about 2.6:1.
+    add('<div class="card planted-txt-fade" style="background:#1c1e24;border:0;border-radius:10px;margin:0"><div style="opacity:.5"><span style="color:#f2f3f5;opacity:.5;font-size:14px">faded line</span></div></div>');
     add('<div class="planted-wide" style="width:640px;height:4px"></div>');
     return true;
   })()`;
@@ -1433,6 +1445,7 @@ async function selfTest(dist) {
         check(`self ${w} text-contrast: --muted-on-surface on the selected fill (4.64:1) passes`, tc('planted-txt-ok').length ? [JSON.stringify(tc('planted-txt-ok'))] : []);
         check(`self ${w} text-contrast: 28px text at 4.09:1 passes the large-text floor`, tc('planted-txt-big').length ? [JSON.stringify(tc('planted-txt-big'))] : []);
         check(`self ${w} text-contrast: a background-clip:text word is measured by its fill`, tc('planted-txt-clip').some((c) => c.ink.startsWith('rgb(42, 45, 53)')) ? [] : [`got ${JSON.stringify(tc('planted-txt-clip'))}`]);
+        check(`self ${w} text-contrast: ancestor opacity is multiplied into the ink (.5 x .5 of #f2f3f5 on --surface fails)`, tc('planted-txt-fade').some((c) => c.ratio < 4.5) ? [] : [`got ${JSON.stringify(tc('planted-txt-fade'))}`]);
         check(`self ${w} overflow is reported`, r.scrollWidth > r.innerWidth || width > 640 ? [] : [`scrollWidth ${r.scrollWidth}`]);
         if (width === 400) check(`self ${w} separation: cards stacked with no gap are reported`, r.gaps.some((g) => g.a.includes('planted-bad') || g.a.includes('planted-good')) ? [] : [`gaps: ${JSON.stringify(r.gaps).slice(0, 300)}`]);
       } finally {

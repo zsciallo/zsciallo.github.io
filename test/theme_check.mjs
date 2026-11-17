@@ -21,10 +21,15 @@
 //             head-theme    the font-ready head snippet (the one inline script
 //                           check_site's perf-hints allows: "fonts-ready" and
 //                           "document.fonts") holds the theme code: it names the
-//                           storage key chromabit:theme, prefers-color-scheme and
-//                           data-theme / dataset.theme, uses try/catch, sits in
-//                           <head> (so it runs before <body> is parsed) and stays
-//                           within perf-hints' 2000 characters (AC2, AC3);
+//                           storage key chromabit:theme and data-theme /
+//                           dataset.theme, uses try/catch, sits in <head> (so it
+//                           runs before <body> is parsed) and stays within
+//                           perf-hints' 2000 characters (AC2, AC3). U2 A1 (owner
+//                           2026-11-17 "make sure dark mode is default"): its
+//                           code (comments aside) names neither
+//                           prefers-color-scheme nor matchMedia;
+//             theme-module  src/lib/theme.js (comments aside) names neither
+//                           prefers-color-scheme nor matchMedia (U2 A1);
 //             meta-default  the prerendered <meta name="theme-color"> is #0E0F12.
 //   tokens    for each theme (stored choice and OS preference both set to it),
 //             the computed custom properties on <html> equal the spec (AC1):
@@ -41,14 +46,26 @@
 //             toggle is clicked the canvas repaints in the other theme's dots
 //             (checked under prefers-reduced-motion, where the dither does not
 //             animate, so only an explicit repaint passes).
-//   switch    the theme switch on / (AC2): first visit follows the OS (emulated
-//             prefers-color-scheme); a stored choice wins over the OS; the
+//             U2 A2 (owner 2026-11-17 "where did the pixel dithering go?"): at
+//             1280 the strongest painted pixel has alpha >= DITHER_MAX_ALPHA_MIN
+//             (base: 100), and the painted pixels in the lower half of the
+//             viewport outside the centre column (|x - centre| >= DITHER_COLUMN_HALF
+//             screen px, where ditherBg.js dims the dots behind the copy) number
+//             at least DITHER_COVER of the base build's count
+//             (test/fixtures/theme/dither-base.json, from base-dist with
+//             --snapshot-dither); in both themes and after the toggle. The
+//             tokens section pins --dither-alpha to 1 and --dither-dot to a
+//             neutral grey >= DITHER_DOT_CONTRAST:1 against the theme's --bg.
+//   switch    the theme switch on / (AC2): U2 A1: a first visit is Obsidian
+//             whatever the OS says (emulated prefers-color-scheme light and
+//             dark both give data-theme "dark" and the #0E0F12 meta); a stored
+//             choice wins over the OS; the
 //             attribute holds its final value before <body> is parsed and never
 //             changes after (no wrong-theme flash); the toggle flips the theme,
 //             stores it and updates the theme-color meta, both ways; the choice
 //             survives a reload; a storage event from another tab switches the
 //             theme; with localStorage throwing the page still renders with no
-//             uncaught exception, follows the OS and toggles.
+//             uncaught exception, is Obsidian (OS light or dark) and toggles.
 //   toggle    on all 8 routes, both widths, both themes: a <button class=
 //             "theme-toggle"> with an aria-label, a sibling right next to
 //             .sound-toggle in the nav, rendered; data-theme and the theme-color
@@ -80,8 +97,67 @@
 //             a .theme-toggle planted beside the sound toggle (when the build
 //             has none) passes; main 1px lower, the brand 1px right, or the
 //             sound toggle 2px lower each fail.
-//   self      pure checks of the comparators (geometry diff, neutrality), so
-//             the geometry check is proven to fail on a real layout change.
+//   self      pure checks of the comparators (geometry diff, neutrality, the
+//             purple rule and the literal scanner), so each check is proven
+//             to fail on what it is for.
+//
+// U2 + U3 sections (owner palette rules, plan "Kept as they are"):
+//   literals  (static, B1) test/palette_scan.mjs: no purple/pink colour literal
+//             (hue 250-340 deg, HSL saturation > 15%: the accent family, the
+//             pinks and the purple-tinted near-blacks such as #0c0718,
+//             rgba(12,7,24,a)) in src/**/*.{css,js,jsx} or the 8 index.html
+//             outside the two theme token blocks, except its ALLOW entries
+//             (file + context + keep-list reason). One line per file, and a
+//             stale ALLOW entry fails. Also pins the chart series hues (B8).
+//   walk      every card_style_check STATE (plus a planted store mode pop-up,
+//             the card fixture's catalog having no modes) at its widths (400
+//             and 1280) in BOTH themes (seeded choice), --jobs pages at a time:
+//             text      every visible text node (the open modal / drawer only,
+//                       when one is open) >= 4.5:1, >= 3:1 at 24px and up,
+//                       against what is painted behind it (nearest fills over
+//                       --bg; each gradient stop; text on an image is counted
+//                       and skipped), with the opacity of the element and of
+//                       every ancestor multiplied into the ink (reviewer F3).
+//                       A disabled control's text is measured without its fade
+//                       (WCAG 1.4.3 exempts inactive components).
+//                       No keep-list exemption (B3: tier labels included).
+//             tiers     B3: every tier label (palette_page TIER_LABELS) outside
+//                       a --inset-on-surface well (wells have no hover or
+//                       selected state; the wells section and the text line
+//                       judge those), painted in its own colour,
+//                       reaches 4.5:1 on each of --surface,
+//                       --surface-hover and --surface-selected (a row at rest,
+//                       hovered and selected), in both themes.
+//             purple    no computed purple (color, fill, stroke, background,
+//                       border, box-shadow, text-shadow, outline, drop-shadow,
+//                       ::before/::after) outside palette_page PURPLE_ALLOW (B5).
+//             borders   Quartz: nothing inside a --surface / --surface-hover /
+//                       --surface-selected / --inset-on-surface fill draws a
+//                       border or a thin divider strip in the page --border /
+//                       --divider colour (B4).
+//             fills     Quartz: a light --bg2 / --bg3 / --surface-inset fill
+//                       inside such a surface holds no failing text (B4).
+//             chrome    Quartz: modals, drawers, the mode pop-up and the slot
+//                       cabinet (palette_page CHROME_DARK) have luminance < 0.05.
+//             selected  selected-state controls (palette_page SELECTED): their
+//                       best non-text marker (fill, border, ring, pseudo or
+//                       empty child bar) >= 3:1 against what is behind them.
+//   focus     (1280, both themes, every state) FOCUS_TABS presses of Tab: each
+//             focus ring (outline or box-shadow) >= 3:1 against what is around
+//             the focused control (reviewer F5).
+//   buttons   (1280, both themes, B6) palette_page SECONDARY: --surface-hover
+//             fill, a --surface-selected ring (border or inset shadow), and on
+//             real mouse hover a neutral fill, ring, border and ink.
+//   chart     (states with a chart, both themes, B8) the grid, axis, tick and
+//             axis-label colours resolve to a theme token; every pinned series
+//             hue is >= 3:1 against the chart card's fill.
+//
+//   node test/theme_check.mjs --snapshot-dither <baseDistDir>
+//       write test/fixtures/theme/dither-base.json (painted pixel count of the
+//       base build's dither, lower half outside the centre column, at 1280).
+//   --jobs <n> (default 3) pages the walk opens at a time; --states <id,...>
+//       limits the walk to those states (debugging); --dump <file>
+//       writes every walk reading as JSON (for reports).
 //
 // Output: one `PASS <name>` / `FAIL <name>: <why>` per check, then
 // `RESULT: PASS n checks` or `RESULT: FAIL k of n`; exit 0 or 1.
@@ -90,7 +166,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FREEZE_ANIMATIONS, ROOT, findChrome, sleep } from './visual_check.mjs';
-import { openState, withBrowser } from './card_style_check.mjs';
+import { STATES, contrastOf, openState, withBrowser } from './card_style_check.mjs';
+import { ALLOW as LITERAL_ALLOW, isPurpleRgb, purpleLiterals, scan as scanLiterals, scanProblems, stripComments } from './palette_scan.mjs';
+import { TIER_LABELS, CHART_PARTS, CHROME_DARK, CHROME_LUM, FOCUS_READ, FOCUS_TABS, INDICATOR_PIN, KEEP_TAGS, LARGE_MIN, LARGE_PX, LAYER_ROOTS, NON_TEXT_MIN, PURPLE_ALLOW, SECONDARY, SELECTED, SERIES_PIN, TEXT_MIN, WALK, BUTTON_READ } from './palette_page.mjs';
 
 export const THEME_KEY = 'chromabit:theme';
 export const THEMES = ['dark', 'light'];
@@ -143,6 +221,23 @@ export const TITLES = [
   { name: 'claim title', title: '.claim-band .claim-title', hl: '.claim-band .claim-title .accent' },
 ];
 export const GLOW_TITLE_ALPHA = 0.35;
+/** U2 A2: the dither strength (owner: "where did the pixel dithering go?"). */
+export const DITHER_ALPHA = 1;
+export const DITHER_DOT_CONTRAST = 9;
+export const DITHER_MAX_ALPHA_MIN = 90;
+export const DITHER_COVER = 0.9;
+/** ditherBg.js COLUMN_HALF: the dots are dimmed within this many px of the centre, behind the copy. */
+export const DITHER_COLUMN_HALF = 470;
+/** U2 B3: the seven ladder tier colours stay exactly as they are (keep list), in both themes. */
+export const TIER_TOKENS = { '--tier-tin': '#8a8f98', '--tier-bronze': '#cd7f32', '--tier-silver': '#c0c0c0', '--tier-gold': '#ffd700', '--tier-emerald': '#50c878', '--tier-mithril': '#ff77e9', '--tier-chroma': '#b24bf3' };
+/** U2 B2: a store mode pop-up, planted (the card fixture's flat catalog never opens it); same markup as src/components/store/ModePrompt.jsx. */
+const PLANT_MODE_PROMPT = `(() => { const o = document.createElement('div'); o.className = 'modal-overlay'; o.innerHTML = '<div class="mode-modal card" role="dialog" aria-modal="true" data-mode-prompt data-planted><h2 class="type-modal-title">WHICH MODE?</h2><div class="type-options"><button type="button" class="type-option mode-option" data-mode-option="pvp"><span class="type-option-name">ChromaPVP</span></button><button type="button" class="type-option mode-option" data-mode-option="smp"><span class="type-option-name">Economy SMP</span></button></div></div>'; document.body.appendChild(o); return true; })()`;
+/** B6: the store's PVP | SMP switch, planted for the same reason (ModeSwitch.jsx markup: the checked mode primary, the other secondary). */
+const PLANT_MODE_SWITCH = `(() => { const m = document.querySelector('main'); if (!m) return false; const d = document.createElement('div'); d.className = 'mode-switch'; d.setAttribute('role', 'radiogroup'); d.setAttribute('data-mode-switch', ''); d.setAttribute('data-planted', ''); d.innerHTML = '<button type="button" role="radio" aria-checked="true" class="btn btn-primary btn-sm mode-switch-opt" data-arcade data-mode="pvp" style="--edge: 4px">ChromaPVP</button><button type="button" role="radio" aria-checked="false" class="btn btn-secondary btn-sm mode-switch-opt" data-arcade data-mode="smp" style="--edge: 4px">Economy SMP</button>'; m.prepend(d); return true; })()`;
+export const EXTRA_STATES = [
+  { id: 'store-mode-prompt', path: '/store/', ready: '.pkg-card', setup: [PLANT_MODE_PROMPT] },
+  { id: 'store-mode-switch', path: '/store/', ready: '.pkg-card', setup: [PLANT_MODE_SWITCH] },
+];
 
 export const ROUTES = [
   { path: '/', ready: '.mode-card', file: 'index.html' },
@@ -169,6 +264,7 @@ export const GEOMETRY_EXCLUDE = [];
 
 const FIX_DIR = join(ROOT, 'test', 'fixtures', 'theme');
 export const BASE_FILE = join(FIX_DIR, 'base.json');
+export const DITHER_BASE_FILE = join(FIX_DIR, 'dither-base.json');
 
 // ------------------------------------------------------------------ run --
 
@@ -228,7 +324,10 @@ function staticChecks(dist, base) {
     else {
       if (font.length > 2000) p.push(`font-ready snippet is ${font.length} chars, perf-hints allows 2000`);
       if (!font.includes(THEME_KEY)) p.push(`font-ready snippet does not read ${THEME_KEY}`);
-      if (!font.includes('prefers-color-scheme')) p.push('font-ready snippet does not consult prefers-color-scheme');
+      // U2 A1: dark is the default whatever the OS says; light only by the visitor's choice.
+      const code = stripComments(font, true);
+      if (code.includes('prefers-color-scheme')) p.push('font-ready snippet reads prefers-color-scheme (a first visit must be Obsidian whatever the OS says)');
+      if (/matchMedia/.test(code)) p.push('font-ready snippet calls matchMedia (a first visit must be Obsidian whatever the OS says)');
       if (!/data-theme|dataset\.theme/.test(font)) p.push('font-ready snippet does not set data-theme');
       if (!/\btry\s*\{/.test(font) || !/\bcatch\b/.test(font)) p.push('font-ready snippet reads storage outside try/catch');
     }
@@ -236,6 +335,36 @@ function staticChecks(dist, base) {
     const metas = [...html.matchAll(/<meta\b[^>]*\bname\s*=\s*["']theme-color["'][^>]*>/gi)].map((m) => m[0].match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? null);
     check(`static ${r.path} meta-default`, metas.length !== 1 ? [`${metas.length} theme-color metas, want 1`] : lc(metas[0]) !== THEME_COLOR.dark ? [`theme-color is ${q(metas[0])}, want ${THEME_COLOR.dark}`] : []);
   }
+  const mod = join(ROOT, 'src', 'lib', 'theme.js');
+  const code = existsSync(mod) ? stripComments(readFileSync(mod, 'utf-8'), true) : null;
+  check('static src/lib/theme.js theme-module: no OS preference (U2 A1)', code == null ? ['src/lib/theme.js missing'] : [
+    code.includes('prefers-color-scheme') ? 'reads prefers-color-scheme' : null,
+    /matchMedia/.test(code) ? 'calls matchMedia' : null,
+  ]);
+}
+
+// --------------------------------------------------------------- literals --
+
+const SERIES_SRC = join(ROOT, 'src', 'components', 'market', 'chart.js');
+const INDICATOR_SRC = join(ROOT, 'src', 'components', 'market', 'CandleChart.jsx');
+function literalChecks() {
+  const hits = scanLiterals();
+  const problems = scanProblems(hits);
+  const byFile = new Map();
+  for (const h of hits) byFile.set(h.file, (byFile.get(h.file) ?? 0) + 1);
+  const files = [...new Set([...byFile.keys(), 'src/index.css', 'src/market.css', 'src/pvp.css'])].sort();
+  for (const f of files) {
+    const p = problems.filter((x) => x.startsWith(f + ':'));
+    check(`literals ${f}: no purple literal outside the token blocks and the keep list (${byFile.get(f) ?? 0} purple, ${(byFile.get(f) ?? 0) - p.length} allowed)`, p.length > 15 ? [`${p.length} purple literals`, ...p.slice(0, 15), `... and ${p.length - 15} more`] : p);
+  }
+  check(`literals allow list: every entry (${LITERAL_ALLOW.length}) still matches a literal`, problems.filter((x) => x.startsWith('stale')));
+  // B8: the series hues are unchanged.
+  const series = existsSync(SERIES_SRC) ? readFileSync(SERIES_SRC, 'utf-8') : '';
+  const ind = existsSync(INDICATOR_SRC) ? readFileSync(INDICATOR_SRC, 'utf-8') : '';
+  check('literals chart series hues unchanged (chart.js SERIES, CandleChart.jsx INDICATORS)', [
+    ...Object.entries(SERIES_PIN).map(([k, v]) => (new RegExp(`\\b${k}\\s*:\\s*'${v}'`, 'i').test(series) ? null : `SERIES.${k} is not ${v}`)),
+    ...Object.entries(INDICATOR_PIN).map(([k, v]) => (new RegExp(`id:\\s*'${k}'[^}]*colour:\\s*'${v}'`, 'i').test(ind) ? null : `INDICATORS ${k} is not ${v}`)),
+  ]);
 }
 
 // --------------------------------------------------------------- in page --
@@ -282,15 +411,19 @@ const LIB = String.raw`(() => {
     const c = document.querySelector('canvas.dither-bg');
     if (!c) return null;
     const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-    let n = 0, bad = 0, sum = 0, worst = null;
+    let n = 0, bad = 0, sum = 0, worst = null, maxA = 0, region = 0;
+    const scale = innerWidth / c.width, mid = innerWidth / 2;
     for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] > maxA) maxA = d[i + 3];
       if (d[i + 3] < 24) continue;
       n++;
+      const px = (i / 4) % c.width, py = Math.floor(i / 4 / c.width);
+      if (py >= c.height / 2 && Math.abs((px + 0.5) * scale - mid) >= ${DITHER_COLUMN_HALF}) region++;
       const spread = Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]);
       if (spread > ${NEUTRAL}) { bad++; worst = worst || [d[i], d[i + 1], d[i + 2], d[i + 3]]; }
       sum += (d[i] + d[i + 1] + d[i + 2]) / 3;
     }
-    return { n, bad, mean: n ? sum / n : null, worst, w: c.width, h: c.height };
+    return { n, bad, mean: n ? sum / n : null, worst, w: c.width, h: c.height, maxA, region, vw: innerWidth };
   };
   const toggle = () => document.querySelector(${JSON.stringify(NEW_ELEMENT)});
   const lum = (c) => {
@@ -400,6 +533,18 @@ async function tokenChecks(page, theme) {
       else if (!isNeutral(x.c.rgba)) e.push(`${n} is ${x.c.css}, not neutral (R, G, B within ${NEUTRAL})`);
     }
   check(`tokens ${theme} edges`, e);
+  // U2 B3: the tier colours are pinned (keep list).
+  const tiers = await page.ev(`(() => { const s = getComputedStyle(document.documentElement); return ${q(Object.keys(TIER_TOKENS))}.map((n) => [n, s.getPropertyValue(n).trim()]); })()`);
+  check(`tokens ${theme} tier colours unchanged`, tiers.filter(([n, v]) => lc(v) !== TIER_TOKENS[n]).map(([n, v]) => `${n} is ${q(v)}, want ${TIER_TOKENS[n]}`));
+  // U2 A2: the dither dots at full strength, a neutral grey well away from --bg.
+  const dd = await page.ev(`(() => { const T = window.__theme; return { alpha: T.token('--dither-alpha'), dot: T.token('--dither-dot'), c: T.colour('var(--dither-dot)') }; })()`);
+  const bgc = hexRgb(spec['--bg']);
+  const dotRatio = dd.c ? contrastOf(dd.c.rgba, bgc) : 0;
+  check(`tokens ${theme} dither: --dither-alpha ${DITHER_ALPHA}, --dither-dot neutral and >= ${DITHER_DOT_CONTRAST}:1 on --bg`, [
+    parseFloat(dd.alpha) !== DITHER_ALPHA ? `--dither-alpha is ${q(dd.alpha)}, want ${DITHER_ALPHA} (the base alpha curve, unscaled)` : null,
+    !dd.c ? `--dither-dot is ${q(dd.dot)}, not a colour` : !isNeutral(dd.c.rgba) ? `--dither-dot ${dd.c.css} is not neutral` : null,
+    dd.c && dotRatio < DITHER_DOT_CONTRAST ? `--dither-dot ${dd.dot} is ${dotRatio.toFixed(2)}:1 on --bg ${spec['--bg']}, want >= ${DITHER_DOT_CONTRAST}` : null,
+  ]);
   const sch = String(got.scheme).split(/\s+/);
   check(`tokens ${theme} color-scheme`, sch.includes(theme) && !sch.includes(theme === 'dark' ? 'light' : 'dark') ? [] : [`color-scheme is ${q(got.scheme)}, want ${theme}`]);
 }
@@ -412,10 +557,16 @@ async function bodyChecks(page, theme) {
   check(`body ${theme} vignette neutral`, got.after.filter((c) => c.rgba[3] > 0 && !isNeutral(c.rgba)).map((c) => `body::after has ${c.css}`));
 }
 
+let ditherBase = null;
 function ditherProblems(d, theme) {
   if (!d) return ['no canvas.dither-bg'];
   if (d.n < 50) return [`only ${d.n} painted pixels (alpha >= 24) on a ${d.w}x${d.h} canvas`];
   const p = [];
+  // U2 A2: as strong as the base build, where it shows (lower half, outside the copy column).
+  if (d.maxA < DITHER_MAX_ALPHA_MIN) p.push(`strongest painted pixel has alpha ${d.maxA}/255, want >= ${DITHER_MAX_ALPHA_MIN}`);
+  const want = ditherBase?.region?.[String(d.vw)];
+  if (want == null) p.push(`no base dither count for width ${d.vw} in ${DITHER_BASE_FILE}`);
+  else if (d.region < DITHER_COVER * want) p.push(`${d.region} painted pixels in the lower half outside the centre column, base has ${want} (want >= ${Math.ceil(DITHER_COVER * want)})`);
   if (d.bad) p.push(`${d.bad} of ${d.n} painted pixels are not neutral, e.g. rgba(${d.worst.join(', ')})`);
   const bg = hexRgb(TOKENS[theme]['--bg']).reduce((x, y) => x + y) / 3;
   if (theme === 'dark' && !(d.mean >= bg + DOT_STEP)) p.push(`dots average ${d.mean.toFixed(0)}, want light dots (>= ${(bg + DOT_STEP).toFixed(0)}) on Obsidian`);
@@ -484,10 +635,11 @@ async function switchChecks(b, origin) {
     }
   };
 
+  // U2 A1 (owner 2026-11-17 "make sure dark mode is default"): was "first visit follows the OS".
   for (const os of THEMES)
-    await run(`first visit follows the OS (${os})`, { os }, async (page) => {
+    await run(`first visit is Obsidian (OS ${os})`, { os }, async (page) => {
       const s = await state(page);
-      check(`switch first visit, OS ${os}: theme ${os}, set before <body>, meta follows`, [s.theme !== os ? `data-theme is ${q(s.theme)}, want ${q(os)}` : null, ...flashProblems(s, os), metaProblem(s, os)]);
+      check(`switch first visit, OS ${os}: theme dark, set before <body>, meta #0E0F12`, [s.theme !== 'dark' ? `data-theme is ${q(s.theme)}, want "dark" whatever the OS says` : null, ...flashProblems(s, 'dark'), metaProblem(s, 'dark')]);
     });
   for (const [stored, os] of [['light', 'dark'], ['dark', 'light']])
     await run(`stored ${stored}`, { os, init: seed(stored) }, async (page) => {
@@ -538,7 +690,7 @@ async function switchChecks(b, origin) {
   }
   if (first) await first.close();
 
-  // localStorage that throws on access (blocked storage): the page renders, follows the OS, and toggles.
+  // localStorage that throws on access (blocked storage): the page renders, is Obsidian (U2 A1), and toggles.
   for (const os of THEMES) {
     errors.length = 0;
     b.listeners.add(onError);
@@ -546,14 +698,14 @@ async function switchChecks(b, origin) {
       await run(`storage throws (OS ${os})`, { os, init: THROWING_STORAGE }, async (page) => {
         const s = await state(page);
         const rendered = await page.ev(`!!document.querySelector('.site-nav') && !!document.querySelector(${q(HOME.ready)})`);
-        const other = os === 'dark' ? 'light' : 'dark';
+        const other = 'light';
         const clicked = await clickToggle(page);
         const ok = clicked && (await waitTheme(page, other));
         await sleep(150);
         const s2 = await state(page);
-        check(`switch localStorage throws, OS ${os}: renders, theme ${os}, toggles to ${other}, no uncaught exception`, [
+        check(`switch localStorage throws, OS ${os}: renders, theme dark, toggles to ${other}, no uncaught exception`, [
           rendered ? null : 'the page did not render its nav and mode cards',
-          s.theme !== os ? `data-theme is ${q(s.theme)}, want ${q(os)}` : null,
+          s.theme !== 'dark' ? `data-theme is ${q(s.theme)}, want "dark" whatever the OS says` : null,
           !clicked ? 'no .theme-toggle to click' : ok ? null : `after the click data-theme is ${q(s2.theme)}, want ${q(other)}`,
           ok ? metaProblem(s2, other) : null,
           errors.length ? `uncaught: ${errors.slice(0, 3).join(' | ')}` : null,
@@ -818,11 +970,188 @@ function selfChecks() {
   check('self glow: the accent at .5 fails', glowColourProblems([col(199, 125, 255, 0.5)], acc, 0.35, 'x').some((x) => x.includes('alpha')) ? [] : ['not reported']);
   const html = '<html><head><script>(function(){document.fonts;"fonts-ready"})()</script><script type="module" src="/a.js"></script><script type="application/ld+json">{}</script><script defer src="x.js"></script><script>var x=1</script></head><body><script>var y=2</script></body></html>';
   check('self head scripts: counts inline blocking head scripts only', inlineHeadScripts(html).length === 2 ? [] : [`counted ${inlineHeadScripts(html).length}`]);
+  // U2: the purple rule and the literal scanner.
+  const lits = (src) => purpleLiterals(src).map((x) => x.literal.toLowerCase());
+  check('self purple: the accent family, pinks and purple near-blacks are purple', ['#c77dff', '#9a4dff', '#7b2fe0', '#ff7de1', '#ffb3ec', '#0c0718', '#150f27', '#05020c', 'rgba(12, 7, 24, 0.6)', 'rgba(4,2,10,.55)', 'hsl(280 60% 50%)', 'hsla(300, 40%, 30%, .5)', '#c7d'].filter((c) => lits(`a{color:${c}}`).length !== 1).map((c) => `${c} not caught`));
+  check('self purple: greys, blues, ambers, reds, greens and white/black overlays are not', ['#8a8f9a', '#0e0f12', '#16181d', '#5cb8ff', '#ffd27a', '#ff4d6d', '#5be3a0', 'rgba(255, 255, 255, 0.1)', 'rgba(0,0,0,.75)', 'hsl(206 80% 60%)', '#d3d6dc'].filter((c) => lits(`a{color:${c}}`).length).map((c) => `${c} caught`));
+  check('self purple: computed rgb purple vs neutral', [isPurpleRgb([199, 125, 255, 1]) ? null : 'accent not purple', isPurpleRgb([39, 42, 50, 1]) ? '#272a32 purple' : null, isPurpleRgb([199, 125, 255, 0]) ? 'transparent counted' : null]);
+  check('self literals: comments are not scanned', lits(stripComments('/* #c77dff */ a { color: #fff } // #ff7de1', true)).length ? ['comment literal caught'] : []);
+  const fakeHits = [{ file: 'src/x.css', line: 1, literal: '#c77dff', context: '.a { color }' }, { file: 'src/x.css', line: 2, literal: '#ff7de1', context: '.keep { color }' }];
+  const fakeAllow = [{ file: 'src/x.css', context: /^\.keep /, reason: 't' }, { file: 'src/x.css', context: /^\.gone /, reason: 't' }];
+  const sp = scanProblems(fakeHits, fakeAllow);
+  check('self literals: an unlisted hit fails, a listed one passes, a stale entry fails', [sp.some((x) => x.includes('.a { color }')) ? null : 'unlisted hit passed', sp.some((x) => x.includes('.keep')) ? 'listed hit failed' : null, sp.some((x) => x.startsWith('stale') && x.includes('gone')) ? null : 'stale entry passed']);
+}
+
+// ------------------------------------------------- walk, focus, buttons --
+
+const fmtList = (list, max = 8) => (list.length > max ? [...list.slice(0, max), `... and ${list.length - max} more`] : list);
+const sameRgb = (a, b) => a && b && a.slice(0, 3).every((v, i) => Math.abs(v - b[i]) <= 1);
+const isNeutralC = (c) => !c || c[3] === 0 || isNeutral(c);
+const rgbS = (c) => (c ? `rgb(${c.slice(0, 3).map(Math.round).join(',')})${c[3] < 1 ? '/' + (+c[3].toFixed(2)) : ''}` : String(c));
+const key = async (page, k, code) => {
+  await page.s('Input.dispatchKeyEvent', { type: 'keyDown', key: k, code, windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+  await page.s('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code, windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+};
+
+/** One state, one width, one theme: [[check name, problems], ...] and the raw readings. */
+async function walkOne(b, origin, job, args) {
+  const { st, width, theme } = job;
+  const id = `${st.id}@${width} ${theme}`;
+  const lines = [];
+  const raw = { id };
+  let page;
+  try {
+    page = await openState(b, origin, { ...st, id: `palette ${st.id}`, init: [seed(theme), st.init].filter(Boolean).join('\n'), colorScheme: 'dark' }, width);
+  } catch (e) {
+    return { lines: [[`walk ${id}`, [`page did not open: ${String(e?.message ?? e).slice(0, 200)}`]]], raw };
+  }
+  try {
+    await install(page);
+    const tk = TOKENS[theme];
+    const H = (n) => hexRgb(tk[n]);
+    const cfg = {
+      theme, layerRoots: LAYER_ROOTS, keepTags: KEEP_TAGS, tierLabels: TIER_LABELS, allow: PURPLE_ALLOW, chrome: CHROME_DARK, selected: SELECTED, chartParts: CHART_PARTS,
+      textMin: TEXT_MIN, largeMin: LARGE_MIN, largePx: LARGE_PX, nonTextMin: NON_TEXT_MIN,
+      tokens: { border: H('--border'), divider: H('--divider'), bg2: H('--bg2'), bg3: H('--bg3'), inset: H('--surface-inset'), surfaces: ['--surface', '--surface-hover', '--surface-selected', '--inset-on-surface'].map(H) },
+    };
+    const t = await page.ev(`document.documentElement.getAttribute('data-theme')`);
+    const w = await page.ev(WALK(cfg));
+    raw.walk = w;
+    const themeP = t !== theme ? [`data-theme is ${q(t)}, want ${q(theme)} (seeded)`] : [];
+    if (want(args, 'walk')) {
+      lines.push([`walk ${id} text contrast (${w.text.n} text nodes in ${w.root}${w.text.onImage ? `, ${w.text.onImage} on images skipped` : ''})`, [...themeP, ...fmtList(w.text.fails.map((f) => `${f.path} ${q(f.text)} ${f.ink} on ${f.bg} ${f.ratio}:1 < ${f.min}${f.fade < 1 ? ` (opacity ${f.fade})` : ''}${f.keep ? ` [${f.keep}]` : ''}`))]]);
+      lines.push([`walk ${id} purple only where allowed`, fmtList(w.purple.map((x) => `${x.path} ${x.prop} ${x.css}`))]);
+      if (theme === 'light') {
+        lines.push([`walk ${id} on-surface borders not the page --border/--divider`, fmtList(w.b4.borders.map((x) => `${x.path} ${x.side} ${x.css}`))]);
+        lines.push([`walk ${id} no light fill with failing text inside a surface`, fmtList(w.b4.fills.map((x) => `${x.path} fill ${x.css} holds ${x.failing} failing text node(s)`))]);
+        if (w.b4.chrome.length) lines.push([`walk ${id} chrome dark (luminance < ${CHROME_LUM})`, fmtList(w.b4.chrome.filter((x) => x.lum == null || x.lum >= CHROME_LUM).map((x) => `${x.path} ${x.css} luminance ${x.lum}`))]);
+      }
+      const tiers = w.tiers.filter((t) => !t.inWell);
+      if (tiers.length) {
+        const fills = [['--surface', H('--surface')], ['--surface-hover', H('--surface-hover')], ['--surface-selected', H('--surface-selected')]];
+        const bad = [];
+        for (const t of tiers)
+          for (const [n, f] of fills) {
+            const painted = [0, 1, 2].map((i) => t.ink[i] * t.ink[3] + f[i] * (1 - t.ink[3]));
+            const r = contrastOf(painted, f);
+            const min = t.large ? LARGE_MIN : TEXT_MIN;
+            if (r < min) bad.push(`${t.path} ${q(t.text)} ${rgbS(t.ink)} on ${n} ${r.toFixed(2)}:1 < ${min}`);
+          }
+        lines.push([`walk ${id} tier labels >= ${TEXT_MIN}:1 on the rest, hover and selected fills (${tiers.length})`, fmtList([...new Set(bad)])]);
+      }
+      if (w.selected.n) lines.push([`walk ${id} selected markers >= ${NON_TEXT_MIN}:1 (${w.selected.n})`, fmtList(w.selected.fails.map((x) => `${x.path} ${x.marker} on ${x.bg} ${x.ratio}:1`))]);
+    }
+    if (w.chart && want(args, 'chart')) {
+      const tokP = w.chart.parts.filter((x) => !x.token).map((x) => `${x.sel} ${x.prop} ${x.css} is no theme token`);
+      lines.push([`chart ${id} grid, axis and labels from tokens (${w.chart.parts.length} parts)`, fmtList([...new Set(tokP)])]);
+      const fill = w.chart.fill;
+      lines.push([`chart ${id} series hues >= ${NON_TEXT_MIN}:1 on the chart card fill`, !fill ? [`no single fill behind the chart (${w.chart.fillCss})`] : Object.entries({ ...SERIES_PIN, ...INDICATOR_PIN }).map(([k, v]) => [k, v, contrastOf(hexRgb(v), fill)]).filter(([, , r]) => r < NON_TEXT_MIN).map(([k, v, r]) => `${k} ${v} is ${r.toFixed(2)}:1 on ${rgbS(fill)}`)]);
+    }
+    // Behind an open modal or drawer the page cannot be hovered: secondary controls are judged where no layer is open.
+    if (width === 1280 && want(args, 'buttons') && w.root === 'body')
+      for (const sec of SECONDARY) {
+        const p = [];
+        let seen = 0;
+        for (let i = 0; i < 2; i++) {
+          await page.ev(`(() => { const el = [...document.querySelectorAll(${q(sec.sel)})].filter((e) => e.getClientRects().length)[${i}]; if (el) el.scrollIntoView({ block: 'center' }); return true; })()`);
+          await sleep(60);
+          const rest = await page.ev(BUTTON_READ(sec.sel, i));
+          if (!rest) break;
+          seen++;
+          if (!(rest.fill && rest.fill[3] >= 0.999 && sameRgb(rest.fill, H('--surface-hover')))) p.push(`${rest.path} fill ${rgbS(rest.fill)}${rest.image !== 'none' ? ' + ' + rest.image.slice(0, 40) : ''}, want --surface-hover ${tk['--surface-hover']}`);
+          if (![...rest.border, ...rest.inset].some((c) => sameRgb(c, H('--surface-selected')))) p.push(`${rest.path} ring ${[...rest.border, ...rest.inset].map(rgbS).join(' ') || 'none'}, want --surface-selected ${tk['--surface-selected']} (border or inset ring)`);
+          await page.s('Input.dispatchMouseEvent', { type: 'mouseMoved', x: rest.x, y: rest.y });
+          await sleep(200);
+          const hov = await page.ev(BUTTON_READ(sec.sel, i));
+          await page.s('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1, y: 1 });
+          if (hov) {
+            const bad = [['fill', hov.fill], ...hov.border.map((c) => ['border', c]), ...hov.inset.map((c) => ['ring', c]), ['ink', hov.ink]].filter(([, c]) => !isNeutralC(c));
+            if (bad.length || hov.purple.length) p.push(`${hov.path} hover not neutral: ${[...bad.map(([k, c]) => `${k} ${rgbS(c)}`), ...hov.purple].join(', ')}`);
+          }
+        }
+        if (!seen) continue;
+        (raw.buttons ??= []).push(sec.name);
+        lines.push([`buttons ${id} ${sec.name}: --surface-hover fill, --surface-selected ring, neutral hover`, p]);
+      }
+    if (width === 1280 && want(args, 'focus')) {
+      await page.s('Emulation.setFocusEmulationEnabled', { enabled: true }).catch(() => {});
+      await page.ev(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
+      const seenF = new Set();
+      const p = [];
+      let rings = 0, focused = 0;
+      for (let i = 0; i < FOCUS_TABS; i++) {
+        await key(page, 'Tab', 'Tab');
+        await sleep(40);
+        const f = await page.ev(FOCUS_READ);
+        if (!f || seenF.has(f.path)) continue;
+        seenF.add(f.path);
+        focused++;
+        if (f.rings) rings++;
+        if (f.ratio != null && f.ratio < NON_TEXT_MIN) p.push(`${f.path} ${f.ring} on ${f.bg} ${f.ratio}:1`);
+      }
+      raw.focus = { focused, rings };
+      lines.push([`focus ${id} rings >= ${NON_TEXT_MIN}:1 (${focused} focused, ${rings} with a ring)`, focused ? fmtList(p) : ['Tab focused nothing']]);
+    }
+  } catch (e) {
+    lines.push([`walk ${id}`, [String(e?.message ?? e).slice(0, 300)]]);
+  } finally {
+    await page.close();
+  }
+  return { lines, raw };
+}
+
+async function walkChecks(b, origin, args) {
+  const jobs = [];
+  const si = args.indexOf('--states');
+  const only = si >= 0 ? args[si + 1].split(',') : null;
+  for (const st of [...STATES, ...EXTRA_STATES]) if (!only || only.includes(st.id)) for (const width of st.widths ?? WIDTHS) for (const theme of THEMES) jobs.push({ st, width, theme });
+  const ji = args.indexOf('--jobs');
+  const n = Math.max(1, ji >= 0 ? +args[ji + 1] : 3);
+  const results = new Array(jobs.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: n }, async () => {
+    while (next < jobs.length) {
+      const i = next++;
+      results[i] = await walkOne(b, origin, jobs[i], args);
+    }
+  }));
+  for (const r of results) for (const [name, problems] of r.lines) check(name, problems);
+  // Coverage: every secondary control and a chart were really measured, in both themes.
+  if (!only)
+    for (const theme of THEMES) {
+      const got = results.filter((r) => r.raw.id.endsWith(` ${theme}`));
+      if (want(args, 'buttons')) check(`buttons ${theme} coverage: each secondary control rendered in some state`, SECONDARY.filter((sec) => !got.some((r) => r.raw.buttons?.includes(sec.name))).map((sec) => `${sec.name} (${sec.sel}) never rendered`));
+      if (want(args, 'walk')) check(`walk ${theme} coverage: tier labels on a surface were judged on the three fills`, got.some((r) => r.raw.walk?.tiers?.some((t) => !t.inWell)) ? [] : ['no state rendered a tier label on a surface fill']);
+      if (want(args, 'chart')) check(`chart ${theme} coverage: a chart rendered in some state`, got.some((r) => r.raw.walk?.chart) ? [] : ['no state rendered a chart']);
+    }
+  const di = args.indexOf('--dump');
+  if (di >= 0) writeFileSync(resolve(args[di + 1]), JSON.stringify(results.map((r) => r.raw), null, 1));
+}
+
+async function snapshotDither(dist) {
+  const out = { capturedFrom: process.argv[process.argv.indexOf('--snapshot-dither') + 2] ?? 'unknown', note: 'Painted dither pixels (alpha >= 24) in the lower half of the viewport outside the centre column, base build, for theme_check dither (U2 A2).', region: {}, maxAlpha: {} };
+  await browser(dist, async (b, origin) => {
+    const page = await open(b, origin, { label: 'dither base', os: 'dark' }, 1280);
+    try {
+      await install(page);
+      const d = await page.ev('window.__theme.dither()');
+      out.region[String(d.vw)] = d.region;
+      out.maxAlpha[String(d.vw)] = d.maxA;
+      console.log(`base dither @${d.vw}: ${d.n} painted, ${d.region} in the region, max alpha ${d.maxA}`);
+    } finally {
+      await page.close();
+    }
+  });
+  if (failed) return;
+  mkdirSync(FIX_DIR, { recursive: true });
+  writeFileSync(DITHER_BASE_FILE, JSON.stringify(out, null, 2) + '\n');
+  console.log(`wrote ${DITHER_BASE_FILE}`);
 }
 
 // ------------------------------------------------------------------- main --
 
-const SECTIONS = ['static', 'tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant', 'self'];
+const SECTIONS = ['static', 'literals', 'tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant', 'walk', 'focus', 'buttons', 'chart', 'self'];
+const BROWSER_SECTIONS = ['tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant', 'walk', 'focus', 'buttons', 'chart'];
 function want(args, section) {
   const i = args.indexOf('--only');
   return i < 0 || args[i + 1].split(',').includes(section);
@@ -872,16 +1201,20 @@ async function snapshot(dist) {
 async function main() {
   const args = process.argv.slice(2);
   const di = args.indexOf('--dist');
-  if (args.includes('--snapshot')) {
+  if (args.includes('--snapshot-dither')) {
+    await snapshotDither(resolve(args[args.indexOf('--snapshot-dither') + 1]));
+  } else if (args.includes('--snapshot')) {
     await snapshot(resolve(args[args.indexOf('--snapshot') + 1]));
   } else {
     const dist = resolve(di >= 0 ? args[di + 1] : join(ROOT, 'dist'));
     const i = args.indexOf('--only');
     if (i >= 0) for (const s of args[i + 1].split(',')) if (!SECTIONS.includes(s)) throw new Error(`unknown section ${s}; sections: ${SECTIONS.join(', ')}`);
     const base = existsSync(BASE_FILE) ? JSON.parse(readFileSync(BASE_FILE, 'utf-8')) : null;
+    ditherBase = existsSync(DITHER_BASE_FILE) ? JSON.parse(readFileSync(DITHER_BASE_FILE, 'utf-8')) : null;
     if (want(args, 'self')) selfChecks();
     if (want(args, 'static')) staticChecks(dist, base);
-    if (['tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant'].some((s) => want(args, s)))
+    if (want(args, 'literals')) literalChecks();
+    if (BROWSER_SECTIONS.some((s) => want(args, s)))
       await browser(dist, async (b, origin) => {
         if (['tokens', 'body', 'dither'].some((s) => want(args, s))) await themedPageChecks(b, origin, args);
         if (want(args, 'switch')) await switchChecks(b, origin);
@@ -889,6 +1222,7 @@ async function main() {
         if (want(args, 'glow')) await glowChecks(b, origin);
         if (want(args, 'toggle') || want(args, 'geometry')) await geometryChecks(b, origin, base, args);
         if (want(args, 'plant')) await plantChecks(b, origin, base);
+        if (['walk', 'focus', 'buttons', 'chart'].some((s) => want(args, s))) await walkChecks(b, origin, args);
       });
   }
   console.log(failed ? `RESULT: FAIL ${failed} of ${passed + failed}` : `RESULT: PASS ${passed} checks`);
