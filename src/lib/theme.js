@@ -1,7 +1,8 @@
 // Site theme: "dark" (Obsidian, the default) or "light" (Quartz).
 //
 // The inline head snippet of every page picks the theme before <body> is
-// parsed (stored choice, else the OS preference, else dark) and writes it to
+// parsed (the stored choice from the toggle, else dark: the OS preference is
+// not consulted, dark is the site's default) and writes it to
 // <html data-theme>, so the first paint is already right. This module takes
 // over from there: the nav toggle, the stored choice, the `storage` event
 // from other tabs, and the <meta name="theme-color"> (the browser chrome).
@@ -24,18 +25,10 @@ function stored() {
   }
 }
 
-function prefersLight() {
-  try {
-    return window.matchMedia('(prefers-color-scheme: light)').matches;
-  } catch {
-    return false;
-  }
-}
-
 /** The theme the head snippet would pick now. */
 function initial() {
   if (!isBrowser) return 'dark';
-  return valid(document.documentElement.dataset.theme) || stored() || (prefersLight() ? 'light' : 'dark');
+  return valid(document.documentElement.dataset.theme) || stored() || 'dark';
 }
 
 let current = initial();

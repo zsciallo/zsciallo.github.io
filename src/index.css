@@ -65,8 +65,8 @@
   --page-top: color-mix(in srgb, var(--bg2) 45%, var(--bg));
   --page-bottom: var(--bg);
   --vignette: rgba(0, 0, 0, 0.8);
-  --dither-dot: #8A8F9A;
-  --dither-alpha: 0.55;
+  --dither-dot: #B4B7BE;
+  --dither-alpha: 1;
 
   /* Translucent nav bar: a frosted form of --surface. */
   --nav-fill: color-mix(in srgb, var(--surface) 78%, transparent);
@@ -110,8 +110,8 @@
   --page-top: var(--bg);
   --page-bottom: var(--bg2);
   --vignette: rgba(22, 24, 29, 0.07);
-  --dither-dot: #565B66;
-  --dither-alpha: 0.4;
+  --dither-dot: #3A3D44;
+  --dither-alpha: 1;
 
   --nav-fill: color-mix(in srgb, var(--surface) 92%, transparent);
   --divider-on-surface: var(--surface-hover);
