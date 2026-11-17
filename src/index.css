@@ -398,7 +398,6 @@ body::after {
   font-size: 0.80rem;
   letter-spacing: 0.06em;
   color: var(--muted);
-  opacity: 0.75;
 }
 
 /* Fixed width, not content width: GAINERS is a letter longer than LOSERS, and
@@ -497,7 +496,6 @@ body::after {
 }
 
 .tape-price {
-  opacity: 0.85;
 }
 
 .tape-change {
@@ -520,7 +518,6 @@ body::after {
   font-size-adjust: cap-height 0.7;
   font-size: 0.82rem;
   color: var(--muted);
-  opacity: 0.6;
 }
 
 @media (max-width: 560px) {
@@ -631,7 +628,6 @@ body::after {
   font-size: 0.9rem;
   letter-spacing: 0.14em;
   color: var(--text);
-  opacity: 0.8;
   margin-top: 0.5em;
 }
 
@@ -641,14 +637,13 @@ body::after {
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   margin: 0.1em 0 0.3em;
 }
 
 .launch-sub {
   font-size: 0.85rem;
   color: var(--muted);
-  opacity: 0.85;
 }
 
 /* ─── SHARED CARD BASE ───
@@ -693,7 +688,7 @@ body::after {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background: linear-gradient(90deg, transparent, var(--muted-on-surface), transparent);
   opacity: 0.7;
 }
 
@@ -736,10 +731,10 @@ body::after {
   align-items: center;
   padding: 6px 16px;
   background: var(--surface-hover);
-  border: 1px solid var(--border);
+  border: 1px solid var(--surface-selected);
   border-radius: 5px;
   box-shadow: 0 3px 0 var(--edge-raised), 0 5px 0 var(--edge-line);
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: none;
   font-size: 1.35rem;
@@ -758,9 +753,9 @@ body::after {
 
 .copy-btn:hover {
   background: var(--surface-selected);
-  border-color: var(--accent);
-  box-shadow: 0 3px 0 var(--edge-lit), 0 5px 0 var(--edge-line);
-  color: var(--text);
+  border-color: var(--muted-on-surface);
+  box-shadow: 0 3px 0 var(--edge-raised), 0 5px 0 var(--edge-line);
+  color: var(--text-on-surface);
 }
 
 .copy-btn:focus-visible {
@@ -952,7 +947,7 @@ body::after {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -1197,7 +1192,6 @@ footer {
   font-size-adjust: cap-height 0.63;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
-  opacity: 0.45;
   position: relative;
   z-index: 1;
   border-top: 1px solid var(--border);
@@ -1356,7 +1350,7 @@ footer {
   font-size-adjust: none;
   font-size: 1.9rem;
   line-height: 1;
-  color: var(--accent-on-surface);
+  color: var(--muted-on-surface);
 }
 
 /* Closed until Motion runs: height 0 is the SSR style too. */
@@ -1571,7 +1565,7 @@ footer {
   font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--accent-2);
+  color: var(--text);
   display: flex;
   justify-content: center;
   align-items: baseline;
@@ -1613,12 +1607,11 @@ footer {
   font-size: 0.8rem;
   letter-spacing: 0.2em;
   color: var(--muted);
-  opacity: 0.7;
   transition: color 0.2s, opacity 0.2s;
 }
 
 .pkg-card:hover .pkg-details-hint {
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   opacity: 1;
 }
 
@@ -2101,7 +2094,7 @@ footer {
   font-family: var(--font-mono);
   font-size-adjust: cap-height 0.7;
   font-weight: 600;
-  color: var(--accent-2);
+  color: var(--text);
 }
 
 .store-table tbody tr:nth-child(even) {
@@ -2114,7 +2107,6 @@ footer {
 
 .store-table-empty {
   color: var(--muted);
-  opacity: 0.5;
 }
 
 @media (max-width: 480px) {
@@ -2228,7 +2220,6 @@ footer {
   letter-spacing: 0.12em;
   line-height: 1.35;
   color: var(--muted);
-  opacity: 0.7;
 }
 
 .rank-step + .rank-step::before {
@@ -3083,7 +3074,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.63;
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--accent-2);
+  color: var(--text);
 }
 
 .type-option-per {
@@ -3105,7 +3096,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.14em;
-  color: var(--accent);
+  color: var(--text);
   margin-top: 0.15rem;
 }
 
@@ -3143,18 +3134,18 @@ html:not(.js) .sound-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  border: 1px solid var(--surface-selected);
   border-radius: 7px;
-  color: var(--accent-2);
+  color: var(--text-on-surface);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
 .pkg-cart-btn:hover {
-  border-color: var(--accent);
-  background: var(--glow);
-  color: var(--text);
+  border-color: var(--muted-on-surface);
+  background: var(--surface-selected);
+  color: var(--text-on-surface);
 }
 
 .pkg-cart-btn:disabled {
@@ -3228,7 +3219,7 @@ html:not(.js) .sound-toggle {
 .store-user-change {
   background: none;
   border: none;
-  color: var(--accent-2);
+  color: var(--text);
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
@@ -3250,14 +3241,14 @@ html:not(.js) .sound-toggle {
   justify-content: center;
   background: var(--frost), var(--bg2);
   border: 1px solid var(--border);
-  color: var(--accent-2);
+  color: var(--text);
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   transition: border-color 0.15s, color 0.15s;
 }
 
 .cart-fab:hover {
-  border-color: var(--accent);
+  border-color: var(--muted);
   color: var(--text);
 }
 
@@ -3269,9 +3260,9 @@ html:not(.js) .sound-toggle {
   height: 20px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--accent-deep);
-  border: 1px solid var(--accent);
-  color: var(--text);
+  background: var(--text);
+  border: 1px solid var(--text);
+  color: var(--bg);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 0.85rem;
@@ -3479,7 +3470,7 @@ html:not(.js) .sound-toggle {
   font-size-adjust: cap-height 0.63;
   font-size: 1rem;
   letter-spacing: 0.04em;
-  color: var(--accent-2);
+  color: var(--text-2);
   white-space: nowrap;
 }
 
@@ -3520,7 +3511,7 @@ html:not(.js) .sound-toggle {
 }
 
 .cart-total span:last-child {
-  color: var(--accent-2);
+  color: var(--text-2);
   font-weight: 700;
 }
 
@@ -3692,7 +3683,7 @@ html:not(.js) .sound-toggle {
 }
 
 .modal-input:focus {
-  border-color: var(--accent);
+  border-color: var(--text-on-surface);
 }
 
 .modal-error {
@@ -3779,8 +3770,8 @@ html:not(.js) .sound-toggle {
   flex-shrink: 0;
   border-radius: 1px;
   transform: rotate(45deg);
-  background: var(--accent-on-surface);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-on-surface) 60%, transparent);
+  background: var(--muted-on-surface);
+  box-shadow: none;
 }
 
 .carousel-slide {
@@ -4094,7 +4085,7 @@ html.js .reveal.is-visible {
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: var(--text);
   border: 1px solid var(--border-pink);
   border-radius: 3px;
   padding: 0.1rem 0.35rem;
@@ -4138,7 +4129,7 @@ html.js .reveal.is-visible {
   font-size: 0.8rem;
   letter-spacing: 0.18em;
   color: var(--bg);
-  background: var(--grad-cta);
+  background: var(--text);
   border-radius: 999px;
   padding: 0.2rem 0.75rem;
   white-space: nowrap;
@@ -4150,7 +4141,7 @@ html.js .reveal.is-visible {
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--accent-2);
+  color: var(--text);
   background: color-mix(in srgb, var(--text) 6%, transparent);
   border: 1px dashed var(--border-pink);
   border-radius: 5px;
@@ -4174,7 +4165,7 @@ html.js .reveal.is-visible {
   font-size-adjust: cap-height 0.7;
   font-size: 0.81rem;
   letter-spacing: 0.1em;
-  color: var(--accent-2);
+  color: var(--muted);
   margin-top: 0.35rem;
 }
 
@@ -4234,7 +4225,7 @@ html.js .reveal.is-visible {
 }
 
 .cart-coupon-hint strong {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .cart-coupon-error {
@@ -4574,6 +4565,12 @@ html.js.fonts-ready .site-nav-inner {
   transition: color 0.2s, text-shadow 0.2s;
 }
 
+.site-nav-brand:focus-visible {
+  outline: 2px solid var(--accent-on-surface);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
 .site-nav-brand:hover {
   color: var(--accent-on-surface);
   text-shadow: 0 0 18px color-mix(in srgb, var(--accent-on-surface) 45%, transparent);
@@ -4666,7 +4663,7 @@ html.js.fonts-ready .site-nav-inner {
   height: 2px;
   border-radius: 2px;
   background: var(--accent-on-surface);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-on-surface) 45%, transparent);
+  box-shadow: none;
   transition: transform 0.22s ease, opacity 0.18s ease, background 0.2s;
 }
 
@@ -4869,12 +4866,12 @@ html.js .pkg-card.reveal {
 
 .pkg-cart-btn:hover:not(:disabled) {
   translate: 0 -2px;
-  box-shadow: 0 7px 0 var(--edge-lit), 0 9px 0 var(--edge-line);
+  box-shadow: 0 7px 0 var(--edge-raised), 0 9px 0 var(--edge-line);
 }
 
 .pkg-cart-btn:active:not(:disabled) {
   translate: 0 5px;
-  box-shadow: 0 0 0 var(--edge-lit), 0 2px 0 var(--edge-line);
+  box-shadow: 0 0 0 var(--edge-raised), 0 2px 0 var(--edge-line);
   transition-duration: 0.06s;
 }
 
@@ -5118,7 +5115,6 @@ html[data-keypromo="off"] .store-promo--key {
 /* The tab is meant to look switched off, so it reads as a secret. ArcadeButton
    sets --edge inline, so the flat look overrides the shadow itself. */
 .store-tab--random.btn {
-  opacity: 0.4;
   color: var(--muted);
   box-shadow: none;
   outline: 2px dashed var(--border);
@@ -5658,10 +5654,10 @@ html[data-keypromo="off"] .store-promo--key {
   height: 100%;
 }
 
-/* Tabbing to the banner shows the same pink ring as the buttons, drawn inside
+/* Tabbing to the banner shows a purple ring like the buttons, drawn inside
    the frame because the banner clips anything outside it. */
 .carousel--banner .carousel-slide-btn:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent-on-surface);
   outline-offset: -4px;
 }
 
@@ -5770,6 +5766,17 @@ html[data-keypromo="off"] .store-promo--key {
   flex: none;
 }
 
+/* Tier labels (U2 B3). The page sets the tier's colour as --tier (one of the
+   seven --tier-* tokens, or the feed's hex). Chips, medals and borders show
+   it as it is; the label TEXT on a dark surface takes a lighter form of the
+   same hue (a straight sRGB mix with white keeps the hue) so every tier
+   reads at 4.5:1 on the rest, hover and selected fills. */
+.pvp-tier[style*='--tier'],
+.mode-live-tier[style*='--tier'] {
+  color: color-mix(in srgb, var(--tier) 58%, white);
+  border-color: var(--tier);
+}
+
 /* The ladder slot with no rows yet: the seven tiers as chips, the same box as
    the live block and about its height, so nothing jumps when rows arrive. */
 .mode-live--idle {
@@ -5861,7 +5868,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 2.6rem;
   font-weight: 400;
   line-height: 1;
-  color: var(--accent-2);
+  color: var(--text-on-surface);
 }
 
 .fact-line {

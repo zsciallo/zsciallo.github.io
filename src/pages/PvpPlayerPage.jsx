@@ -38,7 +38,7 @@ function initialState() {
 /** A tier's colour: the view's (from the ladder), else the built-in ladder's. */
 const tierStyle = (tier) => {
   const colour = tier.colour ?? builtinTierColour(tier.label.split(' ')[0]);
-  return colour ? { color: colour } : undefined;
+  return colour ? { '--tier': colour } : undefined;
 };
 
 /** A broken head hides itself over the frame, which shows the default head. */

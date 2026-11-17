@@ -56,7 +56,7 @@ function LadderTop() {
               {rows.map((row) => (
                 <li key={row.uuid ?? row.name} class="mode-live-row">
                   <span class="mode-live-name"><span class="mode-live-rank">#{row.rank}</span> {row.name}</span>
-                  <span class="mode-live-tier" style={{ color: tierColour(row.tier, doc) ?? undefined }}>{tierLabel(row)}</span>
+                  <span class="mode-live-tier" style={{ '--tier': tierColour(row.tier, doc) ?? undefined }}>{tierLabel(row)}</span>
                 </li>
               ))}
             </ol>

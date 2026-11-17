@@ -7,7 +7,7 @@ export function TierLadder({ doc }) {
       <h2 class="section-title" id="pvp-tiers-title">SEVEN TIERS</h2>
       <ol class="pvp-ladder">
         {ladderTiers(doc).map((t) => (
-          <li key={t.name} class="pvp-rung" data-tier={t.name} style={t.colour ? { color: t.colour } : undefined}>
+          <li key={t.name} class="pvp-rung" data-tier={t.name} style={t.colour ? { '--tier': t.colour } : undefined}>
             <b class="pvp-rung-name">{t.name}</b>
             <span class="pvp-rung-min">{t.minLabel}</span>
           </li>

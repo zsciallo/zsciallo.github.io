@@ -305,7 +305,6 @@
 .market-row .num em {
   font-style: normal;
   color: var(--muted);
-  opacity: 0.6;
 }
 
 .market-when {
@@ -362,8 +361,7 @@
 }
 
 .market-ench {
-  color: var(--accent);
-  opacity: 0.8;
+  color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -376,7 +374,7 @@
   font-size: 0.80rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-on-surface);
+  color: var(--text-on-surface);
   background: var(--surface-hover);
   border-radius: 3px;
 }
@@ -396,7 +394,18 @@
 
 .spark {
   display: block;
+  color: var(--muted-on-surface);
   overflow: visible;
+}
+
+/* The list sparkline is a scan aid, not a chart: neutral line (the detail
+   charts keep the series hues). CSS beats the svg presentation attributes. */
+.spark path {
+  stroke: currentColor;
+}
+
+.spark circle {
+  fill: currentColor;
 }
 
 .spark--empty {
@@ -509,7 +518,6 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
-  opacity: 0.7;
   word-break: break-all;
 }
 
@@ -533,7 +541,7 @@
 }
 
 .detail-ench li b {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .detail-contents li b {
@@ -558,7 +566,7 @@
 
 .mini-table h4 em {
   font-style: normal;
-  opacity: 0.55;
+  color: var(--muted);
 }
 
 /* ─── stat tiles ─── */
@@ -606,7 +614,6 @@
 .stat-note {
   font-size: 0.84rem;
   color: var(--muted);
-  opacity: 0.8;
   margin-top: 0.15rem;
 }
 
@@ -817,7 +824,6 @@
   font-size: 8.5px;
   letter-spacing: 0.12em;
   text-anchor: start;
-  opacity: 0.65;
 }
 
 .chart-crosshair line {
@@ -955,7 +961,6 @@
   font-size: 0.82rem;
   letter-spacing: 0.06em;
   color: var(--muted);
-  opacity: 0.7;
 }
 
 .mini-empty {
@@ -1039,7 +1044,7 @@
   font-size: 0.81rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-2);
+  color: var(--muted);
 }
 
 .explainer-body {
@@ -1058,7 +1063,7 @@
   font-size: 0.82rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text);
   margin-bottom: 0.4rem;
 }
 
@@ -1143,7 +1148,7 @@
   font-size: 0.84rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent-on-surface);
+  color: var(--text-on-surface);
 }
 
 /* No purple text on the selected card. */
@@ -1209,7 +1214,7 @@
 
 .pool-card-depth em {
   font-style: normal;
-  opacity: 0.75;
+  color: var(--muted);
 }
 
 .pool-detail {
@@ -1283,7 +1288,7 @@
   font-size-adjust: cap-height 0.7;
   font-size: 0.80rem;
   letter-spacing: 0.12em;
-  color: var(--accent-on-surface);
+  color: var(--text-on-surface);
   background: var(--surface-hover);
   border-radius: 3px;
 }
@@ -1543,7 +1548,7 @@
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 3;
-  background: radial-gradient(circle at 50% 45%, var(--glow), transparent 70%), var(--bg3);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--text-on-surface) 6%, transparent), transparent 70%), var(--bg3);
   border-bottom: 1px solid var(--divider-on-surface);
 }
 
@@ -1614,7 +1619,7 @@
   border: 0;
   padding: 0;
   font: inherit;
-  color: var(--accent);
+  color: var(--text);
   cursor: pointer;
 }
 
@@ -1638,7 +1643,7 @@
 }
 
 .listing-facts dt {
-  opacity: 0.75;
+  color: var(--muted);
 }
 
 .listing-facts dd {

@@ -53,7 +53,7 @@ function Row({ row, kind, index }) {
         <>
           <td class="pvp-c-tier">
             {row.tier ? (
-              <span class="pvp-tier" style={colour ? { color: colour } : undefined}>{row.tier.label}</span>
+              <span class="pvp-tier" style={colour ? { '--tier': colour } : undefined}>{row.tier.label}</span>
             ) : (
               <span class="pvp-tier pvp-tier--none">-</span>
             )}

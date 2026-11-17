@@ -496,6 +496,16 @@
   color: var(--muted);
 }
 
+.pvp-rung[style*='--tier'] {
+  color: var(--tier);
+}
+
+/* The rungs sit on the page: Quartz takes a darker form of the same hue
+   (a straight sRGB mix with black keeps it) for the name. */
+[data-theme='light'] .pvp-rung[style*='--tier'] .pvp-rung-name {
+  color: color-mix(in srgb, var(--tier) 48%, black);
+}
+
 .pvp-rung-name {
   font-family: var(--font-hud);
   font-size-adjust: none;
