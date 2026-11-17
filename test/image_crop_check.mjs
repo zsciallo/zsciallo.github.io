@@ -422,7 +422,8 @@ async function openPage(b, origin, { width = 1280, variant = 'live', init = '', 
     await s('Network.setCacheDisabled', { cacheDisabled: true });
     await s('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
     await s('Emulation.setDeviceMetricsOverride', { width, height: HEIGHT, deviceScaleFactor: 1, mobile: false });
-    await s('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+    // Run 20261117-palette: the dark theme (Obsidian) explicitly, not whatever the host OS prefers.
+    await s('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }, { name: 'prefers-color-scheme', value: 'dark' }] });
     await s('Emulation.setTimezoneOverride', { timezoneId: 'UTC' });
     await s('Emulation.setLocaleOverride', { locale: 'en-US' });
     await s('Page.addScriptToEvaluateOnNewDocument', { source: FREEZE(FROZEN_TIME) });

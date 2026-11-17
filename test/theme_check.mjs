@@ -64,6 +64,18 @@
 //             sideways in the bar. Nothing else may move, appear or vanish.
 //             Runtime data is deterministic through card_style_check's fixtures
 //             (PVP feed, market data, status, Tebex); GEOMETRY_EXCLUDE is empty.
+//   wells     (round 2, amendment B1) on / at 400 and 1280, both themes: every
+//             rendered .mode-live (the TOP OF THE LADDER / TODAY'S TOP MOVERS
+//             well inside the Home mode cards) has the computed background of
+//             --inset-on-surface (Obsidian #090A0C, Quartz #0E0F12: dark in both),
+//             and every visible text node inside it, tier colours and the
+//             up/down percentages included, is >= 4.5:1 against what is behind it.
+//   glow      (round 2, amendment B2) on / at 1280, both themes: the hero title
+//             (TITLES) and the claim-band title carry no glow of their own
+//             (text-shadow none, no drop-shadow filter, nor on any ancestor);
+//             their highlighted-word spans (.accent) have either no shadow or
+//             only shadows in the theme's --accent at alpha <= GLOW_TITLE_ALPHA:
+//             no pink (no colour with R > B) and no dark drop in either theme.
 //   plant     the geometry comparator on a real page of the build under test:
 //             a .theme-toggle planted beside the sound toggle (when the build
 //             has none) passes; main 1px lower, the brand 1px right, or the
@@ -93,6 +105,8 @@ export const TOKENS = {
     '--accent': '#c77dff', '--accent-deep': '#9a4dff', '--accent-on-surface': '#c77dff', '--on-accent': '#120a1f',
     '--positive': '#5be3a0', '--positive-on-surface': '#5be3a0',
     '--edge-raised': '#3a3e49', '--edge-dark': '#1c1e24',
+    // Round 2 amendment B1: wells inside dark cards stay dark in both themes.
+    '--inset-on-surface': '#090a0c',
   },
   light: {
     '--bg': '#f2f3f5', '--bg2': '#e6e8ec', '--bg3': '#d3d6dc',
@@ -101,6 +115,7 @@ export const TOKENS = {
     '--text': '#16181d', '--muted': '#565b66', '--text-on-surface': '#f2f3f5', '--muted-on-surface': '#a6abb6',
     '--accent': '#7b2fe0', '--accent-deep': '#5a1fb0', '--accent-on-surface': '#c77dff', '--on-accent': '#ffffff',
     '--positive': '#0b6b40', '--positive-on-surface': '#5be3a0',
+    '--inset-on-surface': '#0e0f12',
   },
 };
 /** Both themes: the token resolves to exactly the colour of its target (and is no gradient). */
@@ -120,6 +135,14 @@ export const GLOW_MAX_ALPHA = 0.2;
 export const NEUTRAL = 24;
 /** Dither dots must differ from --bg by at least this much (mean of R, G, B) in the theme's direction. */
 export const DOT_STEP = 40;
+/** B1: text inside a well, against the well. */
+export const WELL_TEXT_MIN = 4.5;
+/** B2: the Home titles (real selectors, src/App.jsx and src/components/ClaimBand.jsx) and their highlighted words. */
+export const TITLES = [
+  { name: 'hero title', title: '.home-hero .hero-title', hl: '.home-hero .hero-title .accent' },
+  { name: 'claim title', title: '.claim-band .claim-title', hl: '.claim-band .claim-title .accent' },
+];
+export const GLOW_TITLE_ALPHA = 0.35;
 
 export const ROUTES = [
   { path: '/', ready: '.mode-card', file: 'index.html' },
@@ -270,7 +293,52 @@ const LIB = String.raw`(() => {
     return { n, bad, mean: n ? sum / n : null, worst, w: c.width, h: c.height };
   };
   const toggle = () => document.querySelector(${JSON.stringify(NEW_ELEMENT)});
-  return { parse, colour, coloursIn, token, meta, dither, toggle, theme: () => document.documentElement.getAttribute('data-theme') };
+  const lum = (c) => {
+    const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+  };
+  const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const over = (t, u) => [0, 1, 2].map((i) => t[i] * t[3] + u[i] * (1 - t[3])).concat(1);
+  const clipText = (cs) => cs.backgroundClip === 'text' || cs.webkitBackgroundClip === 'text';
+  /** The opaque colour behind an element (nearest painted ancestors over the body background); null under an image or gradient. */
+  const effBg = (el) => {
+    const layers = [];
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (!clipText(cs) && cs.backgroundImage !== 'none' && e !== document.body && e !== document.documentElement) return null;
+      const c = clipText(cs) ? null : parse(cs.backgroundColor);
+      if (c && c[3] > 0) { layers.push(c); if (c[3] >= 1) break; }
+    }
+    let bg = parse(getComputedStyle(document.body).backgroundColor);
+    if (bg[3] < 1) bg = [0, 0, 0, 1];
+    for (let i = layers.length - 1; i >= 0; i--) bg = layers[i][3] >= 1 ? layers[i] : over(layers[i], bg);
+    return bg;
+  };
+  /** Every visible text node under root: its ink against what is behind it. */
+  const texts = (root) => {
+    const out = [];
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) {
+      if (!n.nodeValue.trim()) continue;
+      const el = n.parentElement;
+      if (!el || !el.getClientRects().length) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden') continue;
+      const r = document.createRange();
+      r.selectNodeContents(n);
+      const box = r.getBoundingClientRect();
+      if (box.width < 2 || box.height < 2) continue;
+      let ink = parse(cs.webkitTextFillColor);
+      if (ink[3] === 0) ink = parse(cs.color);
+      if (clipText(cs) && ink[3] === 0) ink = cs.backgroundImage === 'none' ? parse(cs.backgroundColor) : null;
+      const bg = effBg(el);
+      if (!ink || !bg) { out.push({ text: n.nodeValue.trim().slice(0, 24), cls: el.className, unknown: true }); continue; }
+      if (ink[3] < 1) ink = over(ink, bg);
+      out.push({ text: n.nodeValue.trim().slice(0, 24), cls: String(el.className), ink: ink.slice(0, 3).map(Math.round), bg: bg.slice(0, 3).map(Math.round), ratio: +contrast(ink, bg).toFixed(2) });
+    }
+    return out;
+  };
+  return { parse, colour, coloursIn, token, meta, dither, toggle, effBg, texts, contrast, theme: () => document.documentElement.getAttribute('data-theme') };
 })()`;
 
 const install = (page) => page.ev(`(window.__theme = ${LIB}, true)`);
@@ -608,6 +676,91 @@ async function geometryChecks(b, origin, base, args) {
       }
 }
 
+// ------------------------------------------------------------ wells, glow --
+
+async function wellChecks(b, origin) {
+  for (const width of WIDTHS)
+    for (const theme of THEMES) {
+      const id = `/@${width} ${theme}`;
+      let page;
+      try {
+        page = await open(b, origin, { label: `wells ${theme}`, init: seed(theme), os: theme }, width);
+      } catch (e) {
+        check(`wells ${id}`, [String(e?.message ?? e)]);
+        continue;
+      }
+      try {
+        await install(page);
+        const ok = await page.ev(`(async () => { for (let i = 0; i < 50; i++) { if ([...document.querySelectorAll('.mode-live')].some((w) => !w.hidden && w.getClientRects().length && w.querySelector('.mode-live-row'))) return true; await new Promise((r) => setTimeout(r, 100)); } return false; })()`);
+        const got = await page.ev(`(() => { const T = window.__theme; return [...document.querySelectorAll('.mode-live')].filter((w) => !w.hidden && w.getClientRects().length).map((w) => ({ live: w.getAttribute('data-live') || w.className, bg: T.parse(getComputedStyle(w).backgroundColor), bgCss: getComputedStyle(w).backgroundColor, texts: T.texts(w) })); })()`);
+        const want = hexRgb(TOKENS[theme]['--inset-on-surface']);
+        const p = [];
+        if (!ok || !got.length) p.push('no rendered .mode-live with rows (the PVP fixture should fill it)');
+        for (const w of got) {
+          if (w.bg[3] < 0.999 || w.bg.slice(0, 3).some((v, i) => Math.abs(v - want[i]) > 0.5)) p.push(`.mode-live[${w.live}] background is ${w.bgCss}, want --inset-on-surface ${TOKENS[theme]['--inset-on-surface']}`);
+        }
+        check(`wells ${id} background`, p);
+        const t = [];
+        for (const w of got)
+          for (const x of w.texts) {
+            if (x.unknown) t.push(`.mode-live[${w.live}] ${q(x.text)} (.${x.cls}) sits on an image or gradient`);
+            else if (x.ratio < WELL_TEXT_MIN) t.push(`.mode-live[${w.live}] ${q(x.text)} (.${x.cls.split(' ').join('.')}) rgb(${x.ink.join(', ')}) on rgb(${x.bg.join(', ')}) ${x.ratio}:1, want >= ${WELL_TEXT_MIN}`);
+          }
+        check(`wells ${id} text contrast (${got.reduce((n, w) => n + w.texts.length, 0)} text nodes)`, got.length ? t : ['no well to read']);
+      } catch (e) {
+        check(`wells ${id}`, [String(e?.message ?? e)]);
+      } finally {
+        await page.close();
+      }
+    }
+}
+
+/** Problems with the shadow colours of a computed text-shadow / filter value: each must be the accent at alpha in (0, max]. */
+export function glowColourProblems(colours, accent, max, what) {
+  const out = [];
+  for (const c of colours) {
+    const [r, g, bl, a] = c.rgba;
+    if (a === 0) continue;
+    if (r > bl) out.push(`${what} has ${c.css}: pink/warm (R > B)`);
+    else if ([r, g, bl].some((v, i) => Math.abs(v - accent[i]) > 1)) out.push(`${what} has ${c.css}: not the theme accent rgb(${accent.join(', ')})`);
+    else if (a > max + 1e-6) out.push(`${what} has ${c.css}: alpha ${a} > ${max}`);
+  }
+  return out;
+}
+
+async function glowChecks(b, origin) {
+  for (const theme of THEMES) {
+    let page;
+    try {
+      page = await open(b, origin, { label: `glow ${theme}`, init: seed(theme), os: theme });
+    } catch (e) {
+      check(`glow ${theme}`, [String(e?.message ?? e)]);
+      continue;
+    }
+    try {
+      await install(page);
+      const accent = hexRgb(TOKENS[theme]['--accent']);
+      for (const t of TITLES) {
+        const got = await page.ev(`(() => { const T = window.__theme; const el = document.querySelector(${q(t.title)}); if (!el) return null; const cs = getComputedStyle(el); const anc = []; for (let a = el.parentElement; a; a = a.parentElement) { const f = getComputedStyle(a).filter; if (/drop-shadow/.test(f)) anc.push({ tag: a.tagName.toLowerCase() + (a.className ? '.' + String(a.className).split(' ').join('.') : ''), filter: f }); } return { shadow: cs.textShadow, filter: cs.filter, anc, hl: [...document.querySelectorAll(${q(t.hl)})].map((h) => { const s = getComputedStyle(h); return { shadow: s.textShadow, filter: s.filter, colours: T.coloursIn(s.textShadow + ' ' + (/drop-shadow/.test(s.filter) ? s.filter : '')) }; }) }; })()`);
+        if (!got) {
+          check(`glow ${theme} ${t.name}`, [`no ${t.title}`]);
+          continue;
+        }
+        check(`glow ${theme} ${t.name}: no glow on the title words (${t.title})`, [
+          got.shadow !== 'none' ? `text-shadow is ${got.shadow.slice(0, 120)}, want none` : null,
+          /drop-shadow/.test(got.filter) ? `filter is ${got.filter.slice(0, 120)}, want no drop-shadow` : null,
+          ...got.anc.map((a) => `ancestor ${a.tag} has filter ${a.filter.slice(0, 80)} (it glows the whole title)`),
+        ]);
+        check(`glow ${theme} ${t.name}: highlighted words (${t.hl}) glow only in the accent at alpha <= ${GLOW_TITLE_ALPHA}`, !got.hl.length ? [`no ${t.hl}`] : got.hl.flatMap((h, i) => glowColourProblems(h.colours, accent, GLOW_TITLE_ALPHA, `span ${i + 1}`)));
+      }
+    } catch (e) {
+      check(`glow ${theme}`, [String(e?.message ?? e)]);
+    } finally {
+      await page.close();
+    }
+  }
+}
+
 /**
  * The comparator on a real page of this build: a planted toggle beside the
  * sound toggle (when the build has none) passes, and a 1px change outside the
@@ -657,13 +810,19 @@ function selfChecks() {
   check('self geometry: a vanished box fails', geometryDiff(base, less).some((x) => x.includes('is gone')) ? [] : ['not reported']);
   check('self geometry: a new box fails', geometryDiff(base, { ...same, 'body/2footer': [0, 450, 100, 40] }).some((x) => x.includes('is new')) ? [] : ['not reported']);
   check('self neutral: #0e0f12 and #32363f pass, #c77dff and #150b29 fail', [isNeutral([14, 15, 18]) ? null : '#0e0f12', isNeutral([50, 54, 63]) ? null : '#32363f', isNeutral([199, 125, 255]) ? '#c77dff passed' : null, isNeutral([21, 11, 41]) ? '#150b29 passed' : null]);
+  const acc = [199, 125, 255];
+  const col = (r, g, b, a) => ({ css: `rgba(${r}, ${g}, ${b}, ${a})`, rgba: [r, g, b, a] });
+  check('self glow: the accent at .3 passes', glowColourProblems([col(199, 125, 255, 0.3)], acc, 0.35, 'x'));
+  check('self glow: pink 255,125,225 fails', glowColourProblems([col(255, 125, 225, 0.3)], acc, 0.35, 'x').some((x) => x.includes('R > B')) ? [] : ['not reported']);
+  check('self glow: a dark drop rgba(22,24,29,.5) fails', glowColourProblems([col(22, 24, 29, 0.5)], acc, 0.35, 'x').length ? [] : ['not reported']);
+  check('self glow: the accent at .5 fails', glowColourProblems([col(199, 125, 255, 0.5)], acc, 0.35, 'x').some((x) => x.includes('alpha')) ? [] : ['not reported']);
   const html = '<html><head><script>(function(){document.fonts;"fonts-ready"})()</script><script type="module" src="/a.js"></script><script type="application/ld+json">{}</script><script defer src="x.js"></script><script>var x=1</script></head><body><script>var y=2</script></body></html>';
   check('self head scripts: counts inline blocking head scripts only', inlineHeadScripts(html).length === 2 ? [] : [`counted ${inlineHeadScripts(html).length}`]);
 }
 
 // ------------------------------------------------------------------- main --
 
-const SECTIONS = ['static', 'tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'plant', 'self'];
+const SECTIONS = ['static', 'tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant', 'self'];
 function want(args, section) {
   const i = args.indexOf('--only');
   return i < 0 || args[i + 1].split(',').includes(section);
@@ -722,10 +881,12 @@ async function main() {
     const base = existsSync(BASE_FILE) ? JSON.parse(readFileSync(BASE_FILE, 'utf-8')) : null;
     if (want(args, 'self')) selfChecks();
     if (want(args, 'static')) staticChecks(dist, base);
-    if (['tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'plant'].some((s) => want(args, s)))
+    if (['tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant'].some((s) => want(args, s)))
       await browser(dist, async (b, origin) => {
         if (['tokens', 'body', 'dither'].some((s) => want(args, s))) await themedPageChecks(b, origin, args);
         if (want(args, 'switch')) await switchChecks(b, origin);
+        if (want(args, 'wells')) await wellChecks(b, origin);
+        if (want(args, 'glow')) await glowChecks(b, origin);
         if (want(args, 'toggle') || want(args, 'geometry')) await geometryChecks(b, origin, base, args);
         if (want(args, 'plant')) await plantChecks(b, origin, base);
       });

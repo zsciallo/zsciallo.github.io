@@ -85,9 +85,23 @@
 //                 overlaps it horizontally by >= 50% of the narrower one starts
 //                 at least 10px below its bottom edge (borderless cards must not
 //                 merge into one block).
-//   contrast      for every card, WCAG contrast of --muted on its background
-//                 >= 4.5 and of --text on it >= 7 (a translucent background is
-//                 composited over --bg first).
+//   contrast      for every card, WCAG contrast of --muted-on-surface on its
+//                 background >= 4.5 and of --text-on-surface on it >= 7 (a
+//                 translucent background is composited over --bg first).
+//                 Run 20261117-palette U1 (owner palette spec 2026-11-17): was
+//                 the root --muted / --text, which are page text now; text on
+//                 surfaces has its own tokens. A missing token fails.
+//   text-contrast (U1, with the above) every visible text node inside a card:
+//                 its computed colour (background-clip:text words: their solid
+//                 fill) against the background actually behind it (the nearest
+//                 painted ancestors, composited over --bg) >= 4.5, or >= 3 at a
+//                 font size >= 24px. A card that still paints the root --muted
+//                 on a selected surface fails here. Text over an image or a
+//                 gradient is skipped (no single background), and so is text in
+//                 KEEP_COLOUR (information-carrying colours the owner kept).
+//   tokens-on-surface  (once) --muted-on-surface >= 4.5 and --text-on-surface
+//                 >= 7 against each of --surface, --surface-inset,
+//                 --surface-hover and --surface-selected (every card state).
 //   coverage      (once, at the end) every CARDS and GUARD entry matched at
 //                 least one rendered element on at least one of its pages, so
 //                 the lists cannot rot into selectors that match nothing.
@@ -138,6 +152,19 @@ export const PERCEPT = { hoverVsRest: 1.1, selectedVsRest: 1.22, selectedVsHover
 export const MIN_GAP = 10;
 export const MUTED_MIN = 4.5;
 export const TEXT_MIN = 7;
+/** Real text on a card (text-contrast): WCAG AA, and the large-text floor from LARGE_PX. */
+export const TEXT_NODE_MIN = 4.5;
+export const LARGE_TEXT_MIN = 3;
+export const LARGE_PX = 24;
+/**
+ * Run 20261117-palette U1: text whose colour carries information the owner kept
+ * (plan "Kept as they are"), exempt from text-contrast only. Each entry names
+ * where it renders. Kept as short as the pages require.
+ */
+export const KEEP_COLOUR = [
+  // Tier colours (Mithril, Chroma, ...) on the tier labels: the PVP search hits (pvp-search) and the profile kit cards (profile).
+  { sel: '.pvp-tier', note: 'tier label colours (keep list: tier colours)' },
+];
 
 // ---------------------------------------------------------------- states --
 // setup: an expression evaluated after the page settles (clicks, typing); it
@@ -530,7 +557,7 @@ const LIB = String.raw`(() => {
   };
   const tokens = () => {
     const t = {};
-    for (const n of ['--surface', '--surface-inset', '--surface-hover', '--surface-selected', '--radius-card', '--radius-inset', '--divider', '--muted', '--text', '--bg']) t[n] = rootVar(n);
+    for (const n of ['--surface', '--surface-inset', '--surface-hover', '--surface-selected', '--radius-card', '--radius-inset', '--divider', '--muted', '--text', '--bg', '--muted-on-surface', '--text-on-surface']) t[n] = rootVar(n);
     return t;
   };
   const resolved = (spec) => {
@@ -541,7 +568,40 @@ const LIB = String.raw`(() => {
       surface: pick('--surface'), inset: pick('--surface-inset'), hover: pick('--surface-hover'), selected: pick('--surface-selected'),
       radiusCard: t['--radius-card'] || spec['--radius-card'], radiusInset: t['--radius-inset'] || spec['--radius-inset'],
       muted: hex(t['--muted']), text: hex(t['--text']), bg: hex(t['--bg']),
+      mutedOn: hex(t['--muted-on-surface']), textOn: hex(t['--text-on-surface']),
     };
+  };
+  /**
+   * The opaque colour behind an element: its own and its ancestors' background
+   * colours, nearest first, composited over the page --bg. Null when an image or
+   * gradient paints first (no single background to measure against).
+   */
+  const effBg = (el, page) => {
+    const layers = [];
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      const clip = cs.backgroundClip === 'text' || cs.webkitBackgroundClip === 'text';
+      if (!clip && cs.backgroundImage !== 'none') return null;
+      const c = clip ? null : rgba(cs.backgroundColor);
+      if (c && c[3] > 0) {
+        layers.push(c);
+        if (c[3] >= 1) break;
+      }
+    }
+    let bg = page || [0, 0, 0, 1];
+    for (let i = layers.length - 1; i >= 0; i--) bg = layers[i][3] >= 1 ? layers[i] : over(layers[i], bg);
+    return bg;
+  };
+  /** The colour a text node is painted in: -webkit-text-fill-color, else color; clipped-background words use their solid fill (null for a gradient). */
+  const inkOf = (el) => {
+    const cs = getComputedStyle(el);
+    const clip = cs.backgroundClip === 'text' || cs.webkitBackgroundClip === 'text';
+    let c = rgba(cs.webkitTextFillColor) || rgba(cs.color);
+    if (clip && (!c || c[3] === 0)) {
+      if (cs.backgroundImage !== 'none') return null;
+      c = rgba(cs.backgroundColor);
+    }
+    return c;
   };
   /** The CARDS entry that decides an element (first match), or null. */
   const entryOf = (el, cards) => cards.find((c) => el.matches(c.sel)) || null;
@@ -559,7 +619,7 @@ const LIB = String.raw`(() => {
     }
     return why;
   };
-  return { rgba, hex, rgbText, contrast, over, rendered, label, path, baseOf, cardProblems, tokens, resolved, entryOf, heuristic, SIDES, CORNERS };
+  return { rgba, hex, rgbText, contrast, over, rendered, label, path, baseOf, cardProblems, tokens, resolved, entryOf, heuristic, effBg, inkOf, SIDES, CORNERS };
 })()`;
 
 /** The page-side inspection; returns plain data. */
@@ -568,7 +628,7 @@ const INSPECT = (cfg) => `(() => {
   const cfg = ${JSON.stringify(cfg)};
   const T = L.resolved(cfg.spec);
   const all = [...document.querySelectorAll('body *')].filter(L.rendered);
-  const out = { tokens: T.raw, cards: [], selected: [], complete: [], excused: [], dividers: [], guard: {}, gaps: [], contrast: [], scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, matched: {} };
+  const out = { tokens: T.raw, cards: [], selected: [], complete: [], excused: [], dividers: [], guard: {}, gaps: [], contrast: [], textContrast: [], scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, matched: {} };
   const cardEls = [];
   for (const el of all) {
     const e = L.entryOf(el, cfg.cards);
@@ -622,14 +682,42 @@ const INSPECT = (cfg) => `(() => {
     for (const p of g.props) v[p] = cs.getPropertyValue(p);
     out.guard[g.sel] = v;
   }
-  // contrast
+  // contrast (U1: the on-surface text tokens; a missing token fails)
   for (const [el, e] of cardEls) {
     let bg = L.rgba(getComputedStyle(el).backgroundColor);
-    if (!bg || !T.muted || !T.text) continue;
+    if (!bg) continue;
+    if (!T.mutedOn || !T.textOn) { out.contrast.push({ sel: e.sel, path: L.path(el), missing: true, muted: 0, text: 0, bg: '--muted-on-surface ' + JSON.stringify(T.raw['--muted-on-surface']) + ', --text-on-surface ' + JSON.stringify(T.raw['--text-on-surface']) + ' not #rrggbb' }); continue; }
     if (bg[3] < 1) bg = L.over(bg, T.bg || [0, 0, 0, 1]);
-    const m = L.contrast(T.muted, bg);
-    const t = L.contrast(T.text, bg);
+    const m = L.contrast(T.mutedOn, bg);
+    const t = L.contrast(T.textOn, bg);
     if (m < cfg.mutedMin || t < cfg.textMin) out.contrast.push({ sel: e.sel, path: L.path(el), muted: +m.toFixed(2), text: +t.toFixed(2), bg: L.rgbText(bg) });
+  }
+  // text-contrast (U1): the real colour of every visible text node in a card against what is behind it
+  const keep = cfg.keepColour.join(', ');
+  const tseen = new Set();
+  for (const [card, e] of cardEls) {
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (tseen.has(n) || !n.nodeValue.trim()) continue;
+      tseen.add(n);
+      const el = n.parentElement;
+      if (!el || !L.rendered(el) || (keep && el.closest(keep))) continue;
+      let faded = false;
+      for (let a = el; a && a !== document.body; a = a.parentElement) if (getComputedStyle(a).opacity === '0') { faded = true; break; }
+      if (faded) continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      const box = range.getBoundingClientRect();
+      if (box.width < 2 || box.height < 2) continue;
+      let ink = L.inkOf(el);
+      const bg = L.effBg(el, T.bg);
+      if (!ink || !bg || ink[3] === 0) continue;
+      if (ink[3] < 1) ink = L.over(ink, bg);
+      const size = parseFloat(getComputedStyle(el).fontSize);
+      const min = size >= cfg.largePx ? cfg.largeMin : cfg.textNodeMin;
+      const ratio = L.contrast(ink, bg);
+      if (ratio < min) out.textContrast.push({ card: e.sel, path: L.path(el), text: n.nodeValue.trim().slice(0, 24), ratio: +ratio.toFixed(3), min, ink: L.rgbText(ink), bg: L.rgbText(bg) });
+    }
   }
   // separation: outer cards only
   if (cfg.gaps) {
@@ -872,6 +960,25 @@ export function tokenPerceptProblems(tok) {
   return out;
 }
 
+/**
+ * U1 (owner palette spec 2026-11-17): the on-surface text tokens against every
+ * card fill token: --muted-on-surface >= MUTED_MIN, --text-on-surface >= TEXT_MIN.
+ */
+export function onSurfaceProblems(tok) {
+  const out = [];
+  const m = hexRgb(tok['--muted-on-surface']);
+  const t = hexRgb(tok['--text-on-surface']);
+  if (!m) out.push(`--muted-on-surface is ${JSON.stringify(tok['--muted-on-surface'] ?? '')}, not a #rrggbb colour`);
+  if (!t) out.push(`--text-on-surface is ${JSON.stringify(tok['--text-on-surface'] ?? '')}, not a #rrggbb colour`);
+  for (const n of ['--surface', '--surface-inset', '--surface-hover', '--surface-selected']) {
+    const bg = hexRgb(tok[n]);
+    if (!bg) { out.push(`${n} is ${JSON.stringify(tok[n] ?? '')}, not a #rrggbb colour`); continue; }
+    if (m && contrastOf(m, bg) < MUTED_MIN) out.push(`--muted-on-surface on ${n} ${contrastOf(m, bg).toFixed(2)}:1, want >= ${MUTED_MIN}`);
+    if (t && contrastOf(t, bg) < TEXT_MIN) out.push(`--text-on-surface on ${n} ${contrastOf(t, bg).toFixed(2)}:1, want >= ${TEXT_MIN}`);
+  }
+  return out;
+}
+
 /** Puts the page in keyboard modality (a real Tab key press), so a scripted focus() matches :focus-visible. */
 async function keyboardModality(page) {
   for (const type of ['keyDown', 'keyUp']) await page.s('Input.dispatchKeyEvent', { type, key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
@@ -1066,7 +1173,7 @@ export async function withBrowser(dist, fn) {
   }
 }
 
-const cfgFor = (width, report = false) => ({ report, spec: SPEC_TOKENS, cards: CARDS.map(({ sel, kind, fill, borderGuarded }) => ({ sel, kind, fill, borderGuarded })), allow: ALLOW.map(({ sel }) => ({ sel })), guard: GUARD.map(({ sel, props }) => ({ sel, props })), gaps: width === 400, minGap: MIN_GAP, divider: DIVIDER, dividerSkip: DIVIDER_SKIP, mutedMin: MUTED_MIN, textMin: TEXT_MIN });
+const cfgFor = (width, report = false) => ({ report, spec: SPEC_TOKENS, cards: CARDS.map(({ sel, kind, fill, borderGuarded }) => ({ sel, kind, fill, borderGuarded })), allow: ALLOW.map(({ sel }) => ({ sel })), guard: GUARD.map(({ sel, props }) => ({ sel, props })), gaps: width === 400, minGap: MIN_GAP, divider: DIVIDER, dividerSkip: DIVIDER_SKIP, mutedMin: MUTED_MIN, textMin: TEXT_MIN, keepColour: KEEP_COLOUR.map((k) => k.sel), textNodeMin: TEXT_NODE_MIN, largeMin: LARGE_TEXT_MIN, largePx: LARGE_PX });
 
 function selectedStates(args) {
   const i = args.indexOf('--only');
@@ -1138,7 +1245,8 @@ async function runChecks(dist, args) {
           check(`${id} guard`, [...new Set(gp)]);
           check(`${id} overflow`, r.scrollWidth > r.innerWidth ? [`scrollWidth ${r.scrollWidth} > ${r.innerWidth}`] : []);
           if (width === 400) check(`${id} separation`, r.gaps.map((g) => `${g.a} then ${g.b}: gap ${g.gap}px, want >= ${MIN_GAP}`));
-          check(`${id} contrast`, grouped(r.contrast.map((c) => ({ key: c.sel, detail: `muted ${c.muted}:1 (>= ${MUTED_MIN}), text ${c.text}:1 (>= ${TEXT_MIN}) on ${c.bg}` }))));
+          check(`${id} contrast`, grouped(r.contrast.map((c) => ({ key: c.sel, detail: c.missing ? c.bg : `muted-on-surface ${c.muted}:1 (>= ${MUTED_MIN}), text-on-surface ${c.text}:1 (>= ${TEXT_MIN}) on ${c.bg}` }))));
+          check(`${id} text-contrast`, grouped(r.textContrast.map((c) => ({ key: c.path.split(' > ').slice(-2).join(' > '), detail: `${JSON.stringify(c.text)} ${c.ink} on ${c.bg} ${c.ratio}:1 (>= ${c.min})` }))));
           if (state.id === RARITY_PROBE_STATE || state.id === RANK_PROBE_STATE) {
             const kind = state.id === RARITY_PROBE_STATE ? 'rarity' : 'rank';
             const got = await probes(page, state, width);
@@ -1153,6 +1261,7 @@ async function runChecks(dist, args) {
   });
   check('tokens', [...tokenProblems]);
   check('tokens-perceptible', lastTokens ? tokenPerceptProblems(lastTokens) : ['no page state was read']);
+  check('tokens-on-surface', lastTokens ? onSurfaceProblems(lastTokens) : ['no page state was read']);
   if (states.length === STATES.length) {
     const cov = [];
     for (const c of CARDS) if (c.states.length && !c.states.some((st) => matched.get(c.sel)?.has(st))) cov.push(`CARDS ${c.sel} matched nothing on ${c.states.join(', ')}`);
@@ -1277,6 +1386,11 @@ async function selfTest(dist) {
     add('<div class="card planted-good" style="background:#1c1e24;border:0;border-radius:10px;box-shadow:none;margin:20px 0;color:#f3ecff">good card<div class="planted-div-ok" style="border-bottom:1px solid #23252c">row</div><div class="planted-div-bad" style="border-bottom:1px solid #2a1e44">row</div></div>');
     add('<div class="card planted-bad" style="background:linear-gradient(#1d1636,#16102a);border:1px solid #2a1e44;border-radius:12px;box-shadow:0 0 8px #000;margin:0;position:relative">bad card</div>');
     add('<div class="card planted-lowc" style="background:#9a93a8;border:0;border-radius:10px;margin:0">low contrast</div>');
+    // U1 text-contrast: root --muted text on the selected fill fails; the on-surface token passes; big text gets 3:1.
+    add('<div class="card planted-txt-bad" style="background:#3a3e49;border:0;border-radius:10px;margin:0"><span style="color:#9ca0ab;font-size:14px">root muted on selected</span></div>');
+    add('<div class="card planted-txt-ok" style="background:#3a3e49;border:0;border-radius:10px;margin:0"><span style="color:#a6abb6;font-size:14px">muted-on-surface on selected</span></div>');
+    add('<div class="card planted-txt-big" style="background:#3a3e49;border:0;border-radius:10px;margin:0"><span style="color:#9ca0ab;font-size:28px">big</span></div>');
+    add('<div class="card planted-txt-clip" style="background:#1c1e24;border:0;border-radius:10px;margin:0"><span style="background:#2a2d35;-webkit-background-clip:text;background-clip:text;color:transparent;font-size:14px">clipped dim word</span></div>');
     add('<div class="planted-wide" style="width:640px;height:4px"></div>');
     return true;
   })()`;
@@ -1314,6 +1428,11 @@ async function selfTest(dist) {
         check(`self ${w} a frosted .card fails every rule`, ['background-color', 'background-image', 'border top 1px', 'box-shadow', '::before draws a box', 'radius 12px'].filter((n) => !bad.includes(n)).map((n) => `missing "${n}" in ${bad}`));
         check(`self ${w} dividers: #23252c passes, #2a1e44 fails`, [r.dividers.some((d) => d.path.includes('planted-div-bad')) ? null : 'bad divider not reported', r.dividers.some((d) => d.path.includes('planted-div-ok')) ? 'good divider reported' : null]);
         check(`self ${w} contrast fails on a light card`, r.contrast.some((c) => c.path.includes('planted-lowc')) ? [] : ['not reported']);
+        const tc = (cls) => r.textContrast.filter((c) => c.path.includes(cls));
+        check(`self ${w} text-contrast: root --muted on the selected fill (4.09:1) fails`, tc('planted-txt-bad').some((c) => c.ratio < 4.5 && c.ratio > 4) ? [] : [`got ${JSON.stringify(tc('planted-txt-bad'))}`]);
+        check(`self ${w} text-contrast: --muted-on-surface on the selected fill (4.64:1) passes`, tc('planted-txt-ok').length ? [JSON.stringify(tc('planted-txt-ok'))] : []);
+        check(`self ${w} text-contrast: 28px text at 4.09:1 passes the large-text floor`, tc('planted-txt-big').length ? [JSON.stringify(tc('planted-txt-big'))] : []);
+        check(`self ${w} text-contrast: a background-clip:text word is measured by its fill`, tc('planted-txt-clip').some((c) => c.ink.startsWith('rgb(42, 45, 53)')) ? [] : [`got ${JSON.stringify(tc('planted-txt-clip'))}`]);
         check(`self ${w} overflow is reported`, r.scrollWidth > r.innerWidth || width > 640 ? [] : [`scrollWidth ${r.scrollWidth}`]);
         if (width === 400) check(`self ${w} separation: cards stacked with no gap are reported`, r.gaps.some((g) => g.a.includes('planted-bad') || g.a.includes('planted-good')) ? [] : [`gaps: ${JSON.stringify(r.gaps).slice(0, 300)}`]);
       } finally {
@@ -1458,6 +1577,11 @@ async function selfTest(dist) {
   check('self tokens-perceptible: the too-faint hover #202228 (1.048:1, the round-1 1.044 case on the new surface) fails', tp({ '--surface-hover': '#202228' }).some((x) => x.startsWith('--surface-hover vs --surface 1.048')) ? [] : [JSON.stringify(tp({ '--surface-hover': '#202228' }))]);
   check('self tokens-perceptible: selected equal to hover fails', tp({ '--surface-selected': '#272a32' }).some((x) => x.startsWith('--surface-selected vs --surface-hover 1.000')) ? [] : [JSON.stringify(tp({ '--surface-selected': '#272a32' }))]);
   check('self tokens-perceptible: a missing token fails', tp({ '--surface-selected': '' }).length ? [] : ['passed']);
+  // U1: the on-surface tokens.
+  const os = (o) => onSurfaceProblems({ ...SPEC_TOKENS, '--muted-on-surface': '#a6abb6', '--text-on-surface': '#f2f3f5', ...o });
+  check('self tokens-on-surface: the spec values pass', os({}));
+  check('self tokens-on-surface: the root --muted #9ca0ab as muted-on-surface fails on --surface-selected (4.09)', os({ '--muted-on-surface': '#9ca0ab' }).some((x) => x.startsWith('--muted-on-surface on --surface-selected 4.09')) ? [] : [JSON.stringify(os({ '--muted-on-surface': '#9ca0ab' }))]);
+  check('self tokens-on-surface: a missing --text-on-surface fails', os({ '--text-on-surface': '' }).length ? [] : ['passed']);
 }
 
 async function main() {
