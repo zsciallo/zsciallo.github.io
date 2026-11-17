@@ -22,12 +22,17 @@
 //   (npm script for the implementer to add: "test:cards": "node test/card_style_check.mjs")
 //
 // What is checked, per page state and width (one PASS/FAIL line each):
-//   tokens        :root defines --surface #150f27, --surface-inset #0f0a1d,
-//                 --surface-hover #21193c, --surface-selected #2c214f,
-//                 --radius-card 10px, --radius-inset 6px, --divider #221838
+//   tokens        :root defines --surface #1c1e24, --surface-inset #090a0c,
+//                 --surface-hover #272a32, --surface-selected #3a3e49,
+//                 --radius-card 10px, --radius-inset 6px, --divider #23252c
 //                 (spec values, compared case-insensitively after trimming;
 //                 amendment U9-states: the round-1 hover #1a1330 was 1.044:1
-//                 against --surface, imperceptible).
+//                 against --surface, imperceptible. Run 20261117-palette U1:
+//                 the owner's "Obsidian" palette replaced the 2026-11-10
+//                 purple surfaces #150f27/#0f0a1d/#21193c/#2c214f/#221838).
+//                 Every page state is opened in the dark theme (Obsidian:
+//                 prefers-color-scheme dark, no stored choice); the light
+//                 theme's tokens are test/theme_check.mjs's.
 //   tokens-perceptible  (once) WCAG contrast between the :root token colours:
 //                 --surface-hover vs --surface >= 1.10, --surface-selected vs
 //                 --surface >= 1.22, --surface-selected vs --surface-hover >= 1.08.
@@ -62,8 +67,8 @@
 //   dividers      inside every card, an element that is neither a card nor
 //                 in DIVIDER_SKIP (nor inside one) and has a border on 1-3
 //                 sides and is at least 24px wide or high (smaller is an icon
-//                 glyph, e.g. the listing chevron): each visible side is 1px solid #221838 (join rows, table
-//                 rows; spec: dividers stay 1px lines in #221838).
+//                 glyph, e.g. the listing chevron): each visible side is 1px solid #23252c (join rows, table
+//                 rows; spec: dividers stay 1px lines in --divider, #23252c in Obsidian).
 //   completeness  any other rendered element with a gradient background-image,
 //                 or a visible border on all four sides with a corner radius
 //                 >= 6px, or a ::before/::after strip (position absolute, 0.5-2.5px
@@ -115,16 +120,18 @@ export const HEIGHT = 900;
 
 /**
  * The spec (plan Amendment 4, amended by U9-states: --surface-hover #1a1330 ->
- * #21193c, new --surface-selected, --divider pinned too).
+ * #21193c, new --surface-selected, --divider pinned too). Run 20261117-palette
+ * U1 (owner palette spec 2026-11-17): the values moved to the "Obsidian" theme's
+ * neutral greys (were #150f27, #0f0a1d, #21193c, #2c214f, divider #221838).
  */
 export const SPEC_TOKENS = {
-  '--surface': '#150f27',
-  '--surface-inset': '#0f0a1d',
-  '--surface-hover': '#21193c',
-  '--surface-selected': '#2c214f',
+  '--surface': '#1c1e24',
+  '--surface-inset': '#090a0c',
+  '--surface-hover': '#272a32',
+  '--surface-selected': '#3a3e49',
   '--radius-card': '10px',
   '--radius-inset': '6px',
-  '--divider': '#221838',
+  '--divider': '#23252c',
 };
 /** Perceptibility floors (amendment U9-states), WCAG contrast ratios between fills. */
 export const PERCEPT = { hoverVsRest: 1.1, selectedVsRest: 1.22, selectedVsHover: 1.08 };
@@ -384,7 +391,7 @@ const BORDER_PROPS = ['top', 'right', 'bottom', 'left'].flatMap((x) => [`border-
 const RANK_PROPS = ['background-color', 'background-image', 'border-top-width', 'border-top-style', 'border-top-color', 'border-top-left-radius'];
 
 /** Dividers inside a card (join rows, table rows): every visible side of a 1-3-sided border is a 1px solid line in this colour. */
-export const DIVIDER = { width: '1px', style: 'solid', color: '#221838' };
+export const DIVIDER = { width: '1px', style: 'solid', color: '#23252c' };
 /**
  * Not dividers, even inside a card: arcade buttons, fields and the ALLOW chips,
  * rungs, row tints and art. Plain <button>s are NOT skipped here (unlike ALLOW):
@@ -742,7 +749,10 @@ function grouped(items) {
 }
 
 export async function openState(b, origin, state, width) {
-  const { browserContextId } = await b.send('Target.createBrowserContext', { disposeOnDetach: true });
+  // Run 20261117-palette: `state.context` opens the page as another tab of an
+  // existing browser context (shared localStorage) and leaves the context alone on close.
+  const shared = state.context ?? null;
+  const { browserContextId } = shared ? { browserContextId: shared } : await b.send('Target.createBrowserContext', { disposeOnDetach: true });
   const { targetId } = await b.send('Target.createTarget', { url: 'about:blank', browserContextId });
   const { sessionId } = await b.send('Target.attachToTarget', { targetId, flatten: true });
   const s = (m, p) => b.send(m, p, sessionId);
@@ -788,7 +798,7 @@ export async function openState(b, origin, state, width) {
   const close = async () => {
     b.listeners.delete(listener);
     await b.send('Target.closeTarget', { targetId }).catch(() => {});
-    await b.send('Target.disposeBrowserContext', { browserContextId }).catch(() => {});
+    if (!shared) await b.send('Target.disposeBrowserContext', { browserContextId }).catch(() => {});
   };
   try {
     await s('Page.enable');
@@ -797,7 +807,9 @@ export async function openState(b, origin, state, width) {
     await s('Network.setCacheDisabled', { cacheDisabled: true });
     await s('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
     await s('Emulation.setDeviceMetricsOverride', { width, height: HEIGHT, deviceScaleFactor: 1, mobile: false });
-    await s('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+    // Run 20261117-palette: the OS colour scheme is pinned (default dark, so a first visit is the
+    // Obsidian theme these checks pin); headless Chrome would otherwise pick light or dark by itself.
+    await s('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }, { name: 'prefers-color-scheme', value: state.colorScheme ?? 'dark' }] });
     await s('Emulation.setTimezoneOverride', { timezoneId: 'UTC' });
     await s('Emulation.setLocaleOverride', { locale: 'en-US' });
     await s('Page.addScriptToEvaluateOnNewDocument', { source: FREEZE(state.time ?? FROZEN_TIME) });
@@ -820,7 +832,7 @@ export async function openState(b, origin, state, width) {
     await sleep(150);
     await ev(FREEZE_ANIMATIONS);
     await ev(`(window.__cards = ${LIB}, true)`);
-    return { s, ev, close };
+    return { s, ev, close, browserContextId };
   } catch (e) {
     await close();
     throw e;
@@ -1262,7 +1274,7 @@ async function selfTest(dist) {
     add('<button class="planted-card-button" style="border:0;border-radius:10px;background:linear-gradient(#1d1636,#16102a);padding:20px">card-shaped button</button>');
     // Modal frames carry .card but are chrome: neither judged as cards nor flagged.
     for (const c of ['modal-card', 'type-modal', 'slot-cabinet', 'pkg-modal']) add('<div class="' + c + ' card planted-frame-' + c + '" style="display:block;position:relative;inset:auto;transform:none;opacity:1;visibility:visible;width:200px;height:60px;background:linear-gradient(#1d1636,#16102a);border:1px solid #2a1e44;border-radius:12px">frame</div>');
-    add('<div class="card planted-good" style="background:#150f27;border:0;border-radius:10px;box-shadow:none;margin:20px 0;color:#f3ecff">good card<div class="planted-div-ok" style="border-bottom:1px solid #221838">row</div><div class="planted-div-bad" style="border-bottom:1px solid #2a1e44">row</div></div>');
+    add('<div class="card planted-good" style="background:#1c1e24;border:0;border-radius:10px;box-shadow:none;margin:20px 0;color:#f3ecff">good card<div class="planted-div-ok" style="border-bottom:1px solid #23252c">row</div><div class="planted-div-bad" style="border-bottom:1px solid #2a1e44">row</div></div>');
     add('<div class="card planted-bad" style="background:linear-gradient(#1d1636,#16102a);border:1px solid #2a1e44;border-radius:12px;box-shadow:0 0 8px #000;margin:0;position:relative">bad card</div>');
     add('<div class="card planted-lowc" style="background:#9a93a8;border:0;border-radius:10px;margin:0">low contrast</div>');
     add('<div class="planted-wide" style="width:640px;height:4px"></div>');
@@ -1300,7 +1312,7 @@ async function selfTest(dist) {
         check(`self ${w} a compliant .card has no card problems`, cardProb('planted-good').length ? cardProb('planted-good') : []);
         const bad = cardProb('planted-bad').join(' | ');
         check(`self ${w} a frosted .card fails every rule`, ['background-color', 'background-image', 'border top 1px', 'box-shadow', '::before draws a box', 'radius 12px'].filter((n) => !bad.includes(n)).map((n) => `missing "${n}" in ${bad}`));
-        check(`self ${w} dividers: #221838 passes, #2a1e44 fails`, [r.dividers.some((d) => d.path.includes('planted-div-bad')) ? null : 'bad divider not reported', r.dividers.some((d) => d.path.includes('planted-div-ok')) ? 'good divider reported' : null]);
+        check(`self ${w} dividers: #23252c passes, #2a1e44 fails`, [r.dividers.some((d) => d.path.includes('planted-div-bad')) ? null : 'bad divider not reported', r.dividers.some((d) => d.path.includes('planted-div-ok')) ? 'good divider reported' : null]);
         check(`self ${w} contrast fails on a light card`, r.contrast.some((c) => c.path.includes('planted-lowc')) ? [] : ['not reported']);
         check(`self ${w} overflow is reported`, r.scrollWidth > r.innerWidth || width > 640 ? [] : [`scrollWidth ${r.scrollWidth}`]);
         if (width === 400) check(`self ${w} separation: cards stacked with no gap are reported`, r.gaps.some((g) => g.a.includes('planted-bad') || g.a.includes('planted-good')) ? [] : [`gaps: ${JSON.stringify(r.gaps).slice(0, 300)}`]);
@@ -1337,7 +1349,7 @@ async function selfTest(dist) {
       try {
         const before = await probes(page, st(RANK_PROBE_STATE), 1280);
         check('self rank probe opens every rank modal', RANKS.every((n) => before[`${RANK_PROBE_STATE}@1280 rank ${n}`]) ? [] : [`got ${JSON.stringify(Object.keys(before))}`]);
-        await page.ev(addStyle('.pkg-modal--rank .store-perk{background:#150f27 !important}'));
+        await page.ev(addStyle('.pkg-modal--rank .store-perk{background:#1c1e24 !important}'));
         const after = await probes(page, st(RANK_PROBE_STATE), 1280);
         const p = probeProblems(after, before, `${RANK_PROBE_STATE}@1280 rank `);
         check('self flattening the rank perk tint fails rank-tints', p.length === RANKS.length && p.every((x) => x.includes('background-image')) ? [] : [`problems: ${p.join(' | ') || 'none'}`]);
@@ -1351,18 +1363,18 @@ async function selfTest(dist) {
     {
       const page = await openState(b, origin, st('store'), 1280);
       try {
-        await page.ev(addStyle(':root{--surface:#150f27!important;--surface-hover:#21193c!important;--surface-selected:#2c214f!important}.pkg-card{background:#150f27!important;transition:none!important}.pkg-card:hover,.pkg-card:focus-visible{background:#21193c!important}.pkg-card:focus-visible{outline:2px solid #c77dff!important}'));
+        await page.ev(addStyle(':root{--surface:#1c1e24!important;--surface-hover:#272a32!important;--surface-selected:#3a3e49!important}.pkg-card{background:#1c1e24!important;transition:none!important}.pkg-card:hover,.pkg-card:focus-visible{background:#272a32!important}.pkg-card:focus-visible{outline:2px solid #c77dff!important}'));
         let h = await hoverProblems(page, 1280);
         check('self store: a compliant hover and focus on .pkg-card pass', [...items(h.hover, '.pkg-card'), ...items(h.percept, '.pkg-card'), ...items(h.focus, '.pkg-card')]);
         // hover too faint: the token itself is the round-1 value, so the fill rule (which follows :root) is satisfied
-        await page.ev(addStyle(':root{--surface-hover:#1a1330!important}.pkg-card:hover,.pkg-card:focus-visible{background:#1a1330!important}'));
+        await page.ev(addStyle(':root{--surface-hover:#202228!important}.pkg-card:hover,.pkg-card:focus-visible{background:#202228!important}'));
         h = await hoverProblems(page, 1280);
         const faint = items(h.percept, '.pkg-card');
-        check('self store: a hover fill too faint (1.044:1) fails perceptible, not the fill rule', faint.length && faint.every((x) => x.includes('want >= 1.1')) && !items(h.hover, '.pkg-card').length ? [] : [`percept: ${faint.join(' | ') || 'none'}; hover: ${items(h.hover, '.pkg-card').join(' | ')}`]);
-        await page.ev(addStyle(':root{--surface-hover:#21193c!important}.pkg-card:hover,.pkg-card:focus-visible{background:#21193c!important}.pkg-card:focus-visible{outline:none!important}'));
+        check('self store: a hover fill too faint (1.048:1) fails perceptible, not the fill rule', faint.length && faint.every((x) => x.includes('want >= 1.1')) && !items(h.hover, '.pkg-card').length ? [] : [`percept: ${faint.join(' | ') || 'none'}; hover: ${items(h.hover, '.pkg-card').join(' | ')}`]);
+        await page.ev(addStyle(':root{--surface-hover:#272a32!important}.pkg-card:hover,.pkg-card:focus-visible{background:#272a32!important}.pkg-card:focus-visible{outline:none!important}'));
         h = await hoverProblems(page, 1280);
         check('self store: focus without a ring fails focus', items(h.focus, '.pkg-card').some((x) => x.startsWith('no focus ring')) ? [] : [`focus: ${items(h.focus, '.pkg-card').join(' | ') || 'none'}`]);
-        await page.ev(addStyle('.pkg-card:focus-visible{outline:2px solid #c77dff!important;background:#150f27!important}'));
+        await page.ev(addStyle('.pkg-card:focus-visible{outline:2px solid #c77dff!important;background:#1c1e24!important}'));
         h = await hoverProblems(page, 1280);
         const nofill = items(h.focus, '.pkg-card');
         check('self store: focus with the ring but no hover fill fails focus', nofill.length && nofill.every((x) => x.startsWith('background-color')) ? [] : [`focus: ${nofill.join(' | ') || 'none'}`]);
@@ -1387,10 +1399,10 @@ async function selfTest(dist) {
       // A card whose focus lands on a control inside it (the FAQ question) can satisfy the rule.
       const page = await openState(b, origin, st('faq-open'), 1280);
       try {
-        await page.ev(addStyle(':root{--surface-hover:#21193c!important}.faq-item{background:#150f27!important;transition:none!important}.faq-item:hover,.faq-item:has(.faq-question:focus-visible){background:#21193c!important}.faq-question:focus-visible{outline:2px solid #c77dff!important}'));
+        await page.ev(addStyle(':root{--surface-hover:#272a32!important}.faq-item{background:#1c1e24!important;transition:none!important}.faq-item:hover,.faq-item:has(.faq-question:focus-visible){background:#272a32!important}.faq-question:focus-visible{outline:2px solid #c77dff!important}'));
         let h = await hoverProblems(page, 1280);
         check('self faq: focus on the question with a ring and the item on the hover fill passes', items(h.focus, '.faq-item'));
-        await page.ev(addStyle('.faq-item:has(.faq-question:focus-visible){background:#150f27!important}'));
+        await page.ev(addStyle('.faq-item:has(.faq-question:focus-visible){background:#1c1e24!important}'));
         h = await hoverProblems(page, 1280);
         check('self faq: the item without the hover fill while its question is focused fails focus', items(h.focus, '.faq-item').some((x) => x.startsWith('background-color')) ? [] : [`focus: ${items(h.focus, '.faq-item').join(' | ') || 'none'}`]);
       } finally {
@@ -1400,10 +1412,10 @@ async function selfTest(dist) {
     {
       const page = await openState(b, origin, st('auctions-pool'), 1280);
       try {
-        await page.ev(addStyle(':root{--surface:#150f27!important;--surface-hover:#21193c!important;--surface-selected:#2c214f!important}.pool-card.selected{background:var(--surface-selected)!important}'));
+        await page.ev(addStyle(':root{--surface:#1c1e24!important;--surface-hover:#272a32!important;--surface-selected:#3a3e49!important}.pool-card.selected{background:var(--surface-selected)!important}'));
         let r = await page.ev(INSPECT(cfgFor(1280)));
         check('self pool: a compliant selected card passes perceptible', [r.selected.some((x) => x.sel === '.pool-card.selected') ? null : 'selected card not measured', ...items(selectedPercept(r), '.pool-card.selected')]);
-        await page.ev(addStyle(':root{--surface-selected:#21193c!important}'));
+        await page.ev(addStyle(':root{--surface-selected:#272a32!important}'));
         r = await page.ev(INSPECT(cfgFor(1280)));
         const same = items(selectedPercept(r), '.pool-card.selected');
         check('self pool: selected equal to hover fails perceptible (vs --surface-hover)', same.some((x) => x.includes('vs --surface-hover 1:1')) && !r.cards.some((c) => c.sel === '.pool-card.selected') ? [] : [`percept: ${same.join(' | ') || 'none'}; cards: ${JSON.stringify(r.cards.filter((c) => c.sel === '.pool-card.selected'))}`]);
@@ -1415,13 +1427,13 @@ async function selfTest(dist) {
     // then a hover / focus rule placed AFTER the selected rule at equal specificity, the wrong order L2 describes.
     const holdItems = async (page, key) => (await selectedHoldProblems(page)).items.filter((x) => x.key.startsWith(key)).map((x) => x.detail);
     for (const [stateId, sel, compliant, hoverAfter, focusAfter] of [
-      ['auctions-pool', '.pool-card.selected', '.pool-card.selected,.pool-card.selected:hover,.pool-card.selected:focus-visible{background-color:#2c214f!important}', '.pool-card:hover{background-color:#21193c}', '.pool-card:focus-visible{background-color:#21193c}'],
-      ['faq-open', '.faq-item[data-open]', '.faq-item[data-open]{background-color:#2c214f!important}', '.faq-item:hover{background-color:#21193c}', '.faq-item[data-open]:has(.faq-question:focus-visible){background-color:#21193c}'],
-      ['store-crate-open', '.store-item.is-open', '.store-item.is-open{background-color:#2c214f!important}', '.store-item.store-item--button:hover{background-color:#21193c}', '.store-item.store-item--button:focus-visible{background-color:#21193c}'],
+      ['auctions-pool', '.pool-card.selected', '.pool-card.selected,.pool-card.selected:hover,.pool-card.selected:focus-visible{background-color:#3a3e49!important}', '.pool-card:hover{background-color:#272a32}', '.pool-card:focus-visible{background-color:#272a32}'],
+      ['faq-open', '.faq-item[data-open]', '.faq-item[data-open]{background-color:#3a3e49!important}', '.faq-item:hover{background-color:#272a32}', '.faq-item[data-open]:has(.faq-question:focus-visible){background-color:#272a32}'],
+      ['store-crate-open', '.store-item.is-open', '.store-item.is-open{background-color:#3a3e49!important}', '.store-item.store-item--button:hover{background-color:#272a32}', '.store-item.store-item--button:focus-visible{background-color:#272a32}'],
     ]) {
       const page = await openState(b, origin, st(stateId), 1280);
       try {
-        await page.ev(addStyle(':root{--surface:#150f27!important;--surface-hover:#21193c!important;--surface-selected:#2c214f!important}'));
+        await page.ev(addStyle(':root{--surface:#1c1e24!important;--surface-hover:#272a32!important;--surface-selected:#3a3e49!important}'));
         // The compliant baseline: the selected fill wins in every mode.
         await page.ev(addStyle(compliant));
         const ok = await selectedHoldProblems(page);
@@ -1443,8 +1455,8 @@ async function selfTest(dist) {
   // Pure: the token-level floors.
   check('self tokens-perceptible: the spec tokens pass', tokenPerceptProblems(SPEC_TOKENS));
   const tp = (o) => tokenPerceptProblems({ ...SPEC_TOKENS, ...o });
-  check('self tokens-perceptible: the round-1 hover #1a1330 fails', tp({ '--surface-hover': '#1a1330' }).some((x) => x.startsWith('--surface-hover vs --surface 1.044')) ? [] : [JSON.stringify(tp({ '--surface-hover': '#1a1330' }))]);
-  check('self tokens-perceptible: selected equal to hover fails', tp({ '--surface-selected': '#21193c' }).some((x) => x.startsWith('--surface-selected vs --surface-hover 1.000')) ? [] : [JSON.stringify(tp({ '--surface-selected': '#21193c' }))]);
+  check('self tokens-perceptible: the too-faint hover #202228 (1.048:1, the round-1 1.044 case on the new surface) fails', tp({ '--surface-hover': '#202228' }).some((x) => x.startsWith('--surface-hover vs --surface 1.048')) ? [] : [JSON.stringify(tp({ '--surface-hover': '#202228' }))]);
+  check('self tokens-perceptible: selected equal to hover fails', tp({ '--surface-selected': '#272a32' }).some((x) => x.startsWith('--surface-selected vs --surface-hover 1.000')) ? [] : [JSON.stringify(tp({ '--surface-selected': '#272a32' }))]);
   check('self tokens-perceptible: a missing token fails', tp({ '--surface-selected': '' }).length ? [] : ['passed']);
 }
 

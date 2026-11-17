@@ -362,7 +362,7 @@ function u8Head(route, { canonical = true, description, ogDescription, twitterTi
     twitterDescription && `<meta name="twitter:description" content="${twitterDescription}">`,
     `<meta name="twitter:image" content="${OG}">`,
     ROBOTS_META,
-    '<meta name="theme-color" content="#0b0614">',
+    '<meta name="theme-color" content="#0e0f12">',
   ]
     .filter(Boolean)
     .join('\n  ');
@@ -454,16 +454,22 @@ function goodSite() {
   };
 }
 
-/** U9: minified like Vite's output: the tokens at :root, the frost token still defined (it may stay for non-cards), cards on --surface. */
+/**
+ * U9: minified like Vite's output: the tokens at :root, the frost token still defined (it may stay for non-cards), cards on --surface.
+ * Run 20261117-palette U1: the :root values are the Obsidian palette (were #150f27/#0f0a1d/#21193c/#2c214f/#221838), and the
+ * light theme block (LIGHT_RULE) carries the Quartz values (minified, so the attribute value is unquoted).
+ */
+const LIGHT_RULE = '[data-theme=light]{--accent:#7b2fe0;--surface:#16181d;--surface-inset:#e6e8ec;--surface-hover:#23262d;--surface-selected:#3a3e49;--divider:#d3d6dc}';
 const CARD_CSS =
-  ':root{--accent:#c77dff;--surface:#150f27;--surface-inset:#0f0a1d;--surface-hover:#21193c;--surface-selected:#2c214f;--radius-card:10px;--radius-inset:6px;--divider:#221838;' +
+  ':root{--accent:#c77dff;--surface:#1c1e24;--surface-inset:#090a0c;--surface-hover:#272a32;--surface-selected:#3a3e49;--radius-card:10px;--radius-inset:6px;--divider:#23252c;' +
   '--frost:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01))}' +
+  LIGHT_RULE +
   '.card{background-color:var(--surface);border:0;border-radius:var(--radius-card);position:relative}' +
   '.mode-live{background-color:var(--surface-inset);border-radius:var(--radius-inset)}' +
   '.faq-item[data-open],.faq-item:hover{background-color:var(--surface-hover)}' +
   '.btn{background:var(--frost),#9a4dff}.btn:after{content:"";position:absolute;height:1px;background:#fff}' +
   '@media (max-width:600px){.card{padding:1rem}}@keyframes pulse{0%{opacity:.5}to{opacity:1}}' +
-  '.join-row+.join-row{border-top:1px solid #221838}';
+  '.join-row+.join-row{border-top:1px solid #23252c}';
 
 function png(width, height) {
   const buf = Buffer.alloc(33);
@@ -1713,7 +1719,7 @@ ${r.out}`);
   expectFail('U8 twitter:image another file on /store/', mutate(ST, meta('name', 'twitter:image', OG), meta('name', 'twitter:image', 'https://chromabit.us/server-icon.png')), 'seo-head', '/store/ twitter:image is "https://chromabit.us/server-icon.png"');
   expectFail('U8 twitter:description missing on /smp/', mutate(S, meta('name', 'twitter:description', DESC.smp), ''), 'seo-head', '/smp/ has 0 twitter:description, want 1');
   expectFail('U8 twitter:title missing on /auctions/', mutate(AU, meta('name', 'twitter:title', 'Auction House | Chromabit SMP'), ''), 'seo-head', '/auctions/ has 0 twitter:title');
-  expectFail('U8 theme-color missing on /auctions/', mutate(AU, '<meta name="theme-color" content="#0b0614">', ''), 'seo-head', '/auctions/ has 0 theme-color, want 1');
+  expectFail('U8 theme-color missing on /auctions/', mutate(AU, '<meta name="theme-color" content="#0e0f12">', ''), 'seo-head', '/auctions/ has 0 theme-color, want 1');
   expectFail('U8 robots without the snippet tokens on /faq/', mutate(FQ, ROBOTS_META, '<meta name="robots" content="index, follow">'), 'seo-head', '/faq/ robots is "index, follow"');
   expectFail('U8 robots noindex on /privacy/ (as at 762b268)', mutate(PR, ROBOTS_META, '<meta name="robots" content="noindex, follow, max-image-preview:large, max-snippet:-1">'), 'seo-head', '/privacy/ robots is "noindex, follow');
   expectFail('U8 robots missing on /store/', mutate(ST, ROBOTS_META, ''), 'seo-head', '/store/ has 0 robots metas, want 1');
@@ -1986,22 +1992,44 @@ ${r.out}`);
   const cssAdd = (extra) => cssMut('.join-row+.join-row', `${extra}.join-row+.join-row`);
   expectFails('U9 no built CSS', { ...goodSite(), [CSS]: null }, { 'card-tokens': 'no built CSS under dist/assets', 'card-no-frost': 'no built CSS under dist/assets' });
   passes('U9 tokens: two stylesheets, tokens in the second, pass', { ...goodSite(), 'assets/a-first.css': '.x{color:red}' });
-  passes('U9 tokens: upper-case hex passes', cssMut('--surface:#150f27', '--surface:#150F27'));
+  passes('U9 tokens: upper-case hex passes', cssMut('--surface:#1c1e24', '--surface:#1C1E24'));
   passes('U9 tokens: spaces and !important pass', cssMut('--radius-card:10px', '--radius-card: 10px !important'));
-  expectFail('U9 tokens: --surface-hover missing', cssMut('--surface-hover:#21193c;', ''), 'card-tokens', '--surface-hover is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --surface-hover missing', cssMut('--surface-hover:#272a32;', ''), 'card-tokens', '--surface-hover is not declared in a top-level :root rule');
   // Amendment U9-states: the round-1 hover value was imperceptible (1.044:1); a new selected token; the divider pinned.
-  expectFail('U9 tokens: --surface-hover at the round-1 value #1a1330', cssMut('--surface-hover:#21193c', '--surface-hover:#1a1330'), 'card-tokens', '--surface-hover is "#1a1330" in :root, want #21193c');
-  expectFail('U9 tokens: --surface-selected missing', cssMut('--surface-selected:#2c214f;', ''), 'card-tokens', '--surface-selected is not declared in a top-level :root rule');
-  expectFail('U9 tokens: --surface-selected equal to the hover value', cssMut('--surface-selected:#2c214f', '--surface-selected:#21193c'), 'card-tokens', '--surface-selected is "#21193c" in :root, want #2c214f');
-  expectFail('U9 tokens: --divider missing', cssMut('--divider:#221838;', ''), 'card-tokens', '--divider is not declared in a top-level :root rule');
-  expectFail('U9 tokens: --divider wrong value', cssMut('--divider:#221838', '--divider:#2a1e44'), 'card-tokens', '--divider is "#2a1e44" in :root, want #221838');
-  expectFail('U9 tokens: --surface wrong value', cssMut('--surface:#150f27', '--surface:#16102a'), 'card-tokens', '--surface is "#16102a" in :root, want #150f27');
-  expectFail('U9 tokens: --surface-inset wrong value', cssMut('--surface-inset:#0f0a1d', '--surface-inset:#0f0a1e'), 'card-tokens', '--surface-inset is "#0f0a1e"');
+  expectFail('U9 tokens: --surface-hover at the round-1 value #1a1330', cssMut('--surface-hover:#272a32', '--surface-hover:#1a1330'), 'card-tokens', '--surface-hover is "#1a1330" in :root, want #272a32');
+  expectFail('U9 tokens: --surface-selected missing', cssMut('--surface-selected:#3a3e49;', ''), 'card-tokens', '--surface-selected is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --surface-selected equal to the hover value', cssMut('--surface-selected:#3a3e49', '--surface-selected:#272a32'), 'card-tokens', '--surface-selected is "#272a32" in :root, want #3a3e49');
+  expectFail('U9 tokens: --divider missing', cssMut('--divider:#23252c;', ''), 'card-tokens', '--divider is not declared in a top-level :root rule');
+  expectFail('U9 tokens: --divider wrong value', cssMut('--divider:#23252c', '--divider:#2a1e44'), 'card-tokens', '--divider is "#2a1e44" in :root, want #23252c');
+  expectFail('U9 tokens: --surface wrong value', cssMut('--surface:#1c1e24', '--surface:#16102a'), 'card-tokens', '--surface is "#16102a" in :root, want #1c1e24');
+  expectFail('U9 tokens: --surface-inset wrong value', cssMut('--surface-inset:#090a0c', '--surface-inset:#090a0d'), 'card-tokens', '--surface-inset is "#090a0d"');
   expectFail('U9 tokens: --radius-card 12px', cssMut('--radius-card:10px', '--radius-card:12px'), 'card-tokens', '--radius-card is "12px" in :root, want 10px');
   expectFail('U9 tokens: --radius-inset in rem', cssMut('--radius-inset:6px', '--radius-inset:.375rem'), 'card-tokens', '--radius-inset is ".375rem"');
   expectFail('U9 tokens: overridden in a media query', cssAdd('@media (max-width:600px){:root{--radius-card:12px}}'), 'card-tokens', '--radius-card is "12px" in :root (@media (max-width:600px)), want 10px');
   expectFail('U9 tokens: overridden on a card', cssAdd('.pkg-card{--surface:#222}'), 'card-tokens', '--surface is "#222" in .pkg-card');
-  expectFail('U9 tokens: only declared inside a media query', edit(cssAdd('@media (min-width:1px){:root{--surface-inset:#0f0a1d}}'), CSS, '--surface-inset:#0f0a1d;--surface-hover', '--surface-hover'), 'card-tokens', '--surface-inset is not declared in a top-level :root rule');
+  expectFail('U9 tokens: only declared inside a media query', edit(cssAdd('@media (min-width:1px){:root{--surface-inset:#090a0c}}'), CSS, '--surface-inset:#090a0c;--surface-hover', '--surface-hover'), 'card-tokens', '--surface-inset is not declared in a top-level :root rule');
+  // Run 20261117-palette U1: the light theme ("Quartz") block is the one other declaration site, with its own values.
+  const lightMut = (from, to) => cssMut(LIGHT_RULE, LIGHT_RULE.replace(from, to));
+  const lightSel = (sel) => lightMut('[data-theme=light]', sel);
+  passes('U1 tokens: the light block written [data-theme="light"] passes', lightSel('[data-theme="light"]'));
+  passes("U1 tokens: the light block written html[data-theme='light'] passes", lightSel("html[data-theme='light']"));
+  passes('U1 tokens: the light block written :root[data-theme=light] passes', lightSel(':root[data-theme=light]'));
+  passes('U1 tokens: upper-case hex in the light block passes', lightMut('--surface:#16181d', '--surface:#16181D'));
+  passes('U1 tokens: the light block repeating a radius token at its :root value passes', lightMut('--divider:#d3d6dc', '--divider:#d3d6dc;--radius-card:10px'));
+  expectFail('U1 tokens: no light block at all', cssMut(LIGHT_RULE, ''), 'card-tokens', '--surface is not declared in a top-level [data-theme="light"] rule');
+  expectFail('U1 tokens: --surface-inset missing from the light block', lightMut('--surface-inset:#e6e8ec;', ''), 'card-tokens', '--surface-inset is not declared in a top-level [data-theme="light"] rule');
+  expectFail('U1 tokens: --divider missing from the light block', lightMut(';--divider:#d3d6dc', ''), 'card-tokens', '--divider is not declared in a top-level [data-theme="light"] rule');
+  expectFail('U1 tokens: the light block with the dark --surface', lightMut('--surface:#16181d', '--surface:#1c1e24'), 'card-tokens', '--surface is "#1c1e24" in [data-theme=light], want #16181d');
+  expectFail('U1 tokens: the light block --surface-hover wrong', lightMut('--surface-hover:#23262d', '--surface-hover:#272a32'), 'card-tokens', '--surface-hover is "#272a32" in [data-theme=light], want #23262d');
+  expectFail('U1 tokens: the light block --surface-inset wrong', lightMut('--surface-inset:#e6e8ec', '--surface-inset:#090a0c'), 'card-tokens', '--surface-inset is "#090a0c" in [data-theme=light], want #e6e8ec');
+  expectFail('U1 tokens: the light block --surface-selected wrong', lightMut('--surface-selected:#3a3e49', '--surface-selected:#2c214f'), 'card-tokens', '--surface-selected is "#2c214f" in [data-theme=light], want #3a3e49');
+  expectFail('U1 tokens: the light block --divider wrong', lightMut('--divider:#d3d6dc', '--divider:#23252c'), 'card-tokens', '--divider is "#23252c" in [data-theme=light], want #d3d6dc');
+  expectFail('U1 tokens: the light block changing a radius token', lightMut('--divider:#d3d6dc', '--divider:#d3d6dc;--radius-card:12px'), 'card-tokens', '--radius-card is "12px" in [data-theme=light], want 10px');
+  expectFail('U1 tokens: the light values only inside a media query', cssMut(LIGHT_RULE, `@media (prefers-color-scheme:light){${LIGHT_RULE}}`), 'card-tokens', '--surface is "#16181d" in [data-theme=light] (@media (prefers-color-scheme:light)), want #1c1e24');
+  expectFail('U1 tokens: a light attribute on a card is not the theme block', cssAdd('.pkg-card[data-theme=light]{--surface:#16181d}'), 'card-tokens', '--surface is "#16181d" in .pkg-card[data-theme=light], want #1c1e24');
+  expectFail('U1 tokens: the light block sharing a selector list with a card', lightSel('.pkg-card,[data-theme=light]'), 'card-tokens', '--surface is "#16181d" in .pkg-card,[data-theme=light], want #1c1e24');
+  expectFail('U1 tokens: a dark-theme attribute block with other values', cssAdd('[data-theme=dark]{--surface:#150f27}'), 'card-tokens', '--surface is "#150f27" in [data-theme=dark], want #1c1e24');
+  passes('U1 tokens: a dark-theme attribute block with the :root values passes', cssAdd('[data-theme=dark]{--surface:#1c1e24;--divider:#23252c}'));
   passes('U9 tokens: a comment with another value is ignored', cssAdd('/* :root{--surface:#000} */'));
   expectFail('U9 frost: var(--frost) on .card', cssAdd('.card{background:var(--frost),var(--surface)}'), 'card-no-frost', '.card applies the frost gradient (background: var(--frost),var(--surface))');
   expectFail('U9 frost: var(--frost) on .pkg-card:hover', cssAdd('.pkg-card:hover{background-image:var(--frost)}'), 'card-no-frost', '.pkg-card:hover applies the frost gradient');
@@ -2014,7 +2042,7 @@ ${r.out}`);
   expectFail('U9 hairline: .card::before 1px strip', cssAdd('.card:before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#c77dff,transparent)}'), 'card-no-frost', '.card:before still draws a 1px hairline');
   expectFail('U9 hairline: .mode-card--pvp::before 2px strip', cssAdd('.mode-card--pvp::before{content:"";position:absolute;height:2px;background:#ff7de1}'), 'card-no-frost', '.mode-card--pvp::before still draws a 2px hairline');
   passes('U9 hairline: a button ::after shine is not a card', goodSite());
-  passes('U9 hairline: a 1px divider between join rows is not a pseudo hairline', cssAdd('.join-row+.join-row{border-top:1px solid #221838}'));
+  passes('U9 hairline: a 1px divider between join rows is not a pseudo hairline', cssAdd('.join-row+.join-row{border-top:1px solid #23252c}'));
 
   // ------------------------------------------------------ U8 round 2 --
   // css-has-isolated (U9 review L1): a :has() selector never shares a selector list with one that does not need it.
