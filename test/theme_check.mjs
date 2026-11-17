@@ -121,8 +121,16 @@
 //                       A disabled control's text is measured without its fade
 //                       (WCAG 1.4.3 exempts inactive components).
 //                       No keep-list exemption (B3: tier labels included).
+//             tierhue   U2 r2 (orchestrator Q1): every tier label text, rung
+//                       names included (TIER_HUE_LABELS), keeps the hue of its
+//                       --tier-* token within 12 degrees (achromatic tokens
+//                       skipped); per-context lighter/darker variants pass.
+//             eyebrows  U2 r2 (Q2): .faq-section-label and .pvp-season-name may
+//                       be purple, but only --accent on the page and
+//                       --accent-on-surface on a surface (text floor as above).
 //             tiers     B3: every tier label (palette_page TIER_LABELS) outside
-//                       a --inset-on-surface well (wells have no hover or
+//                       a --inset-on-surface well and not on the page itself
+//                       (wells have no hover or
 //                       selected state; the wells section and the text line
 //                       judge those), painted in its own colour,
 //                       reaches 4.5:1 on each of --surface,
@@ -167,8 +175,8 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FREEZE_ANIMATIONS, ROOT, findChrome, sleep } from './visual_check.mjs';
 import { STATES, contrastOf, openState, withBrowser } from './card_style_check.mjs';
-import { ALLOW as LITERAL_ALLOW, isPurpleRgb, purpleLiterals, scan as scanLiterals, scanProblems, stripComments } from './palette_scan.mjs';
-import { TIER_LABELS, CHART_PARTS, CHROME_DARK, CHROME_LUM, FOCUS_READ, FOCUS_TABS, INDICATOR_PIN, KEEP_TAGS, LARGE_MIN, LARGE_PX, LAYER_ROOTS, NON_TEXT_MIN, PURPLE_ALLOW, SECONDARY, SELECTED, SERIES_PIN, TEXT_MIN, WALK, BUTTON_READ } from './palette_page.mjs';
+import { ALLOW as LITERAL_ALLOW, hslOf, isPurpleRgb, purpleLiterals, scan as scanLiterals, scanProblems, stripComments } from './palette_scan.mjs';
+import { TIER_LABELS, TIER_HUE_LABELS, TIER_HUE_TOLERANCE, TIER_ACHROMATIC, EYEBROW_TOKEN, CHART_PARTS, CHROME_DARK, CHROME_LUM, FOCUS_READ, FOCUS_TABS, INDICATOR_PIN, KEEP_TAGS, LARGE_MIN, LARGE_PX, LAYER_ROOTS, NON_TEXT_MIN, PURPLE_ALLOW, SECONDARY, SELECTED, SERIES_PIN, TEXT_MIN, WALK, BUTTON_READ } from './palette_page.mjs';
 
 export const THEME_KEY = 'chromabit:theme';
 export const THEMES = ['dark', 'light'];
@@ -970,6 +978,10 @@ function selfChecks() {
   check('self glow: the accent at .5 fails', glowColourProblems([col(199, 125, 255, 0.5)], acc, 0.35, 'x').some((x) => x.includes('alpha')) ? [] : ['not reported']);
   const html = '<html><head><script>(function(){document.fonts;"fonts-ready"})()</script><script type="module" src="/a.js"></script><script type="application/ld+json">{}</script><script defer src="x.js"></script><script>var x=1</script></head><body><script>var y=2</script></body></html>';
   check('self head scripts: counts inline blocking head scripts only', inlineHeadScripts(html).length === 2 ? [] : [`counted ${inlineHeadScripts(html).length}`]);
+  // U2 r2 (Q1): the tier hue guard.
+  check('self tier hue: the token colour, a lighter and a darker variant of Chroma pass', ['Chroma', 'Chroma II'].flatMap((t) => [[178, 75, 243], [214, 160, 250], [110, 30, 160]].map((c) => tierHueProblem(t, c) ? `${t} ${c} failed` : null)));
+  check('self tier hue: Chroma drifted to pink, Gold drifted to green, a grey Chroma fail', [tierHueProblem('Chroma', [255, 119, 233]) ? null : 'pink Chroma passed', tierHueProblem('Gold', [150, 200, 0]) ? null : 'green Gold passed', tierHueProblem('Chroma', [120, 120, 125]) ? null : 'grey Chroma passed']);
+  check('self tier hue: achromatic tokens (Tin, Silver) and non-tier labels are skipped', [tierHueProblem('Silver', [0, 0, 255]) === null ? null : 'Silver judged', tierHueProblem('Tin', [255, 0, 0]) === null ? null : 'Tin judged', tierHueProblem('UNPLACED', [1, 2, 3]) === null ? null : 'UNPLACED judged']);
   // U2: the purple rule and the literal scanner.
   const lits = (src) => purpleLiterals(src).map((x) => x.literal.toLowerCase());
   check('self purple: the accent family, pinks and purple near-blacks are purple', ['#c77dff', '#9a4dff', '#7b2fe0', '#ff7de1', '#ffb3ec', '#0c0718', '#150f27', '#05020c', 'rgba(12, 7, 24, 0.6)', 'rgba(4,2,10,.55)', 'hsl(280 60% 50%)', 'hsla(300, 40%, 30%, .5)', '#c7d'].filter((c) => lits(`a{color:${c}}`).length !== 1).map((c) => `${c} not caught`));
@@ -1010,7 +1022,7 @@ async function walkOne(b, origin, job, args) {
     const tk = TOKENS[theme];
     const H = (n) => hexRgb(tk[n]);
     const cfg = {
-      theme, layerRoots: LAYER_ROOTS, keepTags: KEEP_TAGS, tierLabels: TIER_LABELS, allow: PURPLE_ALLOW, chrome: CHROME_DARK, selected: SELECTED, chartParts: CHART_PARTS,
+      theme, layerRoots: LAYER_ROOTS, keepTags: KEEP_TAGS, tierLabels: TIER_LABELS, tierHueLabels: TIER_HUE_LABELS, eyebrows: EYEBROW_TOKEN, allow: PURPLE_ALLOW, chrome: CHROME_DARK, selected: SELECTED, chartParts: CHART_PARTS,
       textMin: TEXT_MIN, largeMin: LARGE_MIN, largePx: LARGE_PX, nonTextMin: NON_TEXT_MIN,
       tokens: { border: H('--border'), divider: H('--divider'), bg2: H('--bg2'), bg3: H('--bg3'), inset: H('--surface-inset'), surfaces: ['--surface', '--surface-hover', '--surface-selected', '--inset-on-surface'].map(H) },
     };
@@ -1026,7 +1038,8 @@ async function walkOne(b, origin, job, args) {
         lines.push([`walk ${id} no light fill with failing text inside a surface`, fmtList(w.b4.fills.map((x) => `${x.path} fill ${x.css} holds ${x.failing} failing text node(s)`))]);
         if (w.b4.chrome.length) lines.push([`walk ${id} chrome dark (luminance < ${CHROME_LUM})`, fmtList(w.b4.chrome.filter((x) => x.lum == null || x.lum >= CHROME_LUM).map((x) => `${x.path} ${x.css} luminance ${x.lum}`))]);
       }
-      const tiers = w.tiers.filter((t) => !t.inWell);
+      // Judged on the dark fills only where the label sits on a surface (not in a well, not on the page: Q1 lets a page-level label take a page-specific variant; the text line judges it there).
+      const tiers = w.tiers.filter((t) => !t.inWell && !t.onPage);
       if (tiers.length) {
         const fills = [['--surface', H('--surface')], ['--surface-hover', H('--surface-hover')], ['--surface-selected', H('--surface-selected')]];
         const bad = [];
@@ -1038,6 +1051,23 @@ async function walkOne(b, origin, job, args) {
             if (r < min) bad.push(`${t.path} ${q(t.text)} ${rgbS(t.ink)} on ${n} ${r.toFixed(2)}:1 < ${min}`);
           }
         lines.push([`walk ${id} tier labels >= ${TEXT_MIN}:1 on the rest, hover and selected fills (${tiers.length})`, fmtList([...new Set(bad)])]);
+      }
+      // Q1 hue guard: a tier label keeps its token's hue.
+      if (w.tierHue.length) {
+        const bad = [];
+        let judged = 0;
+        for (const t of w.tierHue) {
+          const r = tierHueProblem(t.text, t.ink);
+          if (r === null) continue;
+          judged++;
+          if (r) bad.push(`${t.path} ${r}`);
+        }
+        if (judged) lines.push([`walk ${id} tier label hue within ${TIER_HUE_TOLERANCE}deg of its --tier-* token (${judged})`, fmtList(bad)]);
+      }
+      // Q2: the eyebrows allowed purple use the accent token for their backdrop.
+      if (w.eyebrows.length) {
+        const bad = w.eyebrows.filter((e) => !sameRgb(e.ink, H(e.onPage ? '--accent' : '--accent-on-surface'))).map((e) => `${e.path} ${rgbS(e.ink)} on ${e.bg}, want ${e.onPage ? '--accent' : '--accent-on-surface'} ${tk[e.onPage ? '--accent' : '--accent-on-surface']}`);
+        lines.push([`walk ${id} eyebrow labels use --accent (page) / --accent-on-surface (surface) (${w.eyebrows.length})`, fmtList(bad)]);
       }
       if (w.selected.n) lines.push([`walk ${id} selected markers >= ${NON_TEXT_MIN}:1 (${w.selected.n})`, fmtList(w.selected.fails.map((x) => `${x.path} ${x.marker} on ${x.bg} ${x.ratio}:1`))]);
     }
@@ -1098,6 +1128,18 @@ async function walkOne(b, origin, job, args) {
     await page.close();
   }
   return { lines, raw };
+}
+
+/** Q1 hue guard (pure): null when the label names no chromatic tier, '' when its ink keeps the token hue, else the problem. */
+export function tierHueProblem(text, ink) {
+  const name = (String(text).match(/^[a-z]+/i) ?? [''])[0].toLowerCase();
+  const tok = TIER_TOKENS[`--tier-${name}`];
+  if (!tok) return null;
+  const [th, ts] = hslOf(...hexRgb(tok));
+  if (ts < TIER_ACHROMATIC) return null;
+  const [h, sat] = hslOf(ink[0], ink[1], ink[2]);
+  const d = Math.abs(((h - th + 540) % 360) - 180);
+  return sat < TIER_ACHROMATIC || d > TIER_HUE_TOLERANCE ? `${q(text)} ${rgbS(ink)} hue ${h.toFixed(0)}deg (sat ${(sat * 100).toFixed(0)}%), --tier-${name} ${tok} hue ${th.toFixed(0)}deg: off by ${d.toFixed(0)} > ${TIER_HUE_TOLERANCE}` : '';
 }
 
 async function walkChecks(b, origin, args) {

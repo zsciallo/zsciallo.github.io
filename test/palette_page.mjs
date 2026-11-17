@@ -51,6 +51,9 @@ export const PURPLE_ALLOW = [
   { sel: 'a:not(.btn):not(.card):not([class*="card"])', props: ['color', 'text-decoration-color', 'border-bottom-color'], reason: 'links' },
   { sel: '.accent', reason: '.accent highlighted words' },
   { sel: '.section-eyebrow, .type-modal-eyebrow, [class*="eyebrow"], .join-label--discord', props: ['color', 'text-shadow'], reason: 'eyebrow labels' },
+  // U2 round 2 (orchestrator answer Q2): the FAQ section labels and the PVP season name are eyebrow labels.
+  // Their colour is pinned by EYEBROW_TOKEN (--accent on the page, --accent-on-surface on a surface).
+  { sel: '.faq-section-label, .pvp-season-name', props: ['color'], reason: 'eyebrow labels (orchestrator Q2)' },
   { sel: '[aria-selected="true"], [aria-current="page"], [aria-checked="true"], [aria-pressed="true"], .active, .is-active, .is-selected, .selected', reason: 'selected-state markers (active tabs, active range tab, selected chips)' },
   { sel: '.sound-toggle, .theme-toggle', props: ['color', 'fill', 'stroke'], reason: 'toggle icons' },
   { sel: '.nav-toggle .nav-toggle-bar', props: ['background-color'], reason: 'toggle icons (the menu toggle bars; not their glow)' },
@@ -69,6 +72,19 @@ export const SELECTED = '[aria-selected="true"], [aria-current="page"], [aria-ch
 
 /** B3: tier label text (the ladder colours on text), judged on every surface fill a row can take. */
 export const TIER_LABELS = '.pvp-tier, .mode-live-tier';
+/**
+ * U2 round 2 (orchestrator answer Q1): every tier label text, the ladder rung
+ * names included. Its computed text colour must keep the hue of its --tier-*
+ * token within TIER_HUE_TOLERANCE degrees (per-context lighter / darker text
+ * variants are allowed, another colour is not). Achromatic tokens (saturation
+ * < TIER_ACHROMATIC) skip the hue guard. The tier is read from the label's
+ * first word (Tin, Bronze, ..., Chroma); labels naming no tier are skipped.
+ */
+export const TIER_HUE_LABELS = '.pvp-tier, .mode-live-tier, .pvp-rung-name';
+export const TIER_HUE_TOLERANCE = 12;
+export const TIER_ACHROMATIC = 0.1;
+/** U2 round 2 (Q2): eyebrows that may be purple, pinned to the accent token for their backdrop. */
+export const EYEBROW_TOKEN = '.faq-section-label, .pvp-season-name';
 
 /** B4: chrome that must stay dark in Quartz (luminance < CHROME_LUM). */
 export const CHROME_DARK = ['.pkg-modal', '.modal-card', '.type-modal', '.mode-modal', '.cart-drawer.open', '.slot-cabinet'];
@@ -307,7 +323,21 @@ export const WALK = (cfg) => String.raw`(() => {
     const ink = inks(el)[0];
     if (!ink) continue;
     const bd = backdrops(el);
-    out.tiers.push({ path: L.path(el), text: el.textContent.trim().slice(0, 20), ink: [ink[0], ink[1], ink[2], ink[3] * fade], large: parseFloat(cs(el).fontSize) >= cfg.largePx, inWell: !bd || (bd.length === 1 && same(bd[0], cfg.tokens.surfaces[3])) });
+    out.tiers.push({ path: L.path(el), text: el.textContent.trim().slice(0, 20), ink: [ink[0], ink[1], ink[2], ink[3] * fade], large: parseFloat(cs(el).fontSize) >= cfg.largePx, onPage: !!bd && bd.length === 1 && same(bd[0], pageBg), inWell: !bd || (bd.length === 1 && same(bd[0], cfg.tokens.surfaces[3])) });
+  }
+  // ---- tier label hue (Q1) and eyebrow tokens (Q2): painted ink and backdrop, judged in node
+  out.tierHue = [];
+  for (const el of root.querySelectorAll(cfg.tierHueLabels)) {
+    if (!rendered(el) || !el.textContent.trim() || fadeOf(el) === 0) continue;
+    const ink = inks(el)[0];
+    if (ink) out.tierHue.push({ path: L.path(el), text: el.textContent.trim().slice(0, 20), ink });
+  }
+  out.eyebrows = [];
+  for (const el of root.querySelectorAll(cfg.eyebrows)) {
+    if (!rendered(el) || !el.textContent.trim() || fadeOf(el) === 0) continue;
+    const ink = inks(el)[0];
+    const bd = backdrops(el);
+    if (ink) out.eyebrows.push({ path: L.path(el), ink, onPage: !!bd && bd.length === 1 && same(bd[0], pageBg), bg: bd ? rgbText(bd[0]) : 'image' });
   }
   // ---- chart (B8)
   const svg = [...document.querySelectorAll('svg')].find((s) => s.querySelector('.chart-tick') && rendered(s));
