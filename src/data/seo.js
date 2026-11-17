@@ -20,7 +20,7 @@ import { PVP_MODES } from './pvpModes.js';
 export const SITE = 'https://chromabit.us';
 export const NETWORK = 'Chromabit Network';
 export const GAME_ADDRESS = 'play.chromabit.us';
-export const THEME_COLOR = '#0c0718';
+export const THEME_COLOR = '#0E0F12';
 export const LOCALE = 'en_US';
 const ROBOTS_INDEX = 'index, follow, max-image-preview:large, max-snippet:-1';
 const OG_IMAGE = {

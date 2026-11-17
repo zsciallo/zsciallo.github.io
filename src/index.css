@@ -6,47 +6,124 @@
   padding: 0;
 }
 
+/* Two themes (run 20261117-palette, owner spec 2026-11-17): neutral greys for
+   the page (60%) and the surfaces (30%), purple only as the accent (10%).
+   "Obsidian" (dark) is :root and the default; "Quartz" (light) is the
+   [data-theme="light"] block below. The head snippet of every page sets
+   data-theme on <html> before <body> is parsed (lib/theme.js owns it after).
+   Purple is for the primary CTA fill, the active nav marker, links, the
+   highlighted heading words, eyebrow labels, focus rings and selected markers.
+   Surfaces stay dark in both themes, so anything on a --surface* uses the
+   *-on-surface tokens; text on a purple fill uses --on-accent. */
 :root {
-  /* Chromabit "Frosted Purple" palette */
-  --accent: #c77dff;
-  /* primary purple accent */
-  --accent-2: #ff7de1;
-  /* pink accent */
-  --accent-deep: #9a4dff;
-  /* deep purple */
-  --positive: #5be3a0;
+  color-scheme: dark;
+
+  --accent: #C77DFF;
+  --accent-deep: #9A4DFF;
+  --accent-on-surface: #C77DFF;
+  /* text on a purple fill */
+  --on-accent: #120A1F;
   /* mint green (online / paid) */
+  --positive: #5BE3A0;
+  --positive-on-surface: #5BE3A0;
 
-  --bg: #0c0718;
-  /* page background */
-  --bg2: #16102a;
-  /* panel */
-  --bg3: #1d1636;
-  /* panel raised */
-  --text: #f3ecff;
-  --muted: #a493c4;
+  /* page background, panel, panel raised */
+  --bg: #0E0F12;
+  --bg2: #1C1E24;
+  --bg3: #272A32;
+  --text: #F2F3F5;
+  --muted: #9CA0AB;
+  --text-on-surface: #F2F3F5;
+  --muted-on-surface: #A6ABB6;
 
-  --border: #2a1e44;
-  --border-pink: rgba(255, 125, 225, 0.28);
+  --border: #32363F;
   --glow: rgba(199, 125, 255, 0.1);
-
-  --grad-cta: linear-gradient(100deg, #9a4dff 0%, #c77dff 45%, #ff7de1 100%);
-  --grad-text: linear-gradient(135deg, #c77dff, #ff7de1);
-  /* Frosted panel: modal, drawer and caption chrome only (cards are flat). */
-  --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
 
   /* Card surfaces ("C · Surface", U9): a soft solid fill, no border, no
      gradient, no shadow. Inset is a box nested inside a card or a modal.
      Hover (also keyboard focus) and selected (an open or chosen card) are
      two steps lighter; each must read at a glance. Dividers inside a card
      use --divider. */
-  --surface: #150f27;
-  --surface-inset: #0f0a1d;
-  --surface-hover: #21193c;
-  --surface-selected: #2c214f;
-  --divider: #221838;
+  --surface: #1C1E24;
+  --surface-inset: #090A0C;
+  --surface-hover: #272A32;
+  --surface-selected: #3A3E49;
+  --divider: #23252C;
   --radius-card: 10px;
   --radius-inset: 6px;
+
+  /* Arcade edges (see the shared block below): neutral bands, the primary
+     one under the purple buttons follows the accent. */
+  --edge-raised: #3A3E49;
+  --edge-dark: #1C1E24;
+  --edge-line: rgba(0, 0, 0, 0.75);
+
+  /* Page backdrop: the body gradient's top, the corner vignette, and the
+     dither dots (lib/ditherBg.js reads --dither-dot and --dither-alpha). */
+  --page-top: color-mix(in srgb, var(--bg2) 45%, var(--bg));
+  --page-bottom: var(--bg);
+  --vignette: rgba(0, 0, 0, 0.8);
+  --dither-dot: #8A8F9A;
+  --dither-alpha: 0.55;
+
+  /* Translucent nav bar: a frosted form of --surface. */
+  --nav-fill: color-mix(in srgb, var(--surface) 78%, transparent);
+  /* A rule between two parts of one card. Quartz's --divider is a page
+     line (light), so on a card it takes the hover step instead. */
+  --divider-on-surface: var(--divider);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --accent: #7B2FE0;
+  --accent-deep: #5A1FB0;
+  --accent-on-surface: #C77DFF;
+  --on-accent: #FFFFFF;
+  --positive: #0B6B40;
+  --positive-on-surface: #5BE3A0;
+
+  --bg: #F2F3F5;
+  --bg2: #E6E8EC;
+  --bg3: #D3D6DC;
+  --text: #16181D;
+  --muted: #565B66;
+  --text-on-surface: #F2F3F5;
+  --muted-on-surface: #A6ABB6;
+
+  --border: #D3D6DC;
+  --glow: rgba(123, 47, 224, 0.12);
+
+  --surface: #16181D;
+  --surface-inset: #E6E8EC;
+  --surface-hover: #23262D;
+  --surface-selected: #3A3E49;
+  --divider: #D3D6DC;
+
+  --edge-raised: #4A4F5A;
+  --edge-dark: #6B707C;
+  --edge-line: rgba(22, 24, 29, 0.35);
+
+  --page-top: var(--bg);
+  --page-bottom: var(--bg2);
+  --vignette: rgba(22, 24, 29, 0.07);
+  --dither-dot: #565B66;
+  --dither-alpha: 0.4;
+
+  --nav-fill: color-mix(in srgb, var(--surface) 92%, transparent);
+  --divider-on-surface: var(--surface-hover);
+}
+
+/* Shared by both themes: aliases resolve against the theme's own values. */
+:root {
+  /* the old pink second accent: one accent now */
+  --accent-2: var(--accent);
+  --border-pink: var(--border);
+
+  --grad-cta: var(--accent);
+  --grad-text: var(--accent);
+  /* Frosted panel: modal, drawer and caption chrome only (cards are flat). */
+  --frost: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
 
   /* Type: pixel fonts everywhere except the flickering hero titles (Teko).
      Jersey 10 for labels, buttons, headings and reading text; VT323 for
@@ -64,18 +141,15 @@
 
   /* Arcade edges - the solid band under a raised control. Each has to read
      against what it sits on: cards on the page, buttons on a card.
-       primary  under the gradient buttons: a deeper magenta than any part
-                of their face, bright enough to show on a card
+       primary  under the purple buttons: the deep accent
        raised   under secondary buttons and small controls at rest
        dark     under the purchase-type options at rest
-       lit      any edge on hover */
-  --edge-primary: #9a2fb0;
-  --edge-raised: #54408a;
-  --edge-dark: #2e2150;
-  --edge-lit: #b03fc8;
-  /* Near-black line under a button's edge, so the edge reads as a separate
-     band against a card instead of melting into it. */
-  --edge-line: rgba(4, 2, 10, 0.75);
+       lit      any edge on hover
+       line     a dark line under the edge, so the edge reads as a separate
+                band against a card instead of melting into it
+     raised, dark and line are per theme (the blocks above). */
+  --edge-primary: var(--accent-deep);
+  --edge-lit: var(--accent);
 
   /* Height of the sticky site nav; anchors and the cart FAB clear it. */
   --nav-h: 56px;
@@ -92,7 +166,7 @@ body {
   /* The pixel faces have one weight; a synthesised bold smears them. */
   font-synthesis: none;
   background-color: var(--bg);
-  background-image: radial-gradient(120% 100% at 50% 0%, #150b29 0%, #0c0718 45%, #080411 100%);
+  background-image: radial-gradient(120% 100% at 50% 0%, var(--page-top) 0%, var(--bg) 45%, var(--page-bottom) 100%);
   background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
@@ -113,7 +187,7 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+  background: radial-gradient(ellipse at center, transparent 30%, var(--vignette) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -542,6 +616,14 @@ body::after {
   border-radius: var(--radius-card);
   position: relative;
   overflow: hidden;
+  color: var(--text-on-surface);
+}
+
+/* A highlighted word inside a card (the IP's "chromabit"). */
+.card .accent {
+  background: var(--accent-on-surface);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* Modal chrome keeps its frosted panel and top hairline (it also carries
@@ -847,37 +929,37 @@ body::after {
 .btn-primary {
   --btn-edge: var(--edge-primary);
   background: var(--grad-cta);
-  color: #fff;
-  text-shadow: 0 1px 0 rgba(40, 10, 70, 0.55);
+  color: var(--on-accent);
+  text-shadow: none;
 }
 
 .btn-primary:hover {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)),
     var(--grad-cta);
-  color: #fff;
+  color: var(--on-accent);
 }
 
+/* Secondary: a raised surface step, neutral at rest and on hover. */
 .btn-secondary {
   --btn-edge: var(--edge-raised);
   --btn-glow: rgba(0, 0, 0, 0.25);
-  background: var(--bg2);
-  color: var(--text);
+  background: var(--surface-hover);
+  color: var(--text-on-surface);
   box-shadow:
-    inset 0 0 0 2px var(--border),
+    inset 0 0 0 2px var(--surface-selected),
     0 var(--edge) 0 var(--btn-edge),
     0 calc(var(--edge) + 2px) 0 var(--edge-line),
     0 calc(var(--edge) + 8px) 22px var(--btn-glow);
 }
 
 .btn-secondary:hover {
-  --btn-edge: var(--edge-lit);
-  background: var(--bg3);
+  background: var(--surface-selected);
   box-shadow:
-    inset 0 0 0 2px var(--accent-deep),
+    inset 0 0 0 2px var(--muted-on-surface),
     0 var(--edge) 0 var(--btn-edge),
     0 calc(var(--edge) + 2px) 0 var(--edge-line),
-    0 calc(var(--edge) + 8px) 22px rgba(154, 77, 255, 0.25);
+    0 calc(var(--edge) + 8px) 22px var(--btn-glow);
 }
 
 /* Compact .btn for chrome-level controls - filter tabs, the log-in control -
@@ -1233,7 +1315,7 @@ footer {
 .faq-answer {
   padding: 1rem 1.5rem 1.25rem;
   font-size: 0.92rem;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   line-height: 1.75;
   border-top: 1px solid var(--divider);
 }
@@ -2749,18 +2831,18 @@ footer {
   margin-left: 1.5rem;
   padding: 0;
   background: transparent;
-  border: 2px solid var(--border);
+  border: 2px solid var(--surface-selected);
   border-radius: 7px;
-  color: var(--accent);
+  color: var(--accent-on-surface);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: border-color 0.2s, background 0.2s, color 0.2s, scale 0.3s var(--ease-spring);
 }
 
 .sound-toggle:hover {
-  border-color: var(--accent-deep);
-  background: var(--glow);
-  color: var(--accent-2);
+  border-color: var(--muted-on-surface);
+  background: var(--surface-hover);
+  color: var(--accent-on-surface);
 }
 
 .sound-toggle:active {
@@ -2769,11 +2851,11 @@ footer {
 }
 
 .sound-toggle[aria-pressed='false'] {
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .sound-toggle:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent-on-surface);
   outline-offset: 3px;
 }
 
@@ -2782,7 +2864,14 @@ footer {
   shape-rendering: crispEdges;
 }
 
-/* Order in the bar: brand, links (pushed right), sound, hamburger. */
+/* The theme switch sits right after the sound toggle, in the same shell (it
+   carries .sound-toggle too), half a gap closer so the pair reads as one
+   group. */
+.sound-toggle.theme-toggle {
+  margin-left: -0.5rem;
+}
+
+/* Order in the bar: brand, links (pushed right), sound, theme, hamburger. */
 .site-nav-inner {
   justify-content: flex-start;
 }
@@ -3617,17 +3706,17 @@ html:not(.js) .sound-toggle {
   gap: 9px;
   padding: 4px 15px 3px 12px;
   border-radius: 999px;
-  background: var(--frost), rgba(12, 7, 24, 0.72);
+  background: var(--frost), color-mix(in srgb, var(--surface) 78%, transparent);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--border-pink);
-  color: #ffb3ec;
+  border: 1px solid var(--surface-selected);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 1.2rem;
   letter-spacing: 0.09em;
   line-height: 1.2;
   text-align: left;
-  text-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  text-shadow: none;
   pointer-events: none;
 }
 
@@ -3638,8 +3727,8 @@ html:not(.js) .sound-toggle {
   flex-shrink: 0;
   border-radius: 1px;
   transform: rotate(45deg);
-  background: var(--grad-cta);
-  box-shadow: 0 0 8px rgba(255, 125, 225, 0.6);
+  background: var(--accent-on-surface);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-on-surface) 60%, transparent);
 }
 
 .carousel-slide {
@@ -3661,8 +3750,8 @@ html:not(.js) .sound-toggle {
   gap: 5px;
   padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(12, 7, 24, 0.82);
-  color: var(--text);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-size: 0.78rem;
@@ -4387,10 +4476,10 @@ html.js .reveal.is-visible {
      lightbox (75), cart scrim (80), drawer (90) and modals (100) - those are
      meant to cover the page. */
   z-index: 70;
-  background: rgba(12, 7, 24, 0.72);
+  background: var(--nav-fill);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(199, 125, 255, 0.12);
+  border-bottom: 1px solid var(--surface-hover);
 }
 
 /* Held until Teko is loaded (the inline script in each page head sets
@@ -4422,7 +4511,7 @@ html.js.fonts-ready .site-nav-inner {
   align-items: center;
   gap: 0.6rem;
   text-decoration: none;
-  color: var(--text);
+  color: var(--text-on-surface);
   font-family: var(--font-hud);
   font-size-adjust: cap-height 0.63;
   font-weight: 500;
@@ -4434,8 +4523,8 @@ html.js.fonts-ready .site-nav-inner {
 }
 
 .site-nav-brand:hover {
-  color: var(--accent);
-  text-shadow: 0 0 18px rgba(199, 125, 255, 0.45);
+  color: var(--accent-on-surface);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--accent-on-surface) 45%, transparent);
 }
 
 .site-nav-brand img {
@@ -4455,7 +4544,7 @@ html.js.fonts-ready .site-nav-inner {
   position: relative;
   display: block;
   padding: 0.35rem 0;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   text-decoration: none;
   font-family: var(--font-hud);
   font-size-adjust: none;
@@ -4467,11 +4556,11 @@ html.js.fonts-ready .site-nav-inner {
 
 .site-nav-links a:hover,
 .site-nav-links a.active {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .site-nav-links a:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent-on-surface);
   outline-offset: 4px;
   border-radius: 2px;
 }
@@ -4484,7 +4573,7 @@ html.js.fonts-ready .site-nav-inner {
   right: 0;
   bottom: -2px;
   height: 2px;
-  background: var(--grad-cta);
+  background: var(--accent-on-surface);
   transform: scaleX(0);
   transform-origin: left center;
   pointer-events: none;
@@ -4492,7 +4581,7 @@ html.js.fonts-ready .site-nav-inner {
 
 .site-nav-links a.active .nav-bar {
   transform: scaleX(1);
-  box-shadow: 0 0 10px rgba(255, 125, 225, 0.5);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent-on-surface) 50%, transparent);
 }
 
 /* Hamburger: mobile only, and only where JS can open the panel it controls. */
@@ -4508,7 +4597,7 @@ html.js.fonts-ready .site-nav-inner {
   justify-content: center;
   gap: 5px;
   background: transparent;
-  border: 2px solid var(--border);
+  border: 2px solid var(--surface-selected);
   border-radius: 7px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
@@ -4516,22 +4605,22 @@ html.js.fonts-ready .site-nav-inner {
 
 .nav-toggle:hover,
 .nav-toggle.open {
-  border-color: var(--accent-deep);
-  background: var(--glow);
+  border-color: var(--muted-on-surface);
+  background: var(--surface-hover);
 }
 
 .nav-toggle-bar {
   width: 17px;
   height: 2px;
   border-radius: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 8px rgba(199, 125, 255, 0.45);
+  background: var(--accent-on-surface);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-on-surface) 45%, transparent);
   transition: transform 0.22s ease, opacity 0.18s ease, background 0.2s;
 }
 
 .nav-toggle:hover .nav-toggle-bar,
 .nav-toggle.open .nav-toggle-bar {
-  background: var(--accent-2);
+  background: var(--accent-on-surface);
 }
 
 .nav-toggle.open .nav-toggle-bar:nth-child(1) {
@@ -4562,8 +4651,8 @@ html.js.fonts-ready .site-nav-inner {
     padding: 0 1.25rem;
     /* Opaque, not frosted like the bar: anything fixed underneath it (the
        store's cart button) would otherwise ghost through. */
-    background: var(--bg);
-    border-bottom: 1px solid rgba(199, 125, 255, 0.12);
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface-hover);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
     display: none;
   }
@@ -4574,7 +4663,7 @@ html.js.fonts-ready .site-nav-inner {
   }
 
   .site-nav-links li + li {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--surface-hover);
   }
 
   .site-nav-links a {
@@ -5338,7 +5427,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .join-row + .join-row {
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--divider-on-surface);
   padding-top: 0.7rem;
 }
 
@@ -5362,16 +5451,16 @@ html[data-keypromo="off"] .store-promo--key {
   font-size: 0.95rem;
   letter-spacing: 0.18em;
   line-height: 1.2;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .join-count {
   font-weight: 400;
-  color: var(--positive);
+  color: var(--positive-on-surface);
 }
 
 .join-label--discord {
-  color: var(--accent);
+  color: var(--accent-on-surface);
 }
 
 .join-label--down {
@@ -5379,7 +5468,7 @@ html[data-keypromo="off"] .store-promo--key {
 }
 
 .join-label--down .join-count {
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .join-addr {
@@ -5387,7 +5476,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size-adjust: none;
   font-size: clamp(1.6rem, 6vw, 2.1rem);
   line-height: 1;
-  color: var(--text);
+  color: var(--text-on-surface);
   letter-spacing: 0.02em;
   overflow-wrap: anywhere;
 }
@@ -5397,7 +5486,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size-adjust: none;
   font-size: 1.35rem;
   line-height: 1;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
 .join-foot {
@@ -5405,7 +5494,7 @@ html[data-keypromo="off"] .store-promo--key {
   font-size-adjust: none;
   font-size: 1.1rem;
   line-height: 1.2;
-  color: var(--muted);
+  color: var(--muted-on-surface);
   text-align: center;
   text-wrap: balance;
 }
@@ -5435,15 +5524,15 @@ html[data-keypromo="off"] .store-promo--key {
 .btn.copy-ip.is-copied {
   --btn-edge: rgba(91, 227, 160, 0.45);
   background: rgba(91, 227, 160, 0.16);
-  color: var(--positive);
+  color: var(--positive-on-surface);
   text-shadow: none;
 }
 
-/* ─── the claim, alone between two thin pink rules ─── */
+/* ─── the claim, alone between two thin rules ─── */
 .claim-band {
   padding: 1.6rem 0.5rem;
-  border-block: 1px solid var(--border-pink);
-  background: linear-gradient(90deg, transparent, rgba(255, 125, 225, 0.07), transparent);
+  border-block: 1px solid var(--border);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 4%, transparent), transparent);
   text-align: center;
 }
 
@@ -5489,8 +5578,8 @@ html[data-keypromo="off"] .store-promo--key {
   position: relative;
   aspect-ratio: 16 / 8;
   overflow: hidden;
-  background: var(--bg3);
-  border-bottom: 1px solid var(--divider);
+  background: var(--surface-hover);
+  border-bottom: 1px solid var(--divider-on-surface);
 }
 
 /* A real screenshot dropped in as the banner's only child. */
@@ -5560,16 +5649,17 @@ html[data-keypromo="off"] .store-promo--key {
   font-weight: 400;
   letter-spacing: 0.04em;
   line-height: 1;
-  color: var(--text);
+  color: var(--text-on-surface);
 }
 
 .mode-desc {
   font-size-adjust: none;
   font-size: 1.15rem;
   line-height: 1.3;
-  color: var(--muted);
+  color: var(--muted-on-surface);
 }
 
+/* The inset is light in Quartz, so its text is page text, not card text. */
 .mode-live {
   display: flex;
   flex-direction: column;
@@ -5577,6 +5667,7 @@ html[data-keypromo="off"] .store-promo--key {
   padding: 0.5rem 0.7rem;
   border-radius: var(--radius-inset);
   background: var(--surface-inset);
+  color: var(--text);
 }
 
 .mode-live[hidden] {

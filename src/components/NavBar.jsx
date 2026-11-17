@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { m, useReducedMotion } from 'motion/react';
 import { spring } from '../lib/motion';
 import { useSound } from '../hooks/useSound';
+import { useTheme } from '../hooks/useTheme';
 import { click } from '../lib/sound';
 
 const LINKS = [
@@ -85,6 +86,54 @@ function SoundToggle() {
   );
 }
 
+/** Moon (dark theme) or sun (light theme), in the same pixel steps as the
+ *  speaker: the glyph shows the theme the page is in. */
+function ThemeIcon({ light }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      {light ? (
+        <>
+          <rect x="7" y="6" width="6" height="8" />
+          <rect x="6" y="7" width="8" height="6" />
+          <rect x="9" y="1" width="2" height="3" />
+          <rect x="9" y="16" width="2" height="3" />
+          <rect x="1" y="9" width="3" height="2" />
+          <rect x="16" y="9" width="3" height="2" />
+          <rect x="3" y="3" width="2" height="2" />
+          <rect x="15" y="3" width="2" height="2" />
+          <rect x="3" y="15" width="2" height="2" />
+          <rect x="15" y="15" width="2" height="2" />
+        </>
+      ) : (
+        <>
+          <rect x="7" y="2" width="6" height="2" />
+          <rect x="5" y="4" width="4" height="2" />
+          <rect x="3" y="6" width="4" height="8" />
+          <rect x="5" y="14" width="4" height="2" />
+          <rect x="7" y="16" width="6" height="2" />
+          <rect x="13" y="14" width="3" height="2" />
+          <rect x="16" y="12" width="2" height="2" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Dark / light theme switch (lib/theme.js), beside the sound toggle and in
+ *  its shell (it carries .sound-toggle for the look; .theme-toggle sets it
+ *  apart). */
+function ThemeToggle() {
+  const [theme, toggle] = useTheme();
+  const light = theme === 'light';
+  return (
+    <button type="button" class="sound-toggle theme-toggle"
+      aria-label={light ? 'Switch to dark theme' : 'Switch to light theme'}
+      onClick={() => { toggle(); click(); }}>
+      <ThemeIcon light={light} />
+    </button>
+  );
+}
+
 /** Sticky site nav. `current` is the id of the page rendering it, passed in
  *  rather than read from location so the server-rendered markup matches. */
 export function NavBar({ current = null }) {
@@ -112,6 +161,7 @@ export function NavBar({ current = null }) {
         <Brand still={still} />
 
         <SoundToggle />
+        <ThemeToggle />
 
         <button type="button" class={`nav-toggle${open ? ' open' : ''}`}
           aria-expanded={open} aria-controls="site-nav-links"
