@@ -54,6 +54,7 @@ export default defineConfig({
         faq: resolve(__dirname, 'faq/index.html'),
         store: resolve(__dirname, 'store/index.html'),
         privacy: resolve(__dirname, 'privacy/index.html'),
+        vote: resolve(__dirname, 'vote/index.html'),
         auctions: resolve(__dirname, 'auctions/index.html'),
       },
     },

@@ -125,6 +125,15 @@ export const PAGES = [
     sources: ['privacy/index.html', 'src/privacy.jsx', 'src/pages/PrivacyPage.jsx'],
   },
   {
+    route: '/vote/',
+    entry: 'vote/index.html',
+    // Not linked from anywhere: players reach it by typing the address. Kept out of search and the sitemap.
+    indexable: false,
+    title: 'Vote | Chromabit',
+    description: 'Vote for Chromabit on every server list.',
+    sources: ['vote/index.html', 'src/vote.jsx', 'src/pages/VotePage.jsx'],
+  },
+  {
     route: '/pvp/player/',
     entry: 'pvp/player/index.html',
     // One page serves every player (?name=), so it stays out of search results and the sitemap.
