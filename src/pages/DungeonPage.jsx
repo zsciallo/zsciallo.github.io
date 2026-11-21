@@ -1,7 +1,7 @@
 import { Fragment } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { A, b, origin, preview, size } from '../../public/dungeon/meta.json';
-import { DIFF, EXTRA, ZONES } from '../data/dungeonMap';
+import { DIFF, EXTRA, RESPAWN, ZONES } from '../data/dungeonMap';
 import { project, unproject } from '../lib/dungeonMap/data.js';
 import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
@@ -59,6 +59,8 @@ function inPoly(p, x, z) {
   return c;
 }
 
+// the longest a respawn can take: base + jitter (respawn-scale only ever shortens it)
+const campBack = (z) => RESPAWN.camp[z.d] + RESPAWN.jitter;
 const secs = (s) => (s >= 600 ? `${s / 60} min` : `${s} s`);
 const xyz = (m) => `X ${Math.floor(m.x)}  Y ${Math.floor(m.y)}  Z ${Math.floor(m.z)}`;
 const Row = ({ k, children }) => (children ? <div class="dm-row"><dt>{k}</dt><dd>{children}</dd></div> : null);
@@ -95,7 +97,7 @@ function AreaPanel({ z, go }) {
         <Row k="ARMOUR">{DIFF[z.d][2]}</Row>
         <Row k="BOSS">{z.b && go(z.boss.id, z.b.n)}</Row>
         <Row k="CAMPS"><Lines items={z.k.map((c) => go(`camp-${slug(c[0])}`, c[0]))} /></Row>
-        <Row k="MOBS BACK">up to {secs(z.d > 1 ? 225 : 180)}</Row>
+        <Row k="MOBS BACK">up to {secs(campBack(z))}</Row>
         <Row k="CRATE">{z.key && `${z.key} × ${z.cr.length}`}</Row>
         <Row k="ZONE ITEM">{z.item}</Row>
         <Row k="ARMOUR SET">{z.set}</Row>
@@ -123,7 +125,7 @@ function MarkPanel({ m, go }) {
           <Row k="CAMP">{bo.camp}</Row>
           {at}
           <Row k="HEALTH">{bo.hp} base · +50% per extra player, up to 5</Row>
-          <Row k="BACK IN">up to {secs(bo.final ? 1350 : 225)}</Row>
+          <Row k="BACK IN">up to {secs(bo.final ? RESPAWN.final + RESPAWN.finalJitter : RESPAWN.boss + RESPAWN.jitter)}</Row>
           <Row k="DROPS"><Lines items={[z.item, `${z.set} armour`, z.sp, 'Trophy head (3%)']} /></Row>
           <Row k="CONTRACT">{!bo.final && <><code>/dungeon contract</code> summons a private fight</>}</Row>
         </dl>
@@ -139,7 +141,7 @@ function MarkPanel({ m, go }) {
       {m.t === 'way' && <p>Warp here from the <code>/dungeon</code> menu. Die in any {DIFF[m.extra][0].toLowerCase()} area and you respawn here.</p>}
       {m.t === 'guard' && <p>A guard pack holds this crossing. Clear it to pass.</p>}
       <dl>
-        {m.t === 'camp' && <Row k="MOBS BACK">up to {secs(z.d > 1 ? 225 : 180)}</Row>}
+        {m.t === 'camp' && <Row k="MOBS BACK">up to {secs(campBack(z))}</Row>}
         {m.t === 'way' && <><Row k="WARP COST">{DIFF[m.extra][3]}</Row><Row k="ARMOUR">{DIFF[m.extra][2]}</Row></>}
         {m.t === 'npc' && <Row k="OPENS"><code>{m.extra}</code></Row>}
         {area}
@@ -188,8 +190,8 @@ export function DungeonPage() {
     if (location.hash.slice(1) !== h) history.replaceState(null, '', h ? `#${h}` : location.pathname + location.search);
   };
   const goTo = (id) => {
+    if (!Object.hasOwn(byId, id)) return;
     const o = byId[id];
-    if (!o) return;
     select(o);
     map.current?.fly(o.z ? o.z.bb : [o.m.mx - 22, o.m.mx + 22, o.m.my - 22, o.m.my + 22], o.z ? 6 : undefined);
   };
@@ -225,8 +227,7 @@ export function DungeonPage() {
         },
       });
       handle.cut(live.current.engineCut);
-      const h = location.hash.slice(1);
-      if (byId[h]) live.current.goTo(h);
+      live.current.goTo(location.hash.slice(1));
     });
     const onHash = () => live.current.goTo(location.hash.slice(1));
     addEventListener('hashchange', onHash);

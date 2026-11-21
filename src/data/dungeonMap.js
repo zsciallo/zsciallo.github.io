@@ -10,6 +10,10 @@ export const DIFF = [
   ['VERY HARD', '#E83A3A', 'Living Prism', '$40,000'],
 ];
 
+// Respawn timers (camps/*.yml `respawn:`): interval-seconds per difficulty for camps, mini bosses and the Heart, and
+// jitter-seconds, which CampDefs applies as plus or minus. The Heart has no jitter. The page shows interval + jitter.
+export const RESPAWN = { camp: [180, 180, 225, 225], boss: 225, final: 1350, jitter: 45, finalJitter: 0 };
+
 const R = (a, b, c, d) => [[a, c], [b, c], [b, d], [a, d]];
 
 // n name, d difficulty, L depth layer (2 upper, 1 middle, 0 deep), c colour, p polygon [x, z], y range, t theme,

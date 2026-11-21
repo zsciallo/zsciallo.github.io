@@ -138,6 +138,8 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
     box.dataset.gl = 'off';
     onGl('off');
   };
+  // shortcut: a lost context drops to the preview for good (no webglcontextrestored rebuild); a reload brings it back
+  canvas.addEventListener('webglcontextlost', fail);
   const gl = canvas.getContext('webgl2', { antialias: false });
   if (!gl || typeof DecompressionStream === 'undefined') fail();
   else {
@@ -153,7 +155,7 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
         engine = createEngine(gl, {
           meta, blocks, solid: new Uint8Array(s), atlas, reduced: reducedMotion(),
           onDraw: () => {
-            if (!first) return;
+            if (!first || canvas.hidden) return; // a context lost during the load stays off
             first = false;
             box.dataset.gl = 'on';
             onGl('on', [blocks.origin[1] + lo, blocks.origin[1] + hi]);
@@ -175,6 +177,7 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
       dead = true;
       cancelAnimationFrame(anim);
       ro.disconnect();
+      canvas.removeEventListener('webglcontextlost', fail);
       for (const [ev, fn, o] of on) box.removeEventListener(ev, fn, o);
       engine?.destroy();
     },
