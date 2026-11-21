@@ -125,6 +125,17 @@ export const PAGES = [
     sources: ['privacy/index.html', 'src/privacy.jsx', 'src/pages/PrivacyPage.jsx'],
   },
   {
+    route: '/dungeon/',
+    entry: 'dungeon/index.html',
+    title: 'Heartwood Dungeon Map | Chromabit',
+    description:
+      'Interactive block map of the Heartwood dungeon: areas, bosses, camps, crates and waypoints, with a cutaway to look inside.',
+    keywords: 'Heartwood dungeon map, Minecraft dungeon map, Economy SMP dungeon, Chromabit',
+    crumb: 'Heartwood Map',
+    pageName: 'Heartwood Map',
+    sources: ['dungeon/index.html', 'src/dungeon.jsx', 'src/pages/DungeonPage.jsx', 'src/dungeon.css', 'src/data/dungeonMap.js', 'src/lib/dungeonMap', 'public/dungeon'],
+  },
+  {
     route: '/vote/',
     entry: 'vote/index.html',
     // Not linked from anywhere: players reach it by typing the address. Kept out of search and the sitemap.

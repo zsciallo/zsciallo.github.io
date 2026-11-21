@@ -56,6 +56,7 @@ export default defineConfig({
         privacy: resolve(__dirname, 'privacy/index.html'),
         vote: resolve(__dirname, 'vote/index.html'),
         auctions: resolve(__dirname, 'auctions/index.html'),
+        dungeon: resolve(__dirname, 'dungeon/index.html'),
       },
     },
   },

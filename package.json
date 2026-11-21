@@ -18,7 +18,9 @@
     "test:images": "node test/image_crop.test.mjs && node test/image_crop_check.mjs",
     "test:freekey": "node test/free_key_scope.test.mjs && node test/free_key_scope_check.mjs",
     "test:theme": "node test/theme_check.mjs",
-    "test:dungeon": "node test/dungeon_data.test.mjs"
+    "test:dungeon": "node test/dungeon_data.test.mjs",
+    "test:dungeonlib": "node test/dungeon_lib.test.mjs",
+    "test:dungeon:browser": "node test/dungeon_browser_check.mjs"
   },
   "dependencies": {
     "dompurify": "^3.4.16",

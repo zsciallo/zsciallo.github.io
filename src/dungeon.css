@@ -1,0 +1,643 @@
+/* /dungeon/: the Heartwood map (run 20261121-dungeon-map). Ported from the approved mock-up onto the site tokens.
+   The map box and the panel are dark surfaces in both themes, as cards are. */
+
+.dm {
+  /* above the fixed dither canvas, as .container is */
+  position: relative;
+  z-index: 1;
+  padding: 12px max(16px, env(safe-area-inset-left, 0px)) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dm [hidden] {
+  display: none !important;
+}
+
+[data-theme="light"] :is(.dm-map, .dm-panel, .dm-search, .dm-tools .dm-seg) {
+  color-scheme: dark;
+  --text: var(--text-on-surface);
+  --muted: var(--muted-on-surface);
+  --accent: var(--accent-on-surface);
+  --on-accent: var(--on-accent-on-surface);
+  --border: var(--surface-selected);
+  color: var(--text);
+}
+
+.dm button,
+.dm input {
+  font: inherit;
+  color: inherit;
+}
+
+/* ─── heading, search, view switch, cut slider ─── */
+.dm-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 14px;
+}
+
+.dm-kicker {
+  text-align: left;
+  margin: 0 0 2px;
+}
+
+.dm-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3rem);
+  line-height: 0.85;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.dm-tools {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  font-family: var(--font-hud);
+  font-size: 1.15rem;
+}
+
+.dm-search {
+  position: relative;
+}
+
+.dm-search input {
+  width: min(300px, 60vw);
+  background: var(--surface);
+  color: var(--text);
+  border: 0;
+  border-radius: var(--radius-inset);
+  padding: 0.4rem 0.7rem;
+  box-shadow: inset 0 0 0 2px var(--surface-selected);
+  letter-spacing: 0.04em;
+}
+
+.dm-search input::placeholder {
+  color: var(--muted);
+}
+
+.dm-results {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 230px;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border-radius: var(--radius-inset);
+  box-shadow: 0 0 0 2px var(--surface-selected), 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+.dm-results button {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dm-results button:hover,
+.dm-results button:focus-visible {
+  background: var(--surface-hover);
+}
+
+.dm-results small {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.dm-seg {
+  display: flex;
+  background: var(--surface);
+  border-radius: var(--radius-inset);
+  padding: 3px;
+  gap: 2px;
+  color: var(--text);
+}
+
+.dm-seg label {
+  cursor: pointer;
+}
+
+.dm-seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dm-seg span {
+  display: block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.dm-seg input:checked + span {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.dm-seg input:focus-visible + span {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+.dm-slice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dm-slice span {
+  font-family: var(--font-mono);
+  min-width: 11ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.dm-slice input {
+  width: min(220px, 38vw);
+  accent-color: var(--accent);
+}
+
+/* ─── map box ─── */
+.dm-app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 10px;
+  height: max(420px, calc(100svh - var(--nav-h) - 24px));
+  font-family: var(--font-hud);
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.dm-map {
+  position: relative;
+  min-height: 420px;
+  background: var(--inset-on-surface);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  --k: 1;
+  --tx: 0;
+  --ty: 0;
+}
+
+.dm-map[data-drag] {
+  cursor: grabbing;
+}
+
+.dm-map canvas,
+.dm-map svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.dm-map [data-map-preview] {
+  position: absolute;
+  left: calc((var(--px) * var(--k) + var(--tx)) * 1px);
+  top: calc((var(--py) * var(--k) + var(--ty)) * 1px);
+  width: calc(var(--pw) * var(--k) * 1px);
+  height: calc(var(--ph) * var(--k) * 1px);
+  max-width: none;
+}
+
+/* before the script places them: the picture fits the box, the overlays wait */
+.dm-map:not([data-live]) [data-map-preview] {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.dm-map:not([data-live]) :is(svg, .dm-ov) {
+  visibility: hidden;
+}
+
+.dm-world {
+  transform: matrix(var(--k), 0, 0, var(--k), var(--tx), var(--ty));
+}
+
+.dm-zone {
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  fill-opacity: 0.06;
+  stroke-opacity: 0.8;
+}
+
+.dm-zone.out {
+  stroke-dasharray: 5 4;
+}
+
+.dm-zone.sel {
+  stroke-width: 3;
+  fill-opacity: 0.22;
+  stroke-opacity: 1;
+}
+
+.dm-ov {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dm-zl,
+.dm-mk {
+  position: absolute;
+  left: calc((var(--mx) * var(--k) + var(--tx)) * 1px);
+  top: calc((var(--my) * var(--k) + var(--ty)) * 1px);
+  transform: translate(-50%, -50%);
+}
+
+.dm-zl,
+.dm-lb {
+  text-shadow: 0 0 3px #090A0C, 0 1px 0 #090A0C, 1px 0 0 #090A0C, -1px 0 0 #090A0C, 0 -1px 0 #090A0C;
+  white-space: nowrap;
+}
+
+.dm-zl {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 1.2rem;
+  line-height: 0.95;
+  color: var(--c);
+}
+
+.dm-zl small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.dm-zl.out {
+  font-size: 1rem;
+}
+
+.dm-mk {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.dm-g {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 18px;
+  --c: var(--accent);
+}
+
+.dm-mk i,
+.dm-g i {
+  display: block;
+}
+
+.boss i {
+  width: 14px;
+  height: 14px;
+  /* transform, not rotate: the reduced-motion rule resets rotate, and this is a shape, not motion */
+  transform: rotate(45deg);
+  background: var(--c);
+  box-shadow: 0 0 0 2px #090A0C, 0 0 0 4px #F2F3F5;
+}
+
+.boss.final i {
+  width: 19px;
+  height: 19px;
+}
+
+.camp i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #F2F3F5;
+  box-shadow: 0 0 0 2px #090A0C;
+}
+
+.crate i {
+  width: 9px;
+  height: 9px;
+  background: #F2C14E;
+  box-shadow: 0 0 0 2px #090A0C;
+}
+
+.way i {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #090A0C;
+  border: 4px solid var(--accent);
+  box-shadow: 0 0 0 2px #090A0C;
+}
+
+.npc i {
+  width: 13px;
+  height: 12px;
+  background: #6FD3FF;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.guard i {
+  width: 13px;
+  height: 13px;
+  background: #FF7A45;
+  clip-path: polygon(20% 0, 50% 30%, 80% 0, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0 80%, 30% 50%, 0 20%);
+}
+
+.dm-mk.sel::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+
+.dm-mk:hover {
+  z-index: 5;
+}
+
+.dm-lb {
+  position: absolute;
+  left: calc(100% - 2px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  pointer-events: none;
+}
+
+.boss .dm-lb {
+  font-family: var(--font-hud);
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  left: calc(100% + 2px);
+}
+
+.dm-mk:hover .dm-lb,
+.dm-mk:focus-visible .dm-lb,
+.dm-mk.sel .dm-lb {
+  display: block !important;
+}
+
+/* zoom tiers: far = areas, bosses, waypoints; mid adds boss names, crates, NPCs; near adds camp names */
+[data-zoom="far"] :is(.crate, .npc, .dm-zl.out, .dm-lb),
+[data-zoom="mid"] :is(.camp, .crate, .npc, .guard) .dm-lb,
+[data-zoom="near"] .crate .dm-lb {
+  display: none;
+}
+
+/* layer toggles */
+.no-zone :is(.dm-zone, .dm-zl),
+.no-boss .dm-mk.boss,
+.no-camp .dm-mk.camp,
+.no-crate .dm-mk.crate,
+.no-way .dm-mk.way,
+.no-npc .dm-mk.npc,
+.no-guard .dm-mk.guard {
+  display: none;
+}
+
+.dm-ctl {
+  position: absolute;
+  z-index: 10;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-radius: var(--radius-inset);
+  cursor: default;
+}
+
+.dm-layers {
+  top: 10px;
+  left: 10px;
+  padding: 6px 10px;
+}
+
+.dm-layers summary {
+  cursor: pointer;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.dm-layers label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.dm-layers input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+.dm-layers p {
+  margin: 6px 0 2px;
+  color: var(--muted);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.dm-layers .dm-seg {
+  background: var(--inset-on-surface);
+}
+
+.dm-zoom {
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+}
+
+.dm-zoom button {
+  width: 38px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-inset);
+  background: var(--surface-hover);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  box-shadow: inset 0 0 0 2px var(--surface-selected), 0 4px 0 var(--edge-raised), 0 6px 0 var(--edge-line);
+}
+
+.dm-zoom button:active {
+  translate: 0 4px;
+  box-shadow: inset 0 0 0 2px var(--surface-selected);
+}
+
+.dm-read {
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  pointer-events: none;
+  max-width: calc(100% - 70px);
+}
+
+.dm-north {
+  right: 12px;
+  top: 10px;
+  padding: 2px 9px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* ─── detail panel ─── */
+.dm-panel {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  overflow: auto;
+  min-width: 0;
+}
+
+.dm-eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.dm-panel h2 {
+  margin: 0 0 8px;
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.dm-panel p {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+
+.dm-chip {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--c);
+  color: #090A0C;
+  letter-spacing: 0.08em;
+  font-size: 1rem;
+}
+
+.dm-panel dl {
+  margin: 10px 0 0;
+}
+
+.dm-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 2px solid var(--divider-on-surface);
+}
+
+.dm-row dt {
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.dm-row dd,
+.dm-tiers div {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dm-go {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dm-tiers {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 8px;
+  align-items: baseline;
+  margin-top: 10px;
+}
+
+.dm-tiers div {
+  display: contents;
+}
+
+.dm-tiers .dm-chip {
+  justify-self: start;
+}
+
+.dm code {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  background: var(--inset-on-surface);
+  padding: 0 6px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .dm-app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: max(420px, calc(100svh - var(--nav-h) - 24px)) auto;
+    height: auto;
+  }
+
+  .dm-tools {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dm-search {
+    flex: 1 1 100%;
+  }
+
+  .dm-search input {
+    width: 100%;
+  }
+}
