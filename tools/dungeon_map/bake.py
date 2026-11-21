@@ -315,9 +315,9 @@ def main():
     table = np.zeros(nC, dtype=[('cx', '<u2'), ('cz', '<u2'), ('s', '<u4'), ('c', '<u4')])
     table['cx'], table['cz'], table['s'], table['c'] = ck % 65536, ck // 65536, start, count
     cols = np.concatenate([x, y, z, state]).astype('<u2')
-    with gzip.open(os.path.join(out, 'blocks.bin.gz'), 'wb', 9) as f:
+    with gzip.GzipFile(os.path.join(out, 'blocks.bin.gz'), 'wb', 9, mtime=0) as f:  # mtime 0: a re-bake is byte-identical
         f.write(head + table.tobytes() + cols.tobytes())
-    with gzip.open(os.path.join(out, 'solid.bin.gz'), 'wb', 9) as f:
+    with gzip.GzipFile(os.path.join(out, 'solid.bin.gz'), 'wb', 9, mtime=0) as f:  # mtime 0: a re-bake is byte-identical
         f.write(np.packbits(solid.ravel()).tobytes())
     del solid
     print('blocks %d chunks %d states %d (%.0fs)' % (nB, nC, nS, time.time() - t0), flush=True)
