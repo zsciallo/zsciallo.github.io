@@ -307,7 +307,7 @@ export function DungeonPage() {
               ))}
               {MARKS.map((m) => (
                 <button key={m.id} type="button" data-marker-id={m.id} class={`dm-mk ${m.t}${m.extra?.final ? ' final' : ''}${selId === m.id ? ' sel' : ''}`}
-                  hidden={markHidden(m)} aria-label={m.n} style={{ ...at(m.mx, m.my), '--c': m.zone.c || '#C77DFF' }} onClick={() => select({ m })}>
+                  hidden={markHidden(m)} aria-label={m.n} style={{ ...at(m.mx, m.my), '--c': m.zone.c || 'var(--accent)' }} onClick={() => select({ m })}>
                   <i /><span class="dm-lb">{m.n}</span>
                 </button>
               ))}
