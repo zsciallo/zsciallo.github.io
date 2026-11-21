@@ -11,7 +11,9 @@
 //   node test/theme_check.mjs --snapshot <baseDistDir>
 //       write test/fixtures/theme/base.json (inline head script counts and the
 //       geometry of every visible element) from the BASE build. Taken once from
-//       a full dist of 1043374 (.orch/runs/20261117-palette/base-dist).
+//       a full dist of 1043374 (.orch/runs/20261117-palette/base-dist); retaken
+//       from 7f37244 in run 20261121-dungeon-map U3 (owner 2026-11-21: SMP replaces
+//       AUCTIONS in the nav, /smp/ gains the dungeon preview and button).
 //   (npm script: "test:theme": "node test/theme_check.mjs")
 //
 // Sections (--only takes these names):
