@@ -243,7 +243,8 @@ const PLAYER_MAST =
   `<p class="profile-best" data-profile-best hidden></p>${PLAYER_BACK}</section>`;
 const PLAYER_BODY = `${PVP_NAV}<main>${PLAYER_MAST}${PLAYER_STATE}</main>${FOOTER}`;
 // U8: the sitemap lists exactly the seven indexable pages, each with a lastmod (was / and /pvp/ only, no lastmod).
-const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/'];
+// Run 20261121-dungeon-map U2: /dungeon/ is the eighth indexable page.
+const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/'];
 const sitemapLine = (route) => `  <url><loc>https://chromabit.us${route}</loc><lastmod>2026-11-10</lastmod></url>\n`;
 const SITEMAP =
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
@@ -274,6 +275,7 @@ Join at play.chromabit.us. Bedrock uses the same address with port 19132. Java w
 - [Store](https://chromabit.us/store/): ranks and crate keys.
 - [Auctions](https://chromabit.us/auctions/): live market data.
 - [Privacy](https://chromabit.us/privacy/): how data is handled.
+- [Heartwood map](https://chromabit.us/dungeon/): the dungeon block by block.
 `;
 
 /** U4: give a page the site nav and footer (around #app, so the U2 cases keep their exact #app strings). */
@@ -375,7 +377,12 @@ const DESC = {
   store: 'The official Chromabit store. Buy ranks, crate keys and more; every purchase directly helps Chromabit.',
   auctions: 'Live auction house data for the Chromabit SMP: price history, floors, volume and listings for each item.',
   privacy: 'How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments and your choices.',
+  dungeon: 'Interactive block map of the Heartwood dungeon: areas, bosses, camps, crates and waypoints, with a cutaway to look inside.',
 };
+// Run 20261121-dungeon-map U2: /dungeon/ as spec-U2 describes its server render.
+const DUNGEON_TITLE = 'Heartwood Dungeon Map | Chromabit';
+const DUNGEON_PREVIEW = '<img data-map-preview src="/dungeon/preview.jpg" alt="The Heartwood island" width="1200" height="1164" loading="lazy" decoding="async">';
+const DUNGEON_MAIN = `<main><p class="section-eyebrow">SEASON 4 DUNGEON</p><h1>HEARTWOOD MAP</h1><div class="map-box" data-map-box>${DUNGEON_PREVIEW}</div></main>`;
 const subHead = (route, title, desc) => u8Head(route, { description: desc, ogDescription: desc, twitterTitle: title, twitterDescription: desc });
 
 function headFor(title, extra = '') {
@@ -441,6 +448,8 @@ function goodSite() {
       PVP_BODY,
     ),
     'pvp/player/index.html': htmlPage(headFor(PLAYER_TITLE, `${PLAYER_ROBOTS}\n  ${PVP_CANON}\n  ${REFERRER_META}`), PLAYER_BODY),
+    'dungeon/index.html': framed(htmlPage(headFor(DUNGEON_TITLE, `${subHead('/dungeon/', DUNGEON_TITLE, DESC.dungeon)}
+  ${ldTag(ldSub('/dungeon/', 'Heartwood'))}`), DUNGEON_MAIN)),
     'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
     // U8: the hero logo (preloaded on /, the Organization logo), robots.txt and llms.txt.
@@ -647,6 +656,8 @@ try {
       // U8 round 3 (U8 review r1 F1, F2b)
       'seo-logo',
       'time-datetime',
+      // run 20261121-dungeon-map U2
+      'dungeon-page',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -2196,6 +2207,34 @@ ${r.out}`);
     const fails = r.lines.filter((l) => l.startsWith('FAIL '));
     check('U8r3 time: the <time> wrapper adds no visible text (visible-text-unchanged passes against the plain-date base)', r.code === 0 && fails.length === 0, `exit ${r.code}:\n${r.out}`);
   }
+
+  // Run 20261121-dungeon-map U2: dungeon-page, and /dungeon/ in the shared route lists.
+  const DG = 'dungeon/index.html';
+  expectFail('U2-AC1 dungeon: wrong h1', mutate(DG, '<h1>HEARTWOOD MAP</h1>', '<h1>HEARTWOOD</h1>'), 'dungeon-page', '/dungeon/ <h1> text is "HEARTWOOD", want "HEARTWOOD MAP"');
+  expectFail('U2-AC1 dungeon: no eyebrow', mutate(DG, '>SEASON 4 DUNGEON<', '>SEASON 4<'), 'dungeon-page', 'no visible element with the text "SEASON 4 DUNGEON"');
+  expectFail('U2-AC1 dungeon: no map box', mutate(DG, ' data-map-box', ''), 'dungeon-page', '/dungeon/ has 0 [data-map-box], want 1');
+  expectFail('U2-AC1 dungeon: no preview in the map box', mutate(DG, ' data-map-preview', ''), 'dungeon-page', 'has no <img data-map-preview src="/dungeon/preview.jpg">');
+  {
+    // The nav is the first <header>; nav-links owns the exact list, so it fails too (both, and only both).
+    const site = goodSite();
+    site[DG] = site[DG].replace(NAV, '');
+    expectFails('U2-AC1 dungeon: no nav', site, { 'dungeon-page': '/dungeon/ has no nav <header>', 'nav-links': '/dungeon/ has no nav <header>' });
+  }
+  {
+    const r = runOn({ ...goodSite(), [DG]: null });
+    const line = r.lines.find((l) => l.startsWith('FAIL pages-prerendered:'));
+    check('U2-AC1 dungeon: a missing /dungeon/ fails pages-prerendered and dungeon-page', r.code === 1 && !!line && line.includes('/dungeon/ missing') && r.lines.some((l) => l.startsWith('FAIL dungeon-page:') && l.includes('/dungeon/ missing')), `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    // An empty #app fails every check that reads the page body, so only require pages-prerendered to say so.
+    const r = runOn(mutate(DG, `<div id="app">${DUNGEON_MAIN}</div>`, '<div id="app"></div>'));
+    const line = r.lines.find((l) => l.startsWith('FAIL pages-prerendered:'));
+    check('U2-AC1 dungeon: not prerendered', r.code === 1 && !!line && line.includes('/dungeon/ <div id="app"> is empty'), `exit ${r.code}:
+${r.out}`);
+  }
+  expectFail('U2-AC8 dungeon: wrong title', mutate(DG, `<title>${DUNGEON_TITLE}</title>`, '<title>Heartwood Map | Chromabit</title>'), 'subpage-titles', '/dungeon/');
+  expectFail('U2 dungeon: "Chromabit SMP" on /dungeon/', mutate(DG, '</main>', '<p>Chromabit SMP</p></main>'), 'smp-name-allowlist', 'dungeon/index.html contains "Chromabit SMP"');
+  expectFail('U2-AC8 dungeon: not in the sitemap', mutate('sitemap.xml', sitemapLine('/dungeon/'), ''), 'seo-sitemap', 'lacks ["https://chromabit.us/dungeon/"]');
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

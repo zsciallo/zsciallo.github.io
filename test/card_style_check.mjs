@@ -1159,7 +1159,7 @@ function selectedPercept(r) {
   return out;
 }
 
-export async function withBrowser(dist, fn) {
+export async function withBrowser(dist, fn, gpu) {
   const chrome = findChrome();
   if (!chrome) return check('chrome-found', ['no Chrome: set CHROME to chrome.exe']);
   if (!existsSync(join(dist, 'index.html'))) return check('dist-built', [`${dist} has no index.html: build first (npm run build)`]);
@@ -1173,7 +1173,7 @@ export async function withBrowser(dist, fn) {
   let b = null;
   try {
     if (!(await waitReady(`${origin}/`, 30_000))) return check('preview-server', [`vite preview did not answer on ${origin}: ${JSON.stringify(log.slice(-300))}`]);
-    b = await launchChrome(chrome, profile);
+    b = await launchChrome(chrome, profile, gpu);
     await fn(b, origin);
   } finally {
     if (b) await b.close();

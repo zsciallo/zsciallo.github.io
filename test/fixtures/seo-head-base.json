@@ -38,6 +38,11 @@
       "description": "How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments, and your choices.",
       "descriptionFrozen": true
     },
+    "/dungeon/": {
+      "title": "Heartwood Dungeon Map | Chromabit",
+      "description": "Interactive block map of the Heartwood dungeon: areas, bosses, camps, crates and waypoints, with a cutaway to look inside.",
+      "descriptionFrozen": true
+    },
     "/pvp/player/": {
       "title": "Player | Chromabit",
       "description": "A ChromaPVP ranked player's season: tier and rating per kit, career totals and recent ranked matches.",

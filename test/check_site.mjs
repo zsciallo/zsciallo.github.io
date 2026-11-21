@@ -40,6 +40,8 @@ export const PAGES = {
   '/store/': 'store/index.html',
   '/auctions/': 'auctions/index.html',
   '/privacy/': 'privacy/index.html',
+  // Run 20261121-dungeon-map U2 (owner approved the page 2026-11-21): held to every PAGES check.
+  '/dungeon/': 'dungeon/index.html',
 };
 
 /**
@@ -72,6 +74,7 @@ export const SUBPAGE_TITLES = {
   '/privacy/': 'Privacy Policy | Chromabit',
   '/auctions/': 'Auction House | Chromabit SMP',
   '/smp/': 'Economy SMP | Chromabit',
+  '/dungeon/': 'Heartwood Dungeon Map | Chromabit',
 };
 
 /** The only pages whose built HTML may contain the exact string `Chromabit SMP`. */
@@ -1818,7 +1821,7 @@ function pvpSearchShell(dist) {
 //                            test/fixtures/visible-text-base.json
 // (pixel identity is test/visual_check.mjs).
 //
-// Scope: "indexable" = INDEXABLE below (seven routes). /pvp/player/ is not
+// Scope: "indexable" = INDEXABLE below (seven routes; eight with /dungeon/ since run 20261121-dungeon-map). /pvp/player/ is not
 // indexable (noindex, canonical /pvp/, not in the sitemap: player-shell and
 // player-not-in-sitemap keep asserting that); the semantics and hint checks
 // cover it too (SEMANTIC_ROUTES).
@@ -1848,7 +1851,8 @@ function pvpSearchShell(dist) {
 //   the search block, the hero logo      pvp-search-shell, home-hero
 
 export const SITE = 'https://chromabit.us';
-export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/'];
+// Run 20261121-dungeon-map U2: /dungeon/ is indexable (spec-U2 "SEO entry"), so it is in the sitemap and every check below.
+export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/'];
 export const SEMANTIC_ROUTES = [...INDEXABLE, '/pvp/player/'];
 const FIXTURE_DIR = process.env.CHECK_SITE_FIXTURES ? resolve(process.env.CHECK_SITE_FIXTURES) : join(ROOT, 'test', 'fixtures');
 
@@ -2454,7 +2458,7 @@ export function xmlProblems(text) {
   return problems;
 }
 
-/** U8-C: dist/sitemap.xml is valid XML listing exactly the seven indexable URLs, each with a YYYY-MM-DD lastmod. */
+/** U8-C: dist/sitemap.xml is valid XML listing exactly the INDEXABLE URLs (eight since run 20261121-dungeon-map), each with a YYYY-MM-DD lastmod. */
 function seoSitemap(dist) {
   const file = join(dist, 'sitemap.xml');
   if (!existsSync(file)) return []; // sitemap-pvp's failure
@@ -3247,7 +3251,40 @@ export const CHECKS = [
   // U8 round 3: review r1 F1 and F2b
   ['seo-logo', seoLogo],
   ['time-datetime', timeDatetime],
+  // Run 20261121-dungeon-map U2
+  ['dungeon-page', dungeonPage],
 ];
+
+// ------------------------------------------- run 20261121-dungeon-map U2 --
+// /dungeon/: the Heartwood block map. Hooks (the contract with the implementer):
+// [data-map-box] the map box; inside it <img data-map-preview src="/dungeon/preview.jpg">,
+// shown until the first WebGL frame (so the server render has it). The rendered half
+// (WebGL, slider, search, deep links, fallback, 400 px) is test/dungeon_browser_check.mjs.
+
+export const DUNGEON = { route: '/dungeon/', eyebrow: 'SEASON 4 DUNGEON', h1: 'HEARTWOOD MAP', preview: '/dungeon/preview.jpg' };
+
+/** U2-AC1: /dungeon/ is server-rendered with the nav, the eyebrow, one <h1> HEARTWOOD MAP and the map box holding the preview picture. */
+function dungeonPage(dist) {
+  return eachPage(
+    [DUNGEON.route],
+    (p) => {
+      const problems = [];
+      const r = DUNGEON.route;
+      if (!siteNav(p)) problems.push(`${r} has no nav <header>`);
+      const root = app(p);
+      const h1s = findAll(root, isTag('h1'));
+      if (h1s.length !== 1) problems.push(`${r} has ${h1s.length} <h1>, want 1`);
+      else if (textOf(h1s[0]) !== DUNGEON.h1) problems.push(`${r} <h1> text is ${q(textOf(h1s[0]))}, want ${q(DUNGEON.h1)}`);
+      if (!withText(root, DUNGEON.eyebrow).filter((el) => !hiddenUp(el)).length) problems.push(`${r} has no visible element with the text ${q(DUNGEON.eyebrow)}`);
+      const boxes = findAll(root, hasAttr('data-map-box'));
+      if (boxes.length !== 1) problems.push(`${r} has ${boxes.length} [data-map-box], want 1`);
+      else if (!findAll(boxes[0], (el) => el.tag === 'img' && 'data-map-preview' in el.attrs && el.attrs.src === DUNGEON.preview).length)
+        problems.push(`${r} [data-map-box] has no <img data-map-preview src=${q(DUNGEON.preview)}>`);
+      return problems;
+    },
+    dist,
+  );
+}
 
 // -------------------------------------------------------------------- main --
 
