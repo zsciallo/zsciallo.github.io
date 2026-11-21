@@ -17,7 +17,8 @@
     "test:store": "node test/store_modes.test.mjs && node test/store_mode_check.mjs",
     "test:images": "node test/image_crop.test.mjs && node test/image_crop_check.mjs",
     "test:freekey": "node test/free_key_scope.test.mjs && node test/free_key_scope_check.mjs",
-    "test:theme": "node test/theme_check.mjs"
+    "test:theme": "node test/theme_check.mjs",
+    "test:dungeon": "node test/dungeon_data.test.mjs"
   },
   "dependencies": {
     "dompurify": "^3.4.16",
