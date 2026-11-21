@@ -28,8 +28,10 @@ void main() {
   gl_Position = toClip(m + (c - .5) * vec2(1.5, 1.75), p);
   v = (vec2(float(ast % 40u), float(ast / 40u)) + c) / uAtlas;
 }`;
+// premultiplied atlas: mips average colour by coverage (no dark fringes). Magnified texels are 0 or 1 (NEAREST), so the
+// low threshold only matters minified, where a half-covered edge texel must still draw or the background pokes through.
 const BLOCK_FS = `uniform sampler2D uTex; in vec2 v; out vec4 o;
-void main() { vec4 t = texture(uTex, v); if (t.a < .5) discard; o = vec4(t.rgb, 1); }`;
+void main() { vec4 t = texture(uTex, v); if (t.a < .2) discard; o = vec4(t.rgb / t.a, 1); }`;
 const CAP_VS = `uniform vec3 uGrid; out vec2 w;
 void main() {
   w = vec2(gl_VertexID & 1, gl_VertexID >> 1) * uGrid.xz;
@@ -88,7 +90,9 @@ export function createEngine(gl, { meta, blocks, solid, atlas, reduced, onDraw }
     return t;
   };
   const atlasTex = tex(0);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);

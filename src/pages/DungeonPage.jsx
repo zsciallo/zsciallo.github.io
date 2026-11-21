@@ -194,7 +194,13 @@ export function DungeonPage() {
     map.current?.fly(o.z ? o.z.bb : [o.m.mx - 22, o.m.mx + 22, o.m.my - 22, o.m.my + 22], o.z ? 6 : undefined);
   };
   const go = (id, text) => <button type="button" class="dm-go" onClick={() => goTo(id)}>{text}</button>;
-  live.current = { zoneAt, select, goTo, engineCut: mode === 'cut' ? cut : null };
+  // the view to fit: the outlines shown at this cut (every outline in ALL BLOCKS), at their floors, plus a margin
+  const frame = () => {
+    const zs = AREAS.filter(zoneShown);
+    const bbs = (zs.length ? zs : AREAS).map((z) => z.bb);
+    return [Math.min(...bbs.map((v) => v[0])) - 4, Math.max(...bbs.map((v) => v[1])) + 4, Math.min(...bbs.map((v) => v[2])) - 4, Math.max(...bbs.map((v) => v[3])) + 4];
+  };
+  live.current = { zoneAt, select, goTo, frame, sel, engineCut: mode === 'cut' ? cut : null };
 
   useEffect(() => {
     if (matchMedia('(max-width: 900px)').matches) layers.current.open = false;
@@ -203,6 +209,7 @@ export function DungeonPage() {
       if (dead) return;
       handle = map.current = mount(box.current, {
         meta: META,
+        frame: () => live.current.frame(),
         onGl: (state, yr) => {
           setGl(state);
           if (yr) setRange(yr);
@@ -230,6 +237,8 @@ export function DungeonPage() {
     };
   }, []);
   useEffect(() => map.current?.cut(mode === 'cut' ? cut : null), [mode, cut]);
+  // a new view mode frames its own outlines, unless something is picked
+  useEffect(() => void (live.current.sel || map.current?.fly()), [mode]);
 
   const q = query.trim().toLowerCase();
   const hits = q ? INDEX.filter((i) => i.n.toLowerCase().includes(q)).slice(0, 8) : [];
@@ -265,7 +274,7 @@ export function DungeonPage() {
             </div>
             <div class="dm-seg" role="radiogroup" aria-label="View" data-map-mode hidden={gl === 'off'}>
               {[['cut', 'CUTAWAY'], ['all', 'ALL BLOCKS']].map(([v, t]) => (
-                <label key={v}><input type="radio" name="dm-mode" value={v} checked={mode === v} onChange={() => (setMode(v), sel || map.current?.fly())} /><span>{t}</span></label>
+                <label key={v}><input type="radio" name="dm-mode" value={v} checked={mode === v} onChange={() => setMode(v)} /><span>{t}</span></label>
               ))}
             </div>
             <label class="dm-slice" hidden={!cutOn}>

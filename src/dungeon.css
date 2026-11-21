@@ -624,7 +624,8 @@
 @media (max-width: 900px) {
   .dm-app {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: max(420px, calc(100svh - var(--nav-h) - 24px)) auto;
+    /* no taller than the screen is wide (x1.1): the panel stays a short scroll away */
+    grid-template-rows: max(420px, min(110vw, calc(100svh - var(--nav-h) - 24px))) auto;
     height: auto;
   }
 

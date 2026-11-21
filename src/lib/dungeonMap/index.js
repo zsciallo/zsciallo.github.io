@@ -20,7 +20,7 @@ async function bytes(file) {
  * box: the [data-map-box] element (holds the canvas). opts: meta (A, b, preview), onGl('on' | 'off', yRange),
  * onTap(mx, my) on a click that did not drag, onHover(mx, my | null). Returns { destroy, fly(bb, maxK), cut(c | null) }.
  */
-export function mount(box, { meta, onGl, onTap, onHover }) {
+export function mount(box, { meta, frame, onGl, onTap, onHover }) {
   const canvas = box.querySelector('canvas');
   let k = 1, tx = 0, ty = 0, anim = 0, engine = null, cut = null, dead = false, touched = false;
 
@@ -38,7 +38,11 @@ export function mount(box, { meta, onGl, onTap, onHover }) {
     return [nk, w / 2 - ((bb[0] + bb[1]) / 2) * nk, h / 2 - ((bb[2] + bb[3]) / 2) * nk];
   };
   const pv = meta.preview;
-  const whole = [pv.x, pv.x + pv.w, pv.y, pv.y + pv.h];
+  // what the page frames (the island's areas), clamped to the data box
+  const whole = () => {
+    const f = frame();
+    return [Math.max(pv.x, f[0]), Math.min(pv.x + pv.w, f[1]), Math.max(pv.y, f[2]), Math.min(pv.y + pv.h, f[3])];
+  };
   const fly = (bb, maxK) => {
     touched = true;
     const to = target(bb, maxK), from = [k, tx, ty];
@@ -121,11 +125,11 @@ export function mount(box, { meta, onGl, onTap, onHover }) {
   for (const [ev, fn, o] of on) box.addEventListener(ev, fn, o);
   // until the visitor moves the view, a resize keeps the whole island in the box
   const ro = new ResizeObserver(() => {
-    if (!touched) [k, tx, ty] = target(whole);
+    if (!touched) [k, tx, ty] = target(whole());
     apply();
   });
   ro.observe(box);
-  [k, tx, ty] = target(whole);
+  [k, tx, ty] = target(whole());
   apply();
 
   const fail = () => {
@@ -162,7 +166,7 @@ export function mount(box, { meta, onGl, onTap, onHover }) {
   }
 
   return {
-    fly: (bb, maxK) => fly(bb ?? whole, maxK),
+    fly: (bb, maxK) => fly(bb ?? whole(), maxK),
     cut(c) {
       cut = c;
       engine?.cut(c);
