@@ -11,6 +11,8 @@
 // through the CDP device-metrics override). Two Chrome launches:
 //   GL on   software WebGL2 (SwiftShader): AC2, AC3, AC4, AC5, AC7, the injection checks;
 //   GL off  --disable-gpu --disable-3d-apis (getContext('webgl2') is null): AC6.
+// Run 20261121-dungeon-map U3-AC5 rides on the GL off launch: /smp/ at 400 px (the dungeon preview,
+// EXPLORE THE DUNGEONS and OPEN THE AUCTION HOUSE fully in view, no horizontal scroll).
 //
 // Hooks (the contract with the implementer):
 //   [data-map-box]        the map box. data-gl="on" once the first frame with blocks is drawn;
@@ -247,7 +249,35 @@ async function glOn(b, origin) {
 
 // --------------------------------------------------------------- GL off --
 
+/** Run 20261121-dungeon-map U3-AC5: /smp/ at 400 px, no horizontal scroll, the dungeon preview and both buttons fully in view. */
+async function smp400(b, origin) {
+  let p;
+  try {
+    p = await openState(b, origin, { id: 'smp 400px', path: '/smp/', ready: '[data-section="dungeon"]' }, 400);
+  } catch (e) {
+    return check('U3-AC5 /smp/ at 400 px: page opens', [String(e?.message ?? e)]);
+  }
+  try {
+    const sw = await p.ev('document.documentElement.scrollWidth');
+    check('U3-AC5 /smp/ at 400 px has no horizontal scroll (scrollWidth <= 400)', sw <= 400 ? [] : [`scrollWidth ${sw}`]);
+    const link = (href, text) => `[...document.querySelectorAll('a[href="${href}"]')].find((a) => a.textContent.trim() === ${q(text)})`;
+    for (const [what, find] of [
+      ['dungeon preview picture', `document.querySelector('a[href="/dungeon/"] img[src="/dungeon/preview.jpg"]')`],
+      ['EXPLORE THE DUNGEONS button', link('/dungeon/', 'EXPLORE THE DUNGEONS')],
+      ['OPEN THE AUCTION HOUSE button', link('/auctions/', 'OPEN THE AUCTION HOUSE')],
+    ]) {
+      const r = await p.ev(`(() => { const e = ${find}; if (!e) return null; e.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' }); const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, bo: b.bottom, w: b.width, h: b.height, vw: innerWidth, vh: innerHeight, vis: e.checkVisibility({ visibilityProperty: true }) }; })()`);
+      check(`U3-AC5 /smp/ at 400 px the ${what} is fully inside the viewport`, !r ? [`no ${what}`] : !r.vis || r.w < 1 || r.h < 1 ? [`not shown (${r.w}x${r.h}, visible ${r.vis})`] : r.l < 0 || r.r > r.vw || r.t < 0 || r.bo > r.vh ? [`box ${Math.round(r.l)}..${Math.round(r.r)} x ${Math.round(r.t)}..${Math.round(r.bo)} in a ${r.vw}x${r.vh} viewport`] : []);
+    }
+  } catch (e) {
+    check('U3-AC5 /smp/ at 400 px: runs', [String(e?.message ?? e)]);
+  } finally {
+    await p.close();
+  }
+}
+
 async function glOff(b, origin) {
+  await smp400(b, origin);
   await page(b, origin, 'gl-off', '/dungeon/', 1280, async (p) => {
     const env = await p.ev('window.__dm.webgl2()');
     check("env: WebGL2 is off in this Chrome (getContext('webgl2') is null)", env ? ['getContext("webgl2") works despite --disable-3d-apis'] : []);

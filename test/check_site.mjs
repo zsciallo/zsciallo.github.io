@@ -579,6 +579,10 @@ export const SMP_PAGE = {
   tickerClass: 'tape',
   auctionsHref: '/auctions/',
   auctionsLabel: 'OPEN THE AUCTION HOUSE',
+  // Run 20261121-dungeon-map U3 (owner 2026-11-21): the page links the dungeon map with a preview picture.
+  dungeonHref: '/dungeon/',
+  dungeonLabel: 'EXPLORE THE DUNGEONS',
+  dungeonPreview: '/dungeon/preview.jpg',
   removed: ['Player Economy', 'Store Credit Prizes', 'Grief Prevention', 'Community Events'],
 };
 
@@ -809,7 +813,7 @@ function homeRemoved(dist) {
   );
 }
 
-/** AC7 (U3): the short /smp/ page, and how it is reached (footer, not nav). */
+/** AC7 (U3): the short /smp/ page, and how it is reached (nav and footer; since run 20261121-dungeon-map U3 the nav, not /auctions/). */
 function smpPage(dist) {
   const problems = eachPage(
     ['/smp/'],
@@ -834,6 +838,14 @@ function smpPage(dist) {
       if (!findAll(root, hasClass(SMP_PAGE.tickerClass)).length) problems.push(`/smp/ has no market ticker (.${SMP_PAGE.tickerClass})`);
       const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel);
       if (!auctions.length) problems.push(`/smp/ has no <a href="${SMP_PAGE.auctionsHref}"> ${q(SMP_PAGE.auctionsLabel)}`);
+      // Run 20261121-dungeon-map U3: the ticker is the auction preview, so it comes before the auction button.
+      else if (!hasClass(SMP_PAGE.tickerClass)(findAll(root, (el) => hasClass(SMP_PAGE.tickerClass)(el) || el === auctions[0])[0]))
+        problems.push(`/smp/ .${SMP_PAGE.tickerClass} does not come before the ${q(SMP_PAGE.auctionsLabel)} link`);
+      const toDungeon = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref);
+      if (!toDungeon.some((a) => textOf(a) === SMP_PAGE.dungeonLabel)) problems.push(`/smp/ has no <a href="${SMP_PAGE.dungeonHref}"> ${q(SMP_PAGE.dungeonLabel)}`);
+      const pics = toDungeon.flatMap((a) => findAll(a, (el) => el.tag === 'img' && el.attrs.src === SMP_PAGE.dungeonPreview));
+      if (!pics.length) problems.push(`/smp/ has no <img src="${SMP_PAGE.dungeonPreview}"> inside an <a href="${SMP_PAGE.dungeonHref}">`);
+      else if (!pics.some((i) => (i.attrs.alt ?? '').trim())) problems.push(`/smp/ dungeon preview <img> has no alt text`);
       problems.push(...copyButtonIn(root, '/smp/', null)[0]);
       const betas = findAll(root, hasClass('beta-tag')).length;
       if (betas) problems.push(`/smp/ has ${betas} .beta-tag, want 0`);
@@ -847,12 +859,15 @@ function smpPage(dist) {
     },
     dist,
   );
-  // Not in the nav on any page; the home footer links to it.
-  for (const route of Object.keys(PAGES)) {
+  // Run 20261121-dungeon-map U3 (owner 2026-11-21, reverses the 2026-11-09 ruling): /smp/ is in the nav on every
+  // page and /auctions/ is not (it is reached from /smp/); the home footer still links /smp/.
+  for (const route of ALL_ROUTES) {
     const p = page(route, dist);
-    const nav = p && navOf(p);
-    if (nav && findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length)
-      problems.push(`${route} nav links to /smp/ (the SMP page is not in the nav)`);
+    const nav = p && siteNav(p);
+    if (!nav) continue;
+    if (findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/auctions/').length)
+      problems.push(`${route} nav links to /auctions/ (the auction house is reached from /smp/)`);
+    if (!findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length) problems.push(`${route} nav has no link to /smp/`);
   }
   const home = page('/', dist);
   if (home) {
@@ -986,7 +1001,8 @@ export const NAV_LINKS = [
   ['/', 'HOME'],
   ['/pvp/', 'PVP'],
   ['/store/', 'STORE'],
-  ['/auctions/', 'AUCTIONS'],
+  // Run 20261121-dungeon-map U3 (owner 2026-11-21): SMP replaces AUCTIONS, same place.
+  ['/smp/', 'SMP'],
   ['/faq/', 'FAQ'],
 ];
 export const SITEMAP_PVP = 'https://chromabit.us/pvp/';
@@ -1226,7 +1242,10 @@ function pvpJoin(dist) {
   });
 }
 
-/** U4-AC8: on every page the nav is HOME PVP STORE AUCTIONS FAQ, no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
+/** Run 20261121-dungeon-map U3: pages whose one current nav link is SMP. */
+export const SMP_ACTIVE = ['/smp/', '/auctions/', '/dungeon/'];
+
+/** U4-AC8: on every page the nav is HOME PVP STORE SMP FAQ (AUCTIONS until run 20261121-dungeon-map U3), SMP the one current link on SMP_ACTIVE, no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
 function navLinks(dist) {
   return eachPage(
     ALL_ROUTES,
@@ -1245,7 +1264,9 @@ function navLinks(dist) {
         const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
         if (marks.length)
           problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0 (first: <${marks[0].tag}> ${q(textOf(marks[0]))})`);
-        if (r === PVP.route) {
+        if (SMP_ACTIVE.includes(r)) {
+          if (active.join(',') !== '/smp/') problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ["/smp/"]`);
+        } else if (r === PVP.route) {
           if (active.join(',') !== '/pvp/') problems.push(`/pvp/ nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
         } else {
           if (active.includes('/pvp/')) problems.push(`${r} nav marks PVP as the current page`);
@@ -1721,7 +1742,7 @@ function playerNotInSitemap(dist) {
   return hits.length ? [`dist/sitemap.xml lists the profile page: ${q(hits)}`] : [];
 }
 
-/** U7-A/D: /pvp/player/ nav is HOME PVP STORE AUCTIONS FAQ with PVP the only current link, no BETA marker in any nav, footer links PVP. */
+/** U7-A/D: /pvp/player/ nav is HOME PVP STORE SMP FAQ (AUCTIONS until run 20261121-dungeon-map U3) with PVP the only current link, no BETA marker in any nav, footer links PVP. */
 function playerNav(dist) {
   return onPlayer(dist, (p) => {
     const problems = [];
