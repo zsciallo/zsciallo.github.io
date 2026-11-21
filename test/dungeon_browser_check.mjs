@@ -101,11 +101,11 @@ const open = async (b, origin, path, width = 1280) => {
 };
 const until = (page, cond, ms) => page.ev(`window.__dm.until(() => ${cond}, ${ms})`);
 
-/** The map canvas alone (everything else in the map box made invisible for the capture), decoded. */
-async function shot(page) {
+/** The map canvas alone (or `sel` alone, over the canvas's clip; everything else in the map box invisible), decoded. */
+async function shot(page, sel = 'canvas') {
   const box = await page.ev(`(() => {
     const st = document.createElement('style'); st.id = '__dm_only';
-    st.textContent = '[data-map-box] * { visibility: hidden !important } [data-map-box] canvas { visibility: visible !important }';
+    st.textContent = '[data-map-box] * { visibility: hidden !important } [data-map-box] ${sel} { visibility: visible !important${sel === 'canvas' ? '' : '; display: block !important'} }';
     document.head.appendChild(st);
     const c = document.querySelector('[data-map-box] canvas'); if (!c) return null;
     const r = c.getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, width: r.width, height: r.height, scale: 1 };
@@ -282,11 +282,181 @@ async function glOff(b, origin) {
   });
 }
 
+// ------------------------------------------------------------ round 2 --
+// Reviewer r1 F1, F2, F3, F6, F7 (reports/U2-reviewer-r1.md) and the spec-U2 amendments.
+
+const CUT_RGB = [46, 48, 56];
+const BG_RGB = [9, 10, 12];
+const dist3 = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+const px = (img, x, y) => Array.from(img.rgba.subarray((y * img.width + x) * 4, (y * img.width + x) * 4 + 3));
+/** Root Gate (resources/camps/hw_root_gate.yml, chromatic-dungeons release/chromabithia): interval-seconds 180, jitter-seconds 45. */
+const ROOT_GATE = { id: 'camp-root-gate', name: 'Root Gate', ceiling: '225 s', base: '180 s' };
+
+/**
+ * A column for the cut off-by-one check, from the committed data: a grass or moss block at relative y n, top of a
+ * 4x4 patch (x-1..x+2, z-1..z+2) where every column is a whole cube at n and at n-1 with nothing at n+1.
+ * With the cut at n the top face of (x, n, z) is drawn; at n-1 the cut face covers the patch.
+ */
+const COLUMN = (() => {
+  const b = gunzipSync(readFileSync(join(ROOT, 'public', 'dungeon', 'blocks.bin.gz')));
+  const solid = gunzipSync(readFileSync(join(ROOT, 'public', 'dungeon', 'solid.bin.gz')));
+  const n = b.readUInt32LE(4), nc = b.readUInt32LE(8), [sx, sy, sz] = META.size;
+  const col = (c, i) => b.readUInt16LE(32 + nc * 12 + (c * n + i) * 2);
+  const idx = (x, y, z) => (y * sz + z) * sx + x;
+  const isSolid = (x, y, z) => x >= 0 && z >= 0 && x < sx && z < sz && y >= 0 && y < sy && (solid[idx(x, y, z) >> 3] >> (7 - (idx(x, y, z) & 7))) & 1;
+  const present = new Set();
+  for (let i = 0; i < n; i++) present.add(idx(col(0, i), col(1, i), col(2, i)));
+  const bright = new Set(META.states.map((s, i) => (/^(grass_block|moss_block)\b/.test(s) ? i : -1)).filter((i) => i >= 0));
+  for (let i = 0; i < n; i++) {
+    const [x, y, z] = [col(0, i), col(1, i), col(2, i)];
+    if (!bright.has(col(3, i)) || y < 2) continue;
+    let ok = true;
+    for (let dx = -1; dx <= 2 && ok; dx++)
+      for (let dz = -1; dz <= 2 && ok; dz++)
+        ok = isSolid(x + dx, y, z + dz) && isSolid(x + dx, y - 1, z + dz) && !isSolid(x + dx, y + 1, z + dz) && !present.has(idx(x + dx, y + 1, z + dz));
+    if (ok) return { x: META.origin[0] + x, y: META.origin[1] + y, z: META.origin[2] + z, state: META.states[col(3, i)] };
+  }
+  return null;
+})();
+
+/** Wait for the reloaded document's map box, then reinstall the helpers. */
+async function reloaded(p) {
+  for (let t = 0; t < 300; t++) {
+    try {
+      if (await p.ev(`document.readyState === 'complete' && !!document.querySelector('[data-map-box]')`)) return p.ev(LIB);
+    } catch {
+      /* navigating */
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw new Error('the page did not load again in 30 s');
+}
+
+/** The fallback a visitor gets (spec line 49): data-gl off, preview shown, no slider or mode switch, markers and panel work, no error text. */
+async function fallbackChecks(p, name) {
+  const off = await until(p, `document.querySelector('[data-map-box]')?.dataset.gl === 'off'`, 10_000);
+  check(`${name}: data-gl="off"`, off ? [] : [`data-gl is ${q(await p.ev(`document.querySelector('[data-map-box]')?.dataset.gl ?? null`))}`]);
+  const pv = await p.ev(`(async () => { const i = document.querySelector('[data-map-box] img[data-map-preview]'); if (!i) return null; await window.__dm.until(() => i.complete && i.naturalWidth > 0, 10000); return { ok: i.complete && i.naturalWidth > 0, vis: i.checkVisibility({ visibilityProperty: true, opacityProperty: true }) }; })()`);
+  check(`${name}: preview.jpg is shown`, !pv ? ['no img[data-map-preview]'] : [pv.ok ? null : 'the picture did not load', pv.vis ? null : 'the picture is hidden']);
+  const hide = await p.ev(`({ slider: window.__dm.vis('[data-map-slider]'), mode: window.__dm.vis('[data-map-mode]') })`);
+  check(`${name}: the slider and the mode switch are hidden`, [hide.slider ? '[data-map-slider] is shown' : null, hide.mode ? '[data-map-mode] is shown' : null]);
+  const mk = q(`[data-marker-id="${MOSSBACK.id}"]`);
+  const clicked = await p.ev(`(() => { const e = document.querySelector(${mk}); if (!e) return false; e.click(); return true; })()`);
+  const named = clicked && (await until(p, `window.__dm.panel().includes(${q(MOSSBACK.name)})`, 3000));
+  check(`${name}: clicking the ${MOSSBACK.name} marker opens it in the panel`, !clicked ? [`no ${mk}`] : named ? [] : [`[data-map-panel] text ${q((await p.ev('window.__dm.panel()')).slice(0, 120))}`]);
+  const text = await p.ev(`document.querySelector('[data-map-box]')?.innerText ?? ''`);
+  check(`${name}: no error text for players in the map box`, /error|webgl|failed|unsupported/i.test(text) ? [`map box says ${q(text.slice(0, 120))}`] : []);
+}
+
+async function r2(b, origin) {
+  // T1 (F6): blocks.bin.gz fails to load in a browser that has WebGL2.
+  await page(b, origin, 'T1 failed fetch', '/dungeon/', 1280, async (p) => {
+    await p.s('Network.setBlockedURLs', { urls: ['*/dungeon/blocks.bin.gz*'] });
+    await p.s('Page.reload', { ignoreCache: true });
+    await reloaded(p);
+    check('T1 env: WebGL2 is available, so only the failed fetch can cause the fallback', (await p.ev('window.__dm.webgl2()')) ? [] : ["getContext('webgl2') is null"]);
+    await fallbackChecks(p, 'T1 blocks.bin.gz blocked');
+  });
+
+  // T3 (F2): the WebGL context is lost after the first frame.
+  await page(b, origin, 'T3 context lost', '/dungeon/', 1280, async (p) => {
+    const on = await until(p, `document.querySelector('[data-map-box]')?.dataset.gl === 'on'`, GL_WAIT_MS);
+    check('T3 env: data-gl="on" before the context is lost', on ? [] : ['the map never drew']);
+    const lost = await p.ev(`(() => { const x = document.querySelector('[data-map-box] canvas')?.getContext('webgl2')?.getExtension('WEBGL_lose_context'); if (!x) return false; x.loseContext(); return true; })()`);
+    check('T3 env: WEBGL_lose_context is available on the page canvas', lost ? [] : ['no WEBGL_lose_context']);
+    await fallbackChecks(p, 'T3 WebGL context lost');
+  });
+
+  // T4 (F3): prototype keys in the hash select nothing and throw nothing.
+  for (const key of ['constructor', '__proto__', 'toString']) {
+    const errors = [];
+    const listen = (d) => d.method === 'Runtime.exceptionThrown' && errors.push(d.params.exceptionDetails?.exception?.description?.split('\n')[0] ?? d.params.exceptionDetails?.text ?? 'exception');
+    b.listeners.add(listen);
+    try {
+      await page(b, origin, `T4 #${key}`, `/dungeon/#${key}`, 1280, async (p) => {
+        await until(p, `window.__dm.panel().length > 0`, 10_000);
+        await p.ev('window.__dm.frames()');
+        const panel = await p.ev('window.__dm.panel()');
+        check(`T4 /dungeon/#${key}: no uncaught exception, the panel shows the Heartwood overview`, [
+          errors.length ? `uncaught: ${q(errors.slice(0, 3))}` : null,
+          panel.includes('stacked inside one floating island') ? null : `[data-map-panel] text ${q(panel.slice(0, 120))}, want the overview`,
+        ]);
+      });
+    } finally {
+      b.listeners.delete(listen);
+    }
+  }
+
+  // T5 (F1): a camp's respawn line states the real ceiling, interval + jitter.
+  await page(b, origin, 'T5 respawn', `/dungeon/#${ROOT_GATE.id}`, 1280, async (p) => {
+    await until(p, `window.__dm.panel().includes(${q(ROOT_GATE.name)})`, 10_000);
+    const panel = await p.ev('window.__dm.panel()');
+    check(`T5 ${ROOT_GATE.name}: the respawn line says ${ROOT_GATE.ceiling} (180 s + 45 s jitter), not ${ROOT_GATE.base}`, [
+      panel.includes(ROOT_GATE.name) ? null : `[data-map-panel] does not show ${ROOT_GATE.name}: ${q(panel.slice(0, 120))}`,
+      panel.includes(ROOT_GATE.ceiling) ? null : `no ${q(ROOT_GATE.ceiling)} in ${q(panel.slice(0, 200))}`,
+      panel.includes(ROOT_GATE.base) ? `still says ${q(ROOT_GATE.base)}` : null,
+    ]);
+  });
+
+  // T2 (F7): the drawn picture is the island's picture, and the cut is not off by one.
+  await page(b, origin, 'T2 picture', '/dungeon/', 1280, async (p) => {
+    const on = await until(p, `document.querySelector('[data-map-box]')?.dataset.gl === 'on'`, GL_WAIT_MS);
+    if (!on) return check('T2 env: data-gl="on"', ['the map never drew']);
+    await p.ev(`(document.querySelector('[data-map-mode] input[value="all"]').click(), true)`);
+    await p.ev(`(async () => { const i = document.querySelector('[data-map-preview]'); i.loading = 'eager'; await window.__dm.until(() => i.complete && i.naturalWidth > 0, 10000); return true; })()`);
+    const gl = await shot(p);
+    const pic = await shot(p, '[data-map-preview]');
+    if (!gl || !pic) return check('T2 ALL BLOCKS frame matches preview.jpg', ['no capture']);
+    // the island: pixels of the placed preview that are neither its background nor the box behind it
+    const boxBg = px(pic, 0, 0);
+    let n = 0, close = 0;
+    const sum = [[0, 0, 0], [0, 0, 0]];
+    for (let y = 0; y < pic.height; y++)
+      for (let x = 0; x < pic.width; x++) {
+        const a = px(pic, x, y);
+        if (dist3(a, BG_RGB) <= 24 || dist3(a, boxBg) <= 24) continue;
+        const c = px(gl, x, y);
+        n++;
+        for (let i = 0; i < 3; i++) (sum[0][i] += c[i]), (sum[1][i] += a[i]);
+        if (dist3(a, c) <= 90) close++;
+      }
+    const mean = sum.map((s) => s.map((v) => v / Math.max(1, n)));
+    const off = mean[0].map((v, i) => Math.abs(v - mean[1][i]) / Math.max(1, mean[1][i]));
+    check("T2 ALL BLOCKS at the fit view: the island's mean colour is within 8% of preview.jpg placed by meta.preview", n < 1000 ? [`only ${n} island pixels`] : off.some((v) => v > 0.08) ? [`canvas mean ${q(mean[0].map(Math.round))}, preview mean ${q(mean[1].map(Math.round))}`] : []);
+    check('T2 ALL BLOCKS at the fit view: at least 90% of island pixels are within 90 (sum of |dR|+|dG|+|dB|) of preview.jpg', n < 1000 ? [`only ${n} island pixels`] : close / n >= 0.9 ? [] : [`${((close / n) * 100).toFixed(1)}% of ${n}`]);
+
+    // the cut, one block either side of a column top
+    if (!COLUMN) return check('T2 env: a 4x4 grass/moss patch with air above exists in blocks.bin.gz', ['none found']);
+    await p.ev(`(document.querySelector('[data-map-mode] input[value="cut"]').click(), true)`);
+    const { x, y, z } = COLUMN;
+    const top = [x + 0.5, y + 1, z + 0.5];
+    const mx = META.A[0][0] * top[0] + META.A[0][1] * top[1] + META.A[0][2] * top[2] + META.b[0];
+    const my = META.A[1][0] * top[0] + META.A[1][1] * top[1] + META.A[1][2] * top[2] + META.b[1];
+    // the column's top-face centre on screen, from the view the box publishes (--k, --tx, --ty)
+    const at = `(() => { const bx = document.querySelector('[data-map-box]'), r = bx.getBoundingClientRect(), s = bx.style, k = +s.getPropertyValue('--k'); return [r.left + ${mx} * k + +s.getPropertyValue('--tx'), r.top + ${my} * k + +s.getPropertyValue('--ty')]; })()`;
+    // zoom in on it with the wheel, as a visitor would, so one block covers many pixels
+    for (let i = 0; i < 2; i++) await p.ev(`(() => { const [cx, cy] = ${at}; document.querySelector('[data-map-box]').dispatchEvent(new WheelEvent('wheel', { clientX: cx, clientY: cy, deltaY: -1000, bubbles: true, cancelable: true })); return true; })()`);
+    const sample = async (cut) => {
+      await p.ev(`window.__dm.setCut(${cut})`);
+      if (!(await until(p, `window.__dm.label() === 'CUT AT Y ${cut}'`, 3000))) return null;
+      const [cx, cy] = await p.ev(at);
+      const r = await p.ev(`(() => { const r = document.querySelector('[data-map-box] canvas').getBoundingClientRect(); return [r.left, r.top]; })()`);
+      const img = await shot(p);
+      return img && px(img, Math.round(cx - r[0]), Math.round(cy - r[1]));
+    };
+    const where = `${COLUMN.state} at X ${x} Y ${y} Z ${z}`;
+    const atN = await sample(y);
+    check(`T2 cut at Y ${y}: the top face of ${where} is drawn (not the cut colour, not background)`, !atN ? ['no sample'] : dist3(atN, CUT_RGB) <= 30 || dist3(atN, BG_RGB) <= 30 ? [`pixel rgb(${atN.join(', ')})`] : []);
+    const below = await sample(y - 1);
+    check(`T2 cut at Y ${y - 1}: the cut face covers ${where} (rgb(46, 48, 56))`, !below ? ['no sample'] : dist3(below, CUT_RGB) <= 12 ? [] : [`pixel rgb(${below.join(', ')})`]);
+  });
+}
+
 // ------------------------------------------------------------------ run --
 
 let ran = 0;
 try {
-  await withBrowser(DIST, async (b, origin) => (ran++, glOn(b, origin)), GL_ON);
+  await withBrowser(DIST, async (b, origin) => (ran++, await glOn(b, origin), await r2(b, origin)), GL_ON);
   await withBrowser(DIST, async (b, origin) => (ran++, glOff(b, origin)), GL_OFF);
 } catch (e) {
   check('dungeon-browser-check', [`threw ${e?.stack?.split('\n')[0] ?? e}`]);
