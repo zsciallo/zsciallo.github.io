@@ -96,7 +96,7 @@ export function AuctionsPage() {
 
   return (
     <MotionRoot>
-      <NavBar current="auctions" />
+      <NavBar current="smp" />
       <main>
         {/* A slim masthead rather than the site's full hero: this page is read
             for the table, and a screen-height title between the reader and the

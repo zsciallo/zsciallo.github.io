@@ -9,7 +9,7 @@ const LINKS = [
   { id: 'home', href: '/', label: 'HOME' },
   { id: 'pvp', href: '/pvp/', label: 'PVP' },
   { id: 'store', href: '/store/', label: 'STORE' },
-  { id: 'auctions', href: '/auctions/', label: 'AUCTIONS' },
+  { id: 'smp', href: '/smp/', label: 'SMP' },
   { id: 'faq', href: '/faq/', label: 'FAQ' },
 ];
 
