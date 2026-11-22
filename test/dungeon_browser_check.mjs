@@ -565,6 +565,7 @@ async function u1(b, origin) {
       s2.sel ? 'the marker still has .sel' : null,
       s2.close ? 'the close button is still there' : null,
     ]);
+    await pickedInView(p, 1280);
   });
 
   // AC5: 400 px, a marker picked: the sheet sits in the map box above the bottom bar, its close button in view.
@@ -583,7 +584,27 @@ async function u1(b, origin) {
       r.slider && overlap(r.sheet, r.slider) ? `sheet ${fmt(r.sheet)} overlaps the slider ${fmt(r.slider)}` : null,
       r.mode && r.slider ? null : 'no mode switch or slider',
     ]);
+    await pickedInView(p, 400);
   });
+}
+
+/** AC8 (spec-U1 amendment): Old Mossback picked through search, the fly settled, the marker is not under the card or sheet. */
+async function pickedInView(p, width) {
+  await p.ev(`window.__dm.type(${q(MOSSBACK.name)})`);
+  const hit = `[...document.querySelectorAll('[data-map-result]')].find((e) => e.checkVisibility() && e.textContent.includes(${q(MOSSBACK.name)}))`;
+  const found = await until(p, `!!${hit}`, 3000);
+  if (found) await p.ev(`(${hit}.click(), true)`);
+  const view = `(() => { const s = document.querySelector('[data-map-box]').style; return ['--k', '--tx', '--ty'].map((v) => s.getPropertyValue(v)).join(' '); })()`;
+  const settled = found && (await p.ev(`window.__dm.until(async () => { const a = ${view}; await new Promise((r) => setTimeout(r, 300)); return a === ${view}; }, 1200)`));
+  const r = await p.ev(`(() => { document.querySelector('[data-map-box]').scrollIntoView({ block: 'center', behavior: 'instant' });
+    const m = document.querySelector(${MK}), b = window.__dm.rect('[data-map-box]'), c = m && window.__dm.rect(m); if (!c) return null;
+    const x = c.l + c.w / 2, y = c.t + c.h / 2, e = document.elementFromPoint(x, y);
+    return { x, y, b, onMark: !!e && m.contains(e), at: e ? e.tagName + '.' + e.className + (e.closest('[data-map-panel]') ? ' in [data-map-panel]' : '') : 'nothing (off screen)' }; })()`);
+  check(`U1-AC8 at ${width} px after picking ${MOSSBACK.name} through search and the fly settling, the element at the marker's centre is the marker, inside the map box`, !found ? [`no visible [data-map-result] for ${q(MOSSBACK.name)}`] : !r ? [`no ${MK}`] : [
+    settled ? null : 'the view (--k --tx --ty) did not settle in 8 s',
+    inside({ l: r.x, r: r.x, t: r.y, b: r.y }, r.b) ? null : `centre (${Math.round(r.x)}, ${Math.round(r.y)}) outside the box ${fmt(r.b)}`,
+    r.onMark ? null : `the point hits ${r.at}`,
+  ]);
 }
 
 // ------------------------------------------------------------------ run --
