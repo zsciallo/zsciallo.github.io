@@ -436,6 +436,10 @@ async function r2(b, origin) {
   await page(b, origin, 'T2 picture', '/dungeon/', 1280, async (p) => {
     const on = await until(p, `document.querySelector('[data-map-box]')?.dataset.gl === 'on'`, GL_WAIT_MS);
     if (!on) return check('T2 env: data-gl="on"', ['the map never drew']);
+    // openState leaves the page scrolled to the bottom; on the shorter page (run 20261121-dungeon-ui) that put the
+    // canvas top under the fixed nav, which captureBeyondViewport paints over the canvas. Sample from scroll 0.
+    const sy0 = await p.ev(`(scrollTo({ top: 0, behavior: 'instant' }), window.__dm.frames().then(() => scrollY))`);
+    if (sy0 !== 0) return check('T2 env: the page scrolls to the top', [`scrollY ${sy0}`]);
     await p.ev(`(document.querySelector('[data-map-mode] input[value="all"]').click(), true)`);
     await p.ev(`(async () => { const i = document.querySelector('[data-map-preview]'); i.loading = 'eager'; await window.__dm.until(() => i.complete && i.naturalWidth > 0, 10000); return true; })()`);
     const gl = await shot(p);
@@ -470,19 +474,24 @@ async function r2(b, origin) {
     const at = `(() => { const bx = document.querySelector('[data-map-box]'), r = bx.getBoundingClientRect(), s = bx.style, k = +s.getPropertyValue('--k'); return [r.left + ${mx} * k + +s.getPropertyValue('--tx'), r.top + ${my} * k + +s.getPropertyValue('--ty')]; })()`;
     // zoom in on it with the wheel, as a visitor would, so one block covers many pixels
     for (let i = 0; i < 2; i++) await p.ev(`(() => { const [cx, cy] = ${at}; document.querySelector('[data-map-box]').dispatchEvent(new WheelEvent('wheel', { clientX: cx, clientY: cy, deltaY: -1000, bubbles: true, cancelable: true })); return true; })()`);
+    let covered = null;
     const sample = async (cut) => {
+      covered = null;
       await p.ev(`window.__dm.setCut(${cut})`);
       if (!(await until(p, `window.__dm.label() === 'CUT AT Y ${cut}'`, 3000))) return null;
       const [cx, cy] = await p.ev(at);
       const r = await p.ev(`(() => { const r = document.querySelector('[data-map-box] canvas').getBoundingClientRect(); return [r.left, r.top]; })()`);
+      // the sample point must be the map itself, not a fixed bar or an overlay painted over the canvas
+      covered = await p.ev(`(() => { const e = document.elementFromPoint(${cx}, ${cy}); return e && e.closest('[data-map-box]') && !e.closest('.dm-ctl') ? null : 'sample point (' + Math.round(${cx}) + ', ' + Math.round(${cy}) + ') is covered by ' + (e ? e.tagName + '.' + e.className : 'nothing (off screen)') + ', not the map'; })()`);
+      if (covered) return null;
       const img = await shot(p);
       return img && px(img, Math.round(cx - r[0]), Math.round(cy - r[1]));
     };
     const where = `${COLUMN.state} at X ${x} Y ${y} Z ${z}`;
     const atN = await sample(y);
-    check(`T2 cut at Y ${y}: the top face of ${where} is drawn (not the cut colour, not background)`, !atN ? ['no sample'] : dist3(atN, CUT_RGB) <= 30 || dist3(atN, BG_RGB) <= 30 ? [`pixel rgb(${atN.join(', ')})`] : []);
+    check(`T2 cut at Y ${y}: the top face of ${where} is drawn (not the cut colour, not background)`, !atN ? [covered ?? 'no sample'] : dist3(atN, CUT_RGB) <= 30 || dist3(atN, BG_RGB) <= 30 ? [`pixel rgb(${atN.join(', ')})`] : []);
     const below = await sample(y - 1);
-    check(`T2 cut at Y ${y - 1}: the cut face covers ${where} (rgb(46, 48, 56))`, !below ? ['no sample'] : dist3(below, CUT_RGB) <= 12 ? [] : [`pixel rgb(${below.join(', ')})`]);
+    check(`T2 cut at Y ${y - 1}: the cut face covers ${where} (rgb(46, 48, 56))`, !below ? [covered ?? 'no sample'] : dist3(below, CUT_RGB) <= 12 ? [] : [`pixel rgb(${below.join(', ')})`]);
   });
 }
 
