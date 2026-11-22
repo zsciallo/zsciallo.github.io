@@ -37,6 +37,7 @@ import { join, resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { ROOT, decodePng, diffImages } from './visual_check.mjs';
 import { openState, withBrowser } from './card_style_check.mjs';
+import { DIFF, ZONES } from '../src/data/dungeonMap.js';
 
 const args = process.argv.slice(2);
 const DIST = resolve(args.includes('--dist') ? args[args.indexOf('--dist') + 1] : join(ROOT, 'dist'));
@@ -90,6 +91,7 @@ const LIB = String.raw`(window.__dm = {
   setCut: (v) => { const s = document.querySelector('[data-map-slider]'); s.value = String(v); s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); return s.value; },
   type: (text) => { const i = document.querySelector('[data-map-search]'); i.focus(); i.value = text; i.dispatchEvent(new Event('input', { bubbles: true })); return i.value; },
   panel: () => (document.querySelector('[data-map-panel]')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+  rect: (s) => { const e = typeof s === 'string' ? document.querySelector(s) : s; if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; },
   until: async (fn, ms) => { for (let t = 0; t < ms; t += 50) { if (await fn()) return true; await new Promise((r) => setTimeout(r, 50)); } return !!(await fn()); },
   frames: () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 50)))),
   webgl2: () => !!document.createElement('canvas').getContext('webgl2'),
@@ -407,9 +409,11 @@ async function r2(b, origin) {
         await until(p, `window.__dm.panel().length > 0`, 10_000);
         await p.ev('window.__dm.frames()');
         const panel = await p.ev('window.__dm.panel()');
-        check(`T4 /dungeon/#${key}: no uncaught exception, the panel shows the Heartwood overview`, [
+        // run 20261121-dungeon-ui U1: the nothing-picked state is now the legend, not the overview text
+        const legend = await p.ev(`!!document.querySelector('[data-map-panel] details[data-map-legend]')`);
+        check(`T4 /dungeon/#${key}: no uncaught exception, the panel shows the nothing-picked legend`, [
           errors.length ? `uncaught: ${q(errors.slice(0, 3))}` : null,
-          panel.includes('stacked inside one floating island') ? null : `[data-map-panel] text ${q(panel.slice(0, 120))}, want the overview`,
+          legend ? null : `no [data-map-panel] details[data-map-legend]; panel text ${q(panel.slice(0, 120))}`,
         ]);
       });
     } finally {
@@ -482,11 +486,111 @@ async function r2(b, origin) {
   });
 }
 
+// ------------------------------------------ run 20261121-dungeon-ui U1 --
+// The controls and the info card float on a full-width map (spec .orch/runs/20261121-dungeon-ui/spec-U1.md).
+// Hooks added by that spec: [data-map-close] (aria-label "Close") and details[data-map-legend] (summary LEGEND).
+
+const inside = (a, o) => a.l >= o.l - 0.5 && a.r <= o.r + 0.5 && a.t >= o.t - 0.5 && a.b <= o.b + 0.5;
+const overlap = (a, o) => Math.min(a.r, o.r) - Math.max(a.l, o.l) > 0.5 && Math.min(a.b, o.b) - Math.max(a.t, o.t) > 0.5;
+const fmt = (r) => (r ? `${Math.round(r.l)}..${Math.round(r.r)} x ${Math.round(r.t)}..${Math.round(r.b)}` : 'missing');
+const GL_UP = `document.querySelector('[data-map-box]')?.dataset.gl === 'on'`;
+const MK = q(`[data-marker-id="${MOSSBACK.id}"]`);
+/** Dispatch a wheel (zoom in) on the element at the point `pick` returns; report --k before and after. */
+const wheelAt = (p, pick) => p.ev(`(async () => {
+  const bx = document.querySelector('[data-map-box]'), k = () => +bx.style.getPropertyValue('--k');
+  const pt = (${pick})(); if (!pt || !pt.el) return null;
+  const k0 = k();
+  pt.el.dispatchEvent(new WheelEvent('wheel', { clientX: pt.x, clientY: pt.y, deltaY: -500, bubbles: true, cancelable: true }));
+  await window.__dm.frames();
+  return { k0, k1: k(), inPanel: !!pt.el.closest('[data-map-panel]'), inBox: bx.contains(pt.el), tag: pt.el.tagName + '.' + pt.el.className };
+})()`);
+
+async function u1(b, origin) {
+  await page(b, origin, 'U1 1280px', '/dungeon/', 1280, async (p) => {
+    await until(p, GL_UP, GL_WAIT_MS);
+    // AC1
+    const r = await p.ev(`({ box: window.__dm.rect('[data-map-box]'), search: window.__dm.rect('[data-map-search]'), mode: window.__dm.rect('[data-map-mode]'),
+      slider: window.__dm.rect('[data-map-slider]'), panel: window.__dm.rect('[data-map-panel]'),
+      main: (() => { const m = document.querySelector('main.dm'), s = getComputedStyle(m); return m.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight); })() })`);
+    check('U1-AC1 at 1280 px the search, mode switch, slider and [data-map-panel] lie inside [data-map-box]', !r.box ? ['no [data-map-box]'] : ['search', 'mode', 'slider', 'panel'].map((k) =>
+      !r[k] ? `no ${k}` : r[k].w < 1 || r[k].h < 1 ? `${k} not shown (${r[k].w}x${r[k].h})` : inside(r[k], r.box) ? null : `${k} ${fmt(r[k])} outside the box ${fmt(r.box)}`));
+    check("U1-AC1 the search's left edge is in the left third of the map box", !r.box || !r.search ? ['no box or search'] : r.search.l >= r.box.l - 0.5 && r.search.l <= r.box.l + r.box.w / 3 ? [] : [`search left ${Math.round(r.search.l)}, box ${fmt(r.box)}`]);
+    check("U1-AC1 the map box spans the content width of main.dm (>= 95%, no side column)", !r.box ? ['no [data-map-box]'] : r.box.w >= 0.95 * r.main ? [] : [`box ${Math.round(r.box.w)} px of ${Math.round(r.main)} px`]);
+
+    // AC2: nothing picked, the card is the legend: four tiers and every boss as a button.
+    const lg = await p.ev(`(() => { const d = document.querySelector('[data-map-panel] details[data-map-legend]'); return d && { open: d.open, sum: d.querySelector('summary')?.textContent.trim(),
+      text: d.textContent.replace(/\\s+/g, ' '), buttons: [...d.querySelectorAll('button')].map((x) => x.textContent.trim()) }; })()`);
+    const bosses = ZONES.filter((z) => z.b).map((z) => z.b.n);
+    check('U1-AC2 nothing picked: the card holds an open details[data-map-legend] titled LEGEND with the four tiers and every boss as a button', !lg ? ['no [data-map-panel] details[data-map-legend]'] : [
+      lg.sum === 'LEGEND' ? null : `summary ${q(lg.sum)}`,
+      lg.open ? null : 'closed at 1280 px',
+      ...DIFF.map((d) => (lg.text.includes(d[0]) ? null : `no tier ${q(d[0])}`)),
+      ...bosses.map((n) => (lg.buttons.includes(n) ? null : `no button ${q(n)}`)),
+    ]);
+    const body = await p.ev('document.body.textContent');
+    check('U1-AC2 "Drag to pan" and "stacked inside one floating island" are not on the page', ['Drag to pan', 'stacked inside one floating island'].map((t) => (body.includes(t) ? `page says ${q(t)}` : null)));
+
+    // AC4: a wheel over the card leaves the zoom; one over bare map zooms.
+    const card = await wheelAt(p, `() => { const e = document.querySelector('[data-map-panel]'); if (!e) return null; e.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = e.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + Math.min(r.height / 2, 40); return { x, y, el: document.elementFromPoint(x, y) }; }`);
+    check('U1-AC4 a wheel over the info card (inside the map box) does not change the zoom (--k unchanged)', !card ? ['no [data-map-panel] under its own centre'] : [
+      card.inPanel && card.inBox ? null : `the point hits ${card.tag}: in the panel ${card.inPanel}, in the map box ${card.inBox}`,
+      card.k1 === card.k0 ? null : `--k ${card.k0} -> ${card.k1}`,
+    ]);
+    const bare = await wheelAt(p, `() => { const bx = document.querySelector('[data-map-box]'), r = bx.getBoundingClientRect();
+      for (let y = Math.max(r.top, 0) + 10; y < Math.min(r.bottom, innerHeight) - 10; y += 16) for (let x = r.left + 10; x < r.right - 10; x += 16) {
+        const el = document.elementFromPoint(x, y);
+        if (el && bx.contains(el) && !el.closest('.dm-ctl, [data-map-panel], button, input, label, summary, details, .dm-zl')) return { x, y, el };
+      } return null; }`);
+    check('U1-AC4 a wheel over bare map changes the zoom (--k changes)', !bare ? ['no point of the map box free of overlays'] : bare.k1 !== bare.k0 ? [] : [`--k stayed ${bare.k0} (at ${bare.tag})`]);
+
+    // AC3: pick a marker, close it.
+    await p.ev(`(document.querySelector(${MK}).click(), true)`);
+    await until(p, `window.__dm.panel().includes(${q(MOSSBACK.name)}) && !!document.querySelector('[data-map-panel] [data-map-close]')`, 3000);
+    const st = () => p.ev(`(() => { const c = document.querySelector('[data-map-panel] [data-map-close]'), d = document.querySelector('[data-map-panel] details[data-map-legend]');
+      return { hash: location.hash, sel: document.querySelector(${MK}).classList.contains('sel'), named: window.__dm.panel().includes(${q(MOSSBACK.name)}),
+        close: c && { label: c.getAttribute('aria-label'), vis: c.checkVisibility({ visibilityProperty: true, opacityProperty: true }) }, legend: !!d && d.checkVisibility() }; })()`);
+    const s1 = await st();
+    check(`U1-AC3 picking ${MOSSBACK.name} shows its panel with a visible close button (aria-label "Close"), no legend`, [
+      s1.named ? null : `[data-map-panel] lacks ${q(MOSSBACK.name)}`,
+      !s1.close ? 'no [data-map-panel] [data-map-close]' : s1.close.label !== 'Close' ? `aria-label ${q(s1.close.label)}` : s1.close.vis ? null : 'close button hidden',
+      s1.legend ? 'the legend is still shown' : null,
+      s1.hash === `#${MOSSBACK.id}` ? null : `hash ${q(s1.hash)} before closing`,
+      s1.sel ? null : 'the marker has no .sel ring before closing',
+    ]);
+    const closed = s1.close && (await p.ev(`(document.querySelector('[data-map-panel] [data-map-close]').click(), true)`)) && (await until(p, `!!document.querySelector('[data-map-panel] details[data-map-legend]')`, 3000));
+    const s2 = await st();
+    check('U1-AC3 the close button brings the legend back, clears the hash and the marker\'s selected ring', !s1.close ? ['no close button to press'] : [
+      closed && s2.legend ? null : 'no visible legend after closing',
+      s2.hash === '' ? null : `hash ${q(s2.hash)}`,
+      s2.sel ? 'the marker still has .sel' : null,
+      s2.close ? 'the close button is still there' : null,
+    ]);
+  });
+
+  // AC5: 400 px, a marker picked: the sheet sits in the map box above the bottom bar, its close button in view.
+  await page(b, origin, 'U1 400px', '/dungeon/', 400, async (p) => {
+    await until(p, GL_UP, GL_WAIT_MS);
+    await p.ev(`(document.querySelector(${MK}).click(), true)`);
+    await until(p, `!!document.querySelector('[data-map-panel] [data-map-close]')`, 3000);
+    const r = await p.ev(`(() => { const c = document.querySelector('[data-map-panel] [data-map-close]'); c?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+      return { close: c && window.__dm.rect(c), vis: !!c && c.checkVisibility({ visibilityProperty: true }), sheet: window.__dm.rect('[data-map-panel]'), box: window.__dm.rect('[data-map-box]'),
+        mode: window.__dm.rect('[data-map-mode]'), slider: window.__dm.rect('[data-map-slider]'), vw: innerWidth, vh: innerHeight, sw: document.documentElement.scrollWidth }; })()`);
+    check('U1-AC5 at 400 px with a marker picked there is no horizontal scroll (scrollWidth <= 400)', r.sw <= 400 ? [] : [`scrollWidth ${r.sw}`]);
+    check('U1-AC5 at 400 px the close button ([data-map-close]) is shown fully inside the viewport', !r.close ? ['no [data-map-panel] [data-map-close]'] : !r.vis || r.close.w < 1 ? ['not shown'] : inside(r.close, { l: 0, r: r.vw, t: 0, b: r.vh }) ? [] : [`box ${fmt(r.close)} in a ${r.vw}x${r.vh} viewport`]);
+    check('U1-AC5 at 400 px the sheet lies inside the map box and covers neither the mode switch nor the slider', !r.sheet || !r.box ? ['no [data-map-panel] or [data-map-box]'] : [
+      inside(r.sheet, r.box) ? null : `sheet ${fmt(r.sheet)} outside the box ${fmt(r.box)}`,
+      r.mode && overlap(r.sheet, r.mode) ? `sheet ${fmt(r.sheet)} overlaps the mode switch ${fmt(r.mode)}` : null,
+      r.slider && overlap(r.sheet, r.slider) ? `sheet ${fmt(r.sheet)} overlaps the slider ${fmt(r.slider)}` : null,
+      r.mode && r.slider ? null : 'no mode switch or slider',
+    ]);
+  });
+}
+
 // ------------------------------------------------------------------ run --
 
 let ran = 0;
 try {
-  await withBrowser(DIST, async (b, origin) => (ran++, await glOn(b, origin), await r2(b, origin)), GL_ON);
+  await withBrowser(DIST, async (b, origin) => (ran++, await glOn(b, origin), await r2(b, origin), await u1(b, origin)), GL_ON);
   await withBrowser(DIST, async (b, origin) => (ran++, glOff(b, origin)), GL_OFF);
 } catch (e) {
   check('dungeon-browser-check', [`threw ${e?.stack?.split('\n')[0] ?? e}`]);
