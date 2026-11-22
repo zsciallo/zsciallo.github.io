@@ -676,11 +676,6 @@
     flex-direction: row;
   }
 
-  .dm-north {
-    grid-area: 3 / 2;
-    justify-self: end;
-  }
-
   .dm-panel {
     grid-area: 4 / 1 / 5 / 3;
     align-self: end;
@@ -691,7 +686,8 @@
     grid-area: 5 / 1 / 6 / 3;
   }
 
-  .dm-read {
+  .dm-read,
+  .dm-north {
     display: none;
   }
 }

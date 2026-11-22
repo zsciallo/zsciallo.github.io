@@ -185,11 +185,18 @@ export function DungeonPage() {
     const h = o ? (o.z ?? o.m).id : '';
     if (location.hash.slice(1) !== h) history.replaceState(null, '', h ? `#${h}` : location.pathname + location.search);
   };
+  // after the card renders: the view leaves out the card or sheet the pick opens
+  const later = (f) => requestAnimationFrame(() => map.current && f(map.current));
   const goTo = (id) => {
     if (!Object.hasOwn(byId, id)) return;
     const o = byId[id];
     select(o);
-    map.current?.fly(o.z ? o.z.bb : [o.m.mx - 22, o.m.mx + 22, o.m.my - 22, o.m.my + 22], o.z ? 6 : undefined);
+    later((v) => v.fly(o.z ? o.z.bb : [o.m.mx - 22, o.m.mx + 22, o.m.my - 22, o.m.my + 22], o.z ? 6 : undefined));
+  };
+  // a pick on the map itself keeps the zoom and only pans if the card would cover it
+  const show = (o) => {
+    select(o);
+    if (o) later((v) => (o.z ? v.show((o.z.bb[0] + o.z.bb[1]) / 2, (o.z.bb[2] + o.z.bb[3]) / 2) : v.show(o.m.mx, o.m.my)));
   };
   const go = (id, text) => <button type="button" class="dm-go" onClick={() => goTo(id)}>{text}</button>;
   // the view to fit: the outlines shown at this cut (every outline in ALL BLOCKS), at their floors, plus a margin
@@ -198,7 +205,7 @@ export function DungeonPage() {
     const bbs = (zs.length ? zs : AREAS).map((z) => z.bb);
     return [Math.min(...bbs.map((v) => v[0])) - 4, Math.max(...bbs.map((v) => v[1])) + 4, Math.min(...bbs.map((v) => v[2])) - 4, Math.max(...bbs.map((v) => v[3])) + 4];
   };
-  live.current = { zoneAt, select, goTo, frame, sel, engineCut: mode === 'cut' ? cut : null };
+  live.current = { zoneAt, show, goTo, frame, sel, engineCut: mode === 'cut' ? cut : null };
 
   useEffect(() => {
     setWide(!matchMedia('(max-width: 900px)').matches);
@@ -214,7 +221,7 @@ export function DungeonPage() {
         },
         onTap: (mx, my) => {
           const z = live.current.zoneAt(mx, my);
-          live.current.select(z ? { z } : null);
+          live.current.show(z ? { z } : null);
         },
         onHover: (mx, my) => {
           const z = mx == null ? null : live.current.zoneAt(mx, my);
@@ -274,7 +281,7 @@ export function DungeonPage() {
               ))}
               {MARKS.map((m) => (
                 <button key={m.id} type="button" data-marker-id={m.id} class={`dm-mk ${m.t}${m.extra?.final ? ' final' : ''}${selId === m.id ? ' sel' : ''}`}
-                  hidden={markHidden(m)} aria-label={m.n} style={{ ...at(m.mx, m.my), '--c': m.zone.c || 'var(--accent)' }} onClick={() => select({ m })}>
+                  hidden={markHidden(m)} aria-label={m.n} style={{ ...at(m.mx, m.my), '--c': m.zone.c || 'var(--accent)' }} onClick={() => show({ m })}>
                   <i /><span class="dm-lb">{m.n}</span>
                 </button>
               ))}
@@ -319,7 +326,7 @@ export function DungeonPage() {
               <div class="dm-ctl dm-zoom">
                 <button type="button" data-zoom-by="1.5" aria-label="Zoom in">+</button>
                 <button type="button" data-zoom-by="0.6667" aria-label="Zoom out">−</button>
-                <button type="button" aria-label="Show the whole dungeon" title="Show the whole dungeon" onClick={() => (select(null), map.current?.fly())}>□</button>
+                <button type="button" aria-label="Show the whole dungeon" title="Show the whole dungeon" onClick={() => (select(null), later((v) => v.fly()))}>□</button>
               </div>
               <div class="dm-ctl dm-bar" hidden={gl === 'off'}>
                 <div class="dm-seg" role="radiogroup" aria-label="View" data-map-mode hidden={gl === 'off'}>

@@ -32,16 +32,17 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
     box.dataset.live = '';
     engine?.view(k, tx, ty, box.clientWidth, box.clientHeight, Math.min(2, devicePixelRatio || 1));
   };
-  // left: px on the box's left edge to leave out of the view
-  const target = (bb, maxK = 99, left = 0) => {
-    const w = box.clientWidth - left, h = box.clientHeight;
-    const nk = clampK(Math.min(w / (bb[1] - bb[0]), h / (bb[3] - bb[2]), maxK) * 0.86);
-    return [nk, left + w / 2 - ((bb[0] + bb[1]) / 2) * nk, h / 2 - ((bb[2] + bb[3]) / 2) * nk];
+  // the part of the box the info card leaves free, [left, top, right, bottom] in box px: right of the card on
+  // desktop, above it under 900 px (a full-width sheet); measured as rendered, so the page calls after a pick renders
+  const free = () => {
+    const b = box.getBoundingClientRect(), c = box.querySelector('[data-map-panel]')?.getBoundingClientRect();
+    if (!c) return [0, 0, b.width, b.height];
+    return c.width < b.width / 2 ? [c.right - b.left, 0, b.width, b.height] : [0, 0, b.width, c.top - b.top];
   };
-  // the whole-island view leaves out the info card's column (desktop; under 900 px the card is a full-width sheet)
-  const cardEdge = () => {
-    const c = box.querySelector('[data-map-panel]')?.getBoundingClientRect(), b = box.getBoundingClientRect();
-    return c && c.width < b.width / 2 ? c.right - b.left : 0;
+  const target = (bb, maxK = 99) => {
+    const [l, t, r, b] = free(), w = r - l, h = b - t;
+    const nk = clampK(Math.min(w / (bb[1] - bb[0]), h / (bb[3] - bb[2]), maxK) * 0.86);
+    return [nk, l + w / 2 - ((bb[0] + bb[1]) / 2) * nk, t + h / 2 - ((bb[2] + bb[3]) / 2) * nk];
   };
   const pv = meta.preview;
   // what the page frames (the island's areas), clamped to the data box
@@ -49,9 +50,9 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
     const f = frame();
     return [Math.max(pv.x, f[0]), Math.min(pv.x + pv.w, f[1]), Math.max(pv.y, f[2]), Math.min(pv.y + pv.h, f[3])];
   };
-  const fly = (bb, maxK, left) => {
+  const fly = (to) => {
     touched = true;
-    const to = target(bb, maxK, left), from = [k, tx, ty];
+    const from = [k, tx, ty];
     cancelAnimationFrame(anim);
     if (reducedMotion()) return ([k, tx, ty] = to), apply();
     const t0 = performance.now();
@@ -133,11 +134,11 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
   for (const [ev, fn, o] of on) box.addEventListener(ev, fn, o);
   // until the visitor moves the view, a resize keeps the whole island in the box
   const ro = new ResizeObserver(() => {
-    if (!touched) [k, tx, ty] = target(whole(), 99, cardEdge());
+    if (!touched) [k, tx, ty] = target(whole());
     apply();
   });
   ro.observe(box);
-  [k, tx, ty] = target(whole(), 99, cardEdge());
+  [k, tx, ty] = target(whole());
   apply();
 
   const fail = () => {
@@ -176,7 +177,12 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
   }
 
   return {
-    fly: (bb, maxK) => (bb ? fly(bb, maxK) : fly(whole(), maxK, cardEdge())),
+    fly: (bb, maxK) => fly(target(bb ?? whole(), maxK)),
+    // pan, at the same zoom, to bring (mx, my) into the free part of the box if it is not 20 px inside it
+    show(mx, my) {
+      const [l, t, r, b] = free(), x = mx * k + tx, y = my * k + ty;
+      if (x < l + 20 || x > r - 20 || y < t + 20 || y > b - 20) fly([k, (l + r) / 2 - mx * k, (t + b) / 2 - my * k]);
+    },
     cut(c) {
       cut = c;
       engine?.cut(c);
