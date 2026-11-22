@@ -566,6 +566,25 @@ async function u1(b, origin) {
       s2.close ? 'the close button is still there' : null,
     ]);
     await pickedInView(p, 1280);
+
+    // AC10: closing with the keyboard focus on the close button leaves focus in the card.
+    await p.ev(`(document.querySelector(${MK}).click(), true)`);
+    const shut = await until(p, `!!document.querySelector('[data-map-panel] [data-map-close]')`, 3000);
+    const f = shut && (await p.ev(`(async () => { const c = document.querySelector('[data-map-panel] [data-map-close]'); c.focus(); c.click(); await window.__dm.frames(); await window.__dm.frames();
+      const a = document.activeElement; return { inPanel: !!a && !!a.closest('[data-map-panel]'), at: a ? a.tagName + '.' + a.className : 'null' }; })()`));
+    check('U1-AC10 after pressing the focused close button, focus is on an element inside [data-map-panel], not body', !shut ? ['no [data-map-panel] [data-map-close] after picking'] : f.inPanel && !f.at.startsWith('BODY') ? [] : [`focus on ${f.at}`]);
+
+    // AC9: at scroll 0 the bottom bar is above the fold at common laptop sizes.
+    for (const [w, h] of [[1280, 800], [1366, 768]]) {
+      await p.s('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+      const r = await p.ev(`(async () => { await window.__dm.until(() => innerWidth === ${w} && innerHeight === ${h}, 3000); await window.__dm.frames(); scrollTo({ top: 0, behavior: 'instant' }); await window.__dm.frames();
+        return { sy: scrollY, vw: innerWidth, vh: innerHeight, mode: window.__dm.rect('[data-map-mode]'), slider: window.__dm.rect('[data-map-slider]') }; })()`);
+      check(`U1-AC9 at ${w}x${h} and scroll 0 the mode switch and the slider are fully inside the viewport`, [
+        r.sy === 0 ? null : `scrollY ${r.sy}, want 0`,
+        r.vw === w && r.vh === h ? null : `viewport ${r.vw}x${r.vh}`,
+        ...[['mode switch', r.mode], ['slider', r.slider]].map(([n, x]) => (!x || x.w < 1 ? `no ${n}` : inside(x, { l: 0, r: r.vw, t: 0, b: r.vh }) ? null : `${n} ${fmt(x)} in a ${r.vw}x${r.vh} viewport`)),
+      ]);
+    }
   });
 
   // AC5: 400 px, a marker picked: the sheet sits in the map box above the bottom bar, its close button in view.
