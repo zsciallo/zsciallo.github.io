@@ -32,10 +32,16 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
     box.dataset.live = '';
     engine?.view(k, tx, ty, box.clientWidth, box.clientHeight, Math.min(2, devicePixelRatio || 1));
   };
-  const target = (bb, maxK = 99) => {
-    const w = box.clientWidth, h = box.clientHeight;
+  // left: px on the box's left edge to leave out of the view
+  const target = (bb, maxK = 99, left = 0) => {
+    const w = box.clientWidth - left, h = box.clientHeight;
     const nk = clampK(Math.min(w / (bb[1] - bb[0]), h / (bb[3] - bb[2]), maxK) * 0.86);
-    return [nk, w / 2 - ((bb[0] + bb[1]) / 2) * nk, h / 2 - ((bb[2] + bb[3]) / 2) * nk];
+    return [nk, left + w / 2 - ((bb[0] + bb[1]) / 2) * nk, h / 2 - ((bb[2] + bb[3]) / 2) * nk];
+  };
+  // the whole-island view leaves out the info card's column (desktop; under 900 px the card is a full-width sheet)
+  const cardEdge = () => {
+    const c = box.querySelector('[data-map-panel]')?.getBoundingClientRect(), b = box.getBoundingClientRect();
+    return c && c.width < b.width / 2 ? c.right - b.left : 0;
   };
   const pv = meta.preview;
   // what the page frames (the island's areas), clamped to the data box
@@ -43,9 +49,9 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
     const f = frame();
     return [Math.max(pv.x, f[0]), Math.min(pv.x + pv.w, f[1]), Math.max(pv.y, f[2]), Math.min(pv.y + pv.h, f[3])];
   };
-  const fly = (bb, maxK) => {
+  const fly = (bb, maxK, left) => {
     touched = true;
-    const to = target(bb, maxK), from = [k, tx, ty];
+    const to = target(bb, maxK, left), from = [k, tx, ty];
     cancelAnimationFrame(anim);
     if (reducedMotion()) return ([k, tx, ty] = to), apply();
     const t0 = performance.now();
@@ -107,6 +113,8 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
   };
   const leave = () => onHover(null);
   const wheel = (e) => {
+    // over an overlay the wheel scrolls it (the info card), not the map
+    if (e.target.closest('.dm-ctl')) return;
     e.preventDefault();
     cancelAnimationFrame(anim);
     touched = true;
@@ -125,11 +133,11 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
   for (const [ev, fn, o] of on) box.addEventListener(ev, fn, o);
   // until the visitor moves the view, a resize keeps the whole island in the box
   const ro = new ResizeObserver(() => {
-    if (!touched) [k, tx, ty] = target(whole());
+    if (!touched) [k, tx, ty] = target(whole(), 99, cardEdge());
     apply();
   });
   ro.observe(box);
-  [k, tx, ty] = target(whole());
+  [k, tx, ty] = target(whole(), 99, cardEdge());
   apply();
 
   const fail = () => {
@@ -168,7 +176,7 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
   }
 
   return {
-    fly: (bb, maxK) => fly(bb ?? whole(), maxK),
+    fly: (bb, maxK) => (bb ? fly(bb, maxK) : fly(whole(), maxK, cardEdge())),
     cut(c) {
       cut = c;
       engine?.cut(c);

@@ -67,21 +67,17 @@ const Row = ({ k, children }) => (children ? <div class="dm-row"><dt>{k}</dt><dd
 const Chip = ({ d }) => <span class="dm-chip" style={{ '--c': DIFF[d][1] }}>{DIFF[d][0]}</span>;
 const Lines = ({ items }) => items.filter(Boolean).map((t, i) => <Fragment key={i}>{i ? <br /> : null}{t}</Fragment>);
 
-function Overview({ go }) {
+function Legend({ go, open }) {
   return (
-    <>
-      <h2>Heartwood</h2>
-      <p>
-        {AREAS.filter((z) => !z.o).length} areas and {AREAS.filter((z) => z.o).length} outskirts stacked inside one floating island. Get in with <code>/warp dungeon</code>.
-      </p>
-      <p>Drag to pan, scroll or pinch to zoom, and pick anything on the map. CUTAWAY slices the island open at a height you pick: drag the slider down to work through the floors. ALL BLOCKS shows the island whole.</p>
+    <details data-map-legend open={open}>
+      <summary>LEGEND</summary>
       <div class="dm-tiers">
         {DIFF.map((d, i) => (
           <div key={d[0]}><Chip d={i} /><span>{d[2]} armour · waypoint {d[3].toLowerCase()}</span></div>
         ))}
       </div>
       <dl><Row k="BOSSES"><Lines items={BOSSES.map((z) => go(z.boss.id, z.b.n))} /></Row></dl>
-    </>
+    </details>
   );
 }
 
@@ -170,8 +166,8 @@ export function DungeonPage() {
   const [query, setQuery] = useState('');
   const [off, setOff] = useState([]);
   const [tint, setTint] = useState('zone');
+  const [wide, setWide] = useState(true);
   const box = useRef(null);
-  const layers = useRef(null);
   const map = useRef(null);
   const readout = useRef(null);
   const live = useRef(null);
@@ -205,7 +201,7 @@ export function DungeonPage() {
   live.current = { zoneAt, select, goTo, frame, sel, engineCut: mode === 'cut' ? cut : null };
 
   useEffect(() => {
-    if (matchMedia('(max-width: 900px)').matches) layers.current.open = false;
+    setWide(!matchMedia('(max-width: 900px)').matches);
     let handle = null, dead = false;
     import('../lib/dungeonMap/index.js').then(({ mount }) => {
       if (dead) return;
@@ -252,38 +248,9 @@ export function DungeonPage() {
     <MotionRoot>
       <NavBar current="smp" />
       <main class="dm">
-        <header class="dm-head">
-          <div class="dm-titles">
-            <p class="section-eyebrow dm-kicker">SEASON 4 DUNGEON</p>
-            <h1 class="dm-h1">HEARTWOOD MAP</h1>
-          </div>
-          <div class="dm-tools">
-            <div class="dm-search">
-              <input data-map-search type="search" placeholder="FIND AN AREA, BOSS OR CAMP" autocomplete="off" aria-label="Find an area, boss or camp"
-                value={query} onInput={(e) => setQuery(e.currentTarget.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && hits[0]) pick(hits[0].id);
-                  if (e.key === 'Escape') setQuery('');
-                }} />
-              {q && (
-                <ul class="dm-results">
-                  {hits.length ? hits.map((h) => (
-                    <li key={h.id}><button type="button" data-map-result onClick={() => pick(h.id)}><span>{h.n}</span><small>{h.sub}</small></button></li>
-                  )) : <li><button type="button" disabled>Nothing by that name</button></li>}
-                </ul>
-              )}
-            </div>
-            <div class="dm-seg" role="radiogroup" aria-label="View" data-map-mode hidden={gl === 'off'}>
-              {[['cut', 'CUTAWAY'], ['all', 'ALL BLOCKS']].map(([v, t]) => (
-                <label key={v}><input type="radio" name="dm-mode" value={v} checked={mode === v} onChange={() => setMode(v)} /><span>{t}</span></label>
-              ))}
-            </div>
-            <label class="dm-slice" hidden={!cutOn}>
-              <span>CUT AT Y {cut}</span>
-              <input data-map-slider type="range" min={range[0]} max={range[1]} step="1" value={cut} aria-label="Height the island is cut at"
-                onInput={(e) => setCut(Number(e.currentTarget.value))} />
-            </label>
-          </div>
+        <header>
+          <p class="section-eyebrow dm-kicker">SEASON 4 DUNGEON</p>
+          <h1 class="dm-h1">HEARTWOOD MAP</h1>
         </header>
 
         <div class="dm-app">
@@ -313,32 +280,63 @@ export function DungeonPage() {
               ))}
             </div>
 
-            <details ref={layers} class="dm-ctl dm-layers" open>
-              <summary>LAYERS</summary>
-              {LAYERS.map(([t, label]) => (
-                <label key={t}>
-                  <input type="checkbox" checked={!off.includes(t)} onChange={(e) => setOff((o) => (e.currentTarget.checked ? o.filter((x) => x !== t) : [...o, t]))} />
-                  {t !== 'zone' && <span class={`dm-g ${t}`}><i /></span>} {label}
-                </label>
-              ))}
-              <p>COLOUR BY</p>
-              <div class="dm-seg" role="radiogroup" aria-label="Colour areas by">
-                {[['zone', 'AREA'], ['diff', 'DIFFICULTY']].map(([v, t]) => (
-                  <label key={v}><input type="radio" name="dm-tint" value={v} checked={tint === v} onChange={() => setTint(v)} /><span>{t}</span></label>
-                ))}
+            {/* the overlays: a grid over the map; only its .dm-ctl children take pointer and wheel events */}
+            <div class="dm-hud">
+              <div class="dm-ctl dm-search">
+                <input data-map-search type="search" placeholder="FIND AN AREA, BOSS OR CAMP" autocomplete="off" aria-label="Find an area, boss or camp"
+                  value={query} onInput={(e) => setQuery(e.currentTarget.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && hits[0]) pick(hits[0].id);
+                    if (e.key === 'Escape') setQuery('');
+                  }} />
+                {q && (
+                  <ul class="dm-results">
+                    {hits.length ? hits.map((h) => (
+                      <li key={h.id}><button type="button" data-map-result onClick={() => pick(h.id)}><span>{h.n}</span><small>{h.sub}</small></button></li>
+                    )) : <li><button type="button" disabled>Nothing by that name</button></li>}
+                  </ul>
+                )}
               </div>
-            </details>
-            <div class="dm-ctl dm-north">N ↗</div>
-            <Readout set={readout} />
-            <div class="dm-ctl dm-zoom">
-              <button type="button" data-zoom-by="1.5" aria-label="Zoom in">+</button>
-              <button type="button" data-zoom-by="0.6667" aria-label="Zoom out">−</button>
-              <button type="button" aria-label="Show the whole dungeon" title="Show the whole dungeon" onClick={() => (select(null), map.current?.fly())}>□</button>
+              <details class="dm-ctl dm-layers">
+                <summary>LAYERS</summary>
+                {LAYERS.map(([t, label]) => (
+                  <label key={t}>
+                    <input type="checkbox" checked={!off.includes(t)} onChange={(e) => setOff((o) => (e.currentTarget.checked ? o.filter((x) => x !== t) : [...o, t]))} />
+                    {t !== 'zone' && <span class={`dm-g ${t}`}><i /></span>} {label}
+                  </label>
+                ))}
+                <p>COLOUR BY</p>
+                <div class="dm-seg" role="radiogroup" aria-label="Colour areas by">
+                  {[['zone', 'AREA'], ['diff', 'DIFFICULTY']].map(([v, t]) => (
+                    <label key={v}><input type="radio" name="dm-tint" value={v} checked={tint === v} onChange={() => setTint(v)} /><span>{t}</span></label>
+                  ))}
+                </div>
+              </details>
+              <aside class="dm-ctl dm-panel" data-map-panel aria-live="polite">
+                {sel && <button type="button" class="dm-x" data-map-close aria-label="Close" onClick={() => select(null)}>×</button>}
+                {sel ? sel.z ? <AreaPanel z={sel.z} go={go} /> : <MarkPanel m={sel.m} go={go} /> : <Legend go={go} open={wide} />}
+              </aside>
+              <div class="dm-ctl dm-zoom">
+                <button type="button" data-zoom-by="1.5" aria-label="Zoom in">+</button>
+                <button type="button" data-zoom-by="0.6667" aria-label="Zoom out">−</button>
+                <button type="button" aria-label="Show the whole dungeon" title="Show the whole dungeon" onClick={() => (select(null), map.current?.fly())}>□</button>
+              </div>
+              <div class="dm-ctl dm-bar" hidden={gl === 'off'}>
+                <div class="dm-seg" role="radiogroup" aria-label="View" data-map-mode hidden={gl === 'off'}>
+                  {[['cut', 'CUTAWAY'], ['all', 'ALL BLOCKS']].map(([v, t]) => (
+                    <label key={v}><input type="radio" name="dm-mode" value={v} checked={mode === v} onChange={() => setMode(v)} /><span>{t}</span></label>
+                  ))}
+                </div>
+                <label class="dm-slice" hidden={!cutOn}>
+                  <span>CUT AT Y {cut}</span>
+                  <input data-map-slider type="range" min={range[0]} max={range[1]} step="1" value={cut} aria-label="Height the island is cut at"
+                    onInput={(e) => setCut(Number(e.currentTarget.value))} />
+                </label>
+              </div>
+              <div class="dm-ctl dm-north">N ↗</div>
+              <Readout set={readout} />
             </div>
           </div>
-          <aside class="dm-panel" data-map-panel aria-live="polite">
-            {sel ? sel.z ? <AreaPanel z={sel.z} go={go} /> : <MarkPanel m={sel.m} go={go} /> : <Overview go={go} />}
-          </aside>
         </div>
       </main>
       <Footer />
