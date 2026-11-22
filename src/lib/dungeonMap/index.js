@@ -32,12 +32,14 @@ export function mount(box, { meta, frame, onGl, onTap, onHover }) {
     box.dataset.live = '';
     engine?.view(k, tx, ty, box.clientWidth, box.clientHeight, Math.min(2, devicePixelRatio || 1));
   };
-  // the part of the box the info card leaves free, [left, top, right, bottom] in box px: right of the card on
-  // desktop, above it under 900 px (a full-width sheet); measured as rendered, so the page calls after a pick renders
+  // the part of the box the overlays leave free, [left, top, right, bottom] in box px: between the card and the zoom
+  // column on desktop, between the zoom row and the sheet under 900 px; measured as rendered, so the page calls after
+  // a pick renders
   const free = () => {
-    const b = box.getBoundingClientRect(), c = box.querySelector('[data-map-panel]')?.getBoundingClientRect();
-    if (!c) return [0, 0, b.width, b.height];
-    return c.width < b.width / 2 ? [c.right - b.left, 0, b.width, b.height] : [0, 0, b.width, c.top - b.top];
+    const b = box.getBoundingClientRect(), r = (s) => box.querySelector(s)?.getBoundingClientRect();
+    const c = r('[data-map-panel]'), z = r('.dm-zoom');
+    if (!c || !z) return [0, 0, b.width, b.height];
+    return c.width < b.width / 2 ? [c.right - b.left, 0, z.left - b.left, b.height] : [0, z.bottom - b.top, b.width, c.top - b.top];
   };
   const target = (bb, maxK = 99) => {
     const [l, t, r, b] = free(), w = r - l, h = b - t;

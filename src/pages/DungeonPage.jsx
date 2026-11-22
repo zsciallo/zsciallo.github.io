@@ -238,6 +238,7 @@ export function DungeonPage() {
       dead = true;
       removeEventListener('hashchange', onHash);
       handle?.destroy();
+      map.current = null;
     };
   }, []);
   useEffect(() => map.current?.cut(mode === 'cut' ? cut : null), [mode, cut]);
@@ -320,7 +321,7 @@ export function DungeonPage() {
                 </div>
               </details>
               <aside class="dm-ctl dm-panel" data-map-panel aria-live="polite">
-                {sel && <button type="button" class="dm-x" data-map-close aria-label="Close" onClick={() => select(null)}>×</button>}
+                {sel && <button type="button" class="dm-x" data-map-close aria-label="Close" onClick={() => (select(null), requestAnimationFrame(() => box.current?.querySelector('[data-map-legend] summary')?.focus()))}>×</button>}
                 {sel ? sel.z ? <AreaPanel z={sel.z} go={go} /> : <MarkPanel m={sel.m} go={go} /> : <Legend go={go} open={wide} />}
               </aside>
               <div class="dm-ctl dm-zoom">

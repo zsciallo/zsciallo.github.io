@@ -6,6 +6,8 @@
   position: relative;
   z-index: 1;
   padding: 12px max(16px, env(safe-area-inset-left, 0px)) 24px;
+  /* one screen under the nav; the map box takes what the heading leaves (desktop) */
+  min-height: calc(100svh - var(--nav-h));
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -173,7 +175,7 @@
 /* ─── map box ─── */
 .dm-app {
   display: grid;
-  height: max(420px, calc(100svh - var(--nav-h) - 24px));
+  flex: 1 0 420px;
   font-family: var(--font-hud);
   font-size: 1.15rem;
   line-height: 1.15;
@@ -649,8 +651,13 @@
 
 /* search across the top, LAYERS and zoom under it, the card a sheet docked above the bar */
 @media (max-width: 900px) {
+  .dm {
+    min-height: 0;
+  }
+
   .dm-app {
     /* no taller than 1.5 screen widths: the page above and below stays reachable by touch */
+    flex: none;
     height: max(420px, min(150vw, calc(100svh - var(--nav-h) - 24px)));
   }
 
