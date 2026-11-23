@@ -4781,11 +4781,21 @@ html:not(.js) .nav-toggle {
 }
 
 @media (max-width: 800px) {
+  /* The wrapped rows grow the bar rather than spill above it. */
+  html:not(.js) .site-nav-inner {
+    height: auto;
+    min-height: var(--nav-h);
+  }
+
   html:not(.js) .site-nav-links {
     position: static;
     display: flex;
     flex-direction: row;
     gap: 1.1rem;
+    /* Six labels don't fit one phone row: wrap to a second instead of scrolling sideways. */
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 0;
     padding: 0;
     background: none;
     border-bottom: 0;
