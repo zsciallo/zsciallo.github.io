@@ -1,0 +1,11 @@
+{
+  "title": "Raw <b>HTML</b> Page",
+  "half": "smp",
+  "summary": "**Raw HTML Page** holds <script>alert(1)</script> and <b>bold</b> tags — they must reach the page as text.",
+  "infobox": [["Server", "<b>SMP</b>"]],
+  "sections": [
+    {"h": "Mechanics", "blocks": [{"p": "<script>alert(2)</script>"}, {"ul": ["<img src=x onerror=alert(3)>"]}, {"p": "[click](javascript:alert(4))"}]}
+  ],
+  "history": [{"date": "2026-11-02", "text": "<b>raw</b> change"}],
+  "related": []
+}

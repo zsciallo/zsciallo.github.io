@@ -22,6 +22,7 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { WIKI_DIR, wikiPages } from '../src/wiki/index.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = resolve(process.argv[2] ?? join(ROOT, 'dist'));
@@ -31,6 +32,17 @@ const DIST = resolve(process.argv[2] ?? join(ROOT, 'dist'));
 export const NETWORK = 'Chromabit Network';
 export const OG_IMAGE_URL = 'https://chromabit.us/og-preview.png';
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
+
+/**
+ * Run 20261122-wiki U1: the wiki routes and their titles, from the one page list (src/wiki/index.js).
+ * CHECK_SITE_WIKI points it at another pages directory (the self-test's fake site).
+ */
+export const WIKI_TITLES = {
+  '/wiki/': 'Wiki | Chromabit',
+  '/wiki/changes/': 'Wiki Changes | Chromabit',
+  ...Object.fromEntries(wikiPages(process.env.CHECK_SITE_WIKI ?? WIKI_DIR).map((p) => [p.route, `${p.title} | Chromabit Wiki`])),
+};
+const isWiki = (route) => route in WIKI_TITLES;
 
 /** Route -> built file, relative to dist/. */
 export const PAGES = {
@@ -42,6 +54,8 @@ export const PAGES = {
   '/privacy/': 'privacy/index.html',
   // Run 20261121-dungeon-map U2 (owner approved the page 2026-11-21): held to every PAGES check.
   '/dungeon/': 'dungeon/index.html',
+  // Run 20261122-wiki U1 (owner 2026-11-22: the site gains /wiki/ routes): every wiki route, held to every PAGES check.
+  ...Object.fromEntries(Object.keys(WIKI_TITLES).map((r) => [r, `${r.slice(1)}index.html`])),
 };
 
 /**
@@ -75,6 +89,7 @@ export const SUBPAGE_TITLES = {
   '/auctions/': 'Auction House | Chromabit SMP',
   '/smp/': 'Economy SMP | Chromabit',
   '/dungeon/': 'Heartwood Dungeon Map | Chromabit',
+  ...WIKI_TITLES,
 };
 
 /** The only pages whose built HTML may contain the exact string `Chromabit SMP`. */
@@ -1003,6 +1018,8 @@ export const NAV_LINKS = [
   ['/store/', 'STORE'],
   // Run 20261121-dungeon-map U3 (owner 2026-11-21): SMP replaces AUCTIONS, same place.
   ['/smp/', 'SMP'],
+  // Run 20261122-wiki U1 (owner 2026-11-22): WIKI joins the nav between SMP and FAQ.
+  ['/wiki/', 'WIKI'],
   ['/faq/', 'FAQ'],
 ];
 export const SITEMAP_PVP = 'https://chromabit.us/pvp/';
@@ -1264,7 +1281,10 @@ function navLinks(dist) {
         const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
         if (marks.length)
           problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0 (first: <${marks[0].tag}> ${q(textOf(marks[0]))})`);
-        if (SMP_ACTIVE.includes(r)) {
+        if (isWiki(r)) {
+          // Run 20261122-wiki U1: WIKI is the one current link on every wiki route.
+          if (active.join(',') !== '/wiki/') problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ["/wiki/"]`);
+        } else if (SMP_ACTIVE.includes(r)) {
           if (active.join(',') !== '/smp/') problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ["/smp/"]`);
         } else if (r === PVP.route) {
           if (active.join(',') !== '/pvp/') problems.push(`/pvp/ nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
@@ -1873,7 +1893,8 @@ function pvpSearchShell(dist) {
 
 export const SITE = 'https://chromabit.us';
 // Run 20261121-dungeon-map U2: /dungeon/ is indexable (spec-U2 "SEO entry"), so it is in the sitemap and every check below.
-export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/'];
+// Run 20261122-wiki U1: every wiki route is indexable too (in the sitemap and every check below).
+export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/', ...Object.keys(WIKI_TITLES)];
 export const SEMANTIC_ROUTES = [...INDEXABLE, '/pvp/player/'];
 const FIXTURE_DIR = process.env.CHECK_SITE_FIXTURES ? resolve(process.env.CHECK_SITE_FIXTURES) : join(ROOT, 'test', 'fixtures');
 
@@ -2022,7 +2043,9 @@ export const visibleText = (p) => blockText(app(p));
 export function snapshot(dist = DIST, capturedFrom = 'unknown') {
   const heads = {};
   const text = {};
-  for (const route of SEMANTIC_ROUTES) {
+  // Run 20261122-wiki U1: wiki routes are content that changes with every page edit, so they stay out of
+  // the frozen baselines; test/wiki_check.mjs and the checks above hold them instead.
+  for (const route of SEMANTIC_ROUTES.filter((r) => !isWiki(r))) {
     const p = page(route, dist);
     if (!p) continue;
     const descs = metaValues(p, 'description');
@@ -2269,6 +2292,8 @@ function siteProblems(n, where) {
   return problems;
 }
 
+const wantLevel = (r) => (isWiki(r) && r !== '/wiki/' ? 3 : 2);
+
 /** U8-J: structured data on every indexable page. */
 function seoJsonLd(dist) {
   const problems = [];
@@ -2354,7 +2379,8 @@ function seoJsonLd(dist) {
       else {
         const items = [].concat(crumbs[0].itemListElement ?? []);
         const got = items.map((it) => [it?.position, ldUrl(it?.item), typeof it?.name === 'string' ? !!it.name.trim() : typeof it?.item?.name === 'string' && !!it.item.name.trim()]);
-        const wantCrumbs = [[1, `${SITE}/`, true], [2, `${SITE}${r}`, true]];
+        // Run 20261122-wiki U1: a page under /wiki/ has three levels, Home > Wiki > the page.
+        const wantCrumbs = [[1, `${SITE}/`, true], ...(isWiki(r) && r !== '/wiki/' ? [[2, `${SITE}/wiki/`, true]] : []), [wantLevel(r), `${SITE}${r}`, true]];
         if (q(got) !== q(wantCrumbs)) problems.push(`${r} BreadcrumbList is ${q(got)} ([position, item, named]), want ${q(wantCrumbs)}`);
       }
     }

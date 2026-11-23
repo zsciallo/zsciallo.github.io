@@ -33,10 +33,20 @@ const DISCORD = JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8
 // still find their strings). Run 20261121-dungeon-map U3 (owner 2026-11-21): SMP replaces AUCTIONS
 // in the nav, and SMP is the current link on /smp/, /auctions/ and /dungeon/ (SMP_NAV). Owner ruling 2026-11-10: no BETA marker in the nav
 // (the earlier fixture had a [data-beta] span in the PVP link).
-const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png" width="30" height="30"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li><li><a href="/smp/">SMP</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
-const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/store/">STORE</a><a href="/smp/">SMP</a><a href="/faq/">FAQ</a></header>';
+const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png" width="30" height="30"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li><li><a href="/smp/">SMP</a></li><li><a href="/wiki/">WIKI</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
+const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/store/">STORE</a><a href="/smp/">SMP</a><a href="/wiki/">WIKI</a><a href="/faq/">FAQ</a></header>';
 const SMP_CURRENT = '<a href="/smp/" aria-current="page" class="active">';
 const SMP_NAV = NAV.replace('<a href="/smp/">', SMP_CURRENT);
+// Run 20261122-wiki U1 (owner 2026-11-22): WIKI joins the nav between SMP and FAQ and is the current link on every
+// wiki route. The checker reads the wiki pages from test/fixtures/wiki (CHECK_SITE_WIKI, set in runOn): one live page
+// (/wiki/smp/sample/) and one with "live": false that must stay out of every list.
+const WIKI_NAV = NAV.replace('<a href="/wiki/">', '<a href="/wiki/" aria-current="page" class="active">');
+const WIKI_FIXTURES = join(ROOT, 'test', 'fixtures', 'wiki');
+const WIKI = [
+  ['/wiki/', 'Wiki | Chromabit', 'Wiki', 'The Chromabit player wiki in the self-test: how the systems work, with each page and its change log.'],
+  ['/wiki/changes/', 'Wiki Changes | Chromabit', 'Changes', 'Every recorded change on the self-test wiki, newest first, with the date, the page and the change.'],
+  ['/wiki/smp/sample/', 'Sample Page | Chromabit Wiki', 'Sample Page', 'Sample Page is a test fixture: a live wiki page whose facts block names a table that has no file.'],
+];
 // U8: every <img> has width and height (the hero logo is above the first screen, so not lazy).
 const HERO_LOGO = '<img class="logo" src="/server-icon.png" alt="Chromabit logo" width="64" height="64">';
 const HERO_HEAD =
@@ -254,7 +264,7 @@ const PLAYER_MAST =
 const PLAYER_BODY = `${PVP_NAV}<main>${PLAYER_MAST}${PLAYER_STATE}</main>${FOOTER}`;
 // U8: the sitemap lists exactly the seven indexable pages, each with a lastmod (was / and /pvp/ only, no lastmod).
 // Run 20261121-dungeon-map U2: /dungeon/ is the eighth indexable page.
-const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/'];
+const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/', ...WIKI.map(([r]) => r)];
 const sitemapLine = (route) => `  <url><loc>https://chromabit.us${route}</loc><lastmod>2026-11-10</lastmod></url>\n`;
 const SITEMAP =
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
@@ -286,6 +296,9 @@ Join at play.chromabit.us. Bedrock uses the same address with port 19132. Java w
 - [Auctions](https://chromabit.us/auctions/): live market data.
 - [Privacy](https://chromabit.us/privacy/): how data is handled.
 - [Heartwood map](https://chromabit.us/dungeon/): the dungeon block by block.
+- [Wiki](https://chromabit.us/wiki/)
+- [Wiki changes](https://chromabit.us/wiki/changes/)
+- [Sample Page](https://chromabit.us/wiki/smp/sample/)
 `;
 
 /** U4: give a page the site nav and footer (around #app, so the U2 cases keep their exact #app strings). */
@@ -426,6 +439,20 @@ function faqSite(editFaq = () => {}, ld = null) {
 }
 const faqItem = (groups, q) => groups.flatMap((g) => g.items).find((it) => it.q === q);
 
+/** Run 20261122-wiki U1: a wiki route; below /wiki/ its breadcrumb has three levels (Home > Wiki > page). */
+function wikiPage(route, title, name, desc) {
+  const items = [['Home', '/'], ...(route === '/wiki/' ? [] : [['Wiki', '/wiki/']]), [name, route]].map(([n, r], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: `https://chromabit.us${r}` }));
+  const ld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', '@id': `https://chromabit.us${route}#webpage`, url: `https://chromabit.us${route}`, isPartOf: { '@id': SITE_ID }, publisher: { '@id': ORG_ID } },
+      { '@type': 'BreadcrumbList', itemListElement: items },
+    ],
+  });
+  return framed(htmlPage(headFor(title, `${subHead(route, title, desc)}
+  ${ldTag(ld)}`), `<main><h1>${name}</h1></main>`), WIKI_NAV);
+}
+
 /** A dist/ that should pass every check. */
 function goodSite() {
   return {
@@ -460,6 +487,7 @@ function goodSite() {
     'pvp/player/index.html': htmlPage(headFor(PLAYER_TITLE, `${PLAYER_ROBOTS}\n  ${PVP_CANON}\n  ${REFERRER_META}`), PLAYER_BODY),
     'dungeon/index.html': framed(htmlPage(headFor(DUNGEON_TITLE, `${subHead('/dungeon/', DUNGEON_TITLE, DESC.dungeon)}
   ${ldTag(ldSub('/dungeon/', 'Heartwood'))}`), DUNGEON_MAIN), SMP_NAV),
+    ...Object.fromEntries(WIKI.map(([route, title, name, desc]) => [`${route.slice(1)}index.html`, wikiPage(route, title, name, desc)])),
     'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
     // U8: the hero logo (preloaded on /, the Organization logo), robots.txt and llms.txt.
@@ -505,6 +533,7 @@ function png(width, height) {
 const tmpRoot = mkdtempSync(join(tmpdir(), 'check-site-'));
 let n = 0;
 // U8: the checker's snapshot() writes the two frozen-baseline fixtures (titles/descriptions, visible text).
+process.env.CHECK_SITE_WIKI = WIKI_FIXTURES; // the in-process checker reads the same wiki list as the child runs
 const { snapshot } = await import(pathToFileURL(CHECKER).href);
 
 function writeDist(files) {
@@ -533,7 +562,7 @@ function runOn(files, base = files) {
   const snap = snapshot(baseDist, 'self-test');
   writeFileSync(join(fixtures, 'seo-head-base.json'), JSON.stringify(snap.heads));
   writeFileSync(join(fixtures, 'visible-text-base.json'), JSON.stringify(snap.text));
-  const r = spawnSync(process.execPath, [CHECKER, dist], { encoding: 'utf-8', env: { ...process.env, CHECK_SITE_FIXTURES: fixtures } });
+  const r = spawnSync(process.execPath, [CHECKER, dist], { encoding: 'utf-8', env: { ...process.env, CHECK_SITE_FIXTURES: fixtures, CHECK_SITE_WIKI: WIKI_FIXTURES } });
   return { code: r.status, out: r.stdout + r.stderr, lines: r.stdout.trim().split(/\r?\n/) };
 }
 
@@ -2271,6 +2300,16 @@ ${r.out}`);
   expectFail('U2-AC8 dungeon: wrong title', mutate(DG, `<title>${DUNGEON_TITLE}</title>`, '<title>Heartwood Map | Chromabit</title>'), 'subpage-titles', '/dungeon/');
   expectFail('U2 dungeon: "Chromabit SMP" on /dungeon/', mutate(DG, '</main>', '<p>Chromabit SMP</p></main>'), 'smp-name-allowlist', 'dungeon/index.html contains "Chromabit SMP"');
   expectFail('U2-AC8 dungeon: not in the sitemap', mutate('sitemap.xml', sitemapLine('/dungeon/'), ''), 'seo-sitemap', 'lacks ["https://chromabit.us/dungeon/"]');
+
+  // Run 20261122-wiki U1: the wiki routes (from test/fixtures/wiki through CHECK_SITE_WIKI).
+  const WA = 'wiki/smp/sample/index.html';
+  expectFail('wiki: WIKI missing from the nav on /store/', mutate('store/index.html', '<li><a href="/wiki/">WIKI</a></li>', ''), 'nav-links', '/store/ nav links are');
+  expectFail('wiki: an article marks SMP current, not WIKI', edit(mutate(WA, '<a href="/wiki/" aria-current="page" class="active">', '<a href="/wiki/">'), WA, '<a href="/smp/">', SMP_CURRENT), 'nav-links', '/wiki/smp/sample/ nav aria-current="page" links are ["/smp/"], want ["/wiki/"]');
+  expectFails('wiki: a missing article', { ...goodSite(), [WA]: null }, { 'pages-prerendered': '/wiki/smp/sample/ missing', 'site-name-author': '/wiki/smp/sample/ missing', 'subpage-titles': '/wiki/smp/sample/ missing', 'smp-name-allowlist': '/wiki/smp/sample/ missing', 'og-preview-image': '/wiki/smp/sample/ missing', 'ld-json-parses': '/wiki/smp/sample/ missing', 'nav-links': '/wiki/smp/sample/ missing', 'internal-links': '/wiki/smp/sample/ missing', 'seo-head': '/wiki/smp/sample/ missing', 'seo-jsonld': '/wiki/smp/sample/ missing', 'seo-jsonld-visible-facts': '/wiki/smp/sample/ missing', 'seo-llms': 'missing from dist', 'a11y-headings': '/wiki/smp/sample/ missing', 'a11y-landmarks': '/wiki/smp/sample/ missing', 'a11y-names': '/wiki/smp/sample/ missing', 'img-attrs': '/wiki/smp/sample/ missing', 'perf-hints': '/wiki/smp/sample/ missing', 'pvp-referrer': '/wiki/smp/sample/ missing', 'seo-logo': '/wiki/smp/sample/ missing', 'time-datetime': '/wiki/smp/sample/ missing' });
+  expectFail('wiki: an article with a two-level breadcrumb', mutate(WA, '{"@type":"ListItem","position":2,"name":"Wiki","item":"https://chromabit.us/wiki/"},{"@type":"ListItem","position":3,', '{"@type":"ListItem","position":2,'), 'seo-jsonld', '/wiki/smp/sample/ BreadcrumbList is');
+  expectFail('wiki: the unpublished page in the sitemap', mutate('sitemap.xml', '</urlset>', `${sitemapLine('/wiki/smp/unpublished/')}</urlset>`), 'seo-sitemap', 'lists ["https://chromabit.us/wiki/smp/unpublished/"], which are not indexable pages');
+  expectFail('wiki: an article not in the sitemap', mutate('sitemap.xml', sitemapLine('/wiki/smp/sample/'), ''), 'seo-sitemap', 'lacks ["https://chromabit.us/wiki/smp/sample/"]');
+  expectFail('wiki: wrong article title', mutate(WA, '<title>Sample Page | Chromabit Wiki</title>', '<title>Sample Page | Chromabit</title>'), 'subpage-titles', '/wiki/smp/sample/ title is');
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }
