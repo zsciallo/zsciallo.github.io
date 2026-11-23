@@ -590,14 +590,21 @@ export const LANDING = {
 export const SMP_PAGE = {
   h1: 'MINE IT. PRICE IT. TRADE IT.',
   dungeonWord: 'HEARTWOOD',
-  minFacts: 3,
   tickerClass: 'tape',
   auctionsHref: '/auctions/',
   auctionsLabel: 'OPEN THE AUCTION HOUSE',
   // Run 20261121-dungeon-map U3 (owner 2026-11-21): the page links the dungeon map with a preview picture.
+  // Run 20261123-smp-page (owner 2026-11-23: "get rid of the 9 zones .. 4 difficulties .. cards ... rework the
+  // dungeons picture and button"): no fact cards, a split Heartwood panel with a transparent picture.
   dungeonHref: '/dungeon/',
-  dungeonLabel: 'EXPLORE THE DUNGEONS',
-  dungeonPreview: '/dungeon/preview.jpg',
+  dungeonLabel: 'EXPLORE THE MAP',
+  dungeonPreview: '/dungeon/preview.webp',
+  dungeonPreviewMaxBytes: 200 * 1024,
+  /** The wiki info box and link previews still use the JPEG. */
+  dungeonJpeg: '/dungeon/preview.jpg',
+  wikiHref: '/wiki/smp/dungeons/',
+  /** The four fact cards the owner removed. */
+  oldFacts: ['zones, each with its own boss', 'difficulties, from Easy to Very Hard', 'phases to the final boss, The Rotroot Heart', 'armour sets, one from every zone'],
   removed: ['Player Economy', 'Store Credit Prizes', 'Grief Prevention', 'Community Events'],
 };
 
@@ -845,24 +852,52 @@ function smpPage(dist) {
         if (!heading) problems.push('/smp/ dungeon block has no heading');
         else if (!textOf(heading).includes(SMP_PAGE.dungeonWord))
           problems.push(`/smp/ dungeon heading is ${q(textOf(heading))}, want it to contain ${q(SMP_PAGE.dungeonWord)}`);
-        const facts = findAll(dungeon, hasAttr('data-fact'));
-        if (facts.length < SMP_PAGE.minFacts) problems.push(`/smp/ dungeon block has ${facts.length} [data-fact], want at least ${SMP_PAGE.minFacts}`);
-        const empty = facts.filter((f) => !blockText(f)).length;
-        if (empty) problems.push(`/smp/ dungeon block has ${empty} empty [data-fact]`);
+        // S-T3: one card holding the eyebrow, the h2, the map button and the wiki link.
+        if (!hasClass('card')(dungeon)) problems.push('/smp/ [data-section="dungeon"] is not a .card panel');
+        if (!findAll(dungeon, (el) => hasClass('section-eyebrow')(el) && blockText(el)).length) problems.push('/smp/ dungeon panel has no eyebrow (.section-eyebrow)');
+        if (!findAll(dungeon, (el) => el.tag === 'h2' && textOf(el) === SMP_PAGE.dungeonWord).length) problems.push(`/smp/ dungeon panel has no <h2> ${q(SMP_PAGE.dungeonWord)}`);
+        if (!findAll(dungeon, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref && textOf(el) === SMP_PAGE.dungeonLabel).length)
+          problems.push(`/smp/ dungeon panel has no <a href="${SMP_PAGE.dungeonHref}"> ${q(SMP_PAGE.dungeonLabel)}`);
+        if (!findAll(dungeon, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.wikiHref).length) problems.push(`/smp/ dungeon panel has no <a href="${SMP_PAGE.wikiHref}">`);
+        else if (!existsSync(join(dist, SMP_PAGE.wikiHref, 'index.html'))) problems.push(`/smp/ links ${SMP_PAGE.wikiHref}, which is not built`);
+        const pic = findAll(dungeon, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref).flatMap((a) => findAll(a, (el) => el.tag === 'img' && el.attrs.src === SMP_PAGE.dungeonPreview))[0];
+        if (!pic) problems.push(`/smp/ dungeon panel has no <img src="${SMP_PAGE.dungeonPreview}"> inside an <a href="${SMP_PAGE.dungeonHref}">`);
+        else
+          for (const [k, ok] of [['alt', (pic.attrs.alt ?? '').trim()], ['width', /^\d+$/.test(pic.attrs.width ?? '')], ['height', /^\d+$/.test(pic.attrs.height ?? '')], ['loading="lazy"', pic.attrs.loading === 'lazy']])
+            if (!ok) problems.push(`/smp/ dungeon picture has no ${k}`);
       }
+      // S-T1: the fact cards are gone (the /pvp/ facts are pvp-facts' business).
+      const facts = findAll(root, hasAttr('data-fact')).length;
+      if (facts) problems.push(`/smp/ has ${facts} [data-fact], want 0`);
+      for (const line of SMP_PAGE.oldFacts) if (textOf(root).includes(line)) problems.push(`/smp/ still shows the fact card ${q(line)}`);
+      // S-T4: the transparent WebP (VP8X alpha flag) under the size cap; the JPEG stays.
+      const webp = join(dist, SMP_PAGE.dungeonPreview);
+      if (!existsSync(webp)) problems.push(`${SMP_PAGE.dungeonPreview} missing from dist`);
+      else {
+        const buf = readFileSync(webp);
+        if (buf.length >= SMP_PAGE.dungeonPreviewMaxBytes) problems.push(`${SMP_PAGE.dungeonPreview} is ${buf.length} bytes, want under ${SMP_PAGE.dungeonPreviewMaxBytes}`);
+        if (buf.toString('latin1', 0, 4) !== 'RIFF' || buf.toString('latin1', 8, 12) !== 'WEBP' || buf.toString('latin1', 12, 16) !== 'VP8X' || !(buf[20] & 0x10))
+          problems.push(`${SMP_PAGE.dungeonPreview} is not a WebP with the VP8X alpha flag`);
+      }
+      if (!existsSync(join(dist, SMP_PAGE.dungeonJpeg))) problems.push(`${SMP_PAGE.dungeonJpeg} missing from dist (the wiki info box uses it)`);
       if (!findAll(root, hasClass(SMP_PAGE.tickerClass)).length) problems.push(`/smp/ has no market ticker (.${SMP_PAGE.tickerClass})`);
       // Run 20261123-nav: the nav now links /auctions/ and /dungeon/ too; the page's own buttons are outside it.
       const outNav = (el) => !siteNav(p) || !inside(el, siteNav(p));
       const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel && outNav(el));
       if (!auctions.length) problems.push(`/smp/ has no <a href="${SMP_PAGE.auctionsHref}"> ${q(SMP_PAGE.auctionsLabel)}`);
-      // Run 20261121-dungeon-map U3: the ticker is the auction preview, so it comes before the auction button.
-      else if (!hasClass(SMP_PAGE.tickerClass)(findAll(root, (el) => hasClass(SMP_PAGE.tickerClass)(el) || el === auctions[0])[0]))
-        problems.push(`/smp/ .${SMP_PAGE.tickerClass} does not come before the ${q(SMP_PAGE.auctionsLabel)} link`);
-      const toDungeon = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref && outNav(el));
-      if (!toDungeon.some((a) => textOf(a) === SMP_PAGE.dungeonLabel)) problems.push(`/smp/ has no <a href="${SMP_PAGE.dungeonHref}"> ${q(SMP_PAGE.dungeonLabel)}`);
-      const pics = toDungeon.flatMap((a) => findAll(a, (el) => el.tag === 'img' && el.attrs.src === SMP_PAGE.dungeonPreview));
-      if (!pics.length) problems.push(`/smp/ has no <img src="${SMP_PAGE.dungeonPreview}"> inside an <a href="${SMP_PAGE.dungeonHref}">`);
-      else if (!pics.some((i) => (i.attrs.alt ?? '').trim())) problems.push(`/smp/ dungeon preview <img> has no alt text`);
+      // Run 20261121-dungeon-map U3: the ticker comes before the auction button. Run 20261123-smp-page S-T2: the whole
+      // order is h1, COPY IP, ticker, auction button, Heartwood panel ("put the ah tickers above the dungeons").
+      else {
+        const order = [
+          ['<h1>', findAll(root, isTag('h1'))[0]],
+          ['[data-copy-ip]', findAll(root, hasAttr('data-copy-ip'))[0]],
+          [`.${SMP_PAGE.tickerClass}`, findAll(root, hasClass(SMP_PAGE.tickerClass))[0]],
+          [`the ${q(SMP_PAGE.auctionsLabel)} link`, auctions[0]],
+          ['[data-section="dungeon"]', findAll(root, hasAttr('data-section', 'dungeon'))[0]],
+        ];
+        const got = order.filter(([, el]) => el).sort((a, b) => a[1].order - b[1].order).map(([n]) => n);
+        if (order.every(([, el]) => el) && q(got) !== q(order.map(([n]) => n))) problems.push(`/smp/ order is ${got.join(', ')}, want ${order.map(([n]) => n).join(', ')}`);
+      }
       problems.push(...copyButtonIn(root, '/smp/', null)[0]);
       const betas = findAll(root, hasClass('beta-tag')).length;
       if (betas) problems.push(`/smp/ has ${betas} .beta-tag, want 0`);

@@ -92,19 +92,27 @@ const FOOTER = '<footer><nav class="footer-nav"><a href="/">HOME</a><a href="/fa
 const HOME_BODY = `${NAV}<main><section class="page-hero container">${HERO_HEAD}${JOIN_BOX}</section>${CLAIM}<section class="modes">${PVP_CARD}${SMP_CARD}</section></main>${FOOTER}`;
 
 const SMP_TAPE = '<section class="tape" aria-label="Today&#39;s biggest market moves"><h2 class="tape-title">TODAY’S TOP MOVERS</h2></section>';
-// Run 20261121-dungeon-map U3: the linked dungeon preview and its button.
-const SMP_PREVIEW_IMG = '<img src="/dungeon/preview.jpg" alt="The Heartwood dungeon island, drawn block by block" width="1200" height="1164" loading="lazy" decoding="async">';
-const SMP_DUNGEON_LINKS = `<a class="dungeon-preview" href="/dungeon/">${SMP_PREVIEW_IMG}</a><a class="arcade-btn" href="/dungeon/">EXPLORE THE DUNGEONS</a>`;
+// Run 20261121-dungeon-map U3: the linked dungeon preview and its button. Run 20261123-smp-page (owner 2026-11-23):
+// no fact cards; hero, COPY IP, ticker, auction button, then one Heartwood card panel with the transparent WebP,
+// eyebrow, h2, EXPLORE THE MAP and the Heartwood wiki link.
+const SMP_PREVIEW_IMG = '<img src="/dungeon/preview.webp" alt="The Heartwood dungeon island, drawn block by block" width="800" height="614" loading="lazy" decoding="async">';
+const SMP_DUNGEON_LINKS = `<a class="dungeon-preview" href="/dungeon/">${SMP_PREVIEW_IMG}</a><div class="dungeon-text"><p class="section-eyebrow">SEASON 4 DUNGEON</p><h2 class="section-title">HEARTWOOD</h2><p class="dungeon-line">Nine zones under a giant tree.</p><div class="smp-actions"><a class="arcade-btn" href="/dungeon/">EXPLORE THE MAP</a><a class="dungeon-wiki" href="/wiki/smp/dungeons/">Heartwood wiki</a></div></div>`;
+const SMP_PANEL = `<div class="card dungeon" data-section="dungeon">${SMP_DUNGEON_LINKS}</div>`;
 const SMP_BODY =
   `${NAV_PLAIN.replace('<a href="/smp/">', SMP_CURRENT)}<main>` +
   '<section class="page-hero"><h1 class="hero-title">MINE IT. PRICE IT. <span class="accent">TRADE IT.</span></h1><p class="hero-sub">Chromabit SMP is allowed here</p>' +
   '<button type="button" class="smp-copy" data-copy-ip>COPY IP</button></section>' +
   SMP_TAPE +
-  '<section class="dungeon" data-section="dungeon"><h2>SEASON 4: <span>HEARTWOOD</span></h2><ul>' +
-  '<li data-fact>Four zones under one tree</li><li data-fact>Bosses with phases</li><li data-fact>Zone armour sets</li></ul>' +
-  `${SMP_DUNGEON_LINKS}</section>` +
   '<a class="auctions-link" href="/auctions/">OPEN THE AUCTION HOUSE</a>' +
+  SMP_PANEL +
   `</main>${FOOTER}`;
+/** A WebP header with the VP8X alpha flag (S-T4 reads the flag, not the pixels). */
+function webp(alpha = true) {
+  const b = Buffer.alloc(30);
+  b.write('RIFF', 0, 'latin1'); b.writeUInt32LE(22, 4); b.write('WEBP', 8, 'latin1'); b.write('VP8X', 12, 'latin1'); b.writeUInt32LE(10, 16);
+  b[20] = alpha ? 0x10 : 0;
+  return b;
+}
 // U4-copy: the privacy page's "Other services" section names mc-heads.net.
 const PRIVACY_OTHER = '<section class="other-services"><h2>Other services</h2><p>Player head images on the PVP pages load from mc-heads.net.</p></section>';
 // U8 round 3 (review F2b): the privacy page's last-updated date, wrapped in <time datetime> (inline: no text added).
@@ -497,6 +505,10 @@ function goodSite() {
     ...Object.fromEntries(WIKI.map(([route, title, name, desc]) => [`${route.slice(1)}index.html`, wikiPage(route, title, name, desc)])),
     'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
+    // Run 20261123-smp-page: the panel's picture, the JPEG the wiki keeps, and the page the wiki link opens.
+    'dungeon/preview.webp': webp(),
+    'dungeon/preview.jpg': png(1200, 1164),
+    'wiki/smp/dungeons/index.html': '<!doctype html><title>Dungeons</title>',
     // U8: the hero logo (preloaded on /, the Organization logo), robots.txt and llms.txt.
     'server-icon.png': png(64, 64),
     // U8 round 3: the structured-data logo (review F1).
@@ -1063,17 +1075,28 @@ ${r.out}`,
   expectFail('U3-AC7 old h1', mutate(S, 'MINE IT. PRICE IT. <span class="accent">TRADE IT.</span>', 'ECONOMY<span class="accent">SMP</span>'), 'smp-page', '/smp/ <h1> text is "ECONOMYSMP"');
   expectFail('U3-AC7 second h1', mutate(S, '<h2 class="tape-title">TODAY’S TOP MOVERS</h2>', '<h1 class="tape-title">TODAY’S TOP MOVERS</h1>'), 'smp-page', '/smp/ has 2 <h1>, want 1');
   expectFail('U3-AC7 no dungeon block', mutate(S, ' data-section="dungeon"', ''), 'smp-page', '/smp/ has 0 [data-section="dungeon"], want 1');
-  expectFail('U3-AC7 dungeon heading without HEARTWOOD', mutate(S, '<span>HEARTWOOD</span>', '<span>THE TREE</span>'), 'smp-page', 'want it to contain "HEARTWOOD"');
-  expectFail('U3-AC7 dungeon has no heading', mutate(S, '<h2>SEASON 4: <span>HEARTWOOD</span></h2>', '<p>SEASON 4: HEARTWOOD</p>'), 'smp-page', '/smp/ dungeon block has no heading');
-  expectFail('U3-AC7 two facts', mutate(S, '<li data-fact>Zone armour sets</li>', '<li>Zone armour sets</li>'), 'smp-page', '/smp/ dungeon block has 2 [data-fact], want at least 3');
-  expectFail(
-    'U3-AC7 a fact outside the dungeon block',
-    // Run 20261121-dungeon-map U3: the dungeon links now close the block, so the fact moves past them.
-    mutate(S, `<li data-fact>Zone armour sets</li></ul>${SMP_DUNGEON_LINKS}</section>`, `</ul>${SMP_DUNGEON_LINKS}</section><ul><li data-fact>Zone armour sets</li></ul>`),
-    'smp-page',
-    '/smp/ dungeon block has 2 [data-fact]',
-  );
-  expectFail('U3-AC7 empty fact', mutate(S, '<li data-fact>Zone armour sets</li>', '<li data-fact> &nbsp; </li>'), 'smp-page', '/smp/ dungeon block has 1 empty [data-fact]');
+  expectFail('U3-AC7 dungeon heading without HEARTWOOD', mutate(S, '<h2 class="section-title">HEARTWOOD</h2>', '<h2 class="section-title">THE TREE</h2>'), 'smp-page', 'want it to contain "HEARTWOOD"');
+  expectFail('U3-AC7 dungeon has no heading', mutate(S, '<h2 class="section-title">HEARTWOOD</h2>', '<p>HEARTWOOD</p>'), 'smp-page', '/smp/ dungeon block has no heading');
+  // Run 20261123-smp-page (owner 2026-11-23: "get rid of the 9 zones .. 4 difficulties .. cards"). Was: at least 3
+  // non-empty [data-fact] in the dungeon block (owner 2026-11-21). Now S-T1: none anywhere on /smp/.
+  expectFail('smp: a fact card is back in the panel', mutate(S, '<p class="dungeon-line">', '<div class="card fact" data-fact><b>9</b> zones</div><p class="dungeon-line">'), 'smp-page', '/smp/ has 1 [data-fact], want 0');
+  expectFail('smp: an old fact line without the hook', mutate(S, '<p class="dungeon-line">Nine zones under a giant tree.</p>', '<p class="dungeon-line">4 difficulties, from Easy to Very Hard</p>'), 'smp-page', '/smp/ still shows the fact card "difficulties, from Easy to Very Hard"');
+  // S-T3: the panel is one card with the eyebrow, the h2 HEARTWOOD, EXPLORE THE MAP and the wiki link to a built page.
+  expectFail('smp: the panel is not a card', mutate(S, '<div class="card dungeon" data-section="dungeon">', '<div class="dungeon" data-section="dungeon">'), 'smp-page', '/smp/ [data-section="dungeon"] is not a .card panel');
+  expectFail('smp: no eyebrow', mutate(S, '<p class="section-eyebrow">SEASON 4 DUNGEON</p>', ''), 'smp-page', '/smp/ dungeon panel has no eyebrow');
+  expectFail('smp: the h2 is not HEARTWOOD', mutate(S, '<h2 class="section-title">HEARTWOOD</h2>', '<h2 class="section-title">HEARTWOOD DUNGEON</h2>'), 'smp-page', '/smp/ dungeon panel has no <h2> "HEARTWOOD"');
+  expectFail('smp: the map button outside the panel', edit(mutate(S, '<a class="arcade-btn" href="/dungeon/">EXPLORE THE MAP</a>', ''), S, '<a class="auctions-link"', '<a class="arcade-btn" href="/dungeon/">EXPLORE THE MAP</a><a class="auctions-link"'), 'smp-page', '/smp/ dungeon panel has no <a href="/dungeon/"> "EXPLORE THE MAP"');
+  expectFail('smp: no wiki link', mutate(S, '<a class="dungeon-wiki" href="/wiki/smp/dungeons/">Heartwood wiki</a>', ''), 'smp-page', '/smp/ dungeon panel has no <a href="/wiki/smp/dungeons/">');
+  expectFails('smp: the wiki page is not built', { ...goodSite(), 'wiki/smp/dungeons/index.html': null }, { 'smp-page': '/smp/ links /wiki/smp/dungeons/, which is not built', 'internal-links': '/wiki/smp/dungeons/' });
+  // img-attrs fails with smp-page on these three (both, and only both).
+  expectFails('smp: picture without lazy loading', mutate(S, 'height="614" loading="lazy"', 'height="614"'), { 'smp-page': '/smp/ dungeon picture has no loading="lazy"', 'img-attrs': 'want "lazy" and "async"' });
+  expectFails('smp: picture without width', mutate(S, 'width="800" height="614"', 'height="614"'), { 'smp-page': '/smp/ dungeon picture has no width', 'img-attrs': 'width is null' });
+  expectFails('smp: picture without height', mutate(S, 'width="800" height="614"', 'width="800"'), { 'smp-page': '/smp/ dungeon picture has no height', 'img-attrs': 'height is null' });
+  // S-T4: the WebP is there, small, with the alpha flag; the JPEG stays.
+  expectFail('smp: the WebP has no alpha flag', { ...goodSite(), 'dungeon/preview.webp': webp(false) }, 'smp-page', '/dungeon/preview.webp is not a WebP with the VP8X alpha flag');
+  expectFail('smp: the WebP is too big', { ...goodSite(), 'dungeon/preview.webp': Buffer.concat([webp(), Buffer.alloc(210 * 1024)]) }, 'smp-page', '/dungeon/preview.webp is');
+  expectFail('smp: the JPEG is gone', { ...goodSite(), 'dungeon/preview.jpg': null }, 'smp-page', '/dungeon/preview.jpg missing from dist');
+  expectFail('smp: the WebP is gone', { ...goodSite(), 'dungeon/preview.webp': null }, 'smp-page', '/dungeon/preview.webp missing from dist');
   expectFail('U3-AC7 ticker missing', mutate(S, 'class="tape"', 'class="market-strip"'), 'smp-page', '/smp/ has no market ticker (.tape)');
   expectFail('U3-AC7 auction link label', mutate(S, '>OPEN THE AUCTION HOUSE<', '>AUCTIONS<'), 'smp-page', '/smp/ has no <a href="/auctions/"> "OPEN THE AUCTION HOUSE"');
   expectFail('U3-AC7 auction link href', mutate(S, 'href="/auctions/">OPEN', 'href="/auctions/?tab=markets">OPEN'), 'smp-page', '/smp/ has no <a href="/auctions/">');
@@ -1111,7 +1134,7 @@ ${r.out}`,
   // Run 20261123-nav (owner 2026-11-23): AUCTIONS and MAP are in the nav now, so "no /auctions/ in any nav" is gone.
   // What it protected (the auction house reachable from /smp/) stays: the page's own buttons, outside the nav.
   expectFails('nav: /smp/ auction button only in the nav', edit(mutate(S, '<a class="auctions-link" href="/auctions/">OPEN THE AUCTION HOUSE</a>', ''), S, '<a href="/wiki/">WIKI</a><a href="/auctions/">AUCTIONS</a>', '<a href="/wiki/">WIKI</a><a href="/auctions/">OPEN THE AUCTION HOUSE</a>'), { 'smp-page': '/smp/ has no <a href="/auctions/"> "OPEN THE AUCTION HOUSE"', 'nav-links': '/smp/ nav links are' });
-  expectFails('nav: /smp/ dungeon button only in the nav', edit(mutate(S, SMP_DUNGEON_LINKS, ''), S, '<a href="/dungeon/">MAP</a>', `<a href="/dungeon/">${SMP_PREVIEW_IMG}EXPLORE THE DUNGEONS</a>`), { 'smp-page': '/smp/ has no <a href="/dungeon/"> "EXPLORE THE DUNGEONS"', 'nav-links': '/smp/ nav links are' });
+  expectFails('nav: /smp/ dungeon button only in the nav', edit(mutate(S, SMP_PANEL, ''), S, '<a href="/dungeon/">MAP</a>', `<a href="/dungeon/">${SMP_PREVIEW_IMG}EXPLORE THE MAP</a>`), { 'smp-page': '/smp/ has 0 [data-section="dungeon"], want 1', 'nav-links': '/smp/ nav links are' });
   expectFails('U3dm /smp/ missing from the smp nav', mutate(S, `${SMP_CURRENT}SMP</a>`, ''), {
     'smp-page': '/smp/ nav has no link to /smp/',
     'nav-links': '/smp/ nav links are',
@@ -1121,19 +1144,23 @@ ${r.out}`,
     'nav-links': '/dungeon/ nav links are',
   });
   // Run 20261121-dungeon-map U3: the dungeon preview and button (AC3), the ticker above the auction button (AC4).
-  expectFail('U3dm dungeon button label', mutate(S, '>EXPLORE THE DUNGEONS<', '>EXPLORE<'), 'smp-page', '/smp/ has no <a href="/dungeon/"> "EXPLORE THE DUNGEONS"');
-  expectFail('U3dm dungeon button href', mutate(S, 'href="/dungeon/">EXPLORE', 'href="/dungeon">EXPLORE'), 'smp-page', '/smp/ has no <a href="/dungeon/"> "EXPLORE THE DUNGEONS"');
-  expectFail('U3dm preview not linked', mutate(S, `<a class="dungeon-preview" href="/dungeon/">${SMP_PREVIEW_IMG}</a>`, `<figure class="dungeon-preview">${SMP_PREVIEW_IMG}</figure>`), 'smp-page', '/smp/ has no <img src="/dungeon/preview.jpg"> inside an <a href="/dungeon/">');
+  // Run 20261123-smp-page: label EXPLORE THE MAP (was EXPLORE THE DUNGEONS), picture preview.webp (was preview.jpg).
+  expectFail('U3dm dungeon button label', mutate(S, '>EXPLORE THE MAP<', '>EXPLORE<'), 'smp-page', '/smp/ dungeon panel has no <a href="/dungeon/"> "EXPLORE THE MAP"');
+  expectFail('U3dm dungeon button href', mutate(S, 'href="/dungeon/">EXPLORE', 'href="/dungeon">EXPLORE'), 'smp-page', '/smp/ dungeon panel has no <a href="/dungeon/"> "EXPLORE THE MAP"');
+  expectFail('U3dm preview not linked', mutate(S, `<a class="dungeon-preview" href="/dungeon/">${SMP_PREVIEW_IMG}</a>`, `<figure class="dungeon-preview">${SMP_PREVIEW_IMG}</figure>`), 'smp-page', '/smp/ dungeon panel has no <img src="/dungeon/preview.webp"> inside an <a href="/dungeon/">');
   // An empty link also has no accessible name, so a11y-names fails with smp-page (both, and only both).
-  expectFails('U3dm preview missing', mutate(S, SMP_PREVIEW_IMG, ''), { 'smp-page': '/smp/ has no <img src="/dungeon/preview.jpg"> inside', 'a11y-names': '/smp/ <a class="dungeon-preview" href="/dungeon/"> has no accessible name' });
-  expectFail('U3dm preview is another picture', mutate(S, 'src="/dungeon/preview.jpg"', 'src="/og-preview.png"'), 'smp-page', '/smp/ has no <img src="/dungeon/preview.jpg"> inside');
-  expectFails('U3dm preview without alt', mutate(S, 'alt="The Heartwood dungeon island, drawn block by block"', 'alt=" "'), { 'smp-page': '/smp/ dungeon preview <img> has no alt text', 'a11y-names': '/smp/ <a class="dungeon-preview" href="/dungeon/"> has no accessible name' });
+  expectFails('U3dm preview missing', mutate(S, SMP_PREVIEW_IMG, ''), { 'smp-page': '/smp/ dungeon panel has no <img src="/dungeon/preview.webp"> inside', 'a11y-names': '/smp/ <a class="dungeon-preview" href="/dungeon/"> has no accessible name' });
+  expectFail('U3dm preview is another picture', mutate(S, 'src="/dungeon/preview.webp"', 'src="/dungeon/preview.jpg"'), 'smp-page', '/smp/ dungeon panel has no <img src="/dungeon/preview.webp"> inside');
+  expectFails('U3dm preview without alt', mutate(S, 'alt="The Heartwood dungeon island, drawn block by block"', 'alt=" "'), { 'smp-page': '/smp/ dungeon picture has no alt', 'a11y-names': '/smp/ <a class="dungeon-preview" href="/dungeon/"> has no accessible name' });
+  // S-T2 (owner: "put the ah tickers above the dungeons"): h1, COPY IP, ticker, auction button, panel.
   expectFail(
     'U3dm ticker after the auction button',
     edit(mutate(S, SMP_TAPE, ''), S, '>OPEN THE AUCTION HOUSE</a>', `>OPEN THE AUCTION HOUSE</a>${SMP_TAPE}`),
     'smp-page',
-    '/smp/ .tape does not come before the "OPEN THE AUCTION HOUSE" link',
+    '/smp/ order is <h1>, [data-copy-ip], the "OPEN THE AUCTION HOUSE" link, .tape, [data-section="dungeon"]',
   );
+  expectFail('smp: the panel above the ticker', edit(mutate(S, SMP_PANEL, ''), S, SMP_TAPE, `${SMP_PANEL}${SMP_TAPE}`), 'smp-page', '/smp/ order is <h1>, [data-copy-ip], [data-section="dungeon"], .tape');
+  expectFail('smp: COPY IP below the ticker', edit(mutate(S, '<button type="button" class="smp-copy" data-copy-ip>COPY IP</button></section>', '</section>'), S, '<a class="auctions-link"', '<button type="button" class="smp-copy" data-copy-ip>COPY IP</button><a class="auctions-link"'), 'smp-page', '/smp/ order is <h1>, .tape, [data-copy-ip]');
   expectFail(
     'U3-AC7 home footer lost the /smp/ link',
     mutate(H, '<a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>', '<a href="/store/">STORE</a></nav>'),

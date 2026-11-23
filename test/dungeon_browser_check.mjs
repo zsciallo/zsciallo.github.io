@@ -13,6 +13,11 @@
 //   GL off  --disable-gpu --disable-3d-apis (getContext('webgl2') is null): AC6.
 // Run 20261121-dungeon-map U3-AC5 rides on the GL off launch: /smp/ at 400 px (the dungeon preview,
 // EXPLORE THE DUNGEONS and OPEN THE AUCTION HOUSE fully in view, no horizontal scroll).
+// Run 20261123-smp-page (owner 2026-11-23: "lay the buttons out with better responsiveness, and rework the dungeons
+// picture and button"): that check grows into S-T5 and S-T6, /smp/ at 320, 400, 720 and 1280, dark and Quartz:
+// no side scroll; every button one line, unclipped, inside the viewport, full width of its column at 320 and 400;
+// the Heartwood panel one column under 720 (picture above text) and two from 720 (picture left); picture and text
+// inside the panel; the auction button's right edge on the ticker's at 1280; the panel text >= 4.5:1.
 //
 // Hooks (the contract with the implementer):
 //   [data-map-box]        the map box. data-gl="on" once the first frame with blocks is drawn;
@@ -251,35 +256,106 @@ async function glOn(b, origin) {
 
 // --------------------------------------------------------------- GL off --
 
-/** Run 20261121-dungeon-map U3-AC5: /smp/ at 400 px, no horizontal scroll, the dungeon preview and both buttons fully in view. */
-async function smp400(b, origin) {
-  let p;
-  try {
-    p = await openState(b, origin, { id: 'smp 400px', path: '/smp/', ready: '[data-section="dungeon"]' }, 400);
-  } catch (e) {
-    return check('U3-AC5 /smp/ at 400 px: page opens', [String(e?.message ?? e)]);
-  }
-  try {
-    const sw = await p.ev('document.documentElement.scrollWidth');
-    check('U3-AC5 /smp/ at 400 px has no horizontal scroll (scrollWidth <= 400)', sw <= 400 ? [] : [`scrollWidth ${sw}`]);
-    const link = (href, text) => `[...document.querySelectorAll('a[href="${href}"]')].find((a) => a.textContent.trim() === ${q(text)})`;
-    for (const [what, find] of [
-      ['dungeon preview picture', `document.querySelector('a[href="/dungeon/"] img[src="/dungeon/preview.jpg"]')`],
-      ['EXPLORE THE DUNGEONS button', link('/dungeon/', 'EXPLORE THE DUNGEONS')],
-      ['OPEN THE AUCTION HOUSE button', link('/auctions/', 'OPEN THE AUCTION HOUSE')],
-    ]) {
-      const r = await p.ev(`(() => { const e = ${find}; if (!e) return null; e.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' }); const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, bo: b.bottom, w: b.width, h: b.height, vw: innerWidth, vh: innerHeight, vis: e.checkVisibility({ visibilityProperty: true }) }; })()`);
-      check(`U3-AC5 /smp/ at 400 px the ${what} is fully inside the viewport`, !r ? [`no ${what}`] : !r.vis || r.w < 1 || r.h < 1 ? [`not shown (${r.w}x${r.h}, visible ${r.vis})`] : r.l < 0 || r.r > r.vw || r.t < 0 || r.bo > r.vh ? [`box ${Math.round(r.l)}..${Math.round(r.r)} x ${Math.round(r.t)}..${Math.round(r.bo)} in a ${r.vw}x${r.vh} viewport`] : []);
+/** What S-T5 and S-T6 read from /smp/ in one go (boxes are viewport px). */
+const SMP_MEASURE = String.raw`(() => {
+  const L = window.__cards;
+  const box = (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; };
+  const union = (bs) => bs.length ? { l: Math.min(...bs.map((x) => x.l)), r: Math.max(...bs.map((x) => x.r)), t: Math.min(...bs.map((x) => x.t)), b: Math.max(...bs.map((x) => x.b)) } : null;
+  const shown = (e) => e.checkVisibility({ visibilityProperty: true, opacityProperty: true }) && e.getBoundingClientRect().width > 0;
+  const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+  const cx = cv.getContext('2d', { willReadFrequently: true });
+  // Canvas round-trip: computed colours may be oklch(), which L.rgba does not parse.
+  const px = (c) => { cx.clearRect(0, 0, 1, 1); cx.fillStyle = '#000'; cx.fillStyle = c; cx.fillRect(0, 0, 1, 1); const d = cx.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+  let pageBg = px(getComputedStyle(document.body).backgroundColor);
+  if (pageBg[3] < 1) pageBg = L.over(pageBg, px(getComputedStyle(document.documentElement).backgroundColor));
+  const panel = document.querySelector('[data-section="dungeon"]');
+  const nav = document.querySelector('nav');
+  const columnOf = (e) => { const c = e.parentElement.closest('.card, .container'); const r = c.getBoundingClientRect(); const cs = getComputedStyle(c); return { l: r.left + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth), r: r.right - parseFloat(cs.paddingRight) - parseFloat(cs.borderRightWidth) }; };
+  const buttons = [...document.querySelectorAll('button, .btn')].filter(shown).map((e) => {
+    // Lines of the label text only (an icon-only button, like the menu bars, is one line).
+    const rects = [];
+    for (let w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT), n; (n = w.nextNode()); )
+      if (n.data.trim()) { const rg = document.createRange(); rg.selectNodeContents(n); rects.push(...[...rg.getClientRects()].filter((x) => x.width > 0 && x.height > 0)); }
+    const first = rects[0];
+    return { label: e.textContent.trim() || e.getAttribute('aria-label') || e.className, inMain: !!e.closest('main'), box: box(e), col: e.closest('main') ? columnOf(e) : null,
+      lines: first ? rects.filter((x) => x.top >= first.bottom - 1 || x.bottom <= first.top + 1).length + 1 : 1, clipped: e.scrollWidth > e.clientWidth + 1 };
+  });
+  const auction = [...document.querySelectorAll('main a[href="/auctions/"]')].find((a) => a.textContent.trim() === 'OPEN THE AUCTION HOUSE' && !(nav && nav.contains(a)));
+  const tape = document.querySelector('.tape');
+  const pic = panel && panel.querySelector('a[href="/dungeon/"] img');
+  const texts = panel ? [panel.querySelector('.section-eyebrow'), panel.querySelector('h2'), [...panel.querySelectorAll('p')].find((x) => !x.classList.contains('section-eyebrow')), panel.querySelector('a[href="/wiki/smp/dungeons/"]')] : [];
+  const mapBtn = panel && [...panel.querySelectorAll('a[href="/dungeon/"]')].find((a) => !a.querySelector('img'));
+  const textEls = [...texts, mapBtn].filter(Boolean);
+  let pbg = panel ? px(getComputedStyle(panel).backgroundColor) : pageBg;
+  if (pbg[3] < 1) pbg = L.over(pbg, pageBg);
+  const names = ['eyebrow', 'h2', 'line', 'wiki link'];
+  const contrast = texts.map((e, i) => {
+    if (!e) return { what: names[i], ratio: 0 };
+    const cs = getComputedStyle(e);
+    let fg = px(cs.webkitTextFillColor || cs.color);
+    if (fg[3] < 1) fg = L.over(fg, pbg);
+    return { what: names[i], ratio: +L.contrast(fg, pbg).toFixed(2) };
+  });
+  return { scheme: getComputedStyle(document.documentElement).colorScheme, sw: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth, vh: innerHeight, buttons,
+    auction: auction && box(auction), tape: tape && box(tape), panel: panel && box(panel), pic: pic && box(pic), text: union(textEls.map(box)), textCount: textEls.length, contrast };
+})()`;
+
+/** Run 20261123-smp-page S-T5 + S-T6 (was U3-AC5, /smp/ at 400 px only): /smp/ at four widths, dark and Quartz. */
+async function smpLayout(b, origin) {
+  const px = Math.round;
+  const at4 = (x) => `${px(x.l)}..${px(x.r)} x ${px(x.t)}..${px(x.b)}`;
+  for (const theme of ['dark', 'light'])
+    for (const w of [320, 400, 720, 1280]) {
+      const at = `/smp/ at ${w} px ${theme === 'light' ? 'Quartz' : 'dark'}`;
+      let p;
+      try {
+        p = await openState(b, origin, { id: at, path: '/smp/', ready: '[data-section="dungeon"]', init: `try { localStorage.setItem('chromabit:theme', ${q(theme)}); } catch (e) {}` }, w);
+      } catch (e) {
+        check(`S-T5 ${at}: page opens`, [String(e?.message ?? e)]);
+        continue;
+      }
+      try {
+        const m = await p.ev(SMP_MEASURE);
+        check(`S-T5 ${at}: the theme took (color-scheme ${theme})`, m.scheme.includes(theme) ? [] : [`color-scheme is ${q(m.scheme)}`]);
+        check(`S-T5 ${at}: no horizontal scroll`, m.sw <= m.vw ? [] : [`scrollWidth ${m.sw} > ${m.vw}`]);
+        const inMain = m.buttons.filter((t) => t.inMain);
+        const bad = inMain.length >= 3 ? [] : [`only ${inMain.length} buttons in <main>, want 3 (COPY IP, OPEN THE AUCTION HOUSE, EXPLORE THE MAP)`];
+        for (const t of m.buttons) {
+          if (t.lines !== 1) bad.push(`${q(t.label)} on ${t.lines} lines`);
+          if (t.clipped) bad.push(`${q(t.label)} label clipped`);
+          if (t.box.l < -0.5 || t.box.r > m.vw + 0.5 || t.box.h > m.vh) bad.push(`${q(t.label)} box ${at4(t.box)} in a ${m.vw}x${m.vh} viewport`);
+        }
+        check(`S-T5 ${at}: every button one line, unclipped, inside the viewport`, bad);
+        if (w <= 400)
+          check(`S-T5 ${at}: every <main> button spans its content column`, inMain.filter((t) => Math.abs(t.box.l - t.col.l) > 2 || Math.abs(t.box.r - t.col.r) > 2).map((t) => `${q(t.label)} ${px(t.box.l)}..${px(t.box.r)}, column ${px(t.col.l)}..${px(t.col.r)}`));
+        const { panel: P, pic, text } = m;
+        if (!P || !pic || m.textCount < 5) check(`S-T5 ${at}: the panel layout`, [`panel ${!!P}, picture ${!!pic}, ${m.textCount} of 5 text pieces (eyebrow, h2, line, wiki link, map button)`]);
+        else {
+          const two = pic.r <= text.l + 1 && pic.t < text.b && pic.b > text.t;
+          check(
+            `S-T5 ${at}: the panel is ${w >= 720 ? 'two columns, picture left' : 'one column, picture above the text'}`,
+            (w >= 720 ? two : pic.b <= text.t + 1) ? [] : [`picture ${at4(pic)}, text ${at4(text)}`],
+          );
+          const out = (x) => x.l < P.l - 1 || x.r > P.r + 1 || x.t < P.t - 1 || x.b > P.b + 1;
+          check(`S-T5 ${at}: picture and text inside the panel, the panel inside the viewport`, [
+            out(pic) && `picture ${at4(pic)} leaves the panel ${at4(P)}`,
+            out(text) && `text ${at4(text)} leaves the panel ${at4(P)}`,
+            (P.l < -0.5 || P.r > m.vw + 0.5) && `panel ${at4(P)} in a ${m.vw} px viewport`,
+          ]);
+        }
+        if (w === 1280)
+          check(`S-T5 ${at}: the auction button's right edge is the ticker's (2 px)`, !m.auction || !m.tape ? [`auction button ${!!m.auction}, ticker ${!!m.tape}`] : Math.abs(m.auction.r - m.tape.r) <= 2 ? [] : [`button right ${px(m.auction.r)}, ticker right ${px(m.tape.r)}`]);
+        check(`S-T6 ${at}: the panel text is at least 4.5:1 on the panel`, m.contrast.filter((c) => c.ratio < 4.5).map((c) => `${c.what} ${c.ratio}:1`));
+      } catch (e) {
+        check(`S-T5 ${at}: runs`, [String(e?.message ?? e)]);
+      } finally {
+        await p.close();
+      }
     }
-  } catch (e) {
-    check('U3-AC5 /smp/ at 400 px: runs', [String(e?.message ?? e)]);
-  } finally {
-    await p.close();
-  }
 }
 
 async function glOff(b, origin) {
-  await smp400(b, origin);
+  await smpLayout(b, origin);
   await page(b, origin, 'gl-off', '/dungeon/', 1280, async (p) => {
     const env = await p.ev('window.__dm.webgl2()');
     check("env: WebGL2 is off in this Chrome (getContext('webgl2') is null)", env ? ['getContext("webgl2") works despite --disable-3d-apis'] : []);
