@@ -202,6 +202,10 @@ assert gem_out == [[["Rough", "+1%", "+0.5%", "80 make 1 Perfect"], ["Perfect", 
 everything = json.dumps([gem_out, family, hg, trackers, made, facts.build_crate_gear(GEAR_REWARDS, "glint_crate", src)])
 assert not any(s in everything for s in ("0.25", "3.75", "12.5", "33.3", "weight", "drop")), everything
 
+# Levels above X stay roman; a lore " -- " becomes a comma in gear tables (checked on the real run below).
+assert [facts.roman(n) for n in (4, 10, 15, 20)] == ["IV", "X", "XV", "XX"]
+assert facts.GEAR_DASH.sub(", ", "Luck II while held -- better treasure") == "Luck II while held, better treasure"
+
 # The deny guard: gear-* tables may show a lore's "15% chance", nothing else is exempt.
 deny_terms = [__import__("re").compile(t, 2) for t in json.loads(facts.DENY.read_text(encoding="utf-8"))["terms"]]
 assert facts.GEAR_CHANCE_TERM in [p.pattern for p in deny_terms]
@@ -245,6 +249,8 @@ with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
         assert f.read_bytes() == (pathlib.Path(b) / f.name).read_bytes(), f"{f.name} differs between runs"
         icons = t.get("icons")
         assert icons is None or (len(icons) == len(t["rows"]) and all(i is None or facts.ICON.match(i) for i in icons)), f.name
+    assert not any(facts.GEAR_DASH.search(c) for f in files if f.name.startswith("gear-")
+                   for r in json.loads(f.read_text(encoding="utf-8"))["rows"] for c in r)
     print(f"real run: {len(files)} tables written, skipped {skipped or 'none'}")
     for msg in blocked:
         print(f"WARNING blocked by the guard (facts.py exits 1): {msg[:120]}...")

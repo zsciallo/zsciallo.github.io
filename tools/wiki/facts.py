@@ -78,7 +78,14 @@ def name(item_id):
 
 
 def roman(n):
-    return ROMAN[n] if 0 < n < len(ROMAN) else str(n)
+    if n <= 0:
+        return str(n)
+    out = ""
+    for value, numeral in ((1000, "M"), (900, "CM"), (500, "D"), (400, "CD"), (100, "C"), (90, "XC"), (50, "L"),
+                           (40, "XL"), (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")):
+        out += numeral * (n // value)
+        n %= value
+    return out
 
 
 def enchant_list(enchants, where):
@@ -469,6 +476,7 @@ def build_arsenal(loot, ffa):
 # here and guard() lets gear-* tables through the one deny term below. Weights, drop chances and odds are never read.
 
 GEAR_CHANCE_TERM = r"\d+(\.\d+)?\s?%\s?chance"
+GEAR_DASH = re.compile(r"\s+(--|\u2014|\u2013)\s+")
 SLOT_ORDER = ["helmet", "chestplate", "leggings", "boots", "weapon"]
 GIVEPIECE = re.compile(r"^asets givepiece \S+ (\w+) (\w+)$")
 CC_GIVE = re.compile(r"^chromatic give \S+ (\w+)$")
@@ -939,6 +947,9 @@ def run(smp_ref, kit_ref, out_dir):
         cols, rows, removed[tid] = res
         if not rows:
             raise ShapeError(f"{tid}: no rows from {source}")
+        if tid.startswith("gear-"):
+            for r in rows:  # site rule: no typed dashes in visitor text; lore's " -- " reads as a comma
+                r[:] = [GEAR_DASH.sub(", ", c) for c in r]
         out.append(with_icons({"id": tid, "title": title, **base, "columns": cols, "rows": rows}))
     # A hit blocks its table (never written, old copy removed) and fails the run; the clean tables are still written.
     blocked = [msg for msg in (guard(t, terms) for t in out) if msg]
