@@ -1,0 +1,61 @@
+{
+  "title": "Ranks and Kits",
+  "half": "smp",
+  "live": true,
+  "needs_owner_check": "The kits table (smp-kits) is generated from PlayerKits2 (Diamond Kit every 12 h), while /help and Essentials kits.yml list a different set (starter, claim, daily, tools, diamond once a day, rank kits). Which plugin answers /kit on live, and should the table cover both? Store rank perks are copied from src/data/storeContent.json; the auction listing counts there (15/25/50) do not match ChromaticAuctionHouse config.yml (75 default), so they are left out.",
+  "summary": "**Ranks and Kits** come in two kinds. Explorer ranks, from Tin to Prismatic, are earned in game with `/rankup`. Store ranks (VIP, VIP+, MVP and MVP+) add perks and a daily rank kit. Kits are free gear on a timer.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Progression"],
+    ["Commands", "`/ranks`, `/rankup`, `/kit`"],
+    ["Explorer ranks", "10"],
+    ["Store ranks", "VIP, VIP+, MVP, MVP+"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "`/ranks` shows every Explorer rank and what it needs. When you have done everything a rank asks for, run `/rankup`. Each rank up hands out rewards such as spawners and money, and raises how fast you earn [claim blocks](/wiki/smp/claims/)."},
+      {"p": "Store ranks are bought on [the store](/store/). Each one includes everything in the rank below it."}
+    ]},
+    {"h": "Explorer ranks", "blocks": [
+      {"p": "The ladder, in order:"},
+      {"ul": [
+        "Tin (where everyone starts)",
+        "Bronze",
+        "Silver",
+        "Gold",
+        "Emerald",
+        "Mithril",
+        "Orichalcum",
+        "Adamantine",
+        "Netherite",
+        "Prismatic (the final rank, which also gives an auto-sell chest)"
+      ]}
+    ]},
+    {"h": "Store ranks", "blocks": [
+      {"p": "**VIP**: [VIP] chat tag, 10 homes, 5 auto-sell chests, 2 player warps, `/back` (also after death), `/hat`, `/near`, `/nick`, 1.25x mcMMO XP, 2 spawner storage pages, 150 upgradeable hoppers, and `/kit vip` once every 24 hours (a Shard Key and 200 Prism Shards) plus `/kit diamond`."},
+      {"p": "**VIP+**: [VIP+] tag, 15 homes, 10 auto-sell chests, 3 player warps, `/enderchest`, `/itemname` with colour codes, 1.5x mcMMO XP, 3 spawner storage pages, 175 upgradeable hoppers, and `/kit vipplus` (a Spawner Key and 500 Prism Shards)."},
+      {"p": "**MVP**: [MVP] tag, 20 homes, 15 auto-sell chests, 8 player warps, `/condense`, `/feed`, `/repair` and `/repair all`, `/workbench`, mcMMO abilities that last 12 seconds longer with halved cooldowns, the mcMMO Lucky perk, 5 spawner storage pages, 200 upgradeable hoppers, and `/kit mvp` (a Chroma Key and 750 Prism Shards)."},
+      {"p": "**MVP+**: [MVP+] tag, 25 homes, 250 upgradeable hoppers, and `/kit mvpplus` (a Chroma Key, a Shard Key and 1,000 Prism Shards)."}
+    ]},
+    {"h": "Kits", "blocks": [
+      {"p": "`/kit` lists your kits. A kit on cooldown tells you when it is ready again, and a locked one tells you which rank unlocks it."},
+      {"ul": [
+        "**Starter Kit**: basic armour, tools and food. Once only.",
+        "**Claim Kit**: a golden shovel and claim blocks so you can protect your base.",
+        "**Daily Kit**: once every 24 hours.",
+        "**Tools Kit**: a fresh set of tools every 10 minutes.",
+        "**Diamond Kit**: diamond gear.",
+        "**VIP, VIP+, MVP and MVP+ Kits**: once every 24 hours with the matching rank."
+      ]},
+      {"facts": "smp-kits"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Check `/ranks` early. The first rank up comes quickly, and its spawner is the start of a farm.",
+        "Rank kits pay Prism Shards every day, which adds up for [crafting](/wiki/smp/crafting/)."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/claims", "smp/crates", "smp/spawners-and-hoppers", "smp/crafting"]
+}

@@ -1,0 +1,52 @@
+{
+  "title": "Crates and Keys",
+  "half": "smp",
+  "live": true,
+  "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running (the merge changed Chroma, Reward and Shard Crate rewards; the contents table is generated). Also unconfirmed: whether Halloween Keys can still be earned anywhere now that the Halloween event is over; that keys are virtual (account balance) as ExcellentCrates' Virtual: true suggests.",
+  "summary": "**Crates and Keys** are the reward crates at spawn. Each crate opens with its own key, and every crate also has milestone rewards that unlock after a set number of openings.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Reward"],
+    ["Where", "Spawn, `/warp crates`"],
+    ["Crates", "7"],
+    ["Keys", "Kept on your account"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Go to the crates at spawn and right-click a crate while you hold its key. The hologram over each crate shows how many keys you have. Keys are kept on your account, not in your inventory."},
+      {"ul": [
+        "**Chroma Crate** (Chroma Key): the full Chromatic and Corrupted gear sets, elytras included, and cash from $500,000 to $2,000,000. Keys come from the store, the [daily streak](/wiki/smp/daily-streak/), a 14 day [vote](/wiki/smp/voting/) streak, the monthly top voter awards, the Adamantine rank, the MVP and MVP+ kits, the Reward Crate and milestones.",
+        "**Shard Crate** (Shard Key): all 12 shards, plus trackers. Keys come from the store, your first vote ever, a 7 day vote streak, the daily streak, 2nd and 3rd place at KOTH, the VIP and MVP+ kits and milestones.",
+        "**Spawner Crate** (Crate Key, shown as Spawner Key): 13 spawner types. Keys come from the store, the daily streak, the Emerald and Adamantine ranks, the VIP+ kit and the Vote Crate milestones.",
+        "**Reward Crate** (Reward Key): every crate key except the Vote Key, shards, enchant books (Simple to Legendary) and trackers. Keys come from winning KOTH, envoys and the daily streak.",
+        "**Vote Crate** (Vote Key): one key for every vote, plus bonus keys. See [Voting](/wiki/smp/voting/).",
+        "**Living Prism Crate** (Living Prism Key): the full Living Prism line of armour, tools and weapons, and cash up to $5,000,000. The Living Prism Spear, Mace and Wings only drop here. Keys come from the [Battle Pass](/wiki/smp/battle-pass/), the store and the crate's own milestone.",
+        "**Halloween Crate** (Halloween Key): the seasonal Halloween set. Reaper's Toll is a 1 of 1: only one player will ever pull it."
+      ]}
+    ]},
+    {"h": "Contents", "blocks": [
+      {"facts": "smp-crates"},
+      {"p": "Legendary, Mythic and Chroma pulls (and Living Prism gear) are announced to the whole server."}
+    ]},
+    {"h": "Milestones", "blocks": [
+      {"p": "Every opening counts toward that crate's milestones. Most ladders start over once you reach the last step; the Vote Crate's pays each step only once."},
+      {"ul": [
+        "**Chroma Crate**: 1,500 Prism Shards at 3, 2,000 Prism Shards and a Chroma Key at 5, $1,250,000 at 12, 2 Chroma Keys at 20, a Chromatic Sword at 30, $2,000,000 at 40, a Chromatic Mace at 50.",
+        "**Halloween Crate**: 1,500 Prism Shards at 3, a Halloween Key at 6, $1,250,000 at 13, 2 Halloween Keys at 22, a Witch Hat at 33, $2,000,000 at 44, a Pumpkin Smasher at 55.",
+        "**Shard Crate**: 1,500 Prism Shards at 3, 2,000 at 5, a Shard Key at 10, 1,500 Prism Shards at 43, 2,000 at 45, a Shard Key at 50, a Shard of Strength at 80.",
+        "**Spawner Crate**: 1,500 Prism Shards at 3, 2,000 at 5, a Spawner Key at 50, a Warden spawner at 100.",
+        "**Reward Crate**: 750 Prism Shards at 3, 1,250 at 5, a Chroma Key at 15.",
+        "**Living Prism Crate**: a Living Prism Key every 8 openings.",
+        "**Vote Crate** (once each): a Spawner Crate Key at 2, a Shard Key at 3, a Vote Chestplate at 10, an Elytra at 20, a Chroma Key at 30, a Shard Key at 50."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Keep a free inventory slot. A milestone reward that does not fit drops at your feet.",
+        "Crafting at `/craft` is the slow but certain route to a specific Chromatic piece or shard. See [Crafting and Upgrades](/wiki/smp/crafting/)."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/voting", "smp/daily-streak", "smp/battle-pass", "smp/crafting"]
+}

@@ -1,0 +1,46 @@
+{
+  "title": "Keep-on-Death Gear",
+  "half": "smp",
+  "live": true,
+  "needs_owner_check": "The killer's 80% share of the death fee is written as a game rule from ChromaBound config.yml (killer-payout: 80); confirm it is fine to show on the wiki.",
+  "summary": "**Keep-on-Death Gear** is the SMP rule that Chromatic, Halloween and Living Prism gear stays with you when you die. Everything else drops as normal, and every death costs a small share of your balance.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Rule"],
+    ["Kept", "Chromatic, Halloween, Living Prism, Shattered gear"],
+    ["Death fee", "0.5% of your balance"],
+    ["Combat log", "5% of your balance"]
+  ],
+  "sections": [
+    {"h": "What stays", "blocks": [
+      {"p": "When you die, these items are taken out of your drops and handed back when you respawn:"},
+      {"ul": [
+        "Every Chromatic item: weapons, tools and armour.",
+        "The Halloween set.",
+        "Living Prism gear: armour, sword, bow, crossbow, tools, spear, mace and wings.",
+        "Shattered gear (a broken Chromatic, Halloween or Living Prism item waiting for repair)."
+      ]},
+      {"p": "Bound gear says **It seems bound to you** in its lore. Living Prism and Prismatic Resin materials are not gear, and they drop. So do old Chromatic armour pieces made before the switch to the current items."}
+    ]},
+    {"h": "Death fees", "blocks": [
+      {"p": "Every death takes a share of your balance. The money is gone, except the part paid to a player who killed you."},
+      {"ul": [
+        "Overworld, Nether, End and spawn: 0.5% of your balance.",
+        "KOTH arena: 0.5%, at most $250,000.",
+        "Dungeon: 0.1%, at most $100,000.",
+        "If a player killed you, they get 80% of your fee. This does not happen at spawn, where the fee is charged but nobody is paid.",
+        "Logging out during PvP combat kills you and costs 5% of your balance. Outside spawn, 80% of it goes to your last opponent.",
+        "The fee never takes you below $0. Money held in auction house buy orders and unclaimed auction money counts as part of your balance."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Your other items lie where you died. `/back` takes you there, so go straight away.",
+        "Stay online until PvP combat ends. A combat log costs ten times a normal death.",
+        "Gear that is about to break shatters instead, and you keep it. Repair it at `/craft repair`."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/crafting", "smp/dungeons", "smp/auction-house", "smp/claims"]
+}

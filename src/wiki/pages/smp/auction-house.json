@@ -1,0 +1,62 @@
+{
+  "title": "Auction House and Market",
+  "half": "smp",
+  "live": true,
+  "needs_owner_check": "Listing limits are left out: ChromaticAuctionHouse config.yml gives 75 active listings by default, but the store perks say 15/25/50 for VIP/VIP+/MVP. Rank fee discounts (fee-tiers) are left out because which ranks hold them was not confirmed. The coinflip house cut (rake) is left out on purpose as odds-adjacent. ChromaticHelp still calls /cf a flip against another player; coinflip.yml runs house flips only.",
+  "summary": "**Auction House and Market** is the SMP's trading hub at `/ah`. Players list items for sale and post buy orders, the server runs its own rotating shop and daily bounties, and `/cf` is a coin flip against the server.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Economy"],
+    ["Commands", "`/ah`, `/order`, `/orders`, `/cf`"],
+    ["Listing time", "7 days"],
+    ["Sale tax", "5%, paid by the seller"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Type `/ah` to browse what other players are selling, sorted into categories like spawners, ores, tools, armour, enchanted items, valuables, farming, mob drops, food, redstone, storage, blocks and potions. The live listings are also on [the auction house page](/auctions/)."}
+    ]},
+    {"h": "Listings", "blocks": [
+      {"ul": [
+        "Listing an item is free. When it sells, 5% of the price is taken from what you receive, so a $100 sale pays you $95. Buyers pay nothing extra.",
+        "Prices go from $10 to $1,000,000,000.",
+        "A listing runs for 7 days.",
+        "Items you renamed on an anvil cannot be listed, except gear. A spawner's name must match the mob inside it.",
+        "You can preview what is inside a shulker box before you buy it.",
+        "Purchases that do not fit in your inventory wait in `/ah claim`."
+      ]}
+    ]},
+    {"h": "Buy orders", "blocks": [
+      {"p": "`/order` posts what you want and what you will pay per item. Your money is held until someone delivers, even while you are offline. `/orders` shows your own orders."},
+      {"ul": [
+        "Creating an order costs $100 plus 1% of its value, at least $100 and at most $50,000. The fee is not refunded.",
+        "You can have 10 open orders, each for up to 2,304 items, for up to 7 days.",
+        "Spawners can be ordered for any mob that has a spawner on this server.",
+        "Items survival cannot make, like spawn eggs or bedrock, cannot be ordered."
+      ]}
+    ]},
+    {"h": "Server market", "blocks": [
+      {"p": "`/ah market` is the server's own section."},
+      {"ul": [
+        "**Server listings**: every 6 hours the server lists 6 items, 1 to 3 of each. They come from elytras, totems of undying, enchanted golden apples, netherite ingots and a random spawner. Prices follow what those items have recently sold for on the auction house.",
+        "**Bounties**: every day at 06:00 the server posts 6 bounties, buying things like cobblestone, cooked beef, oak logs, iron and gold ingots and ender pearls. Deliver with `/ah bounties` and you are paid on the spot. A bounty lasts 24 hours, and one player can earn up to $5,000,000 a day from them.",
+        "**The pool**: `/ah pool` buys and sells a few staples at a live price, such as diamonds, netherite and elytras."
+      ]}
+    ]},
+    {"h": "Coinflip", "blocks": [
+      {"p": "`/cf` followed by an amount flips a coin against the server. You can lose everything you stake."},
+      {"ul": [
+        "The smallest bet is $1,000 and the largest $250,000.",
+        "There is a 5 second wait between flips."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Scamming is allowed on the SMP, and a hand-to-hand trade is not protected. Trade through `/ah` or a buy order, which hold both sides.",
+        "Money held in buy orders still counts toward your [death fee](/wiki/smp/keep-on-death/), so parking money in orders does not hide it.",
+        "The server shop (`/shop`, `/sell`) pays a fixed price. Other players usually pay more if you can wait."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/spawners-and-hoppers", "smp/keep-on-death", "smp/crafting"]
+}

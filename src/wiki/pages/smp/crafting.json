@@ -1,0 +1,102 @@
+{
+  "title": "Crafting and Upgrades",
+  "half": "smp",
+  "live": true,
+  "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running. Also unconfirmed: whether the Cluster and Apex Prism recipes show at /craft on live (they load only when the clusters content pack is present); how players earn Chromabithia XP for the Upgrade bench level gate (contracts give it; kills assumed).",
+  "summary": "**Crafting and Upgrades** happen at the Chromatic bench, `/craft`. It builds the Chromatic Arsenal, zone armour, spawners, shards and a few consumables, and its other benches upgrade, re-roll, awaken, disenchant, repair and salvage your gear. Most of it costs Prism Shards.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "System"],
+    ["Command", "`/craft`"],
+    ["Currency", "Prism Shards (`/prism`)"],
+    ["Benches", "Craft, Upgrade, Tinker, Awakening, Disenchant, Repair, Salvage"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Open the bench with `/craft`. Each recipe lists exactly what it needs, and the craft button only appears once you have all of it. `/prism` shows your Prism Shard balance."},
+      {"p": "Prism Shards come from:"},
+      {"ul": [
+        "Salvaging Chromatic gear, Living Prism gear, shards and spawners at the Salvage bench.",
+        "The [Battle Pass](/wiki/smp/battle-pass/) and crate milestones (see [Crates and Keys](/wiki/smp/crates/)).",
+        "Dungeon crates and contracts in [Heartwood](/wiki/smp/dungeons/).",
+        "Rank kits (see [Ranks and Kits](/wiki/smp/ranks-and-kits/))."
+      ]},
+      {"p": "You cannot send Prism Shards to another player."}
+    ]},
+    {"h": "Recipes", "blocks": [
+      {"p": "The bench has five sections: Gear, Zone Sets, Spawners, Shards and Consumables. Vanilla ingredients must be plain: an item with a custom name, lore or enchants is not accepted."},
+      {"ul": [
+        "**Chromatic gear**: sword, bow, crossbow, pickaxe, axe, shovel, harvester, angler, helmet, chestplate, leggings and boots. Each costs 150,000 to 262,500 Prism Shards and $1,000,000, plus diamonds, a netherite ingot, amethyst and echo shards, netherite blocks, a Nether Star, dragon's breath, a netherite upgrade template and 32 each of three Heartwood zone items. Wearing all four armour pieces gives Strength I.",
+        "**Living Prism gear** upgrades a Chromatic piece into its Living Prism twin. The Chromatic piece is used up, and its upgrades, Awakening, prefix and enchants carry over, except Thorns. Each costs 300,000 to 525,000 Prism Shards and $2,500,000, plus Living Prism, Prismatic Resin, two Nether Stars and a larger stack of zone items. The spear, mace and wings only come from the Living Prism Crate.",
+        "**Zone Sets**: one armour set per Heartwood area, made from that area's zone item and 4 Prismatic Resin a piece. Their set bonus only works in Heartwood.",
+        "**Spawners**: 24 mob types. Every recipe needs Blank Spawners (1 for common mobs, up to 3 for the rarest), materials and Prism Shards. You get a Blank Spawner by salvaging a spawner. It cannot be placed.",
+        "**Shards**: the twelve off-hand shards, 7,000 to 30,000 Prism Shards and $100,000 each. Hold one in your off hand for its effect.",
+        "**Clusters** fuse two shards into one off-hand item (Cluster of Wrath, Cinders, Renewal, Industry, the Descent and the Depths). **Apex Prisms** (Warmonger's, Architect's, Wayfarer's and Magnate's Prism) are the top tier.",
+        "**Consumables**: 32 Bottles o' Enchanting for $25,000 and 50 Prism Shards, or an Enchanted Golden Apple for $100,000, 200 Prism Shards, 8 gold blocks, a golden apple and a Nether Star."
+      ]},
+      {"p": "The zone sets and their areas: Sporewarden (Mossgate Landing), Kilnforged (The Ochre Warrens), Bogstrider (Mirewood Roots), Waxguard (The Resin Hive), Palewatch (The Pale Drip), Geodeplate (The Sulfur Geode), Bloomshroud (Glowberry Canopy), Sculkhollow (The Hollow Below) and Rotroot (Heartwood Core)."}
+    ]},
+    {"h": "Upgrades", "blocks": [
+      {"p": "The **Upgrade** bench sells enchant levels. Put in a piece of gear, pick an enchant and buy its next level. Each level costs more Prism Shards than the last, plus 0.01% of your balance. The full list is on [Custom Enchants](/wiki/smp/enchants/)."},
+      {"ul": [
+        "Bench levels 3 and up need a Chromabithia level: level 5 for an enchant's level 3, then 5 more for each level after that, never more than 30.",
+        "Swords that already have Sharpness V can buy Sharpness VI to IX.",
+        "Vanilla gear can be upgraded too, but it cannot be salvaged, so that Prism is gone for good."
+      ]}
+    ]},
+    {"h": "Prefixes", "blocks": [
+      {"p": "The **Tinker** bench gives an item one prefix. A re-roll costs 2,500 Prism Shards plus 0.25% of your balance, and the new prefix replaces the old one."},
+      {"ul": [
+        "Menacing (weapons): +4% damage.",
+        "Godly (weapons): +6% damage, +3% attack speed.",
+        "Quick (weapons, tools): +6% attack speed.",
+        "Warding (armour): +3% armour.",
+        "Sturdy (weapons, tools, armour): +2% armour toughness.",
+        "Lucky (anything): +1 luck.",
+        "Swift (armour, off-hand): +2% movement speed.",
+        "Broken (weapons, tools): -5% damage.",
+        "Plain (anything): no modifier."
+      ]}
+    ]},
+    {"h": "Awakening", "blocks": [
+      {"p": "**Awakening** is the only way past an upgrade's bench cap. The item needs at least two upgrades. It costs 12,000 Prism Shards plus 0.5% of your balance."},
+      {"ul": [
+        "Two of the item's upgrades are picked at random. One is destroyed. The other goes up 1 or 2 levels, even past the cap.",
+        "You choose neither, and it cannot be undone.",
+        "An upgrade can go at most 10 levels past its cap.",
+        "Some enchants gain nothing past their cap, so Awakening never raises them. They can still be the one destroyed.",
+        "Sharpness from the bench is never part of Awakening."
+      ]}
+    ]},
+    {"h": "Disenchanting", "blocks": [
+      {"p": "The **Disenchant** bench removes one enchant you pick from a weapon, tool or armour piece, for 200 Prism Shards. The enchant is destroyed and nothing is refunded. Everything else on the item stays."},
+      {"ul": [
+        "The bench asks you to confirm twice.",
+        "Curses cannot be removed.",
+        "Thorns on Chromatic armour is locked. A grindstone cannot take it off either."
+      ]}
+    ]},
+    {"h": "Repair and shattered gear", "blocks": [
+      {"p": "Chromatic, Halloween and Living Prism gear does not break when it runs out of durability. It turns into a **Shattered** item that keeps everything inside it: enchants, upgrades, prefix and StatTrak. You cannot wear or use it."},
+      {"p": "Repair it with `/craft repair` or by right-clicking it. A repair costs half of what the item's recipe costs, in money, Prism Shards and materials, and the item comes back with full durability."}
+    ]},
+    {"h": "Salvage", "blocks": [
+      {"p": "The **Salvage** bench breaks items down into Prism Shards. Only Chromatic gear, Living Prism gear, shards and spawners can be salvaged."},
+      {"ul": [
+        "You get back less than the item cost to make.",
+        "Worn gear returns less than gear at full durability.",
+        "Spawners go in one at a time, never as a stack. Each one also gives a Blank Spawner.",
+        "Money you spent on upgrades is never returned. An awakened item returns nothing for its upgrades."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Upgrades, re-rolls and Awakening charge a share of your balance, so they cost more the richer you are.",
+        "Shattered gear is kept on death like the item it holds, so you never lose it to a broken durability bar.",
+        "Changing the shard in your off hand starts a 10 second wait before you can equip another."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/enchants", "smp/dungeons", "smp/crates", "smp/keep-on-death"]
+}
