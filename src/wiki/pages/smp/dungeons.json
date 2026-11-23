@@ -96,6 +96,10 @@
     ]}
   ],
   "history": [
+    {"date": "2026-11-23", "text": "Added the Chromabithia level, which rises with dungeon kills and contracts and unlocks higher Upgrade bench levels."},
+    {"date": "2026-11-23", "text": "Added four dungeon waypoints on the `/dungeon` screen, one per difficulty: Easy is free, the harder ones cost money, and dying in an area respawns you at its waypoint."},
+    {"date": "2026-11-23", "text": "Added contracts, which let you pay Prismatic Resin to summon a private mini boss that only you and up to 3 helpers can fight."},
+    {"date": "2026-11-23", "text": "Every player who helps kill a dungeon mob now gets their own loot and key roll, straight into their inventory."},
     {"date": "2026-11-12", "text": "Heartwood crates are now real chests, and they glow green when you hold their key."},
     {"date": "2026-11-12", "text": "Heartwood mini bosses now fight in phases and stay shielded until their wards die."},
     {"date": "2026-11-12", "text": "The Listener boss in The Hollow Below now burrows, comes up under players and fires a faster Sonic Boom."},
