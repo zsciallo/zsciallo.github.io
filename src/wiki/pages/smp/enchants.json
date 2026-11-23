@@ -18,7 +18,7 @@
       {"ul": [
         "An item starts with 9 custom enchant slots.",
         "Books do not combine. Two books of the same enchant, or a book on an item that already has it, will not raise the level. Levels come from the Upgrade bench and Awakening.",
-        "Most custom combat enchants work only against mobs. In fights between players only vanilla enchants count, apart from Backbone, Hardened and the head enchants (Decapitation, Trophy Hunter and Headhunter).",
+        "Custom enchants that trigger when you hit, shoot or get hit work only against mobs, apart from Backbone, Hardened and the head enchants (Decapitation, Trophy Hunter and Headhunter). Always-on effects such as Overload and Gears still apply.",
         "**Awakening** in `/craft` destroys one random upgrade on the item and pushes another one or two levels past its cap, up to 10 levels past it. You do not choose which.",
         "{{icon:grindstone}} The **Disenchant** bench in `/craft` takes one enchant of your choice off an item for 200 Prism Shards. The enchant is destroyed and nothing is refunded. Thorns and vanilla curses cannot come off."
       ]}
@@ -40,7 +40,7 @@
   ],
   "history": [
     {"date": "2026-11-23", "text": "Added three enchants: Executioner for swords and axes, and Prospector and Fortune's Favour for swords."},
-    {"date": "2026-11-23", "text": "Most custom combat enchants now work only against mobs, leaving player fights to vanilla enchants."},
+    {"date": "2026-11-23", "text": "Custom enchants that trigger on a hit now work only against mobs."},
     {"date": "2026-11-23", "text": "37 custom enchants were removed, including True Strike and Grievous Wounds."},
     {"date": "2026-11-23", "text": "The Upgrade bench now sells most custom enchants, and books no longer combine, so levels come only from the bench and Awakening."},
     {"date": "2026-10-08", "text": "Added Grievous Wounds for swords and axes: hits cut your target's healing."},

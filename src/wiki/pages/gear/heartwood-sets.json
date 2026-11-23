@@ -40,6 +40,7 @@
     ]}
   ],
   "history": [
+    {"date": "2026-11-23", "text": "The Geodeplate set bonus now gives Strength I instead of Resistance I."},
     {"date": "2026-11-23", "text": "Zone armour sets can now be built in the Zone Sets section of `/craft` from each area's zone item and Prismatic Resin."},
     {"date": "2026-11-08", "text": "Added zone armour sets for all 9 Heartwood zones, the Heartgrown set and the Branch of Heartwood."}
   ],
