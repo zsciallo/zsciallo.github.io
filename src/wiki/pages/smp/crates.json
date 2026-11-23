@@ -2,7 +2,7 @@
   "title": "Crates and Keys",
   "half": "smp",
   "live": true,
-  "needs_owner_check": "Written for mc-server 63529705 from the ExcellentCrates 7.x layout (objects/crate, objects/key, objects/reward). Halloween Crate retired (positions: {}), so 6 openable crates. The store is not named as a Living Prism Key source (BattlePass rewards.yml: pass-only), but src/data/storeContent.json still carries package 7793665 '1x Living Prism Key'; confirm whether it is on sale. Spawner type count left to the smp-crates table (lore says 13, reward list 14). Prod deploy 20261123-014534 was still running.",
+  "needs_owner_check": "Written for mc-server 63529705 from the ExcellentCrates 7.x layout (objects/crate, objects/key, objects/reward). Halloween Crate retired (positions: {}), so 6 openable crates. Spawner type count left to the smp-crates table (lore says 13, reward list 14). Prod deploy 20261123-014534 was still running.",
   "summary": "**Crates and Keys** are the six reward crates at spawn. Each opens with its own key, and each pays milestone rewards after a set number of openings.",
   "infobox": [
     ["Server", "SMP"],
@@ -20,7 +20,7 @@
         "**Spawner Crate** (Crate Key, also called the Spawner Key): every key is a spawner haul. Keys come from the store, the daily streak, the Emerald and Adamantine ranks, the VIP+ kit, the Reward Crate and the Vote Crate milestones.",
         "**Reward Crate** (Reward Key): every crate key except the Vote Key, shards, enchant books (Simple to Legendary) and trackers. Keys come from winning KOTH, envoys and the daily streak.",
         "**Vote Crate** (Vote Key): one key for every vote, plus bonus keys. See [Voting](/wiki/smp/voting/).",
-        "**Living Prism Crate** (Living Prism Key): the full Living Prism line of armour, tools and weapons, and cash from $500,000 to $5,000,000. The Living Prism Spear, Mace and Wings drop only here. Keys come from the [Battle Pass](/wiki/smp/battle-pass/) and the crate's own milestone."
+        "**Living Prism Crate** (Living Prism Key): the full Living Prism line of armour, tools and weapons, and cash from $500,000 to $5,000,000. The Living Prism Spear, Mace and Wings drop only here. Keys come from the [Battle Pass](/wiki/smp/battle-pass/), the store and the crate's own milestone."
       ]},
       {"p": "The Halloween Crate is retired and can no longer be opened. Halloween gear that players already own still works."}
     ]},
