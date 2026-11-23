@@ -2939,7 +2939,7 @@ footer {
   order: 4;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .sound-toggle {
     margin-left: auto;
   }
@@ -4695,7 +4695,7 @@ html.js.fonts-ready .site-nav-inner {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .nav-toggle {
     display: flex;
   }
@@ -4780,7 +4780,7 @@ html:not(.js) .nav-toggle {
   display: none;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   html:not(.js) .site-nav-links {
     position: static;
     display: flex;

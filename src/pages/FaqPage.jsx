@@ -18,7 +18,7 @@ export function FaqPage() {
 
   return (
     <MotionRoot>
-      <NavBar current="faq" />
+      <NavBar />
       <main>
         <section class="page-hero container" aria-label="Chromabit FAQ">
           <p class="section-eyebrow">HELP CENTER</p>

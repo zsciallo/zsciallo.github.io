@@ -6,12 +6,12 @@ import { useTheme } from '../hooks/useTheme';
 import { click } from '../lib/sound';
 
 const LINKS = [
-  { id: 'home', href: '/', label: 'HOME' },
-  { id: 'pvp', href: '/pvp/', label: 'PVP' },
   { id: 'store', href: '/store/', label: 'STORE' },
   { id: 'smp', href: '/smp/', label: 'SMP' },
+  { id: 'pvp', href: '/pvp/', label: 'PVP' },
   { id: 'wiki', href: '/wiki/', label: 'WIKI' },
-  { id: 'faq', href: '/faq/', label: 'FAQ' },
+  { id: 'auctions', href: '/auctions/', label: 'AUCTIONS' },
+  { id: 'map', href: '/dungeon/', label: 'MAP' },
 ];
 
 /** One nav link. Hover is tracked here and passed to the underline as an
@@ -146,7 +146,7 @@ export function NavBar({ current = null }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
-    const mq = window.matchMedia('(min-width: 701px)');
+    const mq = window.matchMedia('(min-width: 801px)');
     const onWide = (e) => e.matches && setOpen(false);
     window.addEventListener('keydown', onKey);
     mq.addEventListener('change', onWide);

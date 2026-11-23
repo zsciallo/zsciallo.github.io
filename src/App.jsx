@@ -15,7 +15,7 @@ export default function App() {
 
   return (
     <MotionRoot>
-      <NavBar current="home" />
+      <NavBar />
       <main>
         <section class="page-hero container home-hero" aria-label="Chromabit Network">
 

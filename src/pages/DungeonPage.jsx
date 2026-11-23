@@ -254,7 +254,7 @@ export function DungeonPage() {
 
   return (
     <MotionRoot>
-      <NavBar current="smp" />
+      <NavBar current="map" />
       <main class="dm">
         <header>
           <p class="section-eyebrow dm-kicker">SEASON 4 DUNGEON</p>
