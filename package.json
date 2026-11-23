@@ -20,7 +20,8 @@
     "test:theme": "node test/theme_check.mjs",
     "test:dungeon": "node test/dungeon_data.test.mjs",
     "test:dungeonlib": "node test/dungeon_lib.test.mjs",
-    "test:dungeon:browser": "node test/dungeon_browser_check.mjs"
+    "test:dungeon:browser": "node test/dungeon_browser_check.mjs",
+    "test:wiki": "node test/wiki_check.mjs"
   },
   "dependencies": {
     "dompurify": "^3.4.16",

@@ -57,6 +57,7 @@ export default defineConfig({
         vote: resolve(__dirname, 'vote/index.html'),
         auctions: resolve(__dirname, 'auctions/index.html'),
         dungeon: resolve(__dirname, 'dungeon/index.html'),
+        wiki: resolve(__dirname, 'wiki/index.html'),
       },
     },
   },

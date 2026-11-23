@@ -1,0 +1,38 @@
+{
+  "title": "Vote Fly",
+  "half": "smp",
+  "live": true,
+  "needs_owner_check": "Claim-only vote fly (fly bank 2.1.0, mc-server origin/main) is assumed live on the SMP.",
+  "summary": "**Vote Fly** is flight time you earn by voting. Each vote banks 2 minutes of `/fly`, and the bank only counts down while you are in the air.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Perk"],
+    ["Commands", "`/fly`, `/fly off`, `/flytime`"],
+    ["Per vote", "2 minutes"],
+    ["Where", "Your claims, or claims you are trusted to build in"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Vote for the server with `/vote`. Every vote adds 2 minutes to your fly bank."},
+      {"p": "Day 3 of your [daily streak](/wiki/smp/daily-streak/) adds 10 minutes."}
+    ]},
+    {"h": "Mechanics", "blocks": [
+      {"ul": [
+        "Type `/fly` to take off and `/fly off` to stop. `/flytime` shows how much time you have banked.",
+        "The bank only counts down while you are in the air. Time on the ground is free.",
+        "A boss bar shows the time left while you fly. It turns yellow at 60 seconds and red at 10.",
+        "Vote fly works inside a claim you own or have build trust in (`/trust`). Access or container trust is not enough, and neither is the wilderness.",
+        "Flying out of the claim drops you with slow falling. Your bank is kept.",
+        "There is no vote fly in the KOTH arena or the dungeon.",
+        "A PvP hit grounds you and blocks `/fly` for 15 seconds."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Vote on every site: each vote banks its own 2 minutes."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/voting", "smp/daily-streak", "smp/claims"]
+}

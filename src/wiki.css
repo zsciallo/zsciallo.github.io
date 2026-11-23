@@ -1,0 +1,263 @@
+/* ─── WIKI ─── (src/pages/WikiPage.jsx). Prose reuses .legal, tables .store-table, boxes .card. */
+
+/* The nav slot must not box the sticky nav in. */
+.wiki-nav-slot {
+  display: contents;
+}
+
+.wiki.container {
+  max-width: 1000px;
+  padding: 1.5rem 1.25rem 5rem;
+}
+
+.wiki-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  font-family: var(--font-hud);
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.wiki-crumbs li + li::before {
+  content: '›';
+  margin-right: 0.4rem;
+}
+
+.wiki-crumbs a {
+  color: var(--muted);
+}
+
+.wiki-crumbs a:hover {
+  color: var(--text);
+}
+
+.wiki-h1 {
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-weight: 500;
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--text);
+  margin: 0.75rem 0 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.wiki-article {
+  display: flow-root;
+  margin-top: 0;
+}
+
+.wiki-infobox {
+  float: right;
+  width: 290px;
+  margin: 0 0 1.25rem 1.75rem;
+  padding: 1rem 1.15rem;
+  line-height: 1.5;
+}
+
+.wiki-infobox-title {
+  font-family: var(--font-hud);
+  font-size: 1.35rem;
+  color: var(--text);
+  margin-bottom: 0.5rem !important;
+}
+
+.wiki-infobox table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.wiki-infobox th,
+.wiki-infobox td {
+  padding: 0.35rem 0;
+  vertical-align: top;
+  text-align: left;
+}
+
+.wiki-infobox th {
+  padding-right: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.wiki-infobox td {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.wiki-infobox tr + tr > * {
+  border-top: 1px solid var(--divider-on-surface);
+}
+
+@media (max-width: 900px) {
+  .wiki-infobox {
+    float: none;
+    width: auto;
+    margin: 0 0 1.25rem;
+  }
+}
+
+.wiki-lead {
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.wiki-toc {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+}
+
+.wiki-toc-title {
+  font-family: var(--font-hud);
+  font-size: 1.15rem;
+  color: var(--text);
+  margin-bottom: 0.25rem !important;
+}
+
+.wiki-toc ol {
+  margin: 0 0 0 1.25rem;
+}
+
+.wiki-toc li {
+  margin-bottom: 0.15rem;
+}
+
+.wiki code {
+  font-family: var(--font-mono);
+  font-size: 1.1em;
+  color: var(--text);
+  background: var(--bg2);
+  border-radius: 4px;
+  padding: 0 0.3em;
+}
+
+.wiki .store-table-wrap {
+  margin-bottom: 1rem;
+}
+
+.wiki .store-table {
+  font-size: 0.9rem;
+}
+
+.wiki .store-table caption {
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  font-family: var(--font-hud);
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.wiki .store-table td {
+  color: var(--text);
+}
+
+.wiki p a,
+.wiki td a,
+.wiki-related a {
+  color: var(--accent-2);
+  text-decoration: underline;
+}
+
+.wiki-related {
+  clear: both;
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+}
+
+.wiki-related h2 {
+  margin-top: 0 !important;
+}
+
+.wiki-related ul {
+  margin-bottom: 0 !important;
+}
+
+/* Wiki home */
+.wiki-filter label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-hud);
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+.wiki-filter input {
+  width: 100%;
+  max-width: 420px;
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-radius: 7px;
+}
+
+.wiki-filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wiki-group {
+  margin: 2.25rem 0 0.85rem;
+  font-family: var(--font-hud);
+  font-size-adjust: none;
+  font-weight: 500;
+  font-size: 1.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.wiki-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  list-style: none;
+}
+
+.wiki-tiles [hidden] {
+  display: none;
+}
+
+.wiki-tile {
+  display: block;
+  height: 100%;
+  padding: 1rem 1.15rem;
+  text-decoration: none;
+  transition: translate 0.15s ease;
+}
+
+.wiki-tile:hover {
+  translate: 0 -3px;
+}
+
+.wiki-tile h3 {
+  margin-bottom: 0.35rem;
+  font-family: var(--font-hud);
+  font-weight: 500;
+  font-size: 1.35rem;
+  color: var(--text);
+}
+
+.wiki-tile p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiki-tile {
+    transition: none;
+  }
+
+  .wiki-tile:hover {
+    translate: none;
+  }
+}

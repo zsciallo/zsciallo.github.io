@@ -10,6 +10,7 @@ const LINKS = [
   { id: 'pvp', href: '/pvp/', label: 'PVP' },
   { id: 'store', href: '/store/', label: 'STORE' },
   { id: 'smp', href: '/smp/', label: 'SMP' },
+  { id: 'wiki', href: '/wiki/', label: 'WIKI' },
   { id: 'faq', href: '/faq/', label: 'FAQ' },
 ];
 

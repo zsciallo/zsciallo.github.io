@@ -10,25 +10,7 @@ import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
 import { MotionRoot } from '../lib/motion';
 import faq from '../data/faq.json';
-
-// Answers in faq.json use a tiny markdown: **bold**, `code` and [text](href).
-// Anything else is plain text, which keeps the JSON readable and lets
-// plainAnswer() in src/data/seo.js strip it the same way for the page's JSON-LD.
-const TOKEN = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
-
-function rich(text) {
-  return text.split(TOKEN).map((part, i) => {
-    if (!part) return null;
-    if (part.startsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
-    if (part.startsWith('`')) return <code key={i}>{part.slice(1, -1)}</code>;
-    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
-    if (link) {
-      const external = /^https?:/.test(link[2]);
-      return <a key={i} href={link[2]} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>{link[1]}</a>;
-    }
-    return part;
-  });
-}
+import { rich } from '../lib/rich';
 
 export function FaqPage() {
   const status = useServerStatus(config.serverIP, config.underConstruction);

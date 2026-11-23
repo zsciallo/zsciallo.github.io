@@ -7,6 +7,7 @@ export function Footer() {
         <a href="/">HOME</a>
         <a href="/pvp/">PVP</a>
         <a href="/smp/">ECONOMY SMP</a>
+        <a href="/wiki/">WIKI</a>
         <a href="/faq/">FAQ</a>
         <a href="/auctions/">AUCTIONS</a>
         <a href="/store/">STORE</a>
