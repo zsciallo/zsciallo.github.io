@@ -1,0 +1,142 @@
+{
+ "id": "gear-halloween",
+ "title": "Halloween gear",
+ "source": "mc-server:plugins/AdvancedEnchantments/armorSets",
+ "ref": "63529705",
+ "columns": [
+  "Piece",
+  "Enchants",
+  "Bonus",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Bobbing for Souls",
+   "Luck of the Sea V, Lure III, Unbreaking III, Mending I, Soul Lure I",
+   "Luck II while held -- better treasure",
+   "No longer obtainable"
+  ],
+  [
+   "Coffin Lid",
+   "Unbreaking X, Mending I, Slam the Lid I",
+   "Blocking a hit knocks the attacker back",
+   "No longer obtainable"
+  ],
+  [
+   "The Count's Fang",
+   "Sharpness VI, Looting III, Unbreaking III, Mending I, Bloodsip I, Bleed I",
+   "Swift strikes that sip a little health; Hits sometimes make your target bleed",
+   "No longer obtainable"
+  ],
+  [
+   "Grave Digger",
+   "Efficiency VI, Fortune IV, Unbreaking III, Mending I, Six Feet Under I",
+   "Digs a 3x3 area",
+   "No longer obtainable"
+  ],
+  [
+   "Grave Robber",
+   "Efficiency VI, Fortune IV, Unbreaking III, Mending I, Grave Robber I",
+   "Mines an entire ore vein at once",
+   "No longer obtainable"
+  ],
+  [
+   "Grim Harvester",
+   "Efficiency VI, Fortune V, Unbreaking III, Mending I, Reaping I",
+   "Harvests a 3x3 of grown crops",
+   "No longer obtainable"
+  ],
+  [
+   "Headless Hatchet",
+   "Sharpness VII, Efficiency VI, Looting III, Unbreaking III, Mending I, Headhunter I, Collector I",
+   "Players drop their head, mobs sometimes do",
+   "No longer obtainable"
+  ],
+  [
+   "The Last Harvest",
+   "Sharpness VII, Sweeping Edge V, Looting III, Unbreaking III, Mending I, Reap I",
+   "Every strike cuts down everything nearby",
+   "No longer obtainable"
+  ],
+  [
+   "Nightmare Fuel",
+   "Power VII, Punch II, Flame I, Infinity I, Unbreaking III, Mending I, Night Terrors I",
+   "Arrows plunge targets into Darkness and slow them",
+   "No longer obtainable"
+  ],
+  [
+   "Pumpkin Smasher",
+   "Density VI, Breach IV, Wind Burst III, Unbreaking III, Mending I, Gourd Slam I",
+   "Every strike blasts everything nearby away",
+   "No longer obtainable"
+  ],
+  [
+   "Reaper's Toll",
+   "Sharpness 15, Looting V, Fire Aspect II, Unbreaking X, Mending I, Reaper's Toll I",
+   "Every hit steals 1-3 health",
+   "No longer obtainable"
+  ],
+  [
+   "Stake Launcher",
+   "Quick Charge V, Piercing VII, Unbreaking III, Mending I, Stake Through the Heart I",
+   "Piercing bolts that sometimes ignore armor",
+   "No longer obtainable"
+  ],
+  [
+   "Stake Out",
+   "Sharpness VII, Smite V, Lunge III, Looting IV, Unbreaking III, Mending I",
+   "Bonus damage against the undead",
+   "No longer obtainable"
+  ],
+  [
+   "Trick or Stab",
+   "Sharpness VII, Looting III, Unbreaking III, Mending I, Cheap Shot I, Get Webbed I",
+   "Critical hits deal 30% more damage; Hits sometimes web your target (Slowness I)",
+   "No longer obtainable"
+  ],
+  [
+   "Witch Hat",
+   "Protection V, Unbreaking III, Mending I, Respiration III, Aqua Affinity I",
+   "Set bonus: Night Vision (Requires all 4 Widow pieces.)",
+   "No longer obtainable"
+  ],
+  [
+   "Widow's Carapace",
+   "Protection V, Unbreaking III, Mending I",
+   "Set bonus: Night Vision (Requires all 4 Widow pieces.)",
+   "No longer obtainable"
+  ],
+  [
+   "Widow's Legwraps",
+   "Protection V, Unbreaking III, Mending I, Swift Sneak III",
+   "Set bonus: Night Vision (Requires all 4 Widow pieces.)",
+   "No longer obtainable"
+  ],
+  [
+   "Widow's Creepers",
+   "Protection V, Unbreaking III, Mending I, Feather Falling IV, Depth Strider III",
+   "Set bonus: Night Vision (Requires all 4 Widow pieces.)",
+   "No longer obtainable"
+  ]
+ ],
+ "icons": [
+  "fishing_rod",
+  "shield",
+  "netherite_sword",
+  "netherite_shovel",
+  "netherite_pickaxe",
+  "netherite_hoe",
+  "netherite_axe",
+  "netherite_sword",
+  "bow",
+  "mace",
+  "netherite_sword",
+  "crossbow",
+  "netherite_spear",
+  "netherite_sword",
+  "netherite_helmet",
+  "widow_chestplate",
+  "widow_leggings",
+  "widow_boots"
+ ]
+}

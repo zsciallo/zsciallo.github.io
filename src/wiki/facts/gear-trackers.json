@@ -1,0 +1,39 @@
+{
+ "id": "gear-trackers",
+ "title": "Trackers",
+ "source": "mc-server:plugins/AdvancedEnchantments/config.yml",
+ "ref": "63529705",
+ "columns": [
+  "Tracker",
+  "Counts",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "StatTrak Creator",
+   "Track how many kills you have with a weapon",
+   "Chroma Crate, Living Prism Crate, Reward Crate, Shard Crate"
+  ],
+  [
+   "MobTrak Creator",
+   "Track how many mob kills you have with a weapon",
+   "Reward Crate, Shard Crate"
+  ],
+  [
+   "BlockTrak Creator",
+   "Track how many blocks you break with a tool",
+   "Chroma Crate, Reward Crate, Shard Crate"
+  ],
+  [
+   "FishTrak Creator",
+   "Track how many fish you catch with a fishing rod",
+   "Reward Crate, Shard Crate"
+  ]
+ ],
+ "icons": [
+  "echo_shard",
+  "popped_chorus_fruit",
+  "amethyst_cluster",
+  "purple_dye"
+ ]
+}

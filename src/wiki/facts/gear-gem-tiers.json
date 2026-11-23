@@ -1,0 +1,44 @@
+{
+ "id": "gear-gem-tiers",
+ "title": "Gem tiers",
+ "source": "mc-server:plugins/ChromaticCrafting/gems.yml",
+ "ref": "63529705",
+ "columns": [
+  "Tier",
+  "XP bonus",
+  "Delving Prism bonus",
+  "Combine"
+ ],
+ "rows": [
+  [
+   "Rough",
+   "+1%",
+   "+0.5%",
+   "80 make 1 Flawed"
+  ],
+  [
+   "Flawed",
+   "+2%",
+   "+1%",
+   "80 make 1 Fine"
+  ],
+  [
+   "Fine",
+   "+4%",
+   "+2%",
+   "80 make 1 Flawless"
+  ],
+  [
+   "Flawless",
+   "+7%",
+   "+3.5%",
+   "80 make 1 Perfect"
+  ],
+  [
+   "Perfect",
+   "+12%",
+   "+6%",
+   "Top tier"
+  ]
+ ]
+}

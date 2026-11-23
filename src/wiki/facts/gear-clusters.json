@@ -1,0 +1,51 @@
+{
+ "id": "gear-clusters",
+ "title": "Clusters",
+ "source": "mc-server:plugins/ChromaticCrafting/recipes/clusters.yml",
+ "ref": "63529705",
+ "columns": [
+  "Item",
+  "Made from",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Cluster of Wrath",
+   "Shard of Strength, Shard of Vigor, Netherite Ingot x8, Echo Shard x4",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Cluster of Cinders",
+   "Shard of Embers, Shard of Swiftness, Netherite Ingot x6, Blaze Rod x16",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Cluster of Renewal",
+   "Shard of Vitality, Shard of Healing, Netherite Ingot x6, Golden Apple x8",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Cluster of Industry",
+   "Shard of Haste, Shard of Hunger, Netherite Ingot x6, Diamond Block x4",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Cluster of the Descent",
+   "Shard of the Feather, Shard of Night, Netherite Ingot x4, Phantom Membrane x16",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Cluster of the Depths",
+   "Shard of the Tides, Shard of Luck, Netherite Ingot x4, Heart of the Sea",
+   "Crafting, Shard Crate"
+  ]
+ ],
+ "icons": [
+  "cluster_strength_vigor",
+  "cluster_embers_swiftness",
+  "cluster_vitality_healing",
+  "cluster_haste_hunger",
+  "cluster_feather_night",
+  "cluster_tides_luck"
+ ]
+}

@@ -106,6 +106,111 @@ assert facts.guard({"id": "t", "rows": [["Crate", "weight: 5"]]}, terms)
 assert facts.guard({"id": "t", "rows": [["Use /caa reload"]]}, terms)
 assert facts.guard({"id": "t", "rows": [["Chance to strike twice.", "Featherweight"]]}, terms) is None
 
+# ---- Gear tables
+# hw_gear.py is parsed, never run: a file that would exit on import still parses, and a non-literal is refused.
+HW_SRC = '''raise SystemExit("executed")
+SETS = {"Mossy": ("Mossgate Landing", "EASY", "5B7F3A", "wild", "emerald", "7FBF5A",
+                  "Hit by a mob: 15% chance of Regeneration I for 4s.", {
+                      "helmet": ("Mossy Cap", {}, [("glowing", 1)], "Spores settle."),
+                      "boots": ("Mossy Treads", {"feather_falling": 2}, [], "Green prints.")})}
+HEARTGROWN_SETS = ("Mossy",)
+TIER_ENCHANTS = {"EASY": (2, 2)}
+HEARTGROWN_ENCHANTS = (4, 3)
+AE_ENCHANTS = {"glowing": ("Glowing", "AAAAAA"), "ambit": ("Ambit", "FFFF55")}
+BRANCH_ID = "branch_of_heartwood"
+BRANCH_NAME = "Branch of Heartwood"
+BRANCH_ENCHANTS = {"sharpness": 5}
+BRANCH_AE = [("ambit", 1)]
+BRANCH_LORE = [[("AAAAAA", "Broken.")], [("555555", "It still remembers growing.")]]
+GEAR_ITEMS = tuple(_piece_ids())
+'''
+hw = facts.hw_literals(HW_SRC)
+assert hw["HEARTGROWN_SETS"] == ("Mossy",) and "GEAR_ITEMS" not in hw
+for bad_src, msg in ((HW_SRC.replace('HEARTGROWN_SETS = ("Mossy",)', "HEARTGROWN_SETS = tuple(SETS)"), "HEARTGROWN_SETS is not a literal"),
+                     (HW_SRC.replace("BRANCH_ID = ", "BRANCH = "), "no literal BRANCH_ID")):
+    try:
+        facts.hw_literals(bad_src)
+    except facts.ShapeError as e:
+        assert msg in str(e), e
+    else:
+        raise AssertionError(f"hw_literals accepted: {msg}")
+
+def give(texts):
+    return "minecraft:give %player% minecraft:leather_helmet[minecraft:lore=[" + ",".join(f'{{text:"{t}"}}' for t in texts) + "]] 1"
+SETS = {"Glint.yml": {"material": "NETHERITE", "items": {
+            "boots": {"name": "&bGlint Boots", "itemsadder": "glint:glint_boots", "enchants": ["protection:5", "zap:1"],
+                      "lore": ["", "SET BONUS", "{#C77DFF}* Strength I", "* Zap, 15% chance to shock", "on a hit", "(Requires all 4.)", "", "bound"]},
+            "helmet": {"name": "Glint Helmet", "itemsadder": "glint:glint_helmet", "enchants": ["protection:5"], "lore": []}}},
+        "GlintSword.yml": {"material": "NETHERITE_SWORD", "items": {"weapon": {"name": "Glint Sword", "itemsadder": "glint:glint_sword",
+            "enchants": ["sharpness:8"], "lore": ["", "* Takes heads", ""]}}},
+        "GlintExample.yml": {"items": {"weapon": {"name": "Stock Example", "enchants": ["sharpness:1"]}}},
+        "ShardOfZap.yml": {"items": {"weapon": {"name": "Shard of Zap", "itemsadder": "shards:shard_of_zap", "enchants": ["shardofzap:1"]}}}}
+RECIPES = {"gear.yml": {"recipes": {"g_boots": {"output": {"itemsadder": "glint:glint_boots", "name": "Glint Boots"}, "inputs": []}}},
+           "zone_sets.yml": {"recipes": {"z_cap": {"output": {"give": give(["Mossy Cap", "Spores settle."])}, "inputs": []}}},
+           "clusters.yml": {"recipes": {"c_zap": {"output": {"itemsadder": "clusters:zap_cluster", "name": "<b>Cluster of Zap</b>"},
+                                                  "inputs": [{"item": "shards:shard_of_zap", "amount": 1},
+                                                             {"item": "NETHERITE_INGOT", "amount": 8}]}}}}
+GEAR_CRATES = {"glint_crate.yml": crate("Glint Crate", "test_key", ["sword", "boots", "blade", "zap", "trak", "cluster"]),
+               "old_crate.yml": crate("Old Crate", "test_key", ["sword", "hat"], placed=False)}
+cmd = lambda *c: {"base": {"weight": 12.5}, "commands": {"bundles": {"0": {"commands": list(c), "weight": 1.0}}}}
+BLADE = '{components:{"minecraft:custom_name":{text:"Corrupted Blade"},"minecraft:enchantments":{"minecraft:sharpness":5,"minecraft:looting":3}},count:1,id:"minecraft:netherite_sword"}'
+GEAR_REWARDS = {"glint_crate": {"sword": cmd("asets givepiece %player_name% GlintSword WEAPON", "ae giveitem %player_name% stattrak 1"),
+                                "boots": cmd("asets givepiece %player_name% Glint BOOTS"),
+                                "blade": {"base": {"weight": 33.3}, "items": {"item_list": {"0": {"Data": {"Value": BLADE}}}}},
+                                "zap": cmd("asets givepiece %player_name% ShardOfZap WEAPON"),
+                                "trak": cmd("ae giveitem %player_name% mobtrak 1"),
+                                "cluster": cmd("chromatic give %player_name% c_zap")},
+                "old_crate": {"sword": cmd("asets givepiece %player_name% GlintSword WEAPON"),
+                              "hat": cmd("asets givepiece %player_name% Glint HELMET")}}
+LOOT = {"tables": {"boss_t2": {"entries": [{"weight": 4, "commands": [give(["Heartgrown. ", "Mossy Treads", "Green prints."])]},
+                                           {"weight": 1, "commands": [give(["It still remembers growing."])]},
+                                           {"weight": 9, "commands": [give(["Mossy Cap", "Spores settle."])]}]}}}
+ae_by_ia = {"glint:glint_boots": "Glint/boots", "glint:glint_helmet": "Glint/helmet", "glint:glint_sword": "GlintSword/weapon",
+            "shards:shard_of_zap": "ShardOfZap/weapon"}
+src = facts.gear_sources(RECIPES, GEAR_CRATES, GEAR_REWARDS, LOOT, ae_by_ia, hw)
+ae_names = {"zap": "Zap", "shardofzap": "Shard of Zap"}
+ia_icons = {"glint:glint_boots": "glint_boots", "glint:glint_sword": "netherite_sword", "shards:shard_of_zap": "shard_of_zap",
+            "clusters:zap_cluster": "zap_cluster"}
+family = facts.build_ae_family(SETS, "Glint", ae_names, ia_icons, src)
+assert family == [
+    ["Glint Helmet", "Protection V", "None", "No longer obtainable"],
+    ["Glint Boots", "Protection V, Zap I", "Set bonus: Strength I; Zap, 15% chance to shock on a hit (Requires all 4.)", "Crafting, Glint Crate"],
+    ["Glint Sword", "Sharpness VIII", "Takes heads", "Glint Crate"]], family  # the stock example set is left out
+assert [r.icon for r in family] == ["netherite", "glint_boots", "netherite_sword"]  # helmet: no IA texture, the set material
+assert facts.build_hw_sets(hw, src) == [["Mossy Set", "Mossgate Landing", "Easy", "Hit by a mob: 15% chance of Regeneration I for 4s."]]
+assert facts.build_hw_pieces(hw, src, False) == [["Mossy Cap", "Mossy Set", "Protection II, Unbreaking II, Glowing I", "Crafting, Heartwood"]]
+hg = facts.build_hw_pieces(hw, src, True)
+assert hg == [["Heartgrown Mossy Treads", "Mossy Set", "Protection IV, Unbreaking III, Feather Falling II", "Heartwood"],
+              ["Branch of Heartwood", "None", "Sharpness V, Ambit I", "Heartwood"]], hg
+assert [r.icon for r in hg] == ["leather_boots", "wooden_sword"]
+assert facts.build_crate_gear(GEAR_REWARDS, "glint_crate", src) == [["Corrupted Blade", "Sharpness V, Looting III", "Glint Crate"]]
+assert facts.build_shards(SETS, {"shardofzap": {"description": "&7Zaps while held."}}, ia_icons, src) == [["Shard of Zap", "Zaps while held.", "Glint Crate"]]
+made = facts.build_made_from(RECIPES["clusters.yml"], "clusters.yml", {"shards:shard_of_zap": "Shard of Zap"}, ia_icons, src)
+assert made == [["Cluster of Zap", "Shard of Zap, Netherite Ingot x8", "Crafting, Glint Crate"]] and made[0].icon == "zap_cluster"
+AE_CONFIG = {"items": {t: {"type": "ECHO_SHARD", "name": f"{{#C77DFF}}{t} Creator", "lore": [f"&7track {t}", "&7Drag it"]}
+                       for t in ("stattrak", "mobtrak", "blocktrak", "fishtrak")}}
+trackers = facts.build_trackers(AE_CONFIG, src)
+assert trackers[:2] == [["stattrak Creator", "Track stattrak", "Glint Crate"], ["mobtrak Creator", "Track mobtrak", "Glint Crate"]]
+assert trackers[2][2] == "No longer obtainable" and trackers[0].icon == "echo_shard"
+# gems.yml: the drop key never reaches a cell.
+GEMS = {"combine-ratio": 80, "tiers": {"rough": {"xp": 1, "drop": 0.25, "delving-prism": 0.5}, "perfect": {"xp": 12, "drop": 3.75, "delving-prism": 6}},
+        "fees": {"remove": 500, "unlock": 10000}, "sockets": {"zone": {"max": 1, "open": 1}, "chromatic": {"max": 2, "open": 1}}}
+gem_out = [facts.build_gem_tiers(GEMS), facts.build_gem_sockets(GEMS), facts.build_gem_fees(GEMS)]
+assert gem_out == [[["Rough", "+1%", "+0.5%", "80 make 1 Perfect"], ["Perfect", "+12%", "+6%", "Top tier"]],
+                   [["Heartwood zone sets", "1"], ["Chromatic", "2 (1 open, 1 to unlock)"]],
+                   [["Remove a gem", "500 Prism x tier"], ["Unlock a socket", "10,000 Prism"]]], gem_out
+everything = json.dumps([gem_out, family, hg, trackers, made, facts.build_crate_gear(GEAR_REWARDS, "glint_crate", src)])
+assert not any(s in everything for s in ("0.25", "3.75", "12.5", "33.3", "weight", "drop")), everything
+
+# The deny guard: gear-* tables may show a lore's "15% chance", nothing else is exempt.
+deny_terms = [__import__("re").compile(t, 2) for t in json.loads(facts.DENY.read_text(encoding="utf-8"))["terms"]]
+assert facts.GEAR_CHANCE_TERM in [p.pattern for p in deny_terms]
+assert facts.guard({"id": "gear-x", "rows": [["Hit by a mob: 15% chance of Speed I"]]}, deny_terms) is None
+assert facts.guard({"id": "smp-x", "rows": [["Hit by a mob: 15% chance of Speed I"]]}, deny_terms)
+assert facts.guard({"id": "gear-x", "rows": [["Drop weight 5"]]}, deny_terms)
+assert facts.guard({"id": "gear-x", "rows": [["Use /gem give to add one"]]}, deny_terms)
+assert facts.guard({"id": "gear-x", "rows": [["15% chance", "/caa reload"]]}, deny_terms)
+
 # An unexpected config shape raises, naming the file and key.
 for bad, call in [
     ("kits.x: key 'delay'", lambda: facts.build_smp_kits({"kits": {"x": {"items": ["stone 1"]}}}, {})),

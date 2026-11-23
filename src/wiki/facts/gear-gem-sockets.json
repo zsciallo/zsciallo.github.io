@@ -1,0 +1,28 @@
+{
+ "id": "gear-gem-sockets",
+ "title": "Gem sockets",
+ "source": "mc-server:plugins/ChromaticCrafting/gems.yml",
+ "ref": "63529705",
+ "columns": [
+  "Armour",
+  "Sockets"
+ ],
+ "rows": [
+  [
+   "Heartwood zone sets",
+   "1"
+  ],
+  [
+   "Living Prism",
+   "1"
+  ],
+  [
+   "Chromatic",
+   "2 (1 open, 1 to unlock)"
+  ],
+  [
+   "Heartgrown",
+   "2 (1 open, 1 to unlock)"
+  ]
+ ]
+}

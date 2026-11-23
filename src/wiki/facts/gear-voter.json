@@ -1,0 +1,39 @@
+{
+ "id": "gear-voter",
+ "title": "Voter armour",
+ "source": "mc-server:plugins/ExcellentCrates/objects/reward/vote_crate",
+ "ref": "63529705",
+ "columns": [
+  "Piece",
+  "Enchants",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Voter Boots",
+   "Depth Strider III, Feather Falling IV, Mending I, Protection IV, Soul Speed III, Thorns III, Unbreaking IV",
+   "Vote Crate"
+  ],
+  [
+   "Voter Chestplate",
+   "Mending I, Protection IV, Thorns III, Unbreaking IV",
+   "Vote Crate"
+  ],
+  [
+   "Voter Helmet",
+   "Aqua Affinity I, Mending I, Protection IV, Respiration III, Thorns III, Unbreaking IV",
+   "Vote Crate"
+  ],
+  [
+   "Voter Leggings",
+   "Mending I, Protection IV, Swift Sneak III, Thorns III, Unbreaking IV",
+   "Vote Crate"
+  ]
+ ],
+ "icons": [
+  "netherite_boots",
+  "netherite_chestplate",
+  "netherite_helmet",
+  "netherite_leggings"
+ ]
+}

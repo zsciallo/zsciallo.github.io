@@ -1,0 +1,79 @@
+{
+ "id": "gear-heartwood-sets",
+ "title": "Heartwood zone sets",
+ "source": "chromatic-dungeons:tools/hw_gear.py",
+ "ref": "f69980b",
+ "columns": [
+  "Set",
+  "Area",
+  "Tier",
+  "Set bonus"
+ ],
+ "rows": [
+  [
+   "Sporewarden Set",
+   "Mossgate Landing",
+   "Easy",
+   "Hit by a mob: 15% chance of Regeneration I for 4s."
+  ],
+  [
+   "Kilnforged Set",
+   "Ochre Warrens",
+   "Easy",
+   "Hit by a mob: 20% chance of Fire Resistance for 6s."
+  ],
+  [
+   "Bogstrider Set",
+   "Mirewood Roots",
+   "Medium",
+   "Hit by a mob: 20% chance to slow it (Slowness I, 3s)."
+  ],
+  [
+   "Waxguard Set",
+   "Resin Hive",
+   "Medium",
+   "Hit by a mob: 10% chance of Absorption I for 6s."
+  ],
+  [
+   "Palewatch Set",
+   "Pale Drip",
+   "Hard",
+   "Hit by a mob: 15% chance of Speed I for 4s."
+  ],
+  [
+   "Geodeplate Set",
+   "Sulfur Geode",
+   "Hard",
+   "Hit by a mob: 15% chance of Strength I for 4s."
+  ],
+  [
+   "Bloomshroud Set",
+   "Glowberry Canopy",
+   "Hard",
+   "Kill a mob: 25% chance to heal 2 hearts."
+  ],
+  [
+   "Sculkhollow Set",
+   "Hollow Below",
+   "Very Hard",
+   "+8% damage to Heartwood mobs."
+  ],
+  [
+   "Rotroot Set",
+   "Heartwood Core",
+   "Very Hard",
+   "Kill a mob: 30% chance to heal 2 hearts."
+  ]
+ ],
+ "icons": [
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate",
+  "leather_chestplate"
+ ]
+}

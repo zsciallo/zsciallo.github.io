@@ -1,0 +1,69 @@
+{
+ "id": "gear-corrupted",
+ "title": "Corrupted gear",
+ "source": "mc-server:plugins/ExcellentCrates/objects/reward/chroma_crate",
+ "ref": "63529705",
+ "columns": [
+  "Piece",
+  "Enchants",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Corrupted Axe",
+   "Efficiency V, Fortune III, Unbreaking III, Mending I",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Blade",
+   "Sharpness V, Looting III, Fire Aspect II, Unbreaking III, Mending I",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Boots",
+   "Protection IV, Unbreaking III, Feather Falling IV, Depth Strider III",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Chestplate",
+   "Protection IV, Unbreaking III, Thorns III",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Elytra",
+   "Protection III, Unbreaking III, Mending I",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Helmet",
+   "Protection IV, Unbreaking III, Respiration III, Aqua Affinity I",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Leggings",
+   "Protection IV, Unbreaking III, Swift Sneak III",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Pickaxe",
+   "Efficiency V, Fortune III, Unbreaking III, Mending I",
+   "Chroma Crate"
+  ],
+  [
+   "Corrupted Shovel",
+   "Efficiency V, Fortune III, Unbreaking III, Mending I",
+   "Chroma Crate"
+  ]
+ ],
+ "icons": [
+  "netherite_axe",
+  "netherite_sword",
+  "netherite_boots",
+  "netherite_chestplate",
+  "elytra",
+  "netherite_helmet",
+  "netherite_leggings",
+  "netherite_pickaxe",
+  "netherite_shovel"
+ ]
+}

@@ -3,7 +3,8 @@
 Usage: python tools/wiki/facts.py [--smp-ref REF] [--kit-ref REF] [--out DIR]
 Configs are read only with `git show <sha>:<path>` (never the working tree, never a deny-list path). Odds, weights,
 chances and pity never reach a cell: those keys are never read, a "15% chance" in a description loses its number, and a
-final guard aborts on any cell that still matches the deny list.
+final guard aborts on any cell that still matches the deny list. Gear tables (gear-*) print the item lore as it is,
+proc chances included (owner ruling 2026-11-22), and are exempt from that one deny term only.
 """
 import argparse
 import fnmatch
@@ -17,7 +18,8 @@ import yaml
 
 SMP_REPO = "F:/Work/minecraft/mc-server"
 KIT_REPO = "F:/Work/minecraft/mc-kit"
-REFS = {"smp": "origin/main", "kit": "origin/main"}
+DUNGEONS_REPO = "F:/Work/minecraft/chromatic-dungeons"  # tools/hw_gear.py, the Heartwood gear catalogue
+REFS = {"smp": "origin/main", "kit": "origin/main", "dungeons": "main"}
 SITE = pathlib.Path(__file__).resolve().parents[2]
 OUT = SITE / "src/wiki/facts"
 DENY = pathlib.Path(__file__).with_name("deny.json")
@@ -29,7 +31,7 @@ SPEC_TERMS = [r"\bodds\b", r"\bweight", r"\bpity\b", r"drop rate", r"\d+(\.\d+)?
 SPEC_PATHS = ["plugins/LuckPerms/*", "plugins/Votifier/*", "plugins/*Tebex*/*", "plugins/DiscordSRV/*",
               "plugins/*/database.yml"]
 # A config value under one of these keys must never show; "chance to ..." in prose is fine, "chance: 30" is not.
-KEY_GUARD = re.compile(r"\b(weight|pity|permission)s?\b|\bchances?\s*[:=]\s*\d", re.I)
+KEY_GUARD = re.compile(r"\b(weight|pity|permission)s?\b|\bchances?\s*[:=]\s*\d|/gems?\s+(give|take|balance)\b", re.I)
 
 COLOUR = re.compile(r"[&§](#[0-9a-f]{6}|x([&§][0-9a-f]){6}|[0-9a-fk-or])|\{#[0-9a-f]{6}\}|<[^<>]*>|%[a-z_-]+%", re.I)
 CHANCE = re.compile(r"\b(?:(a|an)\s+)?\d+(?:\.\d+)?\s?%\s?(chance)|\b(chance)\s+of\s+\d+(?:\.\d+)?\s?%", re.I)
@@ -462,6 +464,282 @@ def build_arsenal(loot, ffa):
     return [[name(r), ", ".join(ks)] for r, ks in by_tier.items() if ks]
 
 
+# ---------------------------------------------------------------- Gear (SMP)
+# Gear tables print the item's own lore, proc chances included (owner ruling 2026-11-22), so no_chance() is not used
+# here and guard() lets gear-* tables through the one deny term below. Weights, drop chances and odds are never read.
+
+GEAR_CHANCE_TERM = r"\d+(\.\d+)?\s?%\s?chance"
+SLOT_ORDER = ["helmet", "chestplate", "leggings", "boots", "weapon"]
+GIVEPIECE = re.compile(r"^asets givepiece \S+ (\w+) (\w+)$")
+CC_GIVE = re.compile(r"^chromatic give \S+ (\w+)$")
+AE_GIVE = re.compile(r"^ae giveitem \S+ (\w+) \d+$")
+SNBT_ENCHANTS = re.compile(r'"minecraft:enchantments":\{([^{}]*)\}')
+SNBT_LEVEL = re.compile(r'"minecraft:([a-z_]+)":(\d+)')
+HW_NAMES = ("SETS", "HEARTGROWN_SETS", "TIER_ENCHANTS", "HEARTGROWN_ENCHANTS", "AE_ENCHANTS", "BRANCH_ID", "BRANCH_NAME",
+            "BRANCH_ENCHANTS", "BRANCH_AE", "BRANCH_LORE")
+SOCKET_FAMILIES = {"chromatic": "Chromatic", "living_prism": "Living Prism", "zone": "Heartwood zone sets",
+                   "heartgrown": "Heartgrown"}
+GEM_FEES = {"remove": ("Remove a gem", True), "change-skill": ("Change a gem's skill", True),
+            "unlock": ("Unlock a socket", False)}  # (label, multiplied by the tier number), per the gems.yml header
+
+
+def hw_literals(source):
+    """The catalogue literals of chromatic-dungeons tools/hw_gear.py, parsed with ast and never imported or run."""
+    import ast
+    found = {}
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) \
+                and node.targets[0].id in HW_NAMES:
+            try:
+                found[node.targets[0].id] = ast.literal_eval(node.value)
+            except ValueError:
+                raise ShapeError(f"hw_gear.py: {node.targets[0].id} is not a literal") from None
+    missing = [n for n in HW_NAMES if n not in found]
+    if missing:
+        raise ShapeError(f"hw_gear.py: no literal {missing[0]}")
+    return found
+
+
+def ae_enchant_text(entries, ae_names, where):
+    """AE armorSet 'id:level' entries -> 'Protection V, Trophy Hunter I'."""
+    out = []
+    for e in entries:
+        eid, _, lvl = str(e).partition(":")
+        if not lvl.isdigit():
+            raise ShapeError(f"{where}: enchant '{e}' is not id:level")
+        out.append(f"{ae_names.get(eid) or name(eid)} {roman(int(lvl))}")
+    return ", ".join(out)
+
+
+def lore_bonus(lines):
+    """The '* ...' lines of a lore (and the lines that wrap them) up to the next blank line; 'Set bonus: ' when the
+    lore has a SET BONUS header. 'None' when the lore has no bullet."""
+    entries, on, is_set = [], False, False
+    for line in map(clean, lines):
+        if line.upper() == "SET BONUS":
+            on = is_set = True
+        elif line.startswith("* "):
+            on = True
+            entries.append(line[2:])
+        elif on and line:
+            entries[-1:] = [(entries[-1] + " " if entries else "") + line]
+        elif on:
+            break
+    return ("Set bonus: " if is_set else "") + "; ".join(entries) if entries else "None"
+
+
+def snbt_texts(value):
+    return {a or b for a, b in SNBT_TEXT.findall(str(value))}
+
+
+def hw_piece_id(texts, hw):
+    """A give command's item as a hw_gear id, matched on its unique flavour line; None when it is not Heartwood gear."""
+    if hw["BRANCH_LORE"][-1][0][1] in texts:  # the Branch's last lore line
+        return hw["BRANCH_ID"]
+    for set_name, (*_, pieces) in hw["SETS"].items():
+        for slot, piece in pieces.items():
+            if piece[3] in texts:
+                return ("heartgrown_" if "Heartgrown. " in texts else "") + f"{set_name.lower()}_{slot}"
+    return None
+
+
+def gear_sources(recipes, crates, rewards, loot, ae_by_ia, hw):
+    """{item key: set of where it comes from}. Keys: '<Set>/<slot>' for AE pieces, 'ia:<ns:id>' for other ItemsAdder
+    items, 'ae:<item>' for AE items, 'hw:<id>' for Heartwood gear, 'reward:<crate>/<reward>' for a crate's own item.
+    A crate that is not placed counts as a source with no name, so its items show as no longer obtainable."""
+    sources = {}
+    ia_key = lambda ia: ae_by_ia.get(ia) or f"ia:{ia}"
+    for file, data in recipes.items():
+        for rid, r in need(data, "recipes", file, dict).items():
+            out = need(r, "output", f"{file}:recipes.{rid}", dict)
+            if out.get("itemsadder"):
+                sources.setdefault(ia_key(out["itemsadder"]), set()).add("Crafting")
+            elif out.get("give"):
+                hid = hw_piece_id(snbt_texts(out["give"]), hw)
+                if hid:
+                    sources.setdefault(f"hw:{hid}", set()).add("Crafting")
+    all_recipes = {rid: r for data in recipes.values() for rid, r in data["recipes"].items()}
+    for file, c in crates.items():
+        cid, where = file[:-4], f"ExcellentCrates/objects/crate/{file}"
+        placed = any(need(need(c, "blocks", where, dict), "positions", f"{where}:blocks", dict).values())
+        label = clean(need(need(c, "display", where, dict), "name", f"{where}:display", str)) if placed else ""
+        for ref in need(need(c, "rewards", where, dict), "reward_list", f"{where}:rewards", dict).values():
+            rid = need(ref, "reward_id", where, str)
+            r = rewards.get(cid, {}).get(rid)
+            if r is None:
+                raise ShapeError(f"{where}: reward '{rid}' has no objects/reward/{cid}/{rid}.yml")
+            keys = []
+            for b in ((r.get("commands") or {}).get("bundles") or {}).values():
+                for cmd in b.get("commands") or []:
+                    g, cc, ae = GIVEPIECE.match(cmd), CC_GIVE.match(cmd), AE_GIVE.match(cmd)
+                    if g:
+                        keys.append(f"{g.group(1)}/{g.group(2).lower()}")
+                    elif cc and cc.group(1) in all_recipes:
+                        keys.append(ia_key(all_recipes[cc.group(1)]["output"].get("itemsadder")))
+                    elif ae:
+                        keys.append(f"ae:{ae.group(1)}")
+            if gear_item(r):
+                keys.append(f"reward:{cid}/{rid}")
+            for k in keys:
+                sources.setdefault(k, set()).add(label)
+    for tid, t in need(loot, "tables", "ChromaticDungeons/loot.yml", dict).items():
+        for e in t.get("entries") or []:
+            for cmd in e.get("commands") or []:
+                hid = hw_piece_id(snbt_texts(cmd), hw)
+                if hid:
+                    sources.setdefault(f"hw:{hid}", set()).add("Heartwood")
+    return sources
+
+
+def obtained(found):
+    """'Crafting', then the crates by name, then 'Heartwood'; only unplaced crates -> no longer obtainable."""
+    named = sorted(found - {"", "Crafting", "Heartwood"})
+    out = (["Crafting"] if "Crafting" in found else []) + named + (["Heartwood"] if "Heartwood" in found else [])
+    return ", ".join(out) or "No longer obtainable"
+
+
+def gear_item(r):
+    """A crate reward's own item when it is named gear (a custom name and enchantments), as (snbt, material)."""
+    items = list(((r.get("items") or {}).get("item_list") or {}).values())
+    if len(items) != 1:
+        return None
+    value = str(((items[0] or {}).get("Data") or {}).get("Value", ""))
+    mat = SNBT_ID.findall(value)
+    return (value, mat[-1]) if snbt_custom_name(value) and SNBT_ENCHANTS.search(value) and mat else None
+
+
+def build_ae_family(sets, prefix, ae_names, ia_icons, sources):
+    """Every piece of the AE armorSets whose file name starts with prefix and that something hands out."""
+    rows = []
+    for file in sorted(f for f in sets if f.startswith(prefix)):
+        s, set_name = sets[file], file[:-4]
+        for slot, p in sorted(need(s, "items", f"armorSets/{file}", dict).items(), key=lambda kv: SLOT_ORDER.index(kv[0])):
+            found = sources.get(f"{set_name}/{slot}")
+            if found is None:
+                continue
+            where = f"armorSets/{file}:items.{slot}"
+            rows.append(Row([clean(need(p, "name", where, str)), ae_enchant_text(p.get("enchants") or [], ae_names, where),
+                             lore_bonus(p.get("lore") or []), obtained(found)],
+                            ia_icons.get(p.get("itemsadder")) or icon(s.get("material"))))
+    return rows
+
+
+def build_crate_gear(rewards, cid, sources):
+    rows = []
+    for rid, r in sorted(rewards.get(cid, {}).items()):
+        item = gear_item(r)
+        if item and f"reward:{cid}/{rid}" in sources:
+            levels = SNBT_LEVEL.findall(SNBT_ENCHANTS.search(item[0]).group(1))
+            rows.append(Row([clean(snbt_custom_name(item[0])), ", ".join(f"{name(e)} {roman(int(lv))}" for e, lv in levels),
+                             obtained(sources[f"reward:{cid}/{rid}"])], icon(item[1])))
+    return rows
+
+
+def hw_enchants(vanilla, ae, hw):
+    return ", ".join([f"{name(k)} {roman(v)}" for k, v in vanilla.items()] +
+                     [f"{hw['AE_ENCHANTS'][e][0]} {roman(lv)}" for e, lv in ae])
+
+
+def build_hw_sets(hw, sources):
+    rows = []
+    for set_name, (zone, tier, *_, bonus, pieces) in hw["SETS"].items():
+        if any(f"hw:{set_name.lower()}_{slot}" in sources for slot in pieces):
+            rows.append(Row([f"{set_name} Set", zone, name(tier), bonus], "leather_chestplate"))
+    return rows
+
+
+def build_hw_pieces(hw, sources, heartgrown):
+    rows = []
+    for set_name, (zone, tier, *_, pieces) in hw["SETS"].items():
+        if heartgrown and set_name not in hw["HEARTGROWN_SETS"]:
+            continue
+        prot, unb = hw["HEARTGROWN_ENCHANTS"] if heartgrown else hw["TIER_ENCHANTS"][tier]
+        for slot, (piece, extra, ae, _) in pieces.items():
+            hid = ("heartgrown_" if heartgrown else "") + f"{set_name.lower()}_{slot}"
+            if f"hw:{hid}" in sources:
+                rows.append(Row([("Heartgrown " if heartgrown else "") + piece, f"{set_name} Set",
+                                 hw_enchants({"protection": prot, "unbreaking": unb, **extra}, ae, hw),
+                                 obtained(sources[f"hw:{hid}"])], f"leather_{slot}"))
+    if heartgrown and f"hw:{hw['BRANCH_ID']}" in sources:
+        rows.append(Row([hw["BRANCH_NAME"], "None", hw_enchants(hw["BRANCH_ENCHANTS"], hw["BRANCH_AE"], hw),
+                         obtained(sources[f"hw:{hw['BRANCH_ID']}"])], "wooden_sword"))
+    return rows
+
+
+def build_shards(sets, ench, ia_icons, sources):
+    rows = []
+    for file in sorted(f for f in sets if f.startswith("ShardOf")):
+        p = need(need(sets[file], "items", f"armorSets/{file}", dict), "weapon", f"armorSets/{file}:items", dict)
+        found = sources.get(f"{file[:-4]}/weapon")
+        if found is None:
+            continue
+        eid = str(need(p, "enchants", f"armorSets/{file}:items.weapon", list)[0]).partition(":")[0]
+        effect = clean(need(need(ench, eid, "enchantments.yml", dict), "description", f"enchantments.yml:{eid}", str))
+        rows.append(Row([clean(need(p, "name", f"armorSets/{file}", str)), effect, obtained(found)], ia_icons.get(p.get("itemsadder"))))
+    return rows
+
+
+def build_made_from(recipes, file, item_names, ia_icons, sources):
+    rows = []
+    for rid, r in need(recipes, "recipes", file, dict).items():
+        out = need(r, "output", f"{file}:recipes.{rid}", dict)
+        ia = need(out, "itemsadder", f"{file}:recipes.{rid}.output", str)
+        inputs = []
+        for i in need(r, "inputs", f"{file}:recipes.{rid}", list):
+            item, n = need(i, "item", f"{file}:recipes.{rid}.inputs", str), i.get("amount", 1)
+            inputs.append((item_names.get(item) or name(item)) + (f" x{n}" if n > 1 else ""))
+        rows.append(Row([clean(need(out, "name", f"{file}:recipes.{rid}.output", str)), ", ".join(inputs),
+                         obtained(sources.get(f"ia:{ia}", set()))], ia_icons.get(ia)))
+    return rows
+
+
+def pct(v):
+    return f"+{v:g}%"
+
+
+def build_gem_tiers(gems):
+    tiers = list(need(gems, "tiers", "gems.yml", dict).items())
+    ratio = need(gems, "combine-ratio", "gems.yml", int)
+    rows = []
+    for i, (tier, t) in enumerate(tiers):
+        where = f"gems.yml:tiers.{tier}"
+        combine = f"{ratio} make 1 {name(tiers[i + 1][0])}" if i + 1 < len(tiers) else "Top tier"
+        rows.append([name(tier), pct(need(t, "xp", where, (int, float))), pct(need(t, "delving-prism", where, (int, float))), combine])
+    return rows
+
+
+def build_gem_sockets(gems):
+    rows = []
+    for fam, s in need(gems, "sockets", "gems.yml", dict).items():
+        if fam not in SOCKET_FAMILIES:
+            raise ShapeError(f"gems.yml:sockets.{fam}: unknown armour family")
+        top, open_ = need(s, "max", f"gems.yml:sockets.{fam}", int), need(s, "open", f"gems.yml:sockets.{fam}", int)
+        rows.append([SOCKET_FAMILIES[fam], str(top) if top == open_ else f"{top} ({open_} open, {top - open_} to unlock)"])
+    return rows
+
+
+def build_gem_fees(gems):
+    rows = []
+    for key, cost in need(gems, "fees", "gems.yml", dict).items():
+        if key not in GEM_FEES:
+            raise ShapeError(f"gems.yml:fees.{key}: unknown fee")
+        label, per_tier = GEM_FEES[key]
+        rows.append([label, f"{cost:,} Prism" + (" x tier" if per_tier else "")])
+    return rows
+
+
+def build_trackers(ae_config, sources):
+    rows = []
+    items = need(ae_config, "items", "AdvancedEnchantments/config.yml", dict)
+    for tid in ("stattrak", "mobtrak", "blocktrak", "fishtrak"):
+        t = need(items, tid, "AdvancedEnchantments/config.yml:items", dict)
+        where = f"AdvancedEnchantments/config.yml:items.{tid}"
+        counts = clean(need(t, "lore", where, list)[0])
+        rows.append(Row([clean(need(t, "name", where, str)), counts[:1].upper() + counts[1:],
+                         obtained(sources.get(f"ae:{tid}", set()))], icon(t.get("type"))))
+    return rows
+
+
 # ---------------------------------------------------------------- git + run
 
 class Repo:
@@ -479,18 +757,23 @@ class Repo:
         if any(fnmatch.fnmatch(path, g) for g in self.deny):
             raise ShapeError(f"{path} is on the deny list; no tool may read it")
 
-    def yaml(self, path):
+    def text(self, path):
         self.check(path)
         text = self.git("show", f"{self.sha}:{path}", ok=True)
         if text is None:
             raise FileNotFoundError(path)
-        data = yaml.load(text, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
+        return text
+
+    def yaml(self, path):
+        data = yaml.load(self.text(path), Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
         if not isinstance(data, dict):
             raise ShapeError(f"{path}: top level is not a map")
         return data
 
     def need_jar(self, *prefixes):
         """The plugin must be installed at the ref (its jar in plugins/), or the table is not built."""
+        if not prefixes:
+            return  # a tools repo (chromatic-dungeons): its thunk checks the server's jars itself
         jars = (self.git("ls-tree", "--name-only", f"{self.sha}:plugins") or "").splitlines()
         for prefix in prefixes:
             if not any(j.startswith(prefix) and j.endswith(".jar") for j in jars):
@@ -504,7 +787,7 @@ class Repo:
         return {f: self.yaml(f"{folder}/{f}") for f in sorted(out.split()) if f.endswith(suffix)}
 
 
-def tables(smp, kit):
+def tables(smp, kit, dun):
     """Yield (id, title, repo, source, jars that must be installed, thunk -> (columns, rows, removed))."""
     ae, arena = "plugins/AdvancedEnchantments", "plugins/ChromaticArena"
 
@@ -540,10 +823,80 @@ def tables(smp, kit):
            build_shop(kit.yaml(f"{arena}/shop.yml")), 0))
     yield ("pvp-arsenal-crate", "Arsenal Crate", kit, "plugins/ChromaticLoot/crates.yml", ca + ("ChromaticLoot.jar",), lambda: (["Tier", "Contents"],
            build_arsenal(kit.yaml("plugins/ChromaticLoot/crates.yml"), kit.yaml(f"{arena}/ffa-kits.yml")), 0))
+    yield from gear_tables(smp, dun)
+
+
+def gear_tables(smp, dun):
+    ae, cc, ec = "plugins/AdvancedEnchantments", "plugins/ChromaticCrafting", "plugins/ExcellentCrates/objects"
+    rec = f"{cc}/recipes"
+    cache = {}
+
+    def ctx():
+        """Everything the gear tables share, read once."""
+        if not cache:
+            sets = smp.folder(f"{ae}/armorSets")
+            ia = {ns: smp.yaml(f"plugins/ItemsAdder/contents/{ns}/configs/{ns}.yml")
+                  for ns in ("chromatic", "living_prism", "halloween", "shards", "clusters")}
+            ia_items = {f"{ns}:{iid}": it for ns, d in ia.items() for iid, it in need(d, "items", f"ItemsAdder {ns}.yml", dict).items()}
+            # A flat item texture is the item's picture; a 3D model's texture is a UV sheet, so those show the material.
+            ia_icons = {k: (k.split(":")[1] if ((it.get("resource") or {}).get("texture") or (it.get("graphics") or {}).get("texture"))
+                            else icon((it.get("resource") or {}).get("material") or it.get("material"))) for k, it in ia_items.items()}
+            recipes = {f: smp.yaml(f"{rec}/{f}.yml") for f in ("gear", "zone_sets", "shards", "clusters", "apex")}
+            crates = smp.folder(f"{ec}/crate")
+            rewards = {f[:-4]: {r[:-4]: v for r, v in smp.folder(f"{ec}/reward/{f[:-4]}").items()} for f in crates}
+            ae_by_ia = {p["itemsadder"]: f"{f[:-4]}/{slot}" for f, s in sets.items()
+                        for slot, p in (s.get("items") or {}).items() if isinstance(p, dict) and p.get("itemsadder")}
+            hw = hw_literals(dun.text("tools/hw_gear.py"))
+            names = {k: clean(it.get("display_name", "")) for k, it in ia_items.items()}
+            names.update({r["output"]["itemsadder"]: clean(r["output"]["name"]) for d in recipes.values()
+                          for r in d["recipes"].values() if r["output"].get("itemsadder") and r["output"].get("name")})
+            cache.update(sets=sets, ia_icons=ia_icons, recipes=recipes, rewards=rewards, hw=hw, names=names,
+                         ench=smp.yaml(f"{ae}/enchantments.yml"),
+                         sources=gear_sources(recipes, crates, rewards, smp.yaml("plugins/ChromaticDungeons/loot.yml"), ae_by_ia, hw))
+            cache["ae_names"] = {k: clean(v.get("display", k)) for k, v in cache["ench"].items() if isinstance(v, dict)}
+        return cache
+
+    def hw_ctx():
+        smp.need_jar(*jars, "ChromaticDungeons")
+        return ctx()
+
+    jars = ("AdvancedEnchantments-", "ChromaticCrafting", "ItemsAdder_", "ExcellentCrates-7.")
+    piece_cols = ["Piece", "Enchants", "Bonus", "Obtained"]
+    for tid, title, prefix in (("gear-chromatic", "Chromatic gear", "Chromatic"),
+                               ("gear-living-prism", "Living Prism gear", "LivingPrism"),
+                               ("gear-halloween", "Halloween gear", "Halloween")):
+        yield (tid, title, smp, f"{ae}/armorSets", jars, lambda prefix=prefix: (piece_cols, build_ae_family(
+            ctx()["sets"], prefix, ctx()["ae_names"], ctx()["ia_icons"], ctx()["sources"]), 0))
+    hwsrc = "tools/hw_gear.py"
+    yield ("gear-heartwood-sets", "Heartwood zone sets", dun, hwsrc, (), lambda: (
+           ["Set", "Area", "Tier", "Set bonus"], build_hw_sets(hw_ctx()["hw"], ctx()["sources"]), 0))
+    yield ("gear-heartwood-pieces", "Heartwood zone set pieces", dun, hwsrc, (), lambda: (
+           ["Piece", "Set", "Enchants", "Obtained"], build_hw_pieces(hw_ctx()["hw"], ctx()["sources"], False), 0))
+    yield ("gear-heartgrown", "Heartgrown armour and the Branch of Heartwood", dun, hwsrc, (), lambda: (
+           ["Piece", "Set", "Enchants", "Obtained"], build_hw_pieces(hw_ctx()["hw"], ctx()["sources"], True), 0))
+    for tid, title, cid in (("gear-corrupted", "Corrupted gear", "chroma_crate"), ("gear-voter", "Voter armour", "vote_crate")):
+        yield (tid, title, smp, f"{ec}/reward/{cid}", jars, lambda cid=cid: (["Piece", "Enchants", "Obtained"],
+               build_crate_gear(ctx()["rewards"], cid, ctx()["sources"]), 0))
+    yield ("gear-shards", "Shards", smp, f"{ae}/armorSets", jars, lambda: (["Shard", "Effect", "Obtained"],
+           build_shards(ctx()["sets"], ctx()["ench"], ctx()["ia_icons"], ctx()["sources"]), 0))
+    for tid, title, f in (("gear-clusters", "Clusters", "clusters"), ("gear-prisms", "Apex prisms", "apex")):
+        yield (tid, title, smp, f"{rec}/{f}.yml", jars, lambda f=f: (["Item", "Made from", "Obtained"], build_made_from(
+               ctx()["recipes"][f], f"{f}.yml", ctx()["names"], ctx()["ia_icons"], ctx()["sources"]), 0))
+    gems = f"{cc}/gems.yml"
+    yield ("gear-gem-tiers", "Gem tiers", smp, gems, ("ChromaticCrafting",), lambda: (
+           ["Tier", "XP bonus", "Delving Prism bonus", "Combine"], build_gem_tiers(smp.yaml(gems)), 0))
+    yield ("gear-gem-sockets", "Gem sockets", smp, gems, ("ChromaticCrafting",), lambda: (
+           ["Armour", "Sockets"], build_gem_sockets(smp.yaml(gems)), 0))
+    yield ("gear-gem-fees", "Gem fees", smp, gems, ("ChromaticCrafting",), lambda: (
+           ["Action", "Cost"], build_gem_fees(smp.yaml(gems)), 0))
+    yield ("gear-trackers", "Trackers", smp, f"{ae}/config.yml", jars, lambda: (
+           ["Tracker", "Counts", "Obtained"], build_trackers(smp.yaml(f"{ae}/config.yml"), ctx()["sources"]), 0))
 
 
 def guard(t, terms):
-    """The first deny-list hit in a table as a message, else None."""
+    """The first deny-list hit in a table as a message, else None. Gear tables may show a lore's 'N% chance'."""
+    if t["id"].startswith("gear-"):
+        terms = [p for p in terms if p.pattern != GEAR_CHANCE_TERM]
     for row in t["rows"]:
         for cell in row:
             hit = next((p.pattern for p in terms if p.search(cell)), None) or (KEY_GUARD.search(cell) and "key guard")
@@ -565,9 +918,10 @@ def run(smp_ref, kit_ref, out_dir):
     terms = [re.compile(t, re.I) for t in deny.get("terms", SPEC_TERMS)]
     paths = deny.get("paths", SPEC_PATHS)
     smp, kit = Repo(SMP_REPO, smp_ref, paths), Repo(KIT_REPO, kit_ref, paths)
-    names = {id(smp): "mc-server", id(kit): "mc-kit"}
+    dun = Repo(DUNGEONS_REPO, REFS["dungeons"], paths)
+    names = {id(smp): "mc-server", id(kit): "mc-kit", id(dun): "chromatic-dungeons"}
     out, skipped, removed, notes = [], [], {}, []
-    for tid, title, repo, source, jars, thunk in tables(smp, kit):
+    for tid, title, repo, source, jars, thunk in tables(smp, kit, dun):
         repo.need_jar(*jars)
         try:
             res = thunk()
