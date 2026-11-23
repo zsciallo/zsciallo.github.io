@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running. Also unconfirmed: whether the Cluster and Apex Prism recipes show at /craft on live (they load only when the clusters content pack is present); how players earn Chromabithia XP for the Upgrade bench level gate (contracts give it; kills assumed).",
-  "summary": "**Crafting and Upgrades** happen at the Chromatic bench, `/craft`, which builds gear and upgrades, re-rolls and repairs it. Most of it costs Prism Shards.",
+  "summary": "**Crafting and Upgrades** happen at the Chromatic bench, /craft, which builds gear and upgrades, re-rolls and repairs it. Most of it costs Prism Shards.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "System"],
@@ -73,8 +73,7 @@
       {"p": "The **Disenchant** bench removes one enchant you pick from a weapon, tool or armour piece, for 200 Prism Shards. The enchant is destroyed and nothing is refunded. Everything else on the item stays."},
       {"ul": [
         "The bench asks you to confirm twice.",
-        "Curses cannot be removed.",
-        "Thorns on Chromatic armour is locked. A grindstone cannot take it off either."
+        "Thorns and vanilla curses cannot come off. A grindstone cannot take Thorns off either."
       ]}
     ]},
     {"h": "Repair and shattered gear", "blocks": [

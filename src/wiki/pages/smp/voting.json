@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Player text disagrees with the config in two places: site faq.json says every site is every 24 hours and a vote party fires every twenty votes, and ChromaticHelp answers.yml says each vote gives money. VotingPlugin at mc-server 63529705 has minecraftservers.org every 8 hours, a 60-vote party and no money per vote; this page follows the config. 'Miss one day in seven' reads AllowMissedAmount 1 / AllowMissedPeriod 7.",
-  "summary": "**Voting** for Chromabit on server lists earns a Vote Key and 2 minutes of [Vote Fly](/wiki/smp/vote-fly/) for every vote.",
+  "summary": "**Voting** for Chromabit on server lists earns a Vote Key and 2 minutes of Vote Fly for every vote.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Reward"],

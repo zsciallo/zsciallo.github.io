@@ -2,8 +2,8 @@
   "title": "Ranks and Kits",
   "half": "smp",
   "live": true,
-  "needs_owner_check": "The kits table (smp-kits) is generated from PlayerKits2 (Diamond Kit every 12 h), while /help and Essentials kits.yml list a different set (starter, claim, daily, tools, diamond once a day, rank kits). Which plugin answers /kit on live, and should the table cover both? Store rank perks are copied from src/data/storeContent.json; the auction listing counts there (15/25/50) do not match ChromaticAuctionHouse config.yml (75 default), so they are left out.",
-  "summary": "**Ranks and Kits**: Explorer ranks are earned in game with `/rankup`, store ranks add perks and a daily rank kit, and kits are free gear on a timer.",
+  "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running and its LuckPerms rank import failed, so rank perks need the owner's word. Kits come from Essentials kits.yml (PlayerKits2 has configs but no jar). Which kits each rank can claim is a LuckPerms node (not read); Diamond Kit with VIP follows storeContent.json. Store rank perks are copied from src/data/storeContent.json; its auction listing counts (15/25/50) do not match ChromaticAuctionHouse config.yml (75 default), so they are left out.",
+  "summary": "**Ranks and Kits**: Explorer ranks are earned in game with /rankup, store ranks add perks and a daily rank kit, and kits are free gear on a timer.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Progression"],
@@ -39,14 +39,14 @@
       {"p": "**MVP+**: [MVP+] tag, 25 homes, 250 upgradeable hoppers, and `/kit mvpplus` (a Chroma Key, a Shard Key and 1,000 Prism Shards)."}
     ]},
     {"h": "Kits", "blocks": [
-      {"p": "`/kit` lists your kits. A kit on cooldown tells you when it is ready again, and a locked one tells you which rank unlocks it."},
+      {"p": "`/kit` lists the kits you can claim. Each kit has its own cooldown."},
       {"ul": [
-        "**Starter Kit**: basic armour, tools and food. Once only.",
-        "**Claim Kit**: a golden shovel and claim blocks so you can protect your base.",
-        "**Daily Kit**: once every 24 hours.",
-        "**Tools Kit**: a fresh set of tools every 10 minutes.",
-        "**Diamond Kit**: diamond gear.",
-        "**VIP, VIP+, MVP and MVP+ Kits**: once every 24 hours with the matching rank."
+        "**Starter Kit**: stone tools, chainmail and leather armour, a Claim Shovel, a Claim Finder stick, a bed, 32 bread, a Chroma Key and a Shard Key, plus 30 minutes of Resistance, Saturation and Regeneration. Given once, on your first join.",
+        "**Claim Kit**: a Claim Shovel to mark out land. Every minute.",
+        "**Tools Kit**: a stone sword, shovel, pickaxe and axe. Every 10 minutes.",
+        "**Daily Kit**: a full set of iron armour and iron tools, plus 16 steak. Every 24 hours.",
+        "**Diamond Kit**: diamond armour with Protection I, a Sharpness II sword and an Efficiency II pickaxe. Every 24 hours, with VIP and up.",
+        "**VIP, VIP+, MVP and MVP+ Kits**: the crate keys and Prism Shards listed for each rank above. Every 24 hours."
       ]},
       {"facts": "smp-kits"}
     ]},
