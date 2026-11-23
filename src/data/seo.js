@@ -144,7 +144,7 @@ export const PAGES = [
     route: '/wiki/',
     entry: 'wiki/index.html',
     title: 'Wiki | Chromabit',
-    description: 'The Chromabit player wiki: how the Economy SMP and ChromaPVP systems, perks and commands work, and what changed in them.',
+    description: 'The Chromabit player wiki: how the Economy SMP and ChromaPVP systems, custom gear, perks and commands work, and what changed in them.',
     crumb: 'Wiki',
     pageName: 'Wiki',
     sources: [...WIKI_SOURCES, 'src/wiki/pages'],

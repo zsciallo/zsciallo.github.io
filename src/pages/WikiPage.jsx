@@ -212,10 +212,12 @@ export function WikiHome({ pages }) {
       <div class="wiki-boxes">
         {HALVES.map(([half, name]) => {
           const list = pages.filter((p) => p.half === half);
+          if (!list.length) return null;
+          // Gear spans the row under SMP and ChromaPVP, so its tiles flow in more columns.
           return (
-            <section key={half} class="wiki-box" aria-labelledby={`wiki-${half}`}>
+            <section key={half} class={`wiki-box${half === 'gear' ? ' wiki-box-wide' : ''}`} aria-labelledby={`wiki-${half}`}>
               <h2 id={`wiki-${half}`} class="wiki-box-title">{name}</h2>
-              {list.length ? <ul class="wiki-tiles">{list.map((p) => <Tile key={p.route} page={p} />)}</ul> : <p class="wiki-box-body">No pages yet.</p>}
+              <ul class="wiki-tiles">{list.map((p) => <Tile key={p.route} page={p} />)}</ul>
             </section>
           );
         })}

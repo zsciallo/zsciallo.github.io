@@ -1,4 +1,4 @@
-// The one list of wiki pages: src/wiki/pages/<smp|pvp>/<slug>.json, read from disk.
+// The one list of wiki pages: src/wiki/pages/<smp|pvp|gear>/<slug>.json, read from disk.
 // ssg.js, src/data/seo.js (head, sitemap, llms.txt) and the tests all take wiki routes from here.
 // Node only (fs): the browser bundle never imports this file.
 
@@ -9,7 +9,7 @@ import { imageSize } from '../../tools/vite-image-sizes.js';
 
 export const WIKI_DIR = fileURLToPath(new URL('./pages/', import.meta.url));
 export const FACTS_DIR = fileURLToPath(new URL('./facts/', import.meta.url));
-export const HALVES = [['smp', 'SMP'], ['pvp', 'ChromaPVP']];
+export const HALVES = [['smp', 'SMP'], ['pvp', 'ChromaPVP'], ['gear', 'Gear']];
 
 /** Every published page under `dir`, sorted by route. A page is published only with `"live": true`. */
 export function wikiPages(dir = WIKI_DIR) {
