@@ -1192,6 +1192,65 @@ async function snapshotDither(dist) {
   console.log(`wrote ${DITHER_BASE_FILE}`);
 }
 
+// ------------------------------------------------------------------- nav --
+// Run 20261123-nav (owner 2026-11-23: STORE SMP PVP WIKI AUCTIONS MAP). Part of the geometry section so the gate's
+// subset runs it. N-T2: from 801 px the six links sit in one row with no sideways scroll; at 800 and below the
+// hamburger shows and its open menu lists the six in order. N-T3: with no JS (the html.js class removed, which is
+// what the app's no-JS CSS keys on) the bar wraps instead of overflowing at 320, 400 and 760.
+export const NAV_LABELS = ['STORE', 'SMP', 'PVP', 'WIKI', 'AUCTIONS', 'MAP'];
+const NAV_STATE = `(() => {
+  const vw = innerWidth;
+  const links = [...document.querySelectorAll('.site-nav-links a')];
+  const shown = (el) => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+  const rects = links.map((a) => a.getBoundingClientRect());
+  return {
+    sw: document.documentElement.scrollWidth, vw,
+    labels: links.map((a) => a.textContent.trim()),
+    shownLinks: links.filter(shown).length,
+    tops: [...new Set(rects.filter((r, i) => shown(links[i])).map((r) => Math.round(r.top)))],
+    outside: links.filter((a, i) => shown(a) && (rects[i].left < -0.5 || rects[i].right > vw + 0.5)).map((a) => a.textContent.trim()),
+    toggle: shown(document.querySelector('.nav-toggle')),
+  };
+})()`;
+async function navChecks(b, origin) {
+  const look = async (width, steps, fn, name) => {
+    let page;
+    try {
+      page = await openState(b, origin, { id: `nav ${name}`, path: '/', ready: '.site-nav', setup: steps }, width);
+      check(name, fn(await page.ev(NAV_STATE)));
+    } catch (e) {
+      check(name, [String(e?.message ?? e)]);
+    } finally {
+      await page?.close();
+    }
+  };
+  const noScroll = (n) => (n.sw > n.vw ? [`scrollWidth ${n.sw} > ${n.vw}`] : []);
+  for (const width of [801, 900, 1024, 1280])
+    await look(width, [], (n) => [
+      ...noScroll(n),
+      ...(q(n.labels) === q(NAV_LABELS) ? [] : [`nav labels ${q(n.labels)}, want ${q(NAV_LABELS)}`]),
+      ...(n.toggle ? ['the hamburger is shown'] : []),
+      ...(n.shownLinks === NAV_LABELS.length ? [] : [`${n.shownLinks} nav links shown, want ${NAV_LABELS.length}`]),
+      ...(n.tops.length === 1 ? [] : [`nav links sit in ${n.tops.length} rows (tops ${q(n.tops)}), want one`]),
+      ...(n.outside.length ? [`outside the viewport: ${q(n.outside)}`] : []),
+    ], `nav-row @${width}`);
+  const openMenu = ["(() => { const t = document.querySelector('.nav-toggle'); if (!t || !t.getClientRects().length) return false; t.click(); return true; })()", "(async () => { for (let i = 0; i < 50; i++) { if (document.querySelector('.site-nav-links.open')) return true; await new Promise((r) => setTimeout(r, 100)); } return false; })()"];
+  for (const width of [800, 400])
+    await look(width, openMenu, (n) => [
+      ...noScroll(n),
+      ...(n.toggle ? [] : ['no hamburger']),
+      ...(q(n.labels) === q(NAV_LABELS) && n.shownLinks === NAV_LABELS.length ? [] : [`open menu shows ${n.shownLinks} of ${q(n.labels)}, want ${q(NAV_LABELS)}`]),
+      ...(n.outside.length ? [`outside the viewport: ${q(n.outside)}`] : []),
+    ], `nav-menu @${width}`);
+  const noJs = ["(async () => { document.documentElement.classList.remove('js'); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return !document.documentElement.classList.contains('js'); })()"];
+  for (const width of [320, 400, 760])
+    await look(width, noJs, (n) => [
+      ...noScroll(n),
+      ...(n.shownLinks === NAV_LABELS.length ? [] : [`${n.shownLinks} nav links shown without JS, want ${NAV_LABELS.length}`]),
+      ...(n.outside.length ? [`outside the viewport: ${q(n.outside)}`] : []),
+    ], `nav-nojs @${width}`);
+}
+
 // ------------------------------------------------------------------- main --
 
 const SECTIONS = ['static', 'literals', 'tokens', 'body', 'dither', 'switch', 'toggle', 'geometry', 'wells', 'glow', 'plant', 'walk', 'focus', 'buttons', 'chart', 'self'];
@@ -1265,6 +1324,7 @@ async function main() {
         if (want(args, 'wells')) await wellChecks(b, origin);
         if (want(args, 'glow')) await glowChecks(b, origin);
         if (want(args, 'toggle') || want(args, 'geometry')) await geometryChecks(b, origin, base, args);
+        if (want(args, 'geometry')) await navChecks(b, origin);
         if (want(args, 'plant')) await plantChecks(b, origin, base);
         if (['walk', 'focus', 'buttons', 'chart'].some((s) => want(args, s))) await walkChecks(b, origin, args);
       });

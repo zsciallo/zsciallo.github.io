@@ -851,12 +851,14 @@ function smpPage(dist) {
         if (empty) problems.push(`/smp/ dungeon block has ${empty} empty [data-fact]`);
       }
       if (!findAll(root, hasClass(SMP_PAGE.tickerClass)).length) problems.push(`/smp/ has no market ticker (.${SMP_PAGE.tickerClass})`);
-      const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel);
+      // Run 20261123-nav: the nav now links /auctions/ and /dungeon/ too; the page's own buttons are outside it.
+      const outNav = (el) => !siteNav(p) || !inside(el, siteNav(p));
+      const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel && outNav(el));
       if (!auctions.length) problems.push(`/smp/ has no <a href="${SMP_PAGE.auctionsHref}"> ${q(SMP_PAGE.auctionsLabel)}`);
       // Run 20261121-dungeon-map U3: the ticker is the auction preview, so it comes before the auction button.
       else if (!hasClass(SMP_PAGE.tickerClass)(findAll(root, (el) => hasClass(SMP_PAGE.tickerClass)(el) || el === auctions[0])[0]))
         problems.push(`/smp/ .${SMP_PAGE.tickerClass} does not come before the ${q(SMP_PAGE.auctionsLabel)} link`);
-      const toDungeon = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref);
+      const toDungeon = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref && outNav(el));
       if (!toDungeon.some((a) => textOf(a) === SMP_PAGE.dungeonLabel)) problems.push(`/smp/ has no <a href="${SMP_PAGE.dungeonHref}"> ${q(SMP_PAGE.dungeonLabel)}`);
       const pics = toDungeon.flatMap((a) => findAll(a, (el) => el.tag === 'img' && el.attrs.src === SMP_PAGE.dungeonPreview));
       if (!pics.length) problems.push(`/smp/ has no <img src="${SMP_PAGE.dungeonPreview}"> inside an <a href="${SMP_PAGE.dungeonHref}">`);
@@ -874,14 +876,13 @@ function smpPage(dist) {
     },
     dist,
   );
-  // Run 20261121-dungeon-map U3 (owner 2026-11-21, reverses the 2026-11-09 ruling): /smp/ is in the nav on every
-  // page and /auctions/ is not (it is reached from /smp/); the home footer still links /smp/.
+  // Run 20261121-dungeon-map U3: /smp/ is in the nav on every page. Run 20261123-nav (owner 2026-11-23): AUCTIONS
+  // and MAP joined the nav, so the old "no /auctions/ in the nav" rule is gone; the /smp/ page keeps its own two
+  // buttons (checked above, outside the nav).
   for (const route of ALL_ROUTES) {
     const p = page(route, dist);
     const nav = p && siteNav(p);
     if (!nav) continue;
-    if (findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/auctions/').length)
-      problems.push(`${route} nav links to /auctions/ (the auction house is reached from /smp/)`);
     if (!findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length) problems.push(`${route} nav has no link to /smp/`);
   }
   const home = page('/', dist);
@@ -1012,15 +1013,15 @@ export const PVP = {
 };
 
 /** The nav on every page: [href, label] in order. */
+// Run 20261123-nav (owner 2026-11-23: "remove home and faq and it should go Store -> smp -> pvp -> wiki ->
+// auctions -> map"). Was HOME PVP STORE SMP WIKI FAQ (2026-11-21/22). Home stays on the logo, FAQ in the footer.
 export const NAV_LINKS = [
-  ['/', 'HOME'],
-  ['/pvp/', 'PVP'],
   ['/store/', 'STORE'],
-  // Run 20261121-dungeon-map U3 (owner 2026-11-21): SMP replaces AUCTIONS, same place.
   ['/smp/', 'SMP'],
-  // Run 20261122-wiki U1 (owner 2026-11-22): WIKI joins the nav between SMP and FAQ.
+  ['/pvp/', 'PVP'],
   ['/wiki/', 'WIKI'],
-  ['/faq/', 'FAQ'],
+  ['/auctions/', 'AUCTIONS'],
+  ['/dungeon/', 'MAP'],
 ];
 export const SITEMAP_PVP = 'https://chromabit.us/pvp/';
 
@@ -1259,10 +1260,22 @@ function pvpJoin(dist) {
   });
 }
 
-/** Run 20261121-dungeon-map U3: pages whose one current nav link is SMP. */
-export const SMP_ACTIVE = ['/smp/', '/auctions/', '/dungeon/'];
+/** Run 20261123-nav: route -> its one current nav link (wiki routes: WIKI). Every other route has none. */
+export const NAV_CURRENT = { '/store/': '/store/', '/smp/': '/smp/', '/pvp/': '/pvp/', '/auctions/': '/auctions/', '/dungeon/': '/dungeon/' };
 
-/** U4-AC8: on every page the nav is HOME PVP STORE SMP FAQ (AUCTIONS until run 20261121-dungeon-map U3), SMP the one current link on SMP_ACTIVE, no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
+/** Run 20261123-nav N-T1: the logo links home and the footer keeps HOME and FAQ (they left the top bar). */
+function wayHome(p) {
+  const r = p.route;
+  const problems = [];
+  const brand = findAll(siteNav(p) ?? dom(p), hasClass('site-nav-brand'));
+  if (brand.length !== 1 || brand[0].attrs.href !== '/') problems.push(`${r} nav brand links ${q(brand.map((b) => b.attrs.href))}, want one link to "/"`);
+  const footer = siteFooter(p);
+  for (const [href, label] of [['/', 'HOME'], ['/faq/', 'FAQ']])
+    if (!footer || !findAll(footer, (el) => el.tag === 'a' && el.attrs.href === href && textOf(el) === label).length) problems.push(`${r} footer has no <a href="${href}"> ${label}`);
+  return problems;
+}
+
+/** U4-AC8: on every page the nav is NAV_LINKS (run 20261123-nav: STORE SMP PVP WIKI AUCTIONS MAP), exactly the NAV_CURRENT link current (none on /, /faq/, legal pages), no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
 function navLinks(dist) {
   return eachPage(
     ALL_ROUTES,
@@ -1281,18 +1294,12 @@ function navLinks(dist) {
         const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
         if (marks.length)
           problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0 (first: <${marks[0].tag}> ${q(textOf(marks[0]))})`);
-        if (isWiki(r)) {
-          // Run 20261122-wiki U1: WIKI is the one current link on every wiki route.
-          if (active.join(',') !== '/wiki/') problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ["/wiki/"]`);
-        } else if (SMP_ACTIVE.includes(r)) {
-          if (active.join(',') !== '/smp/') problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ["/smp/"]`);
-        } else if (r === PVP.route) {
-          if (active.join(',') !== '/pvp/') problems.push(`/pvp/ nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
-        } else {
-          if (active.includes('/pvp/')) problems.push(`${r} nav marks PVP as the current page`);
-          if (active.length > 1) problems.push(`${r} nav has ${active.length} aria-current="page" links`);
-        }
+        // Run 20261123-nav N-T4 (was: SMP current on /smp/, /auctions/, /dungeon/; at most one elsewhere): exactly one
+        // current link on NAV_CURRENT routes and wiki routes (WIKI), none anywhere else.
+        const want = isWiki(r) ? ['/wiki/'] : NAV_CURRENT[r] ? [NAV_CURRENT[r]] : [];
+        if (q(active) !== q(want)) problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ${q(want)}`);
       }
+      problems.push(...wayHome(p));
       const footer = siteFooter(p);
       if (!footer) problems.push(`${r} has no <footer>`);
       else {
@@ -1762,7 +1769,7 @@ function playerNotInSitemap(dist) {
   return hits.length ? [`dist/sitemap.xml lists the profile page: ${q(hits)}`] : [];
 }
 
-/** U7-A/D: /pvp/player/ nav is HOME PVP STORE SMP FAQ (AUCTIONS until run 20261121-dungeon-map U3) with PVP the only current link, no BETA marker in any nav, footer links PVP. */
+/** U7-A/D: /pvp/player/ nav is NAV_LINKS (run 20261123-nav: STORE SMP PVP WIKI AUCTIONS MAP; logo home, HOME and FAQ in the footer) with PVP the only current link, no BETA marker in any nav, footer links PVP. */
 function playerNav(dist) {
   return onPlayer(dist, (p) => {
     const problems = [];
@@ -1779,6 +1786,7 @@ function playerNav(dist) {
       const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
       if (marks.length) problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0`);
     }
+    problems.push(...wayHome(p));
     const footer = siteFooter(p);
     if (!footer) problems.push(`${r} has no <footer>`);
     else {
