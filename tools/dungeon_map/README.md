@@ -7,6 +7,8 @@
 - `atlas.png`: one 48x56 imposter per block state, 32 px per block, drawn with the arena-map ray caster
 - `meta.json`: origin, size, counts, the world-to-map frame `A`/`b`, the preview's map rect, state names, world stamp
 - `preview.jpg`: the whole island painted from the baked data, 1200 px wide
+- `preview.webp`: the same island with a transparent background, cropped, 800 px wide (the `/smp/` panel); made by
+  `preview_webp.py` from the files above
 
 Formats: `.orch/runs/20261121-dungeon-map/spec-U1.md`. Checked by `npm run test:dungeon`.
 
@@ -24,8 +26,9 @@ From the repo root, after the world changes:
 
 ```
 python tools/dungeon_map/bake.py
+python tools/dungeon_map/preview_webp.py
 npm run test:dungeon
 ```
 
 Needs Python with numpy, Pillow and lz4. The script ends with a self-check against the region files and prints
-the file sizes; commit the five files in `public/dungeon/`.
+the file sizes; commit the six files in `public/dungeon/`.

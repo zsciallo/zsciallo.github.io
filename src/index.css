@@ -5849,45 +5849,102 @@ html[data-keypromo="off"] .store-promo--key {
 
 /* ─── /smp/ ─── */
 .page-hero.smp-hero {
-  padding-bottom: 1.5rem;
+  padding-bottom: 3.5rem;
 }
 
 .smp-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
+  gap: 3rem;
   padding: 0 2rem 4rem;
 }
 
+/* The ticker and its button share the ticker's width; the button sits under its right edge. */
+.smp-market {
+  width: 100%;
+  max-width: 940px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.25rem;
+}
+
+/* Heartwood: one panel, picture left and text right from 720px, stacked below. */
 .dungeon {
   width: 100%;
-  text-align: center;
-}
-
-.dungeon .section-title {
-  margin-bottom: 1.25rem;
-}
-
-.fact-grid {
+  max-width: 940px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 1.1rem;
-  text-align: left;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.75rem;
 }
 
 .dungeon-preview {
   display: block;
-  max-width: 560px;
-  margin: 2.5rem auto 1.25rem;
-  border-radius: var(--radius-card);
-  overflow: hidden;
+  max-width: 460px;
+  width: 100%;
+  margin: 0 auto;
+  transition: transform 0.2s;
+}
+
+.dungeon-preview:hover {
+  transform: scale(1.03);
 }
 
 .dungeon-preview img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.dungeon-text .section-eyebrow,
+.dungeon-text .section-title {
+  text-align: left;
+}
+
+.dungeon-text .section-eyebrow {
+  color: var(--accent-on-surface);
+}
+
+.dungeon-text .section-title {
+  color: var(--text-on-surface);
+}
+
+.dungeon-line {
+  font-size: 1.12rem;
+  line-height: 1.45;
+  color: var(--muted-on-surface);
+  margin-bottom: 1.6rem;
+}
+
+.dungeon-text .smp-actions {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+
+.dungeon-wiki {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent-on-surface);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  white-space: nowrap;
+  transition: transform 0.15s;
+}
+
+.dungeon-wiki:hover {
+  transform: translateX(3px);
+}
+
+@media (min-width: 720px) {
+  .dungeon {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+    padding: 2rem 2.5rem;
+  }
 }
 
 .fact {
@@ -5921,6 +5978,17 @@ html[data-keypromo="off"] .store-promo--key {
   padding-bottom: 7px;
 }
 
+.smp-hero .smp-actions {
+  width: 100%;
+  margin-top: 1.75rem;
+}
+
+/* Every /smp/ button keeps its label on one line and is at least a thumb tall. */
+.smp-actions .btn {
+  white-space: nowrap;
+  min-height: 44px;
+}
+
 /* Phones: the home hero, the cards and the SMP page use more of the width. */
 @media (max-width: 480px) {
   .page-hero.home-hero {
@@ -5932,6 +6000,18 @@ html[data-keypromo="off"] .store-promo--key {
   .smp-body {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  .smp-market {
+    align-items: stretch;
+  }
+
+  .smp-actions .btn {
+    width: 100%;
+  }
+
+  .dungeon {
+    padding: 1.25rem;
   }
 
   .join-box {
