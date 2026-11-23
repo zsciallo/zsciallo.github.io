@@ -99,6 +99,17 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-08", "text": "Added zone armour sets for all 9 Heartwood zones, the Heartgrown set and the Branch of Heartwood."},
+    {"date": "2026-11-08", "text": "Each Heartwood zone now drops its own crafting item, used in Living Prism and Chromatic gear recipes."},
+    {"date": "2026-11-06", "text": "Living Prism armour now costs more Living Prism and Prismatic Resin to craft."},
+    {"date": "2026-11-06", "text": "Added Living Prism gear and materials."},
+    {"date": "2026-11-06", "text": "Added transmute recipes that carry your enchants and upgrades onto new gear."},
+    {"date": "2026-10-22", "text": "Gear can no longer be repaired during combat."},
+    {"date": "2026-10-08", "text": "Chromatic and Halloween gear no longer breaks: at 0 durability it turns Shattered and keeps its enchants until you repair it with `/craft repair`."},
+    {"date": "2026-10-08", "text": "The disenchant bench now takes armour and tools."},
+    {"date": "2026-09-30", "text": "Added the Chromatic Harvester, which reaps and replants a 3x3 of crops, and the Chromatic Angler, which lands a double catch every 15 seconds."},
+    {"date": "2026-09-28", "text": "Added batch crafting and bench Sharpness VI to IX."}
+  ],
   "related": ["smp/enchants", "smp/dungeons", "smp/crates", "smp/keep-on-death", "gear/chromatic", "gear/living-prism", "gear/heartwood-sets", "gear/shards", "gear/clusters-and-prisms", "gear/gems"]
 }

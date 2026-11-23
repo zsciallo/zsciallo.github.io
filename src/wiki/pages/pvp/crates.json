@@ -68,7 +68,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-12", "text": "Added the Arsenal Crate, which holds FFA kits."},
+    {"date": "2026-11-12", "text": "The Prism Crate is now the Spectrum Crate."},
+    {"date": "2026-11-10", "text": "Crates opened in the lobby, with `/crates`, collection sets, crate-only cosmetics and a pull history screen."}
+  ],
   "related": ["pvp/prism-coins", "pvp/ffa", "pvp/kits", "pvp/tournaments"],
   "needs_owner_check": "Mythic Crate: on origin/main with its own crate block, but the brief named only Spectrum and Arsenal; confirm it is live. Store-only cosmetics (store: true in cosmetics.yml) are not mentioned because the store listing was not checked."
 }

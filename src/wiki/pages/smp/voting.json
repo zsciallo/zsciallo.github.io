@@ -43,6 +43,9 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-01", "text": "You can now vote on minecraftservers.org every 8 hours."},
+    {"date": "2026-10-25", "text": "The vote crate now has Voter armour, spawners and one-time milestone rewards, plus streak, vote party and top voter rewards."}
+  ],
   "related": ["smp/vote-fly", "smp/crates", "smp/daily-streak", "smp/claims"]
 }

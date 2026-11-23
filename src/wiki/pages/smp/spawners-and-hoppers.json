@@ -67,6 +67,8 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-07", "text": "Hopper upgrades are now single combined levels."}
+  ],
   "related": ["smp/claims", "smp/auction-house", "smp/crafting", "smp/ranks-and-kits"]
 }

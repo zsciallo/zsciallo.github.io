@@ -59,6 +59,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-17", "text": "Server auctions now open at their reserve price."},
+    {"date": "2026-10-07", "text": "Added the Server Market with daily bounties, server listings every 6 hours and server auctions for rares and spawners, and `/shop` now opens the Auction House hub."},
+    {"date": "2026-10-07", "text": "Selling now has a seller tax and no listing fee."},
+    {"date": "2026-09-09", "text": "Added the Auction House."}
+  ],
   "related": ["smp/spawners-and-hoppers", "smp/keep-on-death", "smp/crafting"]
 }

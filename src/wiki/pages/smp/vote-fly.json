@@ -34,6 +34,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-06", "text": "Each vote now gives 2 minutes of fly."},
+    {"date": "2026-11-06", "text": "Vote fly now lets you glide with an elytra, and `/fly` lifts you off the ground."},
+    {"date": "2026-11-06", "text": "Vote fly now works only inside your own claims or claims you are trusted in."},
+    {"date": "2026-10-30", "text": "Added vote fly: every vote adds 5 minutes of `/fly` to your bank, and it only drains while you fly."}
+  ],
   "related": ["smp/voting", "smp/daily-streak", "smp/claims"]
 }

@@ -48,6 +48,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-06", "text": "Added the Living Prism Crate with its own milestone rewards, and the Halloween crate was retired."},
+    {"date": "2026-10-27", "text": "Opening crates now counts toward milestone rewards, and crate holograms show how many keys you have."},
+    {"date": "2026-10-04", "text": "The reward crate now gives random enchant books from Simple to Legendary."},
+    {"date": "2026-09-28", "text": "Added the Halloween crate."}
+  ],
   "related": ["smp/voting", "smp/daily-streak", "smp/battle-pass", "smp/crafting", "gear/chromatic", "gear/corrupted-and-voter", "gear/shards", "gear/trackers"]
 }

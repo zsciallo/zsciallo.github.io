@@ -38,6 +38,9 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-08", "text": "Chromatic and Halloween gear no longer breaks: at 0 durability it turns Shattered and keeps its enchants until you repair it with `/craft repair`."},
+    {"date": "2026-09-30", "text": "Added the Chromatic Harvester, which reaps and replants a 3x3 of crops, and the Chromatic Angler, which lands a double catch every 15 seconds."}
+  ],
   "related": ["gear/living-prism", "gear/gems", "smp/crafting", "smp/crates", "smp/keep-on-death"]
 }

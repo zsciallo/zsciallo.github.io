@@ -95,6 +95,27 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-12", "text": "Heartwood crates are now real chests, and they glow green when you hold their key."},
+    {"date": "2026-11-12", "text": "Heartwood mini bosses now fight in phases and stay shielded until their wards die."},
+    {"date": "2026-11-12", "text": "The Listener boss in The Hollow Below now burrows, comes up under players and fires a faster Sonic Boom."},
+    {"date": "2026-11-12", "text": "Heartwood mobs now wind up their attacks with clear sounds and particles before they hit."},
+    {"date": "2026-11-08", "text": "Heartwood crates now give 5 to 7 items from a pool for their zone, including gear and named spawners."},
+    {"date": "2026-11-08", "text": "The Sulfur Geode moved to a cave you can walk to, and five guard camps now sit on the paths between zones."},
+    {"date": "2026-11-07", "text": "Heartwood mobs now get tougher the more players fight them, and Hard and Very Hard mobs have more health."},
+    {"date": "2026-11-07", "text": "Bosses above Easy now have phases, and Heartwood gained 14 new camps and ranged mobs."},
+    {"date": "2026-11-07", "text": "Crate holograms now show which key opens them."},
+    {"date": "2026-11-06", "text": "Heartwood mobs now drop themed vanilla items and Prism on every kill."},
+    {"date": "2026-11-06", "text": "Heartwood opened as the Season 4 dungeon at `/warp dungeon`: 9 zones from Easy to Very Hard, each with a boss, ending at the Rotroot Heart."},
+    {"date": "2026-11-06", "text": "The old dungeon camps were retired."},
+    {"date": "2026-11-06", "text": "Heartwood camps now respawn twice as fast, mobs drop more iron and diamonds, and 8 new outskirts camps opened."},
+    {"date": "2026-10-27", "text": "`/dungeon claim` now has pages, a sort button and collect-all."},
+    {"date": "2026-10-20", "text": "Dungeon loot is now split by damage and goes straight into your inventory, and anything that does not fit waits in your dungeon inbox."},
+    {"date": "2026-10-20", "text": "Dungeon mobs no longer drop netherite ingots or diamond blocks, except the Grave Warden, which can still drop a netherite ingot."},
+    {"date": "2026-10-19", "text": "The Grave Warden now brings ranged Crypt Sentry escorts."},
+    {"date": "2026-10-05", "text": "Every dungeon camp now has an Evoker mini boss, and dungeon mobs can roll Speed and hit harder."},
+    {"date": "2026-09-30", "text": "Each dungeon camp now has its own loot, PvP is off in the dungeon, and `/warp dungeon` takes you there."},
+    {"date": "2026-09-28", "text": "Added the dungeon world with a new set of camps."}
+  ],
   "related": ["smp/crafting", "smp/crates", "smp/keep-on-death", "smp/battle-pass", "gear/heartwood-sets", "gear/gems"]
 }

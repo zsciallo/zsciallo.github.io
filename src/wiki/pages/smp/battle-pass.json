@@ -51,6 +51,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-06", "text": "Battle Pass Season 4 Heartwood started, with Living Prism rewards and Heartwood quests."},
+    {"date": "2026-11-02", "text": "Discord Server Boosters now get the premium battle pass and a pink prefix."},
+    {"date": "2026-10-29", "text": "The Shard of Embers replaced the Scroll of Binding at tier 43, and the Scroll of Binding was removed from every reward."},
+    {"date": "2026-09-30", "text": "Battle Pass Season 3 Octoberbit started, with Halloween Keys and Halloween rewards."}
+  ],
   "related": ["smp/crates", "smp/dungeons", "smp/voting", "smp/daily-streak"]
 }

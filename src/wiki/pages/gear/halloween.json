@@ -36,6 +36,8 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-08", "text": "Chromatic and Halloween gear no longer breaks: at 0 durability it turns Shattered and keeps its enchants until you repair it with `/craft repair`."}
+  ],
   "related": ["gear/chromatic", "smp/keep-on-death", "smp/crates"]
 }

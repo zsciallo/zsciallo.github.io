@@ -44,6 +44,9 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-08", "text": "KOTH deaths now cost at most $1M."},
+    {"date": "2026-09-30", "text": "Dying or logging out in combat now costs a fee."}
+  ],
   "related": ["smp/crafting", "smp/dungeons", "smp/auction-house", "smp/claims", "gear/chromatic", "gear/living-prism", "gear/halloween"]
 }

@@ -38,6 +38,8 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-30", "text": "Added daily login rewards on a 7-day streak, with `/daily`."}
+  ],
   "related": ["smp/vote-fly", "smp/voting", "smp/crates"]
 }

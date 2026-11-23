@@ -37,7 +37,14 @@
       {"facts": "enchants-halloween"}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-08", "text": "Added Grievous Wounds for swords and axes: hits cut your target's healing."},
+    {"date": "2026-10-08", "text": "True Strike was reworked: each level makes it likelier that a hit deals an extra half heart through armour."},
+    {"date": "2026-10-08", "text": "Thorns is now locked on Chromatic armour, and Fuddle was disabled."},
+    {"date": "2026-10-04", "text": "Fabled books were removed from every source, and the Kill Aura and Slingshot enchants were removed."},
+    {"date": "2026-10-02", "text": "Added True Strike, a sword enchant on the Upgrade bench that hits through armour."},
+    {"date": "2026-08-14", "text": "Added custom enchants."}
+  ],
   "related": ["smp/crafting", "smp/crates", "smp/battle-pass", "gear/chromatic", "gear/heartwood-sets"],
   "needs_owner_check": "Written from mc-server origin/main 63529705, which holds the Chromabithia merge (1a958347, 2026-11-22). That merge changed the enchant ladders, the Upgrade bench caps (Max level column) and turned book combining off (before it, combining was on). Confirm the live SMP runs this config before publishing."
 }

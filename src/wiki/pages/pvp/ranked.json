@@ -48,7 +48,12 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-16", "text": "Ranked matches can now be watched from the start."},
+    {"date": "2026-11-14", "text": "The tab list now shows your title and ranked tier next to your name."},
+    {"date": "2026-11-13", "text": "Ranked placement now takes 2 games."},
+    {"date": "2026-11-10", "text": "Ranked opened with best of 3 matches, divisions, ranked mace and top-ten boards in the hub."}
+  ],
   "related": ["pvp/duels", "pvp/kits", "pvp/tournaments"],
   "needs_owner_check": "Leaderboard on the site: faq.json says the PVP page has them; not rechecked against the live site. The tier tag is described from config.yml chat comments (best of placed kits, hover for kit and rating)."
 }

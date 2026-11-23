@@ -39,6 +39,8 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-08", "text": "Added zone armour sets for all 9 Heartwood zones, the Heartgrown set and the Branch of Heartwood."}
+  ],
   "related": ["smp/dungeons", "gear/gems", "smp/crafting", "gear/chromatic"]
 }

@@ -80,7 +80,17 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-17", "text": "Each drop into the FFA pit can now give one small bonus item, up to 3 a day."},
+    {"date": "2026-11-17", "text": "Starter kits now drop on death so anyone can pick them up, and you get 3 a day."},
+    {"date": "2026-11-17", "text": "The free starting scrap sword now deals 7 damage."},
+    {"date": "2026-11-16", "text": "Added FFA starter kits for new players."},
+    {"date": "2026-11-14", "text": "Maces left FFA, and the Gale Striker kit now uses a Thunderclap diamond axe."},
+    {"date": "2026-11-13", "text": "Added four Coin Charms that raise the Prism Coins you earn from FFA kills."},
+    {"date": "2026-11-12", "text": "FFA upgrades now follow one 8-step track in a fixed order."},
+    {"date": "2026-11-10", "text": "The FFA pit moved into the new Fallen Empire spawn, with launch pads into the pit."},
+    {"date": "2026-11-10", "text": "FFA opened in the hub with an iron start, an upgrade ladder up to the Clout tier, the Gambler's Blade, Vengeance and FFA events."}
+  ],
   "related": ["pvp/kits", "pvp/prism-coins", "pvp/crates", "pvp/parties"],
   "needs_owner_check": "Hats in FFA: ffa-kits.yml says an equipped hat shows until a real helmet goes on, while cosmetics.yml says hats are worn in the lobby only; the page follows ffa-kits.yml. Leaving the pit: messages.yml says both 'nothing stops it' (comment) and 'Hold still, you're leaving the pit' (leave-anchor); written as 'hold still'. Starter kit 'level' read as Arena Level 1-10. Supply Rain wave contents come from the config comment (gapples, pearls, wind charges, arrows). The site's /pvp/ copy mentions eight zones and extracting; neither is in the config, so neither is on the page."
 }

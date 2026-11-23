@@ -43,7 +43,10 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-12", "text": "Tokens are now called Prism Coins."},
+    {"date": "2026-11-10", "text": "Tokens opened as the ChromaPVP currency, earned in matches and spent on cosmetics."}
+  ],
   "related": ["pvp/ffa", "pvp/crates", "pvp/arena", "pvp/duels"],
   "needs_owner_check": "PVP Membership: config membership.token-bonus-percent 5 and the purple name are on origin/main, but the store package was still owed (run 20261117-ffa-liferoll U6) and it is not on the site's store pages; confirm it can be bought before this section ships, and say where it is sold. Buying Prism Coins on the store: ffa-kits.yml says they are sold there, but it is not confirmed live, so the page only points at `/buy`. The pvp-shop facts table is the Arena gold shop (facts.py: 'Arena shop'), so it sits on pvp/arena, not here; no Prism Coin price table exists among the fixed ids. First win of the day: config says first-win-of-day 25 with no mode split; the design doc says per mode."
 }

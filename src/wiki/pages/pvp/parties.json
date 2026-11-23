@@ -40,7 +40,9 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-10", "text": "Added parties: up to 4 players with `/party`."}
+  ],
   "related": ["pvp/arena", "pvp/duels", "pvp/ffa"],
   "needs_owner_check": "What a party changes in FFA is not in the config (no friendly-fire or nametag setting), so FFA is not covered. Green party nametags (Release Q, TAB placeholder) are not in the ChromaticArena config; left out. Parties of 3 or 4 in the Arena are not described by the config."
 }

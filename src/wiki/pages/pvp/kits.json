@@ -43,7 +43,12 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-16", "text": "Axe queues opened with a kit of a plain diamond axe, a sword, crossbow, bow, 6 arrows and a shield."},
+    {"date": "2026-11-16", "text": "The sword kit no longer has golden apples or steak, and hunger is off."},
+    {"date": "2026-11-13", "text": "The duel sword kit now has Sharpness IV and no Knockback."},
+    {"date": "2026-11-10", "text": "The Kits tab opened with 19 one-life kits, plus practice kits and training dummies."}
+  ],
   "related": ["pvp/duels", "pvp/ranked", "pvp/ffa", "pvp/crates"],
   "needs_owner_check": "Layout slots: config loadout.free-slots is 3 with a cap of 12; whether ranks or PVP Membership raise it on the live server is not confirmed, so only the 3 free slots are stated. Chaos is marked soon: true in kits/chaos.yml; written as coming soon."
 }

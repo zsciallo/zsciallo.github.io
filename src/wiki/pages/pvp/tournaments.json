@@ -46,7 +46,10 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-13", "text": "Tournament signups now show a boss bar on every ChromaPVP server."},
+    {"date": "2026-11-10", "text": "Tournaments opened: double elimination with a bracket screen and a caster sidebar for spectators."}
+  ],
   "related": ["pvp/duels", "pvp/kits", "pvp/ranked", "pvp/crates"],
   "needs_owner_check": "Prize amounts (1,000 / 500 / 250 Prism Coins) come from config.yml tournament.rewards and match the site's /pvp/ copy; the spec's deny list names 'tournament prize config', so confirm the amounts may appear. The minimum signup count for prizes to be paid (reward-min-entrants 3) is left out on purpose."
 }

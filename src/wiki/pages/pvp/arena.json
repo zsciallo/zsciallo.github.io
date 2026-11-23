@@ -76,7 +76,19 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-17", "text": "The Prismatic Arena now changes map every round."},
+    {"date": "2026-11-16", "text": "Added the Bulwark and Trickster classes."},
+    {"date": "2026-11-16", "text": "Added new augments, including Iron Heart, Contract, Valor and Stat Quest."},
+    {"date": "2026-11-16", "text": "Added the Glass Cannon, Fog of War and Vampire Night round modifiers."},
+    {"date": "2026-11-16", "text": "Added two maps, Abbey Cloister and Sunken Temple, and maps now rotate."},
+    {"date": "2026-11-14", "text": "The Spare Spear trident now has Loyalty III."},
+    {"date": "2026-11-13", "text": "The Bomber now buys 4 TNT for 60 gold, and its TNT hits twice as hard."},
+    {"date": "2026-11-12", "text": "The Bomber now has 4 tiers, axes deal 1 less damage, and the Crossbowman's second upgrade gives Quick Charge II."},
+    {"date": "2026-11-11", "text": "The Prismatic Arena now has one queue for 2 to 6 players, and the match format follows how many join."},
+    {"date": "2026-11-11", "text": "Added the Alchemist and Bomber classes."},
+    {"date": "2026-11-10", "text": "The Prismatic Arena opened with classes, gold, a shop between rounds, augments, stat anvils, round modifiers, Bravery, one reroll a match and 2v2v2 matches."}
+  ],
   "related": ["pvp/duels", "pvp/parties", "pvp/prism-coins", "pvp/ffa"],
   "needs_owner_check": "The pvp-shop table (Arena gold shop) is placed here instead of on pvp/prism-coins, where the brief put it: facts.py titles it 'Arena shop' and its prices are gold. Placement Prism Coins read as 1st to 4th place from tokens.arcade-placement [180, 120, 75, 30]. Party of 3 or 4 in the Arena: the config only describes a party of two; not covered. The team health loss amounts (base 20, +5 a round, cap 40, factors) are summarised as 'grows each round' rather than listed."
 }

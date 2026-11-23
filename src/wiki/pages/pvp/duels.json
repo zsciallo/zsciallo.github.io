@@ -65,7 +65,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-17", "text": "Added 13 new duel arenas."},
+    {"date": "2026-11-14", "text": "Unranked and Quickplay no longer match players by skill."},
+    {"date": "2026-11-10", "text": "ChromaPVP opened with duels, Quickplay, `/rematch` and the Mythic and Magic duel arenas."}
+  ],
   "related": ["pvp/kits", "pvp/ranked", "pvp/tournaments", "pvp/arena"],
   "needs_owner_check": "Map names are the arena file ids title-cased (arenas/*.yml has no display name for duel maps); confirm the names players see. Queue lockouts for dodging or leaving are left out on purpose (penalties section)."
 }

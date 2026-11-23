@@ -59,6 +59,11 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-10-30", "text": "Claims no longer expire."},
+    {"date": "2026-10-25", "text": "Doors inside claims are now locked to players without trust."},
+    {"date": "2026-10-22", "text": "You can now claim land in the Nether and the End."},
+    {"date": "2026-10-04", "text": "Claims now expire after 40 days without logging in."}
+  ],
   "related": ["smp/vote-fly", "smp/ranks-and-kits", "smp/spawners-and-hoppers", "smp/keep-on-death"]
 }
