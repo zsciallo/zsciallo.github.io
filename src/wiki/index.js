@@ -52,7 +52,7 @@ const SITE_PATH = /^\/(?!\/)[a-z0-9_./-]+\.(png|jpe?g|webp|gif)$/i;
 
 /** A site picture: { src, width, height } read from the file under public/, or null when it is not there. */
 export function picture(src) {
-  if (typeof src !== 'string' || !SITE_PATH.test(src) || src.includes('..')) return null;
+  if (typeof src !== 'string' || !SITE_PATH.test(src) || src.includes('..') || src.includes('//')) return null;
   const file = join(PUBLIC_DIR, src);
   if (!existsSync(file)) return null;
   const size = imageSize(readFileSync(file));
