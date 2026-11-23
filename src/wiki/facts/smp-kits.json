@@ -1,0 +1,28 @@
+{
+ "id": "smp-kits",
+ "title": "Kits",
+ "source": "mc-server:plugins/PlayerKits2/kits",
+ "ref": "63529705",
+ "columns": [
+  "Kit",
+  "Cooldown",
+  "Contents"
+ ],
+ "rows": [
+  [
+   "Diamond Kit",
+   "12 h",
+   "Diamond Axe, Diamond Pickaxe, Super Sword (Diamond Sword, Fire Aspect V)"
+  ],
+  [
+   "Food Kit",
+   "1 h",
+   "Cooked Beef x5, Cooked Chicken x5"
+  ],
+  [
+   "Iron Kit",
+   "3 h",
+   "Iron Axe, Iron Pickaxe, Iron Sword"
+  ]
+ ]
+}

@@ -1,0 +1,212 @@
+{
+ "id": "battlepass-premium",
+ "title": "Battle Pass: Chroma track",
+ "source": "mc-server:plugins/BattlePass/passes/premium.yml",
+ "ref": "63529705",
+ "columns": [
+  "Tier",
+  "Reward"
+ ],
+ "rows": [
+  [
+   "1",
+   "2x Spawner Key"
+  ],
+  [
+   "2",
+   "Skeleton Spawner"
+  ],
+  [
+   "3",
+   "8x Prismatic Resin"
+  ],
+  [
+   "4",
+   "Trim Pack - Coast + Sentry"
+  ],
+  [
+   "5",
+   "Spider Spawner, Spawner Key"
+  ],
+  [
+   "6",
+   "2x Chroma Key"
+  ],
+  [
+   "7",
+   "Cave Spider Spawner"
+  ],
+  [
+   "8",
+   "500 Prism Shards"
+  ],
+  [
+   "9",
+   "Random Elite Book"
+  ],
+  [
+   "10",
+   "Witch Spawner, 2x Shard Key"
+  ],
+  [
+   "11",
+   "Creeper Spawner"
+  ],
+  [
+   "12",
+   "3x Living Prism"
+  ],
+  [
+   "13",
+   "Trim Pack - Dune + Wild"
+  ],
+  [
+   "14",
+   "Drowned Spawner"
+  ],
+  [
+   "15",
+   "3x Spawner Key, Slime Spawner"
+  ],
+  [
+   "16",
+   "Vein Miner III"
+  ],
+  [
+   "17",
+   "MobTrak"
+  ],
+  [
+   "18",
+   "1,000 Prism Shards"
+  ],
+  [
+   "19",
+   "2x Shard Key"
+  ],
+  [
+   "20",
+   "24x Prismatic Resin, Enderman Spawner"
+  ],
+  [
+   "21",
+   "Chroma Key"
+  ],
+  [
+   "22",
+   "Guardian Spawner"
+  ],
+  [
+   "23",
+   "Trim Pack - Tide + Snout"
+  ],
+  [
+   "24",
+   "Telepathy"
+  ],
+  [
+   "25",
+   "Living Prism Key, +25% Points Booster (24h), $250,000"
+  ],
+  [
+   "26",
+   "Blaze Spawner"
+  ],
+  [
+   "27",
+   "Random Ultimate Book"
+  ],
+  [
+   "28",
+   "1,000 Prism Shards"
+  ],
+  [
+   "29",
+   "2x Shard Key"
+  ],
+  [
+   "30",
+   "Ghast Spawner, Random Legendary Book"
+  ],
+  [
+   "31",
+   "Transmog Scroll, 2x White Scroll"
+  ],
+  [
+   "32",
+   "16x Prismatic Resin"
+  ],
+  [
+   "33",
+   "Trim Pack - Flow + Bolt"
+  ],
+  [
+   "34",
+   "3x Spawner Key"
+  ],
+  [
+   "35",
+   "Evoker Spawner, Shard of Night"
+  ],
+  [
+   "36",
+   "Lifesteal IV"
+  ],
+  [
+   "37",
+   "2x Chroma Key"
+  ],
+  [
+   "38",
+   "Iron Golem Spawner"
+  ],
+  [
+   "39",
+   "3x Shard Key"
+  ],
+  [
+   "40",
+   "9x Living Prism, Wither Skeleton Spawner"
+  ],
+  [
+   "41",
+   "6x Living Prism"
+  ],
+  [
+   "42",
+   "Enderman Pair, Double Strike III"
+  ],
+  [
+   "43",
+   "StatTrak, Shard of Embers"
+  ],
+  [
+   "44",
+   "Random Legendary Book"
+  ],
+  [
+   "45",
+   "Shulker Spawner, 1x Elytra"
+  ],
+  [
+   "46",
+   "2,500 Prism Shards"
+  ],
+  [
+   "47",
+   "Living Prism Key, 3x Shard Key"
+  ],
+  [
+   "48",
+   "1x Beacon, Soulbound III"
+  ],
+  [
+   "49",
+   "Wither Pair, Shard of Haste"
+  ],
+  [
+   "50",
+   "Heart of the Tree, Warden Spawner, 3x Chroma Key, $1,000,000"
+  ]
+ ]
+}

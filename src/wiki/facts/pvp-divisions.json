@@ -1,0 +1,48 @@
+{
+ "id": "pvp-divisions",
+ "title": "Ranked tiers",
+ "source": "mc-kit:plugins/ChromaticArena/seasons.yml",
+ "ref": "2661261",
+ "columns": [
+  "Tier",
+  "Rating",
+  "Divisions"
+ ],
+ "rows": [
+  [
+   "Tin",
+   "0 to 1349",
+   "III, II, I"
+  ],
+  [
+   "Bronze",
+   "1350 to 1499",
+   "III, II, I"
+  ],
+  [
+   "Silver",
+   "1500 to 1599",
+   "III, II, I"
+  ],
+  [
+   "Gold",
+   "1600 to 1699",
+   "III, II, I"
+  ],
+  [
+   "Emerald",
+   "1700 to 1799",
+   "III, II, I"
+  ],
+  [
+   "Mithril",
+   "1800 to 1949",
+   "III, II, I"
+  ],
+  [
+   "Chroma",
+   "1950 and up",
+   "None"
+  ]
+ ]
+}

@@ -1,0 +1,350 @@
+{
+ "id": "pvp-ffa-kits",
+ "title": "FFA kits",
+ "source": "mc-kit:plugins/ChromaticArena/ffa-kits.yml",
+ "ref": "2661261",
+ "columns": [
+  "Kit",
+  "Tab",
+  "Loadout",
+  "Cost"
+ ],
+ "rows": [
+  [
+   "Ranger",
+   "Kits",
+   "Bow (Power II), Arrow x32",
+   "300 Prism Coins"
+  ],
+  [
+   "Diamond Duelist",
+   "Kits",
+   "Diamond Sword (Sharpness II), Shield, Diamond armour (Protection I)",
+   "800 Prism Coins"
+  ],
+  [
+   "Consumables",
+   "Kits",
+   "Golden Apple x8, Splash Potion of Healing x3",
+   "180 Prism Coins"
+  ],
+  [
+   "God Sword",
+   "Kits",
+   "Diamond Sword (Sharpness III)",
+   "1,000 Prism Coins"
+  ],
+  [
+   "Iron God Sword",
+   "Kits",
+   "Iron Sword (Sharpness III)",
+   "400 Prism Coins"
+  ],
+  [
+   "Knight",
+   "Kits",
+   "Shield, Diamond Chestplate (Protection I), Diamond Leggings (Protection I)",
+   "600 Prism Coins"
+  ],
+  [
+   "Tank",
+   "Kits",
+   "Shield, Diamond armour (Protection II)",
+   "1,200 Prism Coins"
+  ],
+  [
+   "Assassin",
+   "Kits",
+   "Diamond Sword (Sharpness II), Ender Pearl x4, Potion of Swiftness II x2",
+   "700 Prism Coins"
+  ],
+  [
+   "Pyro",
+   "Kits",
+   "Iron Sword (Fire Aspect I), Bow (Flame I), Arrow x16, Potion of Fire Resistance",
+   "700 Prism Coins"
+  ],
+  [
+   "Medic",
+   "Kits",
+   "Splash Potion of Healing II x4, Splash Potion of Regeneration x2, Golden Apple x6",
+   "500 Prism Coins"
+  ],
+  [
+   "Brawler",
+   "Kits",
+   "Iron Axe (Sharpness II), Shield, Potion of Strength",
+   "500 Prism Coins"
+  ],
+  [
+   "Crossbowman",
+   "Kits",
+   "Crossbow (Multishot I, Quick Charge II), Arrow x32, Firework Rocket x4",
+   "600 Prism Coins"
+  ],
+  [
+   "Frost Archer",
+   "Kits",
+   "Bow (Power III), Tipped Arrow of Slowness x16",
+   "800 Prism Coins"
+  ],
+  [
+   "Gale Striker",
+   "Kits",
+   "Diamond Axe (Sharpness I), Wind Charge x8",
+   "900 Prism Coins"
+  ],
+  [
+   "Juggernaut",
+   "Kits",
+   "Iron Sword (Sharpness II), Golden Apple x4, Diamond Chestplate (Protection III)",
+   "1,000 Prism Coins"
+  ],
+  [
+   "Sentinel",
+   "Kits",
+   "Diamond Sword (Sharpness I), Shield (Unbreaking III), Diamond Leggings (Protection II)",
+   "900 Prism Coins"
+  ],
+  [
+   "Scout",
+   "Kits",
+   "Iron Sword (Sharpness I), Potion of Swiftness x2, Diamond Boots (Feather Falling IV)",
+   "400 Prism Coins"
+  ],
+  [
+   "Berserker",
+   "Kits",
+   "Diamond Axe (Sharpness II), Potion of Strength II, Golden Apple x4",
+   "1,100 Prism Coins"
+  ],
+  [
+   "Paladin",
+   "Kits",
+   "Diamond Sword (Sharpness II), Splash Potion of Healing x2, Diamond armour (Protection I)",
+   "1,400 Prism Coins"
+  ],
+  [
+   "Inferno Edge",
+   "Legendary",
+   "Inferno Edge (Diamond Sword, Sharpness III, Fire Aspect II)",
+   "4,500 Prism Coins"
+  ],
+  [
+   "Frostbite",
+   "Legendary",
+   "Frostbite (Diamond Sword, Sharpness III, Knockback II)",
+   "4,200 Prism Coins"
+  ],
+  [
+   "Executioner",
+   "Legendary",
+   "Executioner (Diamond Axe, Sharpness IV)",
+   "5,400 Prism Coins"
+  ],
+  [
+   "Wraith Bow",
+   "Legendary",
+   "Wraith Bow (Bow, Power IV, Flame I, Infinity I), Arrow",
+   "4,800 Prism Coins"
+  ],
+  [
+   "Venom Bow",
+   "Legendary",
+   "Venom Bow (Bow, Power III, Punch I), Tipped Arrow of Poison x24",
+   "3,900 Prism Coins"
+  ],
+  [
+   "Skypiercer",
+   "Legendary",
+   "Skypiercer (Crossbow, Piercing IV, Quick Charge III), Arrow x32",
+   "5,100 Prism Coins"
+  ],
+  [
+   "Stormcaller",
+   "Legendary",
+   "Stormcaller (Trident, Loyalty III, Impaling V)",
+   "6,600 Prism Coins"
+  ],
+  [
+   "Thunderclap",
+   "Legendary",
+   "Thunderclap (Diamond Axe, Sharpness III, Unbreaking III), Wind Charge x16",
+   "7,800 Prism Coins"
+  ],
+  [
+   "Bloodfang",
+   "Legendary",
+   "Bloodfang (Iron Sword, Sharpness V, Sweeping Edge III)",
+   "3,600 Prism Coins"
+  ],
+  [
+   "Titan Plate",
+   "Legendary",
+   "Titan Plate (Diamond Chestplate, Protection III, Thorns III)",
+   "7,200 Prism Coins"
+  ],
+  [
+   "Shadowstep Boots",
+   "Legendary",
+   "Shadowstep Boots (Diamond Boots, Protection III, Feather Falling IV, Depth Strider III)",
+   "4,500 Prism Coins"
+  ],
+  [
+   "Aegis",
+   "Legendary",
+   "Aegis (Shield, Unbreaking III), Crown of Aegis (Golden Helmet, Protection III)",
+   "3,300 Prism Coins"
+  ],
+  [
+   "Gambler's Blade",
+   "Legendary",
+   "Gambler's Blade (Golden Sword)",
+   "5,000 Prism Coins"
+  ],
+  [
+   "Prismatic Regalia",
+   "Clout",
+   "Diamond armour (Protection III), Silence trim in Amethyst",
+   "12,000 Prism Coins"
+  ],
+  [
+   "Golden Pharaoh",
+   "Clout",
+   "Diamond armour (Protection III), Dune trim in Gold",
+   "9,500 Prism Coins"
+  ],
+  [
+   "Emerald Warden",
+   "Clout",
+   "Diamond armour (Protection III), Ward trim in Emerald",
+   "10,000 Prism Coins"
+  ],
+  [
+   "Quartz Spire",
+   "Clout",
+   "Diamond armour (Protection III), Spire trim in Quartz",
+   "11,000 Prism Coins"
+  ],
+  [
+   "Lapis Tide",
+   "Clout",
+   "Diamond armour (Protection III), Tide trim in Lapis",
+   "8,250 Prism Coins"
+  ],
+  [
+   "Copper Wild",
+   "Clout",
+   "Diamond armour (Protection III), Wild trim in Copper",
+   "8,500 Prism Coins"
+  ],
+  [
+   "Redstone Raiser",
+   "Clout",
+   "Diamond armour (Protection III), Raiser trim in Redstone",
+   "9,000 Prism Coins"
+  ],
+  [
+   "Void Eye",
+   "Clout",
+   "Diamond armour (Protection III), Eye trim in Netherite",
+   "11,500 Prism Coins"
+  ],
+  [
+   "Bone Rib",
+   "Clout",
+   "Diamond armour (Protection III), Rib trim in Iron",
+   "8,000 Prism Coins"
+  ],
+  [
+   "Host of Crowns",
+   "Clout",
+   "Diamond armour (Protection III), Host trim in Diamond",
+   "10,500 Prism Coins"
+  ],
+  [
+   "Wind Burst Bundle",
+   "Utility",
+   "Wind Charge x16",
+   "400 Prism Coins"
+  ],
+  [
+   "Pearl Stack",
+   "Utility",
+   "Ender Pearl x16",
+   "700 Prism Coins"
+  ],
+  [
+   "Healing Kit",
+   "Utility",
+   "Splash Potion of Healing II x4",
+   "600 Prism Coins"
+  ],
+  [
+   "Totem of Undying",
+   "Utility",
+   "Totem of Undying",
+   "1,800 Prism Coins"
+  ],
+  [
+   "Enchanted Golden Apple",
+   "Utility",
+   "Enchanted Golden Apple",
+   "1,600 Prism Coins"
+  ],
+  [
+   "Golden Feast",
+   "Utility",
+   "Golden Apple x12",
+   "800 Prism Coins"
+  ],
+  [
+   "Swift Draught",
+   "Utility",
+   "Potion of Swiftness II x2",
+   "500 Prism Coins"
+  ],
+  [
+   "Fire Ward",
+   "Utility",
+   "Potion of Fire Resistance (long) x2",
+   "400 Prism Coins"
+  ],
+  [
+   "Full Quiver",
+   "Utility",
+   "Arrow x64, Spectral Arrow x16",
+   "300 Prism Coins"
+  ],
+  [
+   "Strength Brew",
+   "Utility",
+   "Potion of Strength II x2",
+   "900 Prism Coins"
+  ],
+  [
+   "Copper Coin Charm",
+   "Utility",
+   "Copper Coin Charm (Copper Ingot)",
+   "150 Prism Coins"
+  ],
+  [
+   "Silver Coin Charm",
+   "Utility",
+   "Silver Coin Charm (Iron Ingot)",
+   "400 Prism Coins"
+  ],
+  [
+   "Gold Coin Charm",
+   "Utility",
+   "Gold Coin Charm (Gold Ingot)",
+   "900 Prism Coins"
+  ],
+  [
+   "Prism Coin Charm",
+   "Utility",
+   "Prism Coin Charm (Amethyst Shard)",
+   "2,000 Prism Coins"
+  ]
+ ]
+}

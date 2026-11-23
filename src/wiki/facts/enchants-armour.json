@@ -1,0 +1,212 @@
+{
+ "id": "enchants-armour",
+ "title": "Armour enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Aegis",
+   "3",
+   "Boots",
+   "Chance to gain speed when taking fall damage."
+  ],
+  [
+   "Angelic",
+   "5",
+   "Chestplates",
+   "Heals when damaged."
+  ],
+  [
+   "Aquatic",
+   "1",
+   "Helmets",
+   "Breathe underwater."
+  ],
+  [
+   "Arrow Deflect",
+   "4",
+   "All armour",
+   "Chance to block arrows shot by mobs."
+  ],
+  [
+   "Backbone",
+   "5",
+   "Chestplates",
+   "Reduces damage taken from maces by 10% per level."
+  ],
+  [
+   "Convulse",
+   "6",
+   "Boots",
+   "Chance to throw your attackers into the air."
+  ],
+  [
+   "Creeper Armor",
+   "3",
+   "All armour",
+   "Chance to be immune to explosive damage, at higher levels you have a chance to heal."
+  ],
+  [
+   "Disappear",
+   "4",
+   "All armour",
+   "Chance to become invisible when low on health."
+  ],
+  [
+   "Divert",
+   "5",
+   "All armour",
+   "Chance to divert the blow into poison for your attacker and regeneration for you."
+  ],
+  [
+   "Dodge",
+   "5",
+   "All armour",
+   "Chance to dodge hits from mobs, chance increases when sneaking."
+  ],
+  [
+   "Extinguish",
+   "3",
+   "Leggings",
+   "Chance to put out your fire when a mob hits you."
+  ],
+  [
+   "Gears",
+   "1",
+   "Boots",
+   "Added speed when equipped."
+  ],
+  [
+   "Glowing",
+   "1",
+   "Helmets",
+   "Gives permanent night vision."
+  ],
+  [
+   "Hardened",
+   "3",
+   "All armour",
+   "Chance to recover durability when damaged by players."
+  ],
+  [
+   "Implants",
+   "3",
+   "Helmets",
+   "Chance to restore food every few seconds."
+  ],
+  [
+   "Jelly Legs",
+   "3",
+   "Boots",
+   "Chance to negate fall damage."
+  ],
+  [
+   "Judgement",
+   "5",
+   "Elytra",
+   "Chance of poisoning an attacking mob and gaining regeneration."
+  ],
+  [
+   "Lava Walker",
+   "1",
+   "Boots",
+   "Walk on Lava."
+  ],
+  [
+   "Molten",
+   "4",
+   "All armour",
+   "Chance of setting your attacker ablaze."
+  ],
+  [
+   "Momentum",
+   "3",
+   "Elytra",
+   "Chance to gain speed boost with fireworks."
+  ],
+  [
+   "Obsidianshield",
+   "1",
+   "All armour",
+   "Gives permanent fire resistance."
+  ],
+  [
+   "Overload",
+   "1",
+   "All armour",
+   "Unlocks additional hearts."
+  ],
+  [
+   "Patch",
+   "3",
+   "All armour",
+   "Chance to recover durability when damaged by mobs."
+  ],
+  [
+   "Plummet",
+   "3",
+   "Boots",
+   "Deal damage to nearby mobs when taking fall damage."
+  ],
+  [
+   "Poisoned",
+   "4",
+   "All armour",
+   "Chance to give poison to your attacker."
+  ],
+  [
+   "Ragdoll",
+   "4",
+   "All armour",
+   "Chance to be pushed back when getting hit."
+  ],
+  [
+   "Reinforced",
+   "4",
+   "Elytra",
+   "Reduces damage dealt to you."
+  ],
+  [
+   "Rocket Escape",
+   "3",
+   "Boots",
+   "Blast off into the air at low HP."
+  ],
+  [
+   "Shockwave",
+   "5",
+   "Chestplates",
+   "Chance to push back your attacker when your health is low."
+  ],
+  [
+   "Springs",
+   "3",
+   "Boots",
+   "Gives jump boost."
+  ],
+  [
+   "Ward",
+   "4",
+   "All armour",
+   "A chance to halve incoming damage."
+  ],
+  [
+   "Water Walker",
+   "1",
+   "Boots",
+   "Walk on Water."
+  ],
+  [
+   "Wither",
+   "5",
+   "All armour",
+   "A chance to give the wither effect."
+  ]
+ ]
+}

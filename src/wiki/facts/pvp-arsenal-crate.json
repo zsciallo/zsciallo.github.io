@@ -1,0 +1,28 @@
+{
+ "id": "pvp-arsenal-crate",
+ "title": "Arsenal Crate",
+ "source": "mc-kit:plugins/ChromaticLoot/crates.yml",
+ "ref": "2661261",
+ "columns": [
+  "Tier",
+  "Contents"
+ ],
+ "rows": [
+  [
+   "Common",
+   "Ranger, Diamond Duelist, Consumables, Iron God Sword, Knight, Assassin, Pyro, Medic, Brawler, Crossbowman, Frost Archer, Scout, Wind Burst Bundle, Pearl Stack, Healing Kit, Golden Feast, Swift Draught, Fire Ward, Full Quiver, Copper Coin Charm, Silver Coin Charm"
+  ],
+  [
+   "Rare",
+   "God Sword, Tank, Gale Striker, Juggernaut, Sentinel, Berserker, Paladin, Totem of Undying, Enchanted Golden Apple, Strength Brew, Gold Coin Charm, Prism Coin Charm"
+  ],
+  [
+   "Epic",
+   "Inferno Edge, Frostbite, Executioner, Wraith Bow, Venom Bow, Skypiercer, Stormcaller, Thunderclap, Bloodfang, Titan Plate, Shadowstep Boots, Aegis, Gambler's Blade"
+  ],
+  [
+   "Mythic",
+   "Prismatic Regalia, Golden Pharaoh, Emerald Warden, Quartz Spire, Lapis Tide, Copper Wild, Redstone Raiser, Void Eye, Bone Rib, Host of Crowns"
+  ]
+ ]
+}

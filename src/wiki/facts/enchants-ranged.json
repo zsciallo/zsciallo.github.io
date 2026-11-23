@@ -1,0 +1,134 @@
+{
+ "id": "enchants-ranged",
+ "title": "Bow, crossbow and trident enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Archer",
+   "4",
+   "Bows",
+   "Increases damage dealt with bows."
+  ],
+  [
+   "Chaos",
+   "5",
+   "Tridents",
+   "Deal weakness and wither effects."
+  ],
+  [
+   "Deadshot",
+   "5",
+   "Tridents",
+   "Headshots with tridents deal double damage."
+  ],
+  [
+   "Explosive",
+   "5",
+   "Bows",
+   "Chance for arrows to explode."
+  ],
+  [
+   "Frenzy",
+   "5",
+   "Crossbows",
+   "Chance for arrows to explode."
+  ],
+  [
+   "Hellfire",
+   "5",
+   "Bows",
+   "Arrows hit mobs like a fireball."
+  ],
+  [
+   "Hunter",
+   "4",
+   "Tridents, Bows, Crossbows",
+   "Increases damage dealt to Passive Mobs."
+  ],
+  [
+   "Impact",
+   "4",
+   "Tridents",
+   "Chance to double dealt damage."
+  ],
+  [
+   "Marksman",
+   "4",
+   "Crossbows",
+   "Increases damage dealt with Crossbows."
+  ],
+  [
+   "Missile",
+   "5",
+   "Crossbows",
+   "Arrows hit mobs like a fireball."
+  ],
+  [
+   "Perish",
+   "5",
+   "Tridents, Bows, Crossbows",
+   "A chance to give the wither effect."
+  ],
+  [
+   "Piercing",
+   "5",
+   "Bows, Crossbows",
+   "Inflicts more damage."
+  ],
+  [
+   "Poseidon",
+   "4",
+   "Tridents",
+   "Increases damage dealt with Tridents."
+  ],
+  [
+   "Snare",
+   "4",
+   "Bows, Crossbows",
+   "Chance to slow and fatigue the mobs you shoot."
+  ],
+  [
+   "Sniper",
+   "5",
+   "Bows",
+   "Headshots with bows deal double damage."
+  ],
+  [
+   "Soulless",
+   "4",
+   "Tridents, Bows, Crossbows",
+   "Increases damage dealt to Hostile Mobs."
+  ],
+  [
+   "Spark",
+   "3",
+   "Tridents",
+   "Sets the mob you hit on fire."
+  ],
+  [
+   "Strife",
+   "3",
+   "Tridents",
+   "Increases Trident melee damage."
+  ],
+  [
+   "Striker",
+   "3",
+   "Bows",
+   "Chance for a volley to hit the mob you shoot."
+  ],
+  [
+   "Virus",
+   "3",
+   "Tridents, Bows, Crossbows",
+   "A chance of giving poison effect."
+  ]
+ ]
+}

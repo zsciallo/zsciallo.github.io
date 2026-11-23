@@ -1,0 +1,110 @@
+{
+ "id": "enchants-halloween",
+ "title": "Halloween gear enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Bleed",
+   "1",
+   "Swords",
+   "Hits sometimes make your target bleed."
+  ],
+  [
+   "Bloodsip",
+   "1",
+   "Swords",
+   "Every hit sips a little health."
+  ],
+  [
+   "Cheap Shot",
+   "1",
+   "Swords",
+   "Critical hits deal 30% more damage."
+  ],
+  [
+   "Collector",
+   "1",
+   "Axes",
+   "Mobs you kill sometimes drop their head."
+  ],
+  [
+   "Get Webbed",
+   "1",
+   "Swords",
+   "Hits sometimes web your target with Slowness I."
+  ],
+  [
+   "Gourd Slam",
+   "1",
+   "Maces",
+   "Every strike blasts everything around your target away."
+  ],
+  [
+   "Grave Robber",
+   "1",
+   "Pickaxes",
+   "Mines an entire ore vein at once."
+  ],
+  [
+   "Headhunter",
+   "1",
+   "Axes",
+   "Claims the head of every player you kill."
+  ],
+  [
+   "Night Terrors",
+   "1",
+   "Bows",
+   "Arrows plunge what they hit into Darkness and slow it."
+  ],
+  [
+   "Reap",
+   "1",
+   "Swords",
+   "Every strike cuts everything around your target."
+  ],
+  [
+   "Reaper's Toll",
+   "1",
+   "Swords",
+   "Every hit steals 1-3 health."
+  ],
+  [
+   "Reaping",
+   "1",
+   "Hoes",
+   "Harvesting a grown crop reaps a 3x3 around it."
+  ],
+  [
+   "Six Feet Under",
+   "1",
+   "Shovels",
+   "Digs a 3x3 area."
+  ],
+  [
+   "Slam the Lid",
+   "1",
+   "Shields",
+   "Blocking a hit knocks the attacker back."
+  ],
+  [
+   "Soul Lure",
+   "1",
+   "Fishing rods",
+   "Grants Luck II while held, for better treasure."
+  ],
+  [
+   "Stake Through the Heart",
+   "1",
+   "Crossbows",
+   "Bolts sometimes ignore armor entirely."
+  ]
+ ]
+}

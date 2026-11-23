@@ -1,0 +1,68 @@
+{
+ "id": "enchants-chromatic",
+ "title": "Chromatic gear enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Heatseeker",
+   "1",
+   "Bows",
+   "Marks what you hit, then strikes it again."
+  ],
+  [
+   "Prismbreaker",
+   "1",
+   "Pickaxes, Shovels",
+   "Mines a 3x3 area."
+  ],
+  [
+   "Prismcatch",
+   "1",
+   "Fishing rods",
+   "Lands a double catch every 15 seconds."
+  ],
+  [
+   "Prismdrain",
+   "1",
+   "Netherite spears",
+   "Every thrust drinks a little life."
+  ],
+  [
+   "Prismfell",
+   "1",
+   "Axes",
+   "Fells an entire tree in one hit."
+  ],
+  [
+   "Prismquake",
+   "1",
+   "Maces",
+   "Every strike shatters the ground around your target."
+  ],
+  [
+   "Prismreap",
+   "1",
+   "Hoes",
+   "Harvesting a grown crop reaps a 3x3 around it and replants."
+  ],
+  [
+   "Prismstorm",
+   "1",
+   "Crossbows",
+   "Every bolt that lands strikes again."
+  ],
+  [
+   "Trophy Hunter",
+   "1",
+   "Swords",
+   "Claims the head of every player you kill."
+  ]
+ ]
+}

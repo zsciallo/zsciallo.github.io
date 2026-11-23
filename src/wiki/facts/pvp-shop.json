@@ -1,0 +1,52 @@
+{
+ "id": "pvp-shop",
+ "title": "Arena shop",
+ "source": "mc-kit:plugins/ChromaticArena/shop.yml",
+ "ref": "2661261",
+ "columns": [
+  "Item",
+  "Price"
+ ],
+ "rows": [
+  [
+   "Arrows x16",
+   "30 gold"
+  ],
+  [
+   "TNT x4 (Bomber only)",
+   "60 gold"
+  ],
+  [
+   "Golden apples x2",
+   "60 gold"
+  ],
+  [
+   "Shield",
+   "150 gold"
+  ],
+  [
+   "Splash healing",
+   "70 gold"
+  ],
+  [
+   "Ender pearl",
+   "90 gold"
+  ],
+  [
+   "Weapon upgrade, each tier",
+   "100, 150, 250, 400 gold"
+  ],
+  [
+   "Armour upgrade, each tier",
+   "175, 275 gold"
+  ],
+  [
+   "Weapon enchant level (up to 3)",
+   "80 gold"
+  ],
+  [
+   "Stat anvil (pick one of 3: +1 Attack, +2 Armour, +1 Heart, +5% Speed, +5% Attack speed, +1 Toughness; up to 10 a match)",
+   "75 gold, each one after costs 25 more"
+  ]
+ ]
+}

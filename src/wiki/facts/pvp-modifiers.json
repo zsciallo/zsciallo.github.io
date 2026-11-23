@@ -1,0 +1,52 @@
+{
+ "id": "pvp-modifiers",
+ "title": "Arena modifiers",
+ "source": "mc-kit:plugins/ChromaticArena/modifiers.yml",
+ "ref": "2661261",
+ "columns": [
+  "Modifier",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Infected",
+   "Zombies crawl into the arena."
+  ],
+  [
+   "Lightning Storm",
+   "Lightning strikes where the sparks gather. Keep moving."
+  ],
+  [
+   "Low Gravity",
+   "Everyone jumps higher and falls slowly."
+  ],
+  [
+   "Blood Moon",
+   "Every hit is stronger and heals the attacker."
+  ],
+  [
+   "Gold Rush",
+   "Kills and the round pay double gold."
+  ],
+  [
+   "Ruined King",
+   "One player is crowned. Take them down for a bounty."
+  ],
+  [
+   "Slime Time",
+   "Slimes bounce in. Pop one to fly."
+  ],
+  [
+   "Glass Cannon",
+   "Every hit lands harder, and everyone has 4 fewer hearts."
+  ],
+  [
+   "Fog of War",
+   "Darkness falls. Enemies close to you glow."
+  ],
+  [
+   "Vampire Night",
+   "Heal items do nothing. Every hit heals you."
+  ]
+ ]
+}
