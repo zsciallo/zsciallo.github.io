@@ -106,5 +106,23 @@
    "Crossbows",
    "Bolts sometimes ignore armor entirely."
   ]
+ ],
+ "icons": [
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "mace",
+  "enchanted_book",
+  "enchanted_book",
+  "bow",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "shield",
+  "fishing_rod",
+  "crossbow"
  ]
 }

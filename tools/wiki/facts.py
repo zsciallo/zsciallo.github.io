@@ -133,6 +133,31 @@ def loadout(kit, where):
     return ", ".join(out)
 
 
+class Row(list):
+    """A table row that also carries its icon (a vanilla material or None); compares like a plain list."""
+    def __init__(self, cells, icon=None):
+        super().__init__(cells)
+        self.icon = icon
+
+
+ICON = re.compile(r"^[a-z0-9_]+$")
+SNBT_ID = re.compile(r'\bid:"(?:minecraft:)?([a-z0-9_]+)"')
+
+
+def icon(material):
+    """A config material as an icon id: lower snake case, minecraft: dropped; None when it is not a plain material."""
+    if not material:
+        return None
+    m = str(material).lower().split(":")[-1] if str(material).lower().startswith("minecraft:") else str(material).lower()
+    return m if ICON.match(m) else None
+
+
+def key_icon(key):
+    """The material of a crate key's item, from its SNBT."""
+    m = SNBT_ID.findall(str(((key.get("item") or {}).get("item") or {}).get("Data", {}).get("Value", "")))
+    return m[-1] if m else None
+
+
 # ---------------------------------------------------------------- SMP
 
 APPLIES = {"ALL_SWORD": "Swords", "ALL_AXE": "Axes", "ALL_PICKAXE": "Pickaxes", "ALL_SPADE": "Shovels",
@@ -186,9 +211,10 @@ def build_enchants(ench, upgrades):
         except ValueError:
             raise ShapeError(f"{where}: levels has a key that is not a number or no levels") from None
         rows = tables.setdefault(gear_of(e, applies), [])
-        rows.append([clean(need(e, "display", where, str)), str(caps.get(eid, top)),
-                     ", ".join(dict.fromkeys(APPLIES[a] for a in applies)),
-                     no_chance(clean(need(e, "description", where, str)), removed)])
+        gear = next((a.lower() for a in applies if not a.startswith("ALL_")), "enchanted_book")
+        rows.append(Row([clean(need(e, "display", where, str)), str(caps.get(eid, top)),
+                         ", ".join(dict.fromkeys(APPLIES[a] for a in applies)),
+                         no_chance(clean(need(e, "description", where, str)), removed)], gear))
     for rows in tables.values():
         rows.sort(key=lambda r: (r[0].lower(), r[2]))
     return tables, removed[0], skipped
@@ -216,7 +242,7 @@ def build_smp_kits(kits, keys):
         delay = need(k, "delay", where, int)
         if delay < 0:
             continue
-        contents = []
+        contents, item_icons, key_icons = [], [], []
         for line in need(k, "items", where, list):
             line = str(line).strip()
             if line.startswith("/"):
@@ -225,6 +251,7 @@ def build_smp_kits(kits, keys):
                     if m.group(1) not in keys:
                         raise ShapeError(f"{where}: key '{m.group(1)}' has no objects/key/{m.group(1)}.yml")
                     n = int(m.group(2))
+                    key_icons.append(key_icon(keys[m.group(1)]))
                     contents.append(clean(keys[m.group(1)]["display"]["name"]) + (f" x{n}" if n > 1 else ""))
                 elif p:
                     contents.append(f"{int(p.group(1)):,} Prism Shards")
@@ -241,11 +268,12 @@ def build_smp_kits(kits, keys):
                     ench, _, lvl = t.partition(":")
                     item["enchants"][ench] = int(lvl)
             contents.append(item_text(item, where))
+            item_icons.append(icon(item["material"]))
         if not contents:
             continue
         rank = RANK_KIT.match(kid)
         title = (rank.group(1).upper() + ("+" if rank.group(2) else "")) if rank else name(kid)
-        rows.append([title, f"/kit {kid}", duration(delay), ", ".join(counted(contents))])
+        rows.append(Row([title, f"/kit {kid}", duration(delay), ", ".join(counted(contents))], next(filter(None, item_icons + key_icons), None)))  # first real item, else the key
     return rows
 
 
@@ -307,7 +335,8 @@ def build_smp_crates(crates, rewards, keys):
         trims = [m.group(1) or m.group(2) for m in map(TRIM.match, names) if m]
         names = [n for n in names if not TRIM.match(n)] + ([f"Armour trims ({', '.join(trims)})"] if trims else [])
         title = clean(need(need(c, "display", where, dict), "name", f"{where}:display", str))
-        rows.append([title, ", ".join(key_names), ", ".join(dict.fromkeys(names))])
+        kicon = next(filter(None, (key_icon(keys[k]) for k in c["key_requirements"]["keys"])), None)
+        rows.append(Row([title, ", ".join(key_names), ", ".join(dict.fromkeys(names))], kicon))
     return sorted(rows)
 
 
@@ -321,13 +350,29 @@ def pass_reward(r, where):
     return ", ".join(x for x in lines if x)
 
 
-def build_pass(pass_, rewards, file):
+CRATEKEY_CMD = re.compile(r"^cratekey give \S+ (\w+) \d+$")
+
+
+def pass_icon(r, keys):
+    """An item reward's first material, or the key a cratekey command gives."""
+    for it in (r.get("items") or {}).values():
+        return icon(it.get("material"))
+    for cmd in r.get("commands") or []:
+        m = CRATEKEY_CMD.match(str(cmd))
+        if m and m.group(1) in keys:
+            return key_icon(keys[m.group(1)])
+    return None
+
+
+def build_pass(pass_, rewards, file, keys=None):
+    keys = keys or {}
     rows = []
     for tier, t in need(pass_, "tiers", file, dict).items():
         ids = need(t, "rewards", f"{file}:tiers.{tier}", list)
         names = [pass_reward(need(rewards, str(r), f"rewards.yml (tier {tier} of {file})", dict), f"rewards.yml:{r}")
                  for r in ids]
-        rows.append([str(int(tier)), ", ".join(names)])
+        rows.append(Row([str(int(tier)), ", ".join(names)],
+                        next(filter(None, (pass_icon(rewards[str(r)], keys) for r in ids)), None)))
     return sorted(rows, key=lambda r: int(r[0]))
 
 
@@ -343,7 +388,7 @@ def build_pvp_kits(kits):
         if k.get("soon"):
             continue  # shown as "soon" in game, not playable
         modes = ", ".join(MODES.get(m, name(m)) for m in need(k, "modes", where, list))
-        rows.append([clean(need(k, "name", where, str)), modes, loadout(k, where)])
+        rows.append(Row([clean(need(k, "name", where, str)), modes, loadout(k, where)], icon(k.get("icon"))))
     return sorted(rows)
 
 
@@ -351,14 +396,14 @@ def build_ffa_kits(ffa):
     rows = []
     for kid, k in need(ffa, "kits", "ffa-kits.yml", dict).items():
         where = f"ffa-kits.yml:kits.{kid}"
-        rows.append([clean(need(k, "name", where, str)), name(k.get("category", "kits")), loadout(k, where),
-                     f"{need(k, 'price', where, int):,} Prism Coins"])
+        rows.append(Row([clean(need(k, "name", where, str)), name(k.get("category", "kits")), loadout(k, where),
+                         f"{need(k, 'price', where, int):,} Prism Coins"], icon(k.get("icon"))))
     return rows
 
 
 def build_modifiers(mods):
-    return [[clean(need(m, "name", f"modifiers.yml:pool.{mid}", str)),
-             clean(need(m, "description", f"modifiers.yml:pool.{mid}", str))]
+    return [Row([clean(need(m, "name", f"modifiers.yml:pool.{mid}", str)),
+                 clean(need(m, "description", f"modifiers.yml:pool.{mid}", str))], icon(m.get("icon")))
             for mid, m in need(mods, "pool", "modifiers.yml", dict).items()]
 
 
@@ -366,8 +411,8 @@ def build_augments(aug):
     removed, rows = [0], []
     for i, a in enumerate(need(aug, "pool", "augments.yml", list)):
         where = f"augments.yml:pool[{i}]"
-        rows.append([clean(need(a, "name", where, str)), name(need(a, "rarity", where, str)),
-                     no_chance(clean(" ".join(need(a, "lore", where, list))), removed)])
+        rows.append(Row([clean(need(a, "name", where, str)), name(need(a, "rarity", where, str)),
+                         no_chance(clean(" ".join(need(a, "lore", where, list))), removed)], icon(a.get("icon"))))
     return rows, removed[0]
 
 
@@ -388,7 +433,7 @@ def build_shop(shop):
         where = f"shop.yml:items.{iid}"
         only = it.get("classes")
         label = clean(need(it, "name", where, str)) + (f" ({', '.join(name(c) for c in only)} only)" if only else "")
-        rows.append([label, f"{need(it, 'price', where, int)} gold"])
+        rows.append(Row([label, f"{need(it, 'price', where, int)} gold"], icon(it.get("icon"))))
     gold = lambda xs: ", ".join(str(x) for x in xs) + " gold"
     rows.append(["Weapon upgrade, each tier", gold(need(shop, "weapon-prices", "shop.yml", list))])
     rows.append(["Armour upgrade, each tier", gold(need(shop, "armor-prices", "shop.yml", list))])
@@ -479,7 +524,7 @@ def tables(smp, kit):
     for track, title in (("free", "Battle Pass: free track"), ("premium", "Battle Pass: Chroma track")):
         path = f"plugins/BattlePass/passes/{track}.yml"
         yield (f"battlepass-{track}", title, smp, path, ("BattlePass-",), lambda path=path: (["Tier", "Reward"],
-               build_pass(smp.yaml(path), smp.yaml("plugins/BattlePass/rewards.yml"), path), 0))
+               build_pass(smp.yaml(path), smp.yaml("plugins/BattlePass/rewards.yml"), path, keys()), 0))
     ca = ("ChromaticArena.jar",)
     yield ("pvp-kits", "Kits", kit, f"{arena}/kits", ca, lambda: (["Kit", "Modes", "Loadout"],
            build_pvp_kits(kit.folder(f"{arena}/kits")), 0))
@@ -507,6 +552,14 @@ def guard(t, terms):
     return None
 
 
+def with_icons(t):
+    """Add "icons" (one per row, a material or None) when at least one row has one."""
+    icons = [getattr(r, "icon", None) for r in t["rows"]]
+    if any(icons):
+        t["icons"] = icons
+    return t
+
+
 def run(smp_ref, kit_ref, out_dir):
     deny = json.loads(DENY.read_text(encoding="utf-8")) if DENY.exists() else {}
     terms = [re.compile(t, re.I) for t in deny.get("terms", SPEC_TERMS)]
@@ -526,13 +579,13 @@ def run(smp_ref, kit_ref, out_dir):
             gears, removed[tid], left_out = res
             notes.append(f"enchants: {sum(map(len, gears.values()))} in {len(gears)} gear groups, "
                          f"Shard items left out: {len(left_out)}")
-            out += [{"id": f"enchants-{g}", "title": GEAR_TITLES[g], **base, "columns": ENCHANT_COLUMNS, "rows": r}
-                    for g, r in sorted(gears.items())]
+            out += [with_icons({"id": f"enchants-{g}", "title": GEAR_TITLES[g], **base, "columns": ENCHANT_COLUMNS,
+                                "rows": r}) for g, r in sorted(gears.items())]
             continue
         cols, rows, removed[tid] = res
         if not rows:
             raise ShapeError(f"{tid}: no rows from {source}")
-        out.append({"id": tid, "title": title, **base, "columns": cols, "rows": rows})
+        out.append(with_icons({"id": tid, "title": title, **base, "columns": cols, "rows": rows}))
     # A hit blocks its table (never written, old copy removed) and fails the run; the clean tables are still written.
     blocked = [msg for msg in (guard(t, terms) for t in out) if msg]
     out = [t for t in out if not guard(t, terms)]

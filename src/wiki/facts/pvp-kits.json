@@ -24,5 +24,10 @@
    "Unranked, Ranked, FFA",
    "Diamond Sword (Sharpness IV, Unbreaking III), Diamond armour (Protection IV, Unbreaking III)"
   ]
+ ],
+ "icons": [
+  "diamond_axe",
+  "mace",
+  "diamond_sword"
  ]
 }

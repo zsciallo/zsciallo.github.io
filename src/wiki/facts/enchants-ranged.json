@@ -130,5 +130,27 @@
    "Tridents, Bows, Crossbows",
    "A chance of giving poison effect."
   ]
+ ],
+ "icons": [
+  "bow",
+  "trident",
+  "trident",
+  "bow",
+  "crossbow",
+  "bow",
+  "trident",
+  "trident",
+  "crossbow",
+  "crossbow",
+  "trident",
+  "bow",
+  "trident",
+  "bow",
+  "bow",
+  "trident",
+  "trident",
+  "trident",
+  "bow",
+  "trident"
  ]
 }

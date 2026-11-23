@@ -48,5 +48,17 @@
    "Stat anvil (pick one of 3: +1 Attack, +2 Armour, +1 Heart, +5% Speed, +5% Attack speed, +1 Toughness; up to 10 a match)",
    "75 gold, each one after costs 25 more"
   ]
+ ],
+ "icons": [
+  "arrow",
+  "tnt",
+  "golden_apple",
+  "shield",
+  "splash_potion",
+  "ender_pearl",
+  null,
+  null,
+  null,
+  null
  ]
 }

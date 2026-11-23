@@ -61,6 +61,10 @@ rows = facts.build_smp_crates(CRATES, REWARDS, KEYS)
 assert rows == [["Test Crate", "Test Key", "Gem, Netherite Ingot x2, Big Blade, Armour trims (Rib)"]], rows
 assert not any(s in json.dumps(rows) for s in ("12.5", "mythic", "nope", "Old Crate"))
 
+# Icons: config materials only, minecraft: dropped, anything else (ItemsAdder ids) None; a Row still equals its list.
+assert [facts.icon(m) for m in ("DIAMOND_SWORD", "minecraft:trial_key", "itemsadder:ruby", None)] == ["diamond_sword", "trial_key", None, None]
+assert facts.Row(["a"], "bow") == ["a"] and facts.Row(["a"], "bow").icon == "bow"
+
 # Essentials kits: one-time and command-only kits are left out, rank kits show the rank, keys and Prism are named.
 KITS = {"kits": {"starter": {"delay": -1, "items": ["stonesword 1"]},
                  "commandsbook": {"delay": 30, "items": ["/chelp item {USERNAME}"]},
@@ -134,6 +138,8 @@ with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
         assert t["rows"] and all(len(r) == len(t["columns"]) and all(isinstance(c, str) and c for c in r)
                                  for r in t["rows"]), f.name
         assert f.read_bytes() == (pathlib.Path(b) / f.name).read_bytes(), f"{f.name} differs between runs"
+        icons = t.get("icons")
+        assert icons is None or (len(icons) == len(t["rows"]) and all(i is None or facts.ICON.match(i) for i in icons)), f.name
     print(f"real run: {len(files)} tables written, skipped {skipped or 'none'}")
     for msg in blocked:
         print(f"WARNING blocked by the guard (facts.py exits 1): {msg[:120]}...")

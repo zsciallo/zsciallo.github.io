@@ -48,5 +48,17 @@
    "Vampire Night",
    "Heal items do nothing. Every hit heals you."
   ]
+ ],
+ "icons": [
+  "zombie_head",
+  "lightning_rod",
+  "feather",
+  "redstone",
+  "gold_block",
+  "golden_helmet",
+  "slime_ball",
+  "glass",
+  "black_dye",
+  "wither_rose"
  ]
 }

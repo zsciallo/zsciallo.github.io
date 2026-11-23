@@ -58,5 +58,15 @@
    "Fishing rods",
    "Pull hit entity towards you."
   ]
+ ],
+ "icons": [
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod"
  ]
 }

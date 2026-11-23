@@ -58,5 +58,15 @@
    "1 d",
    "Chroma Key, Shard Key, 1,000 Prism Shards"
   ]
+ ],
+ "icons": [
+  "iron_helmet",
+  "diamond_helmet",
+  "golden_shovel",
+  "stone_sword",
+  "heart_of_the_sea",
+  "tripwire_hook",
+  "tripwire_hook",
+  "tripwire_hook"
  ]
 }

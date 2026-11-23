@@ -64,5 +64,16 @@
    "Swords",
    "Claims the head of every player you kill."
   ]
+ ],
+ "icons": [
+  "bow",
+  "enchanted_book",
+  "fishing_rod",
+  "netherite_spear",
+  "enchanted_book",
+  "mace",
+  "enchanted_book",
+  "crossbow",
+  "enchanted_book"
  ]
 }
