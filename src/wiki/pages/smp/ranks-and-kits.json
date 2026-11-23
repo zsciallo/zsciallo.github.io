@@ -73,7 +73,7 @@
           "p": "Each store rank includes everything in the ranks below it, kits too."
         },
         {
-          "p": "**VIP**: [VIP] chat tag, 10 homes, 5 auto-sell chests, 2 player warps, `/back` (also after death), `/hat`, `/near`, `/nick`, 1.25x mcMMO XP, 2 spawner storage pages, 150 upgradeable hoppers, and the VIP and Diamond kits."
+          "p": "**VIP**: [VIP] chat tag, 10 homes, 5 auto-sell chests, 2 player warps, `/hat`, `/near`, `/nick`, 1.25x mcMMO XP, 2 spawner storage pages, 150 upgradeable hoppers, and the VIP and Diamond kits."
         },
         {
           "p": "**VIP+**: [VIP+] tag, 15 homes, 10 auto-sell chests, 3 player warps, `/enderchest`, `/itemname` with colour codes, 1.5x mcMMO XP, 3 spawner storage pages, 175 upgradeable hoppers, and the VIP+ kit."
@@ -85,7 +85,7 @@
           "p": "**MVP+**: [MVP+] tag, 25 homes, 250 upgradeable hoppers, and the MVP+ kit."
         },
         {
-          "p": "Without a store rank you have 2 auto-sell chests, 1 spawner storage page and 125 upgradeable hoppers."
+          "p": "Without a store rank you have 3 homes, 2 auto-sell chests, 1 player warp, 1 spawner storage page, 125 upgradeable hoppers and `/back` (also after death)."
         }
       ]
     },
