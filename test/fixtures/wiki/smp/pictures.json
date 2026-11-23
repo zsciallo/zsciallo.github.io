@@ -1,0 +1,18 @@
+{
+  "title": "Pictures Page",
+  "half": "smp",
+  "summary": "**Pictures Page** is a test fixture for icon tokens, page pictures and img blocks; it is never published.",
+  "icon": "diamond_sword",
+  "image": {"src": "/dungeon/preview.jpg", "alt": "\"><script>alert(1)</script>"},
+  "infobox": [["Server", "SMP"]],
+  "sections": [
+    {"h": "Mechanics", "blocks": [
+      {"p": "T1ok {{icon:diamond_sword}} sword"},
+      {"p": "T1bad {{icon:../x}} {{icon:A B}} {{icon:\"onerror=}}"},
+      {"p": "T1none {{icon:zz_no_sprite}} none"},
+      {"img": {"src": "/dungeon/preview.jpg", "alt": "\"><script>alert(2)</script>", "caption": "<b>cap</b> [js-cap](javascript:alert(3)) [ok-cap](/wiki/)"}}
+    ]}
+  ],
+  "history": [],
+  "related": []
+}

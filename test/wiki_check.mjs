@@ -187,7 +187,8 @@ check('content-text-self-test', (() => {
   const want = ['has a tag', 'has an em dash', 'links "javascript:'];
   return [
     ...want.filter((w) => !got.some((s) => s.includes(w))).map((w) => `smp/raw-html.json ${w} is not caught`),
-    ...contentProblems(FIXTURE).filter((s) => !s.startsWith('smp/raw-html.json')).map((s) => `clean fixture flagged: ${s}`),
+    // pictures.json (round 4) is dirty on purpose too: it feeds the renderer's picture and icon checks.
+    ...contentProblems(FIXTURE).filter((s) => !/^smp\/(raw-html|pictures)\.json/.test(s)).map((s) => `clean fixture flagged: ${s}`),
   ];
 })());
 
@@ -198,6 +199,77 @@ check('summary-length', pages.flatMap((p) => {
   if (!(p.summary ?? '').startsWith(`**${p.title}**`)) out.push(`${p.route} summary does not start with **${p.title}**`);
   return out;
 }));
+
+// ------------------------------------------------------------------ pictures --
+// Round 4 (owner: "lots of pictures"): materials named anywhere need a sprite file, so a typo fails.
+const MATERIAL = /^[a-z0-9_]+$/;
+const ICON_DIR = join(ROOT, 'public', 'wiki', 'icons');
+const KNOWN_MISSING = ['netherite_spear']; // named by a facts table, no sprite exists anywhere (implementer r4)
+const factFiles = readdirSync(FACTS_DIR).filter((f) => f.endsWith('.json')).map((f) => ({ file: f, data: JSON.parse(readFileSync(join(FACTS_DIR, f), 'utf-8')) }));
+
+check('icons-have-files', (() => {
+  const named = [
+    ...pages.filter((p) => p.icon && MATERIAL.test(p.icon)).map((p) => [p.icon, `${p.route} icon`]),
+    ...pages.flatMap((p) => strings(p).flatMap((s) => [...s.matchAll(/\{\{icon:([^}]*)\}\}/g)].map((m) => [m[1], `${p.route} token`]))),
+    ...factFiles.flatMap(({ file, data }) => (data.icons ?? []).filter(Boolean).map((m) => [m, `facts ${file}`])),
+  ];
+  return [
+    ...named.filter(([m]) => !MATERIAL.test(m)).map(([m, where]) => `${where} names ${q(m)}, not a material`),
+    ...named.filter(([m]) => MATERIAL.test(m) && !KNOWN_MISSING.includes(m) && !existsSync(join(ICON_DIR, `${m}.png`))).map(([m, where]) => `${where} names ${q(m)}, no public/wiki/icons/${m}.png`),
+    ...KNOWN_MISSING.filter((m) => existsSync(join(ICON_DIR, `${m}.png`))).map((m) => `${m} now has a sprite: drop it from KNOWN_MISSING`),
+  ];
+})());
+
+check('facts-icons-shape', factFiles.flatMap(({ file, data }) => {
+  if (!('icons' in data)) return [];
+  if (!Array.isArray(data.icons)) return [`${file} icons is not a list`];
+  return [
+    ...(data.icons.length !== (data.rows ?? []).length ? [`${file} has ${data.icons.length} icons for ${(data.rows ?? []).length} rows`] : []),
+    ...data.icons.filter((m) => m !== null && !(typeof m === 'string' && MATERIAL.test(m))).map((m) => `${file} icon ${q(m)} is not null or a material`),
+  ];
+}));
+
+// T2 on the build: the FAQ never shows a wiki sprite.
+{
+  const doc = built('/faq/');
+  check('faq-no-wiki-icons', doc ? findAll(doc, (el) => el.tag === 'img' && (el.attrs.src ?? '').includes('/wiki/icons/')).map((el) => `/faq/ has <img src=${q(el.attrs.src)}>`) : ['/faq/ has no built file']);
+}
+
+// T4: the bottom nav box links every live page of the article's half but itself, which is bold text.
+check('navbox-half-pages', pages.flatMap((p) => {
+  const doc = built(p.route);
+  const box = doc && findAll(doc, (el) => el.tag === 'nav' && (el.attrs.class ?? '').split(/\s+/).includes('wiki-navbox'))[0];
+  if (!box) return [`${p.route} has no nav box`];
+  const row = findAll(box, (el) => el.tag === 'tr').find((tr) => findAll(tr, (el) => el.tag === 'th').some((th) => textOf(th) === 'Pages'));
+  if (!row) return [`${p.route} nav box has no Pages row`];
+  const hrefs = findAll(row, (el) => el.tag === 'a').map((a) => a.attrs.href);
+  const want = pages.filter((o) => o.half === p.half && o.route !== p.route).map((o) => o.route);
+  return [
+    ...want.filter((r) => !hrefs.includes(r)).map((r) => `${p.route} nav box does not link ${r}`),
+    ...hrefs.filter((r) => !want.includes(r)).map((r) => `${p.route} nav box links ${r}`),
+    ...(findAll(box, (el) => el.tag === 'a' && el.attrs.href === p.route).length ? [`${p.route} nav box links the page itself`] : []),
+    ...(findAll(row, (el) => el.tag === 'strong').some((s) => textOf(s) === p.title) ? [] : [`${p.route} nav box does not show ${q(p.title)} as text`]),
+  ];
+}));
+
+// T5: one tile per live page; the summary lives in the link title, not in the tile text.
+{
+  const doc = built('/wiki/');
+  const tiles = doc ? findAll(doc, (el) => el.tag === 'li' && 'data-wiki-title' in el.attrs) : [];
+  check('home-tiles', !doc ? ['/wiki/ has no built file'] : [
+    ...(tiles.length !== pages.length ? [`/wiki/ has ${tiles.length} tiles, want ${pages.length}`] : []),
+    ...pages.flatMap((p) => {
+      const mine = tiles.filter((t) => findAll(t, (el) => el.tag === 'a' && el.attrs.href === p.route).length);
+      if (mine.length !== 1) return [`${p.route} has ${mine.length} tiles, want 1`];
+      const a = findAll(mine[0], (el) => el.tag === 'a')[0];
+      const sum = plainAnswer(p.summary ?? '');
+      return [
+        ...(a.attrs.title === sum ? [] : [`${p.route} tile title is ${q(a.attrs.title)}, want the plain summary`]),
+        ...(textOf(mine[0]).includes(sum) || textOf(mine[0]) !== p.title ? [`${p.route} tile text is ${q(textOf(mine[0]).slice(0, 60))}, want just ${q(p.title)}`] : []),
+      ];
+    }),
+  ]);
+}
 
 // ------------------------------------------------------------- real renderer --
 // The fixture pages through src/pages/WikiPage.jsx, loaded the way ssg.js loads it.
@@ -224,6 +296,74 @@ check('summary-length', pages.flatMap((p) => {
       ...[['wiki-link', '/wiki/smp/sample/'], ['ext-link', 'https://chromabit.us/']].filter((want) => !links.some((l) => q(l) === q(want))).map(([t, href]) => `${q(t)} does not render as a link to ${href}`),
       ...['js-link', 'data-link', 'http-link', 'proto-link'].filter((t) => !text.includes(t)).map((t) => `${q(t)} label is not shown as text`),
     ]);
+    // Round 4 pictures fixture (no "live": never listed).
+    const { WikiHome } = await server.ssrLoadModule('/src/pages/WikiPage.jsx');
+    const { rich } = await server.ssrLoadModule('/src/lib/rich.jsx');
+    const pic = { ...JSON.parse(readFileSync(join(FIXTURE, 'smp', 'pictures.json'), 'utf-8')), half: 'smp', slug: 'pictures', route: '/wiki/smp/pictures/' };
+    const mainOf = (d) => findAll(d, (el) => el.tag === 'main')[0] ?? d;
+    const imgs = (n) => findAll(n, (el) => el.tag === 'img');
+    const onAttrs = (n) => findAll(n, (el) => Object.keys(el.attrs).some((k) => k.startsWith('on'))).map((el) => `<${el.tag}> has ${Object.keys(el.attrs).filter((k) => k.startsWith('on'))}`);
+    const picDoc = parseHtml(render(h(WikiArticle, { page: pic, pages: [pic], facts: {} })));
+    const para = (mark) => findAll(picDoc, (el) => el.tag === 'p' && textOf(el).startsWith(mark))[0];
+
+    // T1 icon token.
+    check('render-icon-token', (() => {
+      const ok = para('T1ok');
+      const bad = para('T1bad');
+      const none = para('T1none');
+      if (!ok || !bad || !none) return ['the icon token paragraphs did not render'];
+      const [img, ...more] = imgs(ok);
+      return [
+        ...(!img || more.length ? [`{{icon:diamond_sword}} renders ${imgs(ok).length} <img>, want 1`] : []),
+        ...(img && (img.attrs.alt !== '' || img.attrs.width !== '20' || img.attrs.height !== '20' || img.attrs.src !== '/wiki/icons/diamond_sword.png')
+          ? [`sprite is ${q(img.attrs)}, want alt "", width/height 20, src /wiki/icons/diamond_sword.png`] : []),
+        ...(imgs(bad).length ? [`an invalid icon name renders ${imgs(bad).length} <img>`] : []),
+        ...['{{icon:../x}}', '{{icon:A B}}', '{{icon:"onerror=}}'].filter((t) => !textOf(bad).includes(t)).map((t) => `${q(t)} is not shown as text`),
+        ...onAttrs(mainOf(picDoc)),
+        ...(imgs(none).length ? ['a material with no sprite renders an <img>'] : []),
+      ];
+    })());
+
+    // T2 the FAQ path: rich() without a resolver (FaqPage calls rich(item.a)) leaves the token as text.
+    check('faq-icon-token-is-text', (() => {
+      const d = parseHtml(render(h('p', null, rich('answer {{icon:diamond_sword}} here'))));
+      return [
+        ...(imgs(d).length ? ['rich() without a resolver renders an <img>'] : []),
+        ...(textOf(d).includes('{{icon:diamond_sword}}') ? [] : [`the token is not kept as text: ${q(textOf(d))}`]),
+        ...(/rich\(item\.a\)/.test(readFileSync(join(ROOT, 'src', 'pages', 'FaqPage.jsx'), 'utf-8')) ? [] : ['FaqPage no longer calls rich(item.a) with no resolver']),
+      ];
+    })());
+
+    // T3 picture paths: only a plain site path (no .., no //, no scheme) renders; alt and caption escaped.
+    check('render-picture-paths', (() => {
+      const out = [];
+      const fig = findAll(picDoc, (el) => el.tag === 'figure')[0];
+      const box = findAll(picDoc, (el) => 'data-wiki-infobox' in el.attrs)[0];
+      // Control: the good path renders in the info box, the figure and the home tile.
+      if (!box || imgs(box).length !== 1) out.push('a good image.src does not render one info box <img>');
+      if (!fig || imgs(fig).length !== 1) out.push('a good img block does not render one <img>');
+      else {
+        if (imgs(fig)[0].attrs.alt !== '"><script>alert(2)</script>') out.push(`figure alt is ${q(imgs(fig)[0].attrs.alt)}, want the raw string`);
+        const cap = findAll(fig, (el) => el.tag === 'figcaption')[0];
+        if (!cap || !textOf(cap).includes('<b>cap</b>')) out.push('caption <b> is not shown as text');
+        const hrefs = cap ? findAll(cap, (el) => el.tag === 'a').map((a) => a.attrs.href) : [];
+        if (hrefs.some((x) => /^javascript:/i.test(x))) out.push('caption renders a javascript: link');
+        if (!hrefs.includes('/wiki/')) out.push('caption [ok-cap](/wiki/) is not a link');
+      }
+      if (box && imgs(box)[0]?.attrs.alt !== '"><script>alert(1)</script>') out.push('info box alt is not the raw string');
+      if (findAll(mainOf(picDoc), (el) => el.tag === 'script').length) out.push('a <script> reached the article');
+      const homeImg = (page) => imgs(mainOf(parseHtml(render(h(WikiHome, { pages: [page] }))))).filter((i) => !(i.attrs.class ?? '').includes('wiki-home-logo'));
+      if (homeImg(pic).length !== 1) out.push('a good page icon does not render a tile <img>');
+      for (const bad of ['/../dungeon/preview.jpg', '/dungeon/../dungeon/preview.jpg', '//chromabit.us/dungeon/preview.jpg', '/wiki/icons//diamond_sword.png', 'https://chromabit.us/dungeon/preview.jpg', 'javascript:alert(1)', 'data:image/png;base64,AA', 'dungeon/preview.jpg']) {
+        const page = { ...pic, icon: bad, image: { src: bad, alt: 'x' }, sections: [{ h: 'Mechanics', blocks: [{ img: { src: bad, alt: 'x' } }] }] };
+        const n = imgs(mainOf(parseHtml(render(h(WikiArticle, { page, pages: [page], facts: {} })))));
+        if (n.length) out.push(`${q(bad)} renders ${n.length} article <img> (${q(n[0].attrs.src)})`);
+        const t = homeImg(page);
+        if (t.length) out.push(`${q(bad)} as a page icon renders a tile <img> (${q(t[0].attrs.src)})`);
+      }
+      return out;
+    })());
+
     const article = parseHtml(render(h(WikiArticle, { page: fx[0], pages: fx, facts: {} })));
     const changes = parseHtml(render(h(WikiChanges, { pages: fx })));
     check('render-history-newest-first', [
@@ -238,6 +378,23 @@ check('summary-length', pages.flatMap((p) => {
 }
 
 // -------------------------------------------------------------------- browser --
+
+// In the page: colours go through a 1x1 canvas, so oklch()/color() computed values read as RGBA too.
+const SOLID = `(() => {
+  const ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });
+  const rgba = (c) => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = '#000'; ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1); return [...ctx.getImageData(0, 0, 1, 1).data]; };
+  const main = document.querySelector('main');
+  const opaque = (el) => { for (let e = el; e && main.contains(e); e = e.parentElement) { const c = rgba(getComputedStyle(e).backgroundColor); if (c[3] === 255) return c; } return null; };
+  const bad = [];
+  for (const el of main.querySelectorAll('*')) {
+    if (![...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) || !el.getClientRects().length) continue;
+    if (!opaque(el)) bad.push(el.tagName.toLowerCase() + (typeof el.className === 'string' && el.className ? '.' + el.className.split(' ')[0] : '') + ' ' + JSON.stringify(el.textContent.trim().slice(0, 30)));
+  }
+  const lum = (c) => (c ? (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255 : null);
+  const at = (sel) => { const e = document.querySelector(sel); return e ? lum(opaque(e)) : null; };
+  const panel = document.querySelector('.wiki-panel');
+  return { theme: document.documentElement.dataset.theme, bad, panelAlpha: panel ? rgba(getComputedStyle(panel).backgroundColor)[3] : null, lum: { panel: at('.wiki-panel'), td: at('main td'), infobox: at('[data-wiki-infobox]') } };
+})()`;
 
 if (!args.includes('--no-browser')) {
   let ran = false;
@@ -255,6 +412,35 @@ if (!args.includes('--no-browser')) {
         await p?.close();
       }
     }
+    // T6 (owner: text on a solid panel): every visible text element in main sits on an opaque background
+    // inside main, in dark and Quartz; in Quartz the panel, a table cell and the info box are light.
+    const art = pages.find((p) => factIds(p).length) ?? pages[0];
+    for (const path of ['/wiki/', art?.route].filter(Boolean))
+      for (const width of [1280, 400]) {
+        const lum = {};
+        for (const theme of ['dark', 'light']) {
+          let p;
+          const name = `solid-panel ${path}@${width} ${theme}`;
+          try {
+            const init = theme === 'light' ? "try { localStorage.setItem('chromabit:theme', 'light'); } catch (e) {}" : undefined;
+            p = await openState(b, origin, { id: `wiki ${name}`, path, ready: 'main.wiki .wiki-panel', init, colorScheme: theme }, width);
+            const r = await p.ev(SOLID);
+            lum[theme] = r.lum;
+            check(name, [
+              ...(r.theme === theme ? [] : [`data-theme is ${q(r.theme)}, want ${theme}`]),
+              ...(r.panelAlpha === 255 ? [] : [`.wiki-panel background alpha is ${r.panelAlpha}/255, want opaque`]),
+              ...r.bad.map((s) => `${s} has no opaque background inside main`),
+            ]);
+          } catch (e) {
+            check(name, [String(e?.message ?? e)]);
+          } finally {
+            await p?.close();
+          }
+        }
+        if (lum.dark && lum.light)
+          check(`quartz-light ${path}@${width}`, ['panel', ...(path === '/wiki/' ? [] : ['td', 'infobox'])].flatMap((k) =>
+            lum.light[k] == null || lum.dark[k] == null ? [`no ${k} measured`] : lum.light[k] - lum.dark[k] < 0.3 ? [`${k} luminance ${lum.light[k].toFixed(2)} in Quartz vs ${lum.dark[k].toFixed(2)} dark, want at least 0.3 lighter`] : []));
+      }
   });
   if (!ran) check('browser', ['the browser half did not run (see the line above)']);
 }
