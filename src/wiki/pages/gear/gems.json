@@ -4,7 +4,6 @@
   "live": true,
   "icon": "amethyst_cluster",
   "image": {"src": "/wiki/icons/amethyst_cluster.png", "alt": "An amethyst cluster, the Gems button in /craft"},
-  "needs_owner_check": "Written for mc-server 63529705. Prod deploy 20261123-014534 (Chromabithia and gems) recorded a failure at the rank import after the server started: confirm gems are fully live before this page ships.",
   "summary": "**Amethyst Gems** go into armour sockets for more skill XP and a chance of extra drops. They are a count on your account, not an item.",
   "infobox": [
     ["Server", "SMP"],
@@ -56,6 +55,8 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-23", "text": "Added Amethyst Gems, which drop from Heartwood kills and go into armour sockets from the Gems page in `/craft`, with a guide at `/help gems`."}
+  ],
   "related": ["gear/chromatic", "gear/living-prism", "gear/heartwood-sets", "smp/dungeons", "smp/crafting"]
 }

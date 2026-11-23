@@ -28,6 +28,9 @@
       ]}
     ]}
   ],
-  "history": [],
+  "history": [
+    {"date": "2026-11-23", "text": "The Shard of Vitality now gives room for 4 absorption hearts that fill over time, and the Shard of Vigor now gives Health Boost II."},
+    {"date": "2026-11-23", "text": "The Shard of Healing and the Shard of Hunger now stop for 10 seconds after a player fight."}
+  ],
   "related": ["gear/clusters-and-prisms", "smp/crates", "smp/crafting"]
 }
