@@ -6,16 +6,6 @@ import { Footer } from '../components/Footer';
 import { NavBar } from '../components/NavBar';
 import { MotionRoot } from '../lib/motion';
 
-// Heartwood, from the dungeon's own config (mc-server plugins/ChromaticDungeons,
-// MythicMobs pack Heartwood, AdvancedEnchantments armorSets). Re-check these
-// against the config when the dungeon changes; the U3 report lists the sources.
-const FACTS = [
-  ['9', 'zones, each with its own boss'],
-  ['4', 'difficulties, from Easy to Very Hard'],
-  ['3', 'phases to the final boss, The Rotroot Heart'],
-  ['9', 'armour sets, one from every zone'],
-];
-
 export function SmpPage() {
   useScrollReveal();
 
@@ -29,32 +19,33 @@ export function SmpPage() {
             {/* No-break spaces keep each sentence whole when the line wraps. */}
             MINE&nbsp;IT. PRICE&nbsp;IT. <span class="accent">TRADE&nbsp;IT.</span>
           </h1>
+          <div class="smp-actions">
+            <CopyIpButton variant="primary" size="md" />
+          </div>
         </section>
 
         <section class="smp-body container" aria-label="Economy SMP">
-          <div class="dungeon reveal" data-section="dungeon">
-            <p class="section-eyebrow">SEASON 4 DUNGEON</p>
-            <h2 class="section-title dungeon-title">HEARTWOOD</h2>
-            <div class="fact-grid">
-              {FACTS.map(([figure, line]) => (
-                <div key={line} class="card fact" data-fact>
-                  <b class="fact-figure">{figure}</b>
-                  <span class="fact-line">{line}</span>
-                </div>
-              ))}
+          <div class="smp-market">
+            <MarketTicker />
+            <div class="smp-actions">
+              <ArcadeButton href="/auctions/" variant="primary">OPEN THE AUCTION HOUSE</ArcadeButton>
             </div>
-            <a class="dungeon-preview" href="/dungeon/">
-              <img src="/dungeon/preview.jpg" alt="The Heartwood dungeon island, drawn block by block"
-                width="1200" height="1164" loading="lazy" decoding="async" />
-            </a>
-            <ArcadeButton href="/dungeon/" variant="primary">EXPLORE THE DUNGEONS</ArcadeButton>
           </div>
 
-          <MarketTicker />
-
-          <div class="smp-actions">
-            <ArcadeButton href="/auctions/" variant="primary">OPEN THE AUCTION HOUSE</ArcadeButton>
-            <CopyIpButton variant="secondary" size="md" />
+          <div class="card dungeon reveal" data-section="dungeon">
+            <a class="dungeon-preview" href="/dungeon/">
+              <img src="/dungeon/preview.webp" alt="The Heartwood dungeon island, drawn block by block"
+                width="800" height="614" loading="lazy" decoding="async" />
+            </a>
+            <div class="dungeon-text">
+              <p class="section-eyebrow">SEASON 4 DUNGEON</p>
+              <h2 class="section-title dungeon-title">HEARTWOOD</h2>
+              <p class="dungeon-line">Nine zones under a giant tree. Plan your route before you drop in.</p>
+              <div class="smp-actions">
+                <ArcadeButton href="/dungeon/" variant="primary">EXPLORE THE MAP</ArcadeButton>
+                <a class="dungeon-wiki" href="/wiki/smp/dungeons/">Heartwood wiki</a>
+              </div>
+            </div>
           </div>
         </section>
       </main>
