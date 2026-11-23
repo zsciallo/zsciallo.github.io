@@ -1,0 +1,33 @@
+{
+  "title": "Shards",
+  "half": "gear",
+  "live": true,
+  "icon": "shard_of_strength",
+  "image": {"src": "/wiki/icons/shard_of_strength.png", "alt": "A Shard of Strength"},
+  "summary": "**Shards** are off-hand items that each give one effect while you hold them. Make them at `/craft` or win them from the Shard Crate.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Off-hand item"],
+    ["Made at", "`/craft`, Shards"],
+    ["Crate", "Shard Crate"],
+    ["Worn in", "Off hand"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Build any shard in the Shards section of `/craft`, or win one from the [Shard Crate](/wiki/smp/crates/). Some also come from the Reward Crate and the Vote Crate. Costs are on [Crafting and Upgrades](/wiki/smp/crafting/)."}
+    ]},
+    {"h": "Effects", "blocks": [
+      {"p": "Hold a shard in your off hand to get its effect."},
+      {"facts": "gear-shards"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "{{icon:shard_of_strength}} After you swap the shard in your off hand, you wait 10 seconds before you can equip another.",
+        "{{icon:cluster_strength_vigor}} Two shards fuse into a Cluster, which gives both effects from one off-hand slot. See [Clusters and Prisms](/wiki/gear/clusters-and-prisms/).",
+        "Shards can be salvaged for Prism Shards at `/craft`."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["gear/clusters-and-prisms", "smp/crates", "smp/crafting"]
+}

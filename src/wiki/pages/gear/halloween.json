@@ -1,0 +1,41 @@
+{
+  "title": "Halloween Gear",
+  "half": "gear",
+  "live": true,
+  "icon": "widow_chestplate",
+  "image": {"src": "/wiki/icons/widow_chestplate.png", "alt": "Widow's Carapace, the Halloween chestplate"},
+  "needs_owner_check": "The Widow chestplate, leggings and boots names (Widow's Carapace, Widow's Legwraps, Widow's Creepers) are marked as placeholders in AdvancedEnchantments armorSets/HalloweenWidow.yml at 63529705. Confirm them before this page ships.",
+  "summary": "**Halloween Gear** is the retired Halloween 2026 line: the Widow armour set and a row of themed weapons and tools. It can no longer be obtained.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Gear (retired)"],
+    ["Event", "Halloween 2026"],
+    ["Obtainable", "No"],
+    ["Kept on death", "Yes"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Halloween gear can no longer be obtained. It came from the Halloween Crate, which is retired. Gear that players already own still works, and it keeps its enchants and abilities."},
+      {"ul": [
+        "{{icon:widow_chestplate}} The Widow set: the Witch Hat, Widow's Carapace, Widow's Legwraps and Widow's Creepers.",
+        "{{icon:netherite_sword}} Weapons such as The Count's Fang, Trick or Stab and The Last Harvest.",
+        "{{icon:netherite_pickaxe}} Tools such as Grave Robber, Grave Digger and Grim Harvester.",
+        "{{icon:shield}} Coffin Lid, a shield."
+      ]}
+    ]},
+    {"h": "Pieces", "blocks": [
+      {"facts": "gear-halloween"}
+    ]},
+    {"h": "Reaper's Toll", "blocks": [
+      {"p": "Reaper's Toll is a one of one: exactly one exists, and its lore says so. Its Sharpness and Unbreaking are far above anything else on the server."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Halloween gear says **It seems bound to you** in its lore and stays with you when you die. See [Keep-on-Death Gear](/wiki/smp/keep-on-death/).",
+        "It shatters instead of breaking, like Chromatic gear. Repair it with `/craft repair`."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["gear/chromatic", "smp/keep-on-death", "smp/crates"]
+}

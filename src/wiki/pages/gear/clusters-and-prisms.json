@@ -1,0 +1,41 @@
+{
+  "title": "Clusters and Prisms",
+  "half": "gear",
+  "live": true,
+  "icon": "cluster_strength_vigor",
+  "image": {"src": "/wiki/icons/warmongers_prism.png", "alt": "Warmonger's Prism, an Apex Prism"},
+  "summary": "**Clusters and Prisms** fuse shards into one off-hand item. A Cluster joins two shards, and an Apex Prism joins five plus a Cluster.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Off-hand item"],
+    ["Made at", "`/craft`, Shards"],
+    ["Crate", "Shard Crate"],
+    ["Worn in", "Off hand"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Fuse them in the Shards section of `/craft`, or win them from the [Shard Crate](/wiki/smp/crates/). Each recipe uses up the [shards](/wiki/gear/shards/) it is made from."},
+      {"ul": [
+        "{{icon:cluster_strength_vigor}} A Cluster gives the effects of its two shards.",
+        "{{icon:warmongers_prism}} An Apex Prism gives the effects of five shards and needs a Cluster as well."
+      ]}
+    ]},
+    {"h": "Abilities", "blocks": [
+      {"p": "Hold one in your off hand and right-click to use its ability (a few need sneak and right-click). Each ability has a set number of charges and a cooldown."}
+    ]},
+    {"h": "Clusters", "blocks": [
+      {"facts": "gear-clusters"}
+    ]},
+    {"h": "Apex Prisms", "blocks": [
+      {"facts": "gear-prisms"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Build the Cluster before the Apex Prism that needs it.",
+        "Clusters and Apex Prisms cannot be salvaged, so the shards inside them are gone for good."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["gear/shards", "smp/crafting", "smp/crates"]
+}

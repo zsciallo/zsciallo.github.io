@@ -1,0 +1,37 @@
+{
+  "title": "Trackers",
+  "half": "gear",
+  "live": true,
+  "icon": "echo_shard",
+  "image": {"src": "/wiki/icons/echo_shard.png", "alt": "An echo shard, the StatTrak Creator"},
+  "summary": "**Trackers** add a live counter to a weapon, tool or fishing rod: kills, mob kills, blocks broken or fish caught. Win them from crates.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Item add-on"],
+    ["Kinds", "StatTrak, MobTrak, BlockTrak, FishTrak"],
+    ["Crates", "Shard, Reward, Chroma, Living Prism"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Trackers come from [crates](/wiki/smp/crates/). None of them can be crafted."},
+      {"ul": [
+        "{{icon:echo_shard}} StatTrak Creator: player kills with a weapon.",
+        "{{icon:popped_chorus_fruit}} MobTrak Creator: mob kills with a weapon.",
+        "{{icon:amethyst_cluster}} BlockTrak Creator: blocks broken with a tool.",
+        "{{icon:purple_dye}} FishTrak Creator: fish caught with a fishing rod."
+      ]}
+    ]},
+    {"h": "Using a tracker", "blocks": [
+      {"p": "Drag the Creator on top of the item in your inventory to apply it. FishTrak only goes on a fishing rod. The item then shows a counter line in its lore, such as StatTrak Kills or BlockTrak Blocks Broken, and it counts up as you use it."},
+      {"facts": "gear-trackers"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "A shattered Chromatic, Halloween or Living Prism item keeps its StatTrak count.",
+        "{{icon:chest}} The Living Prism Crate can also give a Sell Chest, an auto-sell chest that sells what is inside on a timer and pays you, even while you are offline. See [Spawners and Hoppers](/wiki/smp/spawners-and-hoppers/)."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/crates", "gear/chromatic", "smp/spawners-and-hoppers"]
+}

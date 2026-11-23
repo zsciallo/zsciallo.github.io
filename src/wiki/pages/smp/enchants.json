@@ -38,6 +38,6 @@
     ]}
   ],
   "history": [],
-  "related": ["smp/crafting", "smp/crates", "smp/battle-pass"],
+  "related": ["smp/crafting", "smp/crates", "smp/battle-pass", "gear/chromatic", "gear/heartwood-sets"],
   "needs_owner_check": "Written from mc-server origin/main 63529705, which holds the Chromabithia merge (1a958347, 2026-11-22). That merge changed the enchant ladders, the Upgrade bench caps (Max level column) and turned book combining off (before it, combining was on). Confirm the live SMP runs this config before publishing."
 }

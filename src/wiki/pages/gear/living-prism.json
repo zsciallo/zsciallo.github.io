@@ -1,0 +1,43 @@
+{
+  "title": "Living Prism Gear",
+  "half": "gear",
+  "live": true,
+  "icon": "living_prism_chestplate",
+  "image": {"src": "/wiki/icons/living_prism_chestplate.png", "alt": "A Living Prism Chestplate"},
+  "summary": "**Living Prism Gear** is the step above Chromatic: the same armour, tools and weapons, plus wings and the Living Bark set bonus on the armour.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Gear"],
+    ["Made at", "`/craft`, from a Chromatic piece"],
+    ["Crate", "Living Prism Crate"],
+    ["Kept on death", "Yes"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "At `/craft`, each Living Prism recipe upgrades a [Chromatic](/wiki/gear/chromatic/) piece into its twin. The Chromatic piece is used up, and its upgrades, Awakening, prefix and enchants carry over, except Thorns. Costs are on [Crafting and Upgrades](/wiki/smp/crafting/)."},
+      {"p": "The [Living Prism Crate](/wiki/smp/crates/) gives every piece. Its keys come from the [Battle Pass](/wiki/smp/battle-pass/), the store and the crate's own milestone. The spear, mace and wings only come from this crate."},
+      {"ul": [
+        "{{icon:living_prism_chestplate}} Armour: helmet, chestplate, leggings and boots, with Living Bark when you wear all four.",
+        "{{icon:netherite_sword}} Weapons: sword, spear, mace, bow and crossbow.",
+        "{{icon:netherite_pickaxe}} Tools: pickaxe, axe, shovel, harvester and angler.",
+        "{{icon:elytra}} Living Prism Wings."
+      ]}
+    ]},
+    {"h": "Pieces", "blocks": [
+      {"p": "A new piece comes with these enchants. The bonus is what its lore says."},
+      {"facts": "gear-living-prism"}
+    ]},
+    {"h": "Keeping and repairing", "blocks": [
+      {"p": "Living Prism gear stays with you when you die (see [Keep-on-Death Gear](/wiki/smp/keep-on-death/)). At zero durability it shatters instead of breaking and keeps everything on it. Repair it with `/craft repair`."},
+      {"p": "Each armour piece has a gem socket: see [Amethyst Gems](/wiki/gear/gems/)."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Living Prism armour is the recommended gear for the Very Hard areas of [Heartwood](/wiki/smp/dungeons/).",
+        "If a Chromatic piece holds more gems than its Living Prism twin has sockets, take the extra out before you upgrade it. The bench refuses otherwise."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["gear/chromatic", "gear/gems", "smp/crafting", "smp/crates", "smp/battle-pass"]
+}
