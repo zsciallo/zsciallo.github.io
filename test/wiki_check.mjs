@@ -19,9 +19,9 @@ import { join, relative, resolve } from 'node:path';
 import { h } from 'preact';
 import render from 'preact-render-to-string';
 import { createServer } from 'vite';
-import { FACTS_DIR, WIKI_DIR, factIds, wikiChanges, wikiPages } from '../src/wiki/index.js';
+import { FACTS_DIR, HALVES, WIKI_DIR, factIds, iconPicture, picture, wikiChanges, wikiFacts, wikiPages } from '../src/wiki/index.js';
 import { plainAnswer } from '../src/data/seo.js';
-import { findAll, page, parseHtml, textOf, visibleText } from './check_site.mjs';
+import { blockText, findAll, page, parseHtml, textOf, visibleText } from './check_site.mjs';
 import { openState, withBrowser } from './card_style_check.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -144,12 +144,36 @@ check('articles-built', pages.flatMap((p) => {
 }
 
 // AC5: visible text plus the head (title, meta, JSON-LD), which carries the summary to search engines.
+// Scope change (run 20261122-wiki-gear, owner ruling 2026-11-22: gear tables "show what the lore shows",
+// including "N% chance" proc text): text inside a table built from a `gear-*` facts file is exempt from the
+// one lore-chance term. Every other term still applies to gear tables; prose on every page, the head and
+// every other table keep the full list.
+const LORE_CHANCE = String.raw`\d+(\.\d+)?\s?%\s?chance`;
+const gearTitlesOf = (p, facts) => new Set(factIds(p).filter((id) => id.startsWith('gear-')).map((id) => facts(id)?.title).filter(Boolean));
+const captionOf = (t) => {
+  const c = findAll(t, (el) => el.tag === 'caption')[0];
+  return c ? textOf(c) : null;
+};
+/** Deny terms a rendered page matches; `gearTitles` are the captions of its gear-* tables. */
+function denyHits(doc, gearTitles, head = '') {
+  const root = findAll(doc, (el) => el.tag === 'div' && el.attrs.id === 'app')[0] ?? doc;
+  const all = `${blockText(root)}\n${head}`;
+  const rest = `${blockText(root, (el) => el.tag === 'table' && gearTitles.has(captionOf(el)))}\n${head}`;
+  return DENY.filter((re) => re.test(re.source === LORE_CHANCE ? rest : all)).map(String);
+}
+const pageOf = Object.fromEntries(pages.map((p) => [p.route, p]));
 check('deny-terms', ROUTES.flatMap((route) => {
   const p = page(route, DIST);
   if (!p) return [`${route} has no built file`];
-  const text = [visibleText(p), ...p.titles, ...p.metas.map((m) => m.content ?? ''), ...p.jsonLd].join('\n');
-  return denied(text).map((t) => `${route} matches ${t}`);
+  const head = [...p.titles, ...p.metas.map((m) => m.content ?? ''), ...p.jsonLd].join('\n');
+  const titles = pageOf[route] ? gearTitlesOf(pageOf[route], wikiFacts) : new Set();
+  return denyHits(parseHtml(p.html), titles, head).map((t) => `${route} matches ${t}`);
 }));
+// The exemption keys on the table caption, so no other facts table may share a gear table's title.
+check('gear-titles-unique', (() => {
+  const all = readdirSync(FACTS_DIR).filter((f) => f.endsWith('.json')).map((f) => [f.slice(0, -5), JSON.parse(readFileSync(join(FACTS_DIR, f), 'utf-8')).title]);
+  return all.filter(([id, t]) => id.startsWith('gear-') && all.some(([o, u]) => o !== id && u === t)).map(([id, t]) => `${id} title ${q(t)} is shared with another facts table`);
+})());
 
 // AC6 on the build: facts tables are generated, so their text is held to the no-em-dash rule here.
 check('built-no-em-dash', ROUTES.flatMap((route) => {
@@ -271,6 +295,62 @@ check('navbox-half-pages', pages.flatMap((p) => {
   ]);
 }
 
+// ---------------------------------------------------------------------- gear --
+// Run 20261122-wiki-gear (owner 2026-11-22: a Gear box on the home, a page per family).
+const gear = pages.filter((p) => p.half === 'gear');
+const halfBoxes = (doc) => findAll(doc, (el) => el.tag === 'section' && /^wiki-/.test(el.attrs['aria-labelledby'] ?? '') && el.attrs['aria-labelledby'] !== 'wiki-recent').map((el) => el.attrs['aria-labelledby']);
+
+// G-T2: every live gear page is built under /wiki/gear/; the home has one box per half with live pages, in HALVES order.
+check('gear-half', [
+  ...(gear.length ? [] : ['no live gear pages']),
+  ...gear.filter((p) => !p.route.startsWith('/wiki/gear/') || !built(p.route)).map((p) => `${p.route} is not built under /wiki/gear/`),
+  ...(() => {
+    const doc = built('/wiki/');
+    const want = HALVES.filter(([half]) => pages.some((p) => p.half === half)).map(([half]) => `wiki-${half}`);
+    const got = doc ? halfBoxes(doc) : null;
+    return !got ? ['/wiki/ has no built file'] : q(got) === q(want) ? [] : [`/wiki/ half boxes are ${q(got)}, want ${q(want)}`];
+  })(),
+  ...(q(HALVES.map(([h, n]) => n)) === q(['SMP', 'ChromaPVP', 'Gear']) ? [] : [`HALVES labels are ${q(HALVES.map(([, n]) => n))}, want SMP, ChromaPVP, Gear in that order`]),
+]);
+
+// G-T3: the nav box is titled with the page's half; outside the Related row it links only that half.
+check('navbox-title-and-rows', pages.flatMap((p) => {
+  const doc = built(p.route);
+  const box = doc && findAll(doc, (el) => el.tag === 'nav' && (el.attrs.class ?? '').split(/\s+/).includes('wiki-navbox'))[0];
+  if (!box) return [`${p.route} has no nav box`];
+  const label = HALVES.find(([h]) => h === p.half)?.[1];
+  const title = findAll(box, (el) => el.tag === 'h2')[0];
+  const rows = findAll(box, (el) => el.tag === 'tr').filter((tr) => !findAll(tr, (el) => el.tag === 'th').some((th) => textOf(th) === 'Related'));
+  return [
+    ...(title && textOf(title) === label ? [] : [`${p.route} nav box title is ${q(title ? textOf(title) : null)}, want ${q(label)}`]),
+    ...rows.flatMap((tr) => findAll(tr, (el) => el.tag === 'a').map((a) => a.attrs.href).filter((r) => pageOf[r]?.half !== p.half).map((r) => `${p.route} nav box links ${r} outside the Related row`)),
+  ];
+}));
+
+// G-T4: gear pages carry their pictures and tables; every gear table is on some page.
+check('gear-pages-pictures-tables', [
+  ...gear.flatMap((p) => [
+    ...(p.icon && iconPicture(p.icon) ? [] : [`${p.route} icon ${q(p.icon)} does not resolve`]),
+    ...(picture(p.image?.src) ? [] : [`${p.route} info box image ${q(p.image?.src)} does not resolve to a file`]),
+    ...(factIds(p).length ? [] : [`${p.route} has no facts block`]),
+  ]),
+  ...readdirSync(FACTS_DIR).filter((f) => /^gear-.*\.json$/.test(f)).map((f) => f.slice(0, -5)).filter((id) => !pages.some((p) => factIds(p).includes(id))).map((id) => `${id} is on no live page`),
+]);
+
+// G-T5: no admin gem command, no drop odds, no "--" or em dash in gear pages or gear tables.
+const gearLeaks = (where, s) => [
+  ...(/\/gem\s+(give|take|balance)\b/i.test(s) ? [`${where} names an admin /gem command: ${q(s.slice(0, 60))}`] : []),
+  ...(/(drop chance|extra drop)/i.test(s) && /\d+(\.\d+)?\s?%/.test(s) ? [`${where} gives a drop percentage: ${q(s.slice(0, 60))}`] : []),
+  ...(s.includes('--') || s.includes('—') ? [`${where} has "--" or an em dash: ${q(s.slice(0, 60))}`] : []),
+];
+check('gear-no-admin-odds-dashes', [
+  ...gear.flatMap((p) => strings(p).flatMap((s) => gearLeaks(p.route, s))),
+  ...readdirSync(FACTS_DIR).filter((f) => /^gear-.*\.json$/.test(f)).flatMap((f) => strings(JSON.parse(readFileSync(join(FACTS_DIR, f), 'utf-8'))).flatMap((s) => gearLeaks(f, s))),
+]);
+
+// G-T6: every related entry names a live page (the renderer drops a dead one silently).
+check('related-resolve', pages.flatMap((p) => (p.related ?? []).filter((r) => !pageOf[`/wiki/${r}/`]).map((r) => `${p.route} related ${q(r)} is not a live page`)));
+
 // ------------------------------------------------------------- real renderer --
 // The fixture pages through src/pages/WikiPage.jsx, loaded the way ssg.js loads it.
 {
@@ -362,6 +442,26 @@ check('navbox-half-pages', pages.flatMap((p) => {
         if (t.length) out.push(`${q(bad)} as a page icon renders a tile <img> (${q(t[0].attrs.src)})`);
       }
       return out;
+    })());
+
+    // G-T1: the lore-chance exemption covers gear tables and that one term only.
+    check('deny-gear-exemption-self-test', (() => {
+      const table = (id, title, cell) => ({ [id]: { id, title, columns: ['Set', 'Bonus'], rows: [['A', cell]] } });
+      const gearPage = (blocks) => ({ title: 'Gear Fixture', half: 'gear', slug: 'fx', route: '/wiki/gear/fx/', summary: '**Gear Fixture** is a test page.', infobox: [], sections: [{ h: 'Mechanics', blocks }], history: [], related: [] });
+      const hits = (pg, facts) => denyHits(parseHtml(render(h(WikiArticle, { page: pg, pages: [pg], facts }))), gearTitlesOf(pg, (id) => facts[id]));
+      const cases = [
+        ['a gear table with "15% chance"', gearPage([{ facts: 'gear-fx' }]), table('gear-fx', 'Gear Fx', '15% chance of Regeneration I'), false],
+        ['a gear table with "weight"', gearPage([{ facts: 'gear-fx' }]), table('gear-fx', 'Gear Fx', 'reward weight 5'), true],
+        ['gear page prose with "15% chance"', gearPage([{ p: 'A 15% chance of Regeneration I.' }, { facts: 'gear-fx' }]), table('gear-fx', 'Gear Fx', 'Plain'), true],
+        ['a non-gear table with "15% chance"', gearPage([{ facts: 'smp-fx' }]), table('smp-fx', 'Smp Fx', '15% chance of Regeneration I'), true],
+      ];
+      return cases.flatMap(([name, pg, facts, want]) => (hits(pg, facts).length > 0 === want ? [] : [`${name} is ${want ? 'allowed, want denied' : `denied (${hits(pg, facts)}), want allowed`}`]));
+    })());
+
+    // G-T2: a half with no live pages renders no home box (the fixture list is SMP only).
+    check('home-empty-half-no-box', (() => {
+      const got = halfBoxes(parseHtml(render(h(WikiHome, { pages: fx }))));
+      return q(got) === q(['wiki-smp']) ? [] : [`home boxes for an SMP-only list are ${q(got)}, want ["wiki-smp"]`];
     })());
 
     const article = parseHtml(render(h(WikiArticle, { page: fx[0], pages: fx, facts: {} })));
