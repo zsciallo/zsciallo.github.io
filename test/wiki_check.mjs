@@ -145,8 +145,8 @@ check('articles-built', pages.flatMap((p) => {
 
 // AC5: visible text plus the head (title, meta, JSON-LD), which carries the summary to search engines.
 // Scope change (run 20261122-wiki-gear, owner ruling 2026-11-22: gear tables "show what the lore shows",
-// including "N% chance" proc text): text inside a table built from a `gear-*` facts file is exempt from the
-// one lore-chance term. Every other term still applies to gear tables; prose on every page, the head and
+// including "N% chance" proc text): text in a lore column (LORE_COLUMNS) of a table built from a `gear-*`
+// facts file is exempt from the one lore-chance term. Every other term still applies to gear tables; prose on every page, the head and
 // every other table keep the full list.
 const LORE_CHANCE = String.raw`\d+(\.\d+)?\s?%\s?chance`;
 const gearTitlesOf = (p, facts) => new Set(factIds(p).filter((id) => id.startsWith('gear-')).map((id) => facts(id)?.title).filter(Boolean));
@@ -154,11 +154,24 @@ const captionOf = (t) => {
   const c = findAll(t, (el) => el.tag === 'caption')[0];
   return c ? textOf(c) : null;
 };
+// Reviewer F1 (gear r2): only the lore columns are exempt; Obtained and every other gear column keep the full list.
+const LORE_COLUMNS = ['Bonus', 'Set bonus', 'Effect'];
+/** A <td> in a lore column of a gear table (caption = a gear-* facts title). */
+function isLoreCell(el, gearTitles) {
+  if (el.tag !== 'td' || el.parent?.tag !== 'tr') return false;
+  let table = el.parent;
+  while (table && table.tag !== 'table') table = table.parent;
+  if (!table || !gearTitles.has(captionOf(table))) return false;
+  const col = el.parent.children.filter((c) => c.tag === 'td' || c.tag === 'th').indexOf(el);
+  const head = findAll(table, (c) => c.tag === 'thead')[0];
+  const th = head ? findAll(head, (c) => c.tag === 'th')[col] : null;
+  return !!th && LORE_COLUMNS.includes(textOf(th));
+}
 /** Deny terms a rendered page matches; `gearTitles` are the captions of its gear-* tables. */
 function denyHits(doc, gearTitles, head = '') {
   const root = findAll(doc, (el) => el.tag === 'div' && el.attrs.id === 'app')[0] ?? doc;
   const all = `${blockText(root)}\n${head}`;
-  const rest = `${blockText(root, (el) => el.tag === 'table' && gearTitles.has(captionOf(el)))}\n${head}`;
+  const rest = `${blockText(root, (el) => isLoreCell(el, gearTitles))}\n${head}`;
   return DENY.filter((re) => re.test(re.source === LORE_CHANCE ? rest : all)).map(String);
 }
 const pageOf = Object.fromEntries(pages.map((p) => [p.route, p]));
@@ -451,6 +464,8 @@ check('related-resolve', pages.flatMap((p) => (p.related ?? []).filter((r) => !p
       const hits = (pg, facts) => denyHits(parseHtml(render(h(WikiArticle, { page: pg, pages: [pg], facts }))), gearTitlesOf(pg, (id) => facts[id]));
       const cases = [
         ['a gear table with "15% chance"', gearPage([{ facts: 'gear-fx' }]), table('gear-fx', 'Gear Fx', '15% chance of Regeneration I'), false],
+        ['a gear table with "15% chance" in its Obtained column', gearPage([{ facts: 'gear-fx' }]), { 'gear-fx': { id: 'gear-fx', title: 'Gear Fx', columns: ['Set', 'Obtained'], rows: [['A', '15% chance to drop a key']] } }, true],
+        ['the same text in its Bonus column', gearPage([{ facts: 'gear-fx' }]), { 'gear-fx': { id: 'gear-fx', title: 'Gear Fx', columns: ['Set', 'Bonus'], rows: [['A', '15% chance to drop a key']] } }, false],
         ['a gear table with "weight"', gearPage([{ facts: 'gear-fx' }]), table('gear-fx', 'Gear Fx', 'reward weight 5'), true],
         ['gear page prose with "15% chance"', gearPage([{ p: 'A 15% chance of Regeneration I.' }, { facts: 'gear-fx' }]), table('gear-fx', 'Gear Fx', 'Plain'), true],
         ['a non-gear table with "15% chance"', gearPage([{ facts: 'smp-fx' }]), table('smp-fx', 'Smp Fx', '15% chance of Regeneration I'), true],
