@@ -40,7 +40,7 @@ export function SmpPage() {
             <div class="dungeon-text">
               <p class="section-eyebrow">SEASON 4 DUNGEON</p>
               <h2 class="section-title dungeon-title">HEARTWOOD</h2>
-              <p class="dungeon-line">Nine zones under a giant tree. Plan your route before you drop in.</p>
+              <p class="dungeon-line">Nine zones under a giant tree. Plan your route before you drop&nbsp;in.</p>
               <div class="smp-actions">
                 <ArcadeButton href="/dungeon/" variant="primary">EXPLORE THE MAP</ArcadeButton>
                 <a class="dungeon-wiki" href="/wiki/smp/dungeons/">Heartwood wiki</a>
