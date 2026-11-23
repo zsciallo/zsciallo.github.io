@@ -1,0 +1,43 @@
+{
+ "id": "smp-crates",
+ "title": "Crates",
+ "source": "mc-server:plugins/ExcellentCrates/crates",
+ "ref": "63529705",
+ "columns": [
+  "Crate",
+  "Key",
+  "Can contain"
+ ],
+ "rows": [
+  [
+   "Chroma Crate",
+   "Chroma Key",
+   "Chromatic Sword, Chromatic Mace, Chromatic Spear, Chromatic Bow, Chromatic Crossbow, Chromatic Helmet, Chromatic Chestplate, Chromatic Leggings, Chromatic Boots, Chromatic Elytra, $2,000,000, Elytra, Chroma Key x3, Chromatic Pickaxe, Chromatic Axe, Chromatic Shovel, Chromatic Harvester, Chromatic Angler, $1,500,000, Chroma Key x2, Corrupted Helmet, Corrupted Chestplate, Corrupted Leggings, Corrupted Boots, Corrupted Blade, Corrupted Elytra, $1,250,000, Chroma Key, Corrupted Pickaxe, Corrupted Axe, Corrupted Shovel, $1,000,000, Random Legendary Book, Netherite Ingot x2, $750,000, Random Ultimate Book, Random Elite Book, $500,000, Heavy Core, 1,000 Claim Blocks, 3,000 Claim Blocks, 1,500 Prism Shards, 2,000 Prism Shards, Armour trims (Sentry, Dune, Coast, Wild, Ward, Eye, Vex, Tide, Snout, Rib, Spire, Wayfinder, Shaper, Silence, Raiser, Host, Flow, Bolt)"
+  ],
+  [
+   "Halloween Crate",
+   "Halloween Key",
+   "Reaper's Toll, The Count's Fang, Trick or Stab, The Last Harvest, Stake Out, Pumpkin Smasher, Nightmare Fuel, Stake Launcher, Witch Hat, Widow's Carapace, Widow's Legwraps, Widow's Creepers, Halloween Key x3, $2,000,000, Grave Robber, Grave Digger, Grim Harvester, Headless Hatchet, Bobbing for Souls, Coffin Lid, Halloween Key x2, $1,500,000, Halloween Key, $1,250,000, Elytra, $1,000,000, Random Legendary Book, Netherite Ingot x2, 2,000 Prism Shards, $750,000, Random Ultimate Book, Random Elite Book, 1,500 Prism Shards, $500,000, 3,000 Claim Blocks, Heavy Core, Armour trims (Rib, Vex, Silence, Ward)"
+  ],
+  [
+   "Reward Crate",
+   "Reward Key",
+   "Chroma Key x3, Chroma Key x2, Chroma Key, Shard of Haste, Shard of Embers, Shard of Night, Shard of Hunger, Random Legendary Book, Random Ultimate Book, Random Elite Book, Random Unique Book, Random Simple Book, $500,000, Spawner Key x2, Shard Key x2, 1,250 Prism Shards, Spawner Key, Shard Key, $250,000, 750 Prism Shards, BlockTrak Creator, StatTrak Creator, MobTrak Creator, FishTrak Creator"
+  ],
+  [
+   "Shard Crate",
+   "Shard Key",
+   "Warmonger's Prism, Architect's Prism, Wayfarer's Prism, Magnate's Prism, Cluster of Wrath, Cluster of Cinders, Cluster of Renewal, Cluster of Industry, Cluster of the Descent, Cluster of the Depths, Shard of Strength, Shard of Vitality, Shard of Vigor, Shard of Healing, Shard of Hunger, Shard of Haste, Shard of Swiftness, Shard of the Tides, Shard of Embers, Shard of Night, Shard of the Feather, Shard of Luck, 2,000 Prism Shards, Shard Key, 1,500 Prism Shards, BlockTrak Creator, StatTrak Creator, MobTrak Creator, FishTrak Creator"
+  ],
+  [
+   "Spawner Crate",
+   "Crate Key",
+   "Spawner Key x5, Spawner Key x3, Spawner Key x2, Spawner Key, ᴡᴀʀᴅᴇɴ ꜱᴘᴀᴡɴᴇʀ, ꜱʜᴜʟᴋᴇʀ ꜱᴘᴀᴡɴᴇʀ, ɪʀᴏɴ ɢᴏʟᴇᴍ ꜱᴘᴀᴡɴᴇʀ, ᴇᴠᴏᴋᴇʀ ꜱᴘᴀᴡɴᴇʀ, ᴡɪᴛʜᴇʀ ꜱᴋᴇʟᴇᴛᴏɴ ꜱᴘᴀᴡɴᴇʀ, ᴡɪᴛᴄʜ ꜱᴘᴀᴡɴᴇʀ, ɢʜᴀꜱᴛ ꜱᴘᴀᴡɴᴇʀ, ᴄʀᴇᴇᴘᴇʀ ꜱᴘᴀᴡɴᴇʀ, ʙʀᴇᴇᴢᴇ ꜱᴘᴀᴡɴᴇʀ, ʙʟᴀᴢᴇ ꜱᴘᴀᴡɴᴇʀ, ᴇɴᴅᴇʀᴍᴀɴ ꜱᴘᴀᴡɴᴇʀ, ꜱʟɪᴍᴇ ꜱᴘᴀᴡɴᴇʀ, ᴍᴀɢᴍᴀ ᴄᴜʙᴇ ꜱᴘᴀᴡɴᴇʀ, 1,500 Prism Shards, 2,000 Prism Shards, ᴘɪɢʟɪɴ ꜱᴘᴀᴡɴᴇʀ"
+  ],
+  [
+   "Vote Crate",
+   "Vote Key",
+   "Spawner Crate Key, Chroma Key, KOTH Starter, Player Head, Netherite Scrap x2, $100,000, Netherite Scrap x4, Diamond Kit, Voter Helmet, Voter Chestplate, Voter Leggings, Voter Boots, Netherite Upgrade Smithing Template, Creeper Spawner, Blaze Spawner, Enderman Spawner, 200 Claim Blocks, Iron Block x8, Gold Ingot x16, Shard Key, Shard of Night, Shard of Hunger, Shard of Luck, 250 Prism Shards, 500 Prism Shards"
+  ]
+ ]
+}
