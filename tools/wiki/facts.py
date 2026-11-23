@@ -273,7 +273,13 @@ def reward_name(r, where):
         custom = snbt_custom_name(str(((preview.get("icon") or {}).get("Data") or {}).get("Value", "")))
         if custom:
             return clean(custom)
-    return re.sub(r" X(\d+)$", r" x\1", clean(need(preview, "name", f"{where}.preview", str)))
+    text = re.sub(r" X(\d+)$", r" x\1", clean(need(preview, "name", f"{where}.preview", str)))
+    # The stack size lives on the given item, not in the preview name; a name that already counts is left alone.
+    items = list(((r.get("items") or {}).get("item_list") or {}).values())
+    count = re.search(r"\bcount:(\d+)", str(((items[0] or {}).get("Data") or {}).get("Value", ""))) if len(items) == 1 else None
+    if count and int(count.group(1)) > 1 and not re.search(r"\bx\d+$|^\d+x\b|^[\d,]+ ", text):
+        text += f" x{count.group(1)}"
+    return text
 
 
 def build_smp_crates(crates, rewards, keys):

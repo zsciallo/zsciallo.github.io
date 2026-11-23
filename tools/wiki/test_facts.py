@@ -54,6 +54,9 @@ REWARDS = {"test_crate": {
     "rib": reward("Trim Rib", '{count:1,id:"minecraft:rib_armor_trim_smithing_template"}', item=True)},
     "old_crate": {"gem": reward("Gem")}}
 KEYS = {"test_key": {"display": {"name": "Test Key"}}}
+# The stack size comes from the given item when the name does not already count it.
+stack = lambda name, count: {**reward(name, item=True), "items": {"item_list": {"0": {"Data": {"Value": f'{{count:{count},id:"minecraft:iron_block"}}'}}}}}
+assert [facts.reward_name(stack(n, c), "t") for n, c in (("Iron Block", 8), ("Elytra", 1), ("Netherite Ingot X2", 2), ("4x Resin", 4))]     == ["Iron Block x8", "Elytra", "Netherite Ingot x2", "4x Resin"]
 rows = facts.build_smp_crates(CRATES, REWARDS, KEYS)
 assert rows == [["Test Crate", "Test Key", "Gem, Netherite Ingot x2, Big Blade, Armour trims (Rib)"]], rows
 assert not any(s in json.dumps(rows) for s in ("12.5", "mythic", "nope", "Old Crate"))
