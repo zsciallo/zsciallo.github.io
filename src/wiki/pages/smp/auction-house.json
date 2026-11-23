@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Listing limits are left out: ChromaticAuctionHouse config.yml gives 75 active listings by default, but the store perks say 15/25/50 for VIP/VIP+/MVP. Rank fee discounts (fee-tiers) are left out because which ranks hold them was not confirmed. The coinflip house cut (rake) is left out on purpose as odds-adjacent. ChromaticHelp still calls /cf a flip against another player; coinflip.yml runs house flips only.",
-  "summary": "**Auction House and Market** is the SMP's trading hub at `/ah`. Players list items for sale and post buy orders, the server runs its own rotating shop and daily bounties, and `/cf` is a coin flip against the server.",
+  "summary": "**Auction House and Market** is the SMP's trading hub at `/ah`, where players list items for sale and post buy orders.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Economy"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "The server also runs its own rotating shop and daily bounties, and `/cf` is a coin flip against the server."},
       {"p": "Type `/ah` to browse what other players are selling, sorted into categories like spawners, ores, tools, armour, enchanted items, valuables, farming, mob drops, food, redstone, storage, blocks and potions. The live listings are also on [the auction house page](/auctions/)."}
     ]},
     {"h": "Listings", "blocks": [

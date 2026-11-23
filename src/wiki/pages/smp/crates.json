@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running (the merge changed Chroma, Reward and Shard Crate rewards; the contents table is generated). Also unconfirmed: whether Halloween Keys can still be earned anywhere now that the Halloween event is over; that keys are virtual (account balance) as ExcellentCrates' Virtual: true suggests.",
-  "summary": "**Crates and Keys** are the reward crates at spawn. Each crate opens with its own key, and every crate also has milestone rewards that unlock after a set number of openings.",
+  "summary": "**Crates and Keys** are the reward crates at spawn. Each crate opens with its own key and has milestone rewards.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Reward"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "Milestone rewards unlock after a set number of openings of that crate."},
       {"p": "Go to the crates at spawn and right-click a crate while you hold its key. The hologram over each crate shows how many keys you have. Keys are kept on your account, not in your inventory."},
       {"ul": [
         "**Chroma Crate** (Chroma Key): the full Chromatic and Corrupted gear sets, elytras included, and cash from $500,000 to $2,000,000. Keys come from the store, the [daily streak](/wiki/smp/daily-streak/), a 14 day [vote](/wiki/smp/voting/) streak, the monthly top voter awards, the Adamantine rank, the MVP and MVP+ kits, the Reward Crate and milestones.",

@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running. Also unconfirmed: whether the Cluster and Apex Prism recipes show at /craft on live (they load only when the clusters content pack is present); how players earn Chromabithia XP for the Upgrade bench level gate (contracts give it; kills assumed).",
-  "summary": "**Crafting and Upgrades** happen at the Chromatic bench, `/craft`. It builds the Chromatic Arsenal, zone armour, spawners, shards and a few consumables, and its other benches upgrade, re-roll, awaken, disenchant, repair and salvage your gear. Most of it costs Prism Shards.",
+  "summary": "**Crafting and Upgrades** happen at the Chromatic bench, `/craft`, which builds gear and upgrades, re-rolls and repairs it. Most of it costs Prism Shards.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "System"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "The bench builds the Chromatic Arsenal, zone armour, spawners, shards and a few consumables, and its other benches upgrade, re-roll, awaken, disenchant, repair and salvage your gear."},
       {"p": "Open the bench with `/craft`. Each recipe lists exactly what it needs, and the craft button only appears once you have all of it. `/prism` shows your Prism Shard balance."},
       {"p": "Prism Shards come from:"},
       {"ul": [

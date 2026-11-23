@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "The kits table (smp-kits) is generated from PlayerKits2 (Diamond Kit every 12 h), while /help and Essentials kits.yml list a different set (starter, claim, daily, tools, diamond once a day, rank kits). Which plugin answers /kit on live, and should the table cover both? Store rank perks are copied from src/data/storeContent.json; the auction listing counts there (15/25/50) do not match ChromaticAuctionHouse config.yml (75 default), so they are left out.",
-  "summary": "**Ranks and Kits** come in two kinds. Explorer ranks, from Tin to Prismatic, are earned in game with `/rankup`. Store ranks (VIP, VIP+, MVP and MVP+) add perks and a daily rank kit. Kits are free gear on a timer.",
+  "summary": "**Ranks and Kits**: Explorer ranks are earned in game with `/rankup`, store ranks add perks and a daily rank kit, and kits are free gear on a timer.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Progression"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "Explorer ranks run from Tin to Prismatic. The store ranks are VIP, VIP+, MVP and MVP+."},
       {"p": "`/ranks` shows every Explorer rank and what it needs. When you have done everything a rank asks for, run `/rankup`. Each rank up hands out rewards such as spawners and money, and raises how fast you earn [claim blocks](/wiki/smp/claims/)."},
       {"p": "Store ranks are bought on [the store](/store/). Each one includes everything in the rank below it."}
     ]},

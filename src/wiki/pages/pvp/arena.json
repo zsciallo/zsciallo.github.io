@@ -2,7 +2,7 @@
   "title": "Arena",
   "half": "pvp",
   "live": true,
-  "summary": "**Arena** (the Prismatic Arena) is ChromaPVP's round-based team mode. Every team fights in one shrinking ring each round, and between rounds you pick augments and spend gold in a shop. The last team with health left wins.",
+  "summary": "**Arena** (the Prismatic Arena) is ChromaPVP's round-based team mode: one shrinking ring, augment picks and a gold shop between rounds.",
   "infobox": [
     ["Server", "ChromaPVP"],
     ["Type", "Game mode"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Joining", "blocks": [
+      {"p": "Every team fights in one shrinking ring each round, and between rounds you pick augments and spend gold in a shop. The last team with health left wins."},
       {"p": "Pick the Arena on the Play screen (`/play`), or use Quickplay, which can also put you in an Arena match. There is one Arena queue, and the format depends on how many players are waiting:"},
       {"ul": [
         "2 players: 1v1",

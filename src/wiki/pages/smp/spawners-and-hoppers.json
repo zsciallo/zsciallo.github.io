@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "ChromaticHelp says a spawner cycles every 5 seconds; SmartSpawner config.yml at 63529705 says 20s, which this page follows. ChromaticHelp also describes four separate hopper upgrades; hoppers.yml has one combined 7-level ladder, which this page follows. Auto-sell chest timer and upgrade prices are left out (AutoSellChests config not read, and the help text gives both 10 and 5 minutes). How chunk hoppers are obtained (no crafting recipe) is not confirmed. The default hopper limit for players without a store rank is not known.",
-  "summary": "**Spawners and Hoppers** are the SMP's money farm. Spawners here store their drops and XP instead of spawning mobs, and they stack. Upgradeable Hoppers pull those drops out and send them to a chest, ideally an auto-sell chest that pays you while you are offline.",
+  "summary": "**Spawners and Hoppers** are the SMP's money farm: stacking spawners that store drops and XP, and hoppers that move the drops to a chest.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Farming"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "Spawners here store their drops and XP instead of spawning mobs, and they stack. Upgradeable Hoppers pull those drops out and send them to a chest, ideally an auto-sell chest that pays you while you are offline."},
       {"p": "Spawners come from:"},
       {"ul": [
         "Mining any spawner you find, for example in a dungeon or mineshaft. You need a stone pickaxe or better, but not Silk Touch, and the spawner goes straight into your inventory.",

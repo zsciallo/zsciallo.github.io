@@ -2,7 +2,7 @@
   "title": "Crates and Cosmetics",
   "half": "pvp",
   "live": true,
-  "summary": "**Crates and Cosmetics** covers ChromaPVP's crates, which you open with Prism Coins, and the cosmetics that change how you look in the lobby and in fights. Cosmetics never change how a fight plays.",
+  "summary": "**Crates and Cosmetics** covers ChromaPVP's crates, which you open with Prism Coins, and the cosmetics that change how you look.",
   "infobox": [
     ["Server", "ChromaPVP"],
     ["Type", "Cosmetics"],
@@ -13,6 +13,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "Cosmetics change how you look in the lobby and in fights. They never change how a fight plays."},
       {"p": "Open crates with `/crates`, or click a crate block in the lobby. Crates only open in the lobby, not in a match or in FFA. Each crate costs Prism Coins:"},
       {"ul": [
         "**Spectrum Crate**, 1,500 Prism Coins: common and rare cosmetics.",

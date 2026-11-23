@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running (the merge changed one premium reward, Telepathy IV to Telepathy). Season dates are from settings.yml and the week files (Season 4 Heartwood, 05/11 to 09/12/2026); the page goes stale when Season 5 starts. The +25% progress booster in settings.yml is left out because who gets it was not confirmed.",
-  "summary": "**Battle Pass** is the SMP's seasonal reward track. Daily and weekly quests earn points, points unlock tiers, and every tier you reach has a reward to claim. The current season is Season 4, Heartwood.",
+  "summary": "**Battle Pass** is the SMP's seasonal reward track. Daily and weekly quests earn points, and points unlock tiers with a reward to claim.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "Seasonal"],
@@ -14,6 +14,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "The current season is Season 4, Heartwood."},
       {"p": "Everyone has the Free Pass. Open it with `/bp` (also `/battlepass` or `/pass`), and see your quests with `/quests`. The premium track, the **Chroma Pass**, is sold on [the store](/store/) and lasts for one season."}
     ]},
     {"h": "Tiers and quests", "blocks": [
@@ -24,13 +25,13 @@
         "**Weekly quests**: a new week opens every 7 days. Older weeks stay open, so you can catch up. Quests 9 and 10 of each week are for Chroma Pass holders only.",
         "Points past tier 50 turn into money: $25 a point on the Free Pass, $75 on the Chroma Pass."
       ]},
-      {"p": "Season 4 runs from 5 November to 9 December 2026:"},
+      {"p": "Season 4 has five themed weeks:"},
       {"ul": [
-        "Week 1, Overgrowth (5 to 11 November).",
-        "Week 2, Root and Resin (12 to 18 November).",
-        "Week 3, Into the Heartwood (19 to 25 November): the Easy dungeon areas.",
-        "Week 4, The Deep Roots (26 November to 2 December): the Medium and Hard areas.",
-        "Week 5, Heart of the Tree (3 to 9 December): the boss at the core."
+        "Week 1, Overgrowth.",
+        "Week 2, Root and Resin.",
+        "Week 3, Into the Heartwood: the Easy dungeon areas.",
+        "Week 4, The Deep Roots: the Medium and Hard areas.",
+        "Week 5, Heart of the Tree: the boss at the core."
       ]}
     ]},
     {"h": "Free rewards", "blocks": [

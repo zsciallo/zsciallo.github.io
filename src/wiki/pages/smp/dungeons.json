@@ -3,7 +3,7 @@
   "half": "smp",
   "live": true,
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running. Also unconfirmed: how the Chromabithia level and XP are described to players (this page only says kills and contracts feed it); whether /warp dungeon charges the same $20,000 as a camp warp.",
-  "summary": "**Dungeons** on the SMP are camps of custom mobs inside Heartwood, a giant underground tree in the dungeon world. Clear a camp to open its crate, collect area keys and zone items, take on the mini bosses, and finish at the Rotroot Heart in the core.",
+  "summary": "**Dungeons** on the SMP are camps of custom mobs inside Heartwood, a giant underground tree in the dungeon world.",
   "infobox": [
     ["Server", "SMP"],
     ["Type", "PvE"],
@@ -14,6 +14,7 @@
   ],
   "sections": [
     {"h": "Obtaining", "blocks": [
+      {"p": "Clear a camp to open its crate, collect area keys and zone items, take on the mini bosses, and finish at the Rotroot Heart in the core."},
       {"p": "Type `/dungeon` to open the status screen. It shows every camp, its respawn timer, your keys, and four area tiles to warp to:"},
       {"ul": [
         "**Easy**: free. Recommended gear: iron armour.",

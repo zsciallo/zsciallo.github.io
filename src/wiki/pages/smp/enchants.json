@@ -2,7 +2,7 @@
   "title": "Custom Enchants",
   "half": "smp",
   "live": true,
-  "summary": "**Custom Enchants** are enchantments the SMP adds on top of the vanilla ones. There are 141 of them, for weapons, armour, tools, hoes, fishing rods and two gear sets.",
+  "summary": "**Custom Enchants** are enchantments the SMP adds on top of the vanilla ones: 141 of them, for weapons, armour, tools, hoes, fishing rods and two gear sets.",
   "infobox": [["Server", "SMP"], ["Type", "System"], ["Enchants", "141"], ["Command", "`/craft`"]],
   "sections": [
     {"h": "Obtaining", "blocks": [
