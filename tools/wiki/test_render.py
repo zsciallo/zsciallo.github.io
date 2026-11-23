@@ -49,4 +49,11 @@ for bad in ("../../config", "t:../x", "/etc/x", "t:a/../../b", "T:Upper"):
     else:
         raise AssertionError(f"{bad!r} accepted")
 assert rm.pack_path("t:animated/a1", "textures", ".png", "x")[1] == "plugins/ItemsAdder/contents/t/resourcepack/t/textures/animated/a1.png"
+# A run into a scratch folder leaves the repo manifest as it is.
+import tempfile  # noqa: E402
+before = open(rm.MANIFEST, "rb").read() if pathlib.Path(rm.MANIFEST).exists() else None
+with tempfile.TemporaryDirectory() as scratch:
+    rm.main(["--out", scratch])
+    assert any(pathlib.Path(scratch).glob("*.png")), "scratch run rendered nothing"
+assert (open(rm.MANIFEST, "rb").read() if pathlib.Path(rm.MANIFEST).exists() else None) == before, "scratch run rewrote the manifest"
 print("test_render: PASS")

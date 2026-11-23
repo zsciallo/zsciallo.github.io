@@ -266,9 +266,13 @@ def main(argv=None):
         with open(target, "wb") as fh:
             fh.write(body)
         done[iid] = pack_path(ref, "models", ".json", ns)[1]
-    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(dict(sorted(done.items())), fh, indent=1)
-        fh.write("\n")
+    if os.path.abspath(a.out) == os.path.abspath(OUT):  # a scratch --out never touches the repo manifest
+        # Merge: an entry goes only when its picture is gone, so a skipped item keeps its earlier render.
+        merged = {k: v for k, v in manifest.items() if os.path.exists(os.path.join(OUT, f"{k}.png"))}
+        merged.update(done)
+        with open(MANIFEST, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(dict(sorted(merged.items())), fh, indent=1)
+            fh.write("\n")
     print(f"[render] {len(done)} rendered")
     for s in skipped:
         print(f"[render] skipped {s}")
