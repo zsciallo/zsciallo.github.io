@@ -1,0 +1,45 @@
+{
+  "title": "Daily Streak",
+  "half": "smp",
+  "live": true,
+  "icon": "clock",
+  "needs_owner_check": "ChromaticDaily (/daily) is on mc-server origin/main; confirm it is live on the SMP.",
+  "summary": "**Daily Streak** is a reward for every day you log in. Claim it with `/daily`. The rewards get better for 7 days in a row, then stay at the top.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Reward"],
+    ["Command", "`/daily`"],
+    ["Ladder", "7 days"],
+    ["New day", "Midnight, New York time"]
+  ],
+  "sections": [
+    {"h": "Rewards", "blocks": [
+      {"ul": [
+        "{{icon:tripwire_hook}} Day 1: 1 Vote Key",
+        "{{icon:tripwire_hook}} Day 2: 1 Reward Key",
+        "{{icon:tripwire_hook}} Day 3: 1 Reward Key and 10 minutes of [vote fly](/wiki/smp/vote-fly/) time",
+        "{{icon:tripwire_hook}} Day 4: 1 Shard Key",
+        "{{icon:tripwire_hook}} Day 5: 1 Shard Key",
+        "{{icon:tripwire_hook}} Day 6: 1 Spawner Key",
+        "{{icon:tripwire_hook}} Day 7: 1 Chroma Key, then again every day your streak lasts"
+      ]}
+    ]},
+    {"h": "Mechanics", "blocks": [
+      {"ul": [
+        "You can claim once per calendar day. A new day starts at midnight, New York time.",
+        "Claim the day after your last claim to move one day up. Miss a day and the streak starts over at day 1.",
+        "When you join with today's reward unclaimed, the daily screen opens a few seconds later. Press **Later** to close it; `/daily` opens it again."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Keys open the crates at spawn. Right-click a crate with its key.",
+        "Log in for a moment each day to keep the streak, even when you cannot play."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-10-30", "text": "Added daily login rewards on a 7-day streak, with `/daily`."}
+  ],
+  "related": ["smp/vote-fly", "smp/voting", "smp/crates"]
+}

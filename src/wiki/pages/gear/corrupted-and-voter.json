@@ -1,0 +1,38 @@
+{
+  "title": "Corrupted and Voter Gear",
+  "half": "gear",
+  "live": true,
+  "icon": "netherite_chestplate",
+  "image": {"src": "/wiki/icons/netherite_chestplate.png", "alt": "Corrupted and Voter armour are enchanted netherite"},
+  "summary": "**Corrupted and Voter Gear** are enchanted netherite sets from crates: Corrupted gear from the Chroma Crate and Voter armour from the Vote Crate.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Gear"],
+    ["Corrupted", "Chroma Crate"],
+    ["Voter", "Vote Crate"],
+    ["Crafted", "No"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Neither set has a recipe. Both come only from [crates](/wiki/smp/crates/)."},
+      {"ul": [
+        "{{icon:netherite_chestplate}} Corrupted gear: armour, the Corrupted Blade, a pickaxe, axe and shovel, and the Corrupted Elytra, from the Chroma Crate.",
+        "{{icon:netherite_helmet}} Voter armour: helmet, chestplate, leggings and boots, from the Vote Crate. You get a Vote Key for every [vote](/wiki/smp/voting/)."
+      ]}
+    ]},
+    {"h": "Corrupted gear", "blocks": [
+      {"facts": "gear-corrupted"}
+    ]},
+    {"h": "Voter armour", "blocks": [
+      {"facts": "gear-voter"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Neither set has a set bonus or a special ability: what you get is the enchants.",
+        "They are not on the keep-on-death list, which covers Chromatic, Halloween and Living Prism gear. See [Keep-on-Death Gear](/wiki/smp/keep-on-death/)."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["smp/crates", "smp/voting", "gear/chromatic"]
+}

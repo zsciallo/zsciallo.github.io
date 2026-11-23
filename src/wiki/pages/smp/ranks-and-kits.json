@@ -1,0 +1,140 @@
+{
+  "title": "Ranks and Kits",
+  "half": "smp",
+  "live": true,
+  "icon": "name_tag",
+  "needs_owner_check": "rank perks written from the ranks file at origin/main; the prod rank import in deploy 20261123-014534 was recorded as failed",
+  "summary": "**Ranks and Kits**: Explorer ranks are earned in game with /rankup, store ranks add perks and a daily rank kit, and kits are free gear on a timer.",
+  "infobox": [
+    [
+      "Server",
+      "SMP"
+    ],
+    [
+      "Type",
+      "Progression"
+    ],
+    [
+      "Commands",
+      "`/ranks`, `/rankup`, `/kit`"
+    ],
+    [
+      "Explorer ranks",
+      "10"
+    ],
+    [
+      "Store ranks",
+      "VIP, VIP+, MVP, MVP+"
+    ]
+  ],
+  "sections": [
+    {
+      "h": "Obtaining",
+      "blocks": [
+        {
+          "p": "Explorer ranks run from Tin to Prismatic. The store ranks are VIP, VIP+, MVP and MVP+."
+        },
+        {
+          "p": "`/ranks` shows every Explorer rank and what it needs. When you have done everything a rank asks for, run `/rankup`. Each rank up hands out rewards such as spawners and money, and raises how fast you earn [claim blocks](/wiki/smp/claims/)."
+        },
+        {
+          "p": "Store ranks are bought on [the store](/store/). Each one includes everything in the rank below it."
+        }
+      ]
+    },
+    {
+      "h": "Explorer ranks",
+      "blocks": [
+        {
+          "p": "The ladder, in order:"
+        },
+        {
+          "ul": [
+            "Tin (where everyone starts)",
+            "Bronze",
+            "Silver",
+            "Gold",
+            "Emerald",
+            "Mithril",
+            "Orichalcum",
+            "Adamantine",
+            "Netherite",
+            "Prismatic (the final rank, which also gives an auto-sell chest)"
+          ]
+        },
+        {
+          "p": "Everyone starts with 3 homes. Silver raises that to 4 and Adamantine to 5. Each Explorer rank also shows as a tag after your name in chat."
+        }
+      ]
+    },
+    {
+      "h": "Store ranks",
+      "blocks": [
+        {
+          "p": "Each store rank includes everything in the ranks below it, kits too."
+        },
+        {
+          "p": "**VIP**: [VIP] chat tag, 10 homes, 5 auto-sell chests, 2 player warps, `/hat`, `/near`, `/nick`, 1.25x mcMMO XP, 2 spawner storage pages, 150 upgradeable hoppers, and the VIP and Diamond kits."
+        },
+        {
+          "p": "**VIP+**: [VIP+] tag, 15 homes, 10 auto-sell chests, 3 player warps, `/enderchest`, `/itemname` with colour codes, 1.5x mcMMO XP, 3 spawner storage pages, 175 upgradeable hoppers, and the VIP+ kit."
+        },
+        {
+          "p": "**MVP**: [MVP] tag, 20 homes, 15 auto-sell chests, 8 player warps, formatting codes in chat, `/condense`, `/feed`, `/repair` and `/repair all`, `/workbench`, mcMMO abilities that last 12 seconds longer with halved cooldowns, the mcMMO Lucky perk, 5 spawner storage pages, 200 upgradeable hoppers, and the MVP kit."
+        },
+        {
+          "p": "**MVP+**: [MVP+] tag, 25 homes, 250 upgradeable hoppers, and the MVP+ kit."
+        },
+        {
+          "p": "Without a store rank you have 3 homes, 2 auto-sell chests, 1 player warp, 1 spawner storage page, 125 upgradeable hoppers and `/back` (also after death)."
+        }
+      ]
+    },
+    {
+      "h": "Kits",
+      "blocks": [
+        {
+          "p": "`/kit` lists the kits you can claim. Everyone can claim the Starter, Claim, Tools and Daily kits. Each kit has its own cooldown."
+        },
+        {
+          "ul": [
+            "{{icon:stone_pickaxe}} **Starter Kit**: stone tools, chainmail and leather armour, a Claim Shovel, a Claim Finder stick, a bed, 32 bread, a Chroma Key and a Shard Key, plus 30 minutes of Resistance, Saturation and Regeneration. Given once, on your first join.",
+            "{{icon:golden_shovel}} **Claim Kit**: a Claim Shovel to mark out land. Every minute.",
+            "{{icon:stone_pickaxe}} **Tools Kit**: a stone sword, shovel, pickaxe and axe. Every 10 minutes.",
+            "{{icon:iron_chestplate}} **Daily Kit**: a full set of iron armour and iron tools, plus 16 steak. Every 24 hours.",
+            "{{icon:diamond_chestplate}} **Diamond Kit**: diamond armour with Protection I, a Sharpness II sword and an Efficiency II pickaxe. Every 24 hours, with VIP and up.",
+            "{{icon:tripwire_hook}} **VIP Kit**: a Shard Key and 200 Prism Shards. Every 24 hours, with VIP and up.",
+    "{{icon:tripwire_hook}} **VIP+ Kit**: a Spawner Key and 500 Prism Shards. Every 24 hours, with VIP+ and up.",
+    "{{icon:tripwire_hook}} **MVP Kit**: a Chroma Key and 750 Prism Shards. Every 24 hours, with MVP and up.",
+    "{{icon:tripwire_hook}} **MVP+ Kit**: a Chroma Key, a Shard Key and 1,000 Prism Shards. Every 24 hours, with MVP+."
+          ]
+        },
+        {
+          "facts": "smp-kits"
+        }
+      ]
+    },
+    {
+      "h": "Tips",
+      "blocks": [
+        {
+          "ul": [
+            "Check `/ranks` early. The first rank up comes quickly, and its spawner is the start of a farm.",
+            "Rank kits pay Prism Shards every day, which adds up for [crafting](/wiki/smp/crafting/)."
+          ]
+        }
+      ]
+    }
+  ],
+  "history": [
+    {"date": "2026-10-07", "text": "Rank-ups now pay more money and give a spawner at every rank."},
+    {"date": "2026-09-28", "text": "Added the Prismatic rank above Netherite."},
+    {"date": "2026-08-08", "text": "Added new ranks."}
+  ],
+  "related": [
+    "smp/claims",
+    "smp/crates",
+    "smp/spawners-and-hoppers",
+    "smp/crafting"
+  ]
+}

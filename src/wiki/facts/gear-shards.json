@@ -1,0 +1,87 @@
+{
+ "id": "gear-shards",
+ "title": "Shards",
+ "source": "mc-server:plugins/AdvancedEnchantments/armorSets",
+ "ref": "63529705",
+ "columns": [
+  "Shard",
+  "Effect",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Shard of Embers",
+   "Grants Fire Resistance while held.",
+   "Crafting, Reward Crate, Shard Crate"
+  ],
+  [
+   "Shard of Haste",
+   "Grants Haste II while held.",
+   "Crafting, Reward Crate, Shard Crate"
+  ],
+  [
+   "Shard of Healing",
+   "Grants Regeneration I while held. Stops for 10 seconds after a player fight.",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Shard of Hunger",
+   "Restores 1 food every 10 seconds while held. Stops for 10 seconds after a player fight.",
+   "Crafting, Reward Crate, Shard Crate, Vote Crate"
+  ],
+  [
+   "Shard of Luck",
+   "Grants Luck while held.",
+   "Crafting, Shard Crate, Vote Crate"
+  ],
+  [
+   "Shard of Night",
+   "Grants Night Vision while held.",
+   "Crafting, Reward Crate, Shard Crate, Vote Crate"
+  ],
+  [
+   "Shard of Strength",
+   "Grants Strength II while held.",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Shard of Swiftness",
+   "Grants Speed II while held.",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Shard of the Feather",
+   "Grants Slow Falling while held.",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Shard of the Tides",
+   "Grants Water Breathing and Dolphin's Grace while held.",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Shard of Vigor",
+   "Grants Health Boost II while held.",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Shard of Vitality",
+   "Room for 4 absorption hearts that fill over time.",
+   "Crafting, Shard Crate"
+  ]
+ ],
+ "icons": [
+  "shard_of_embers",
+  "shard_of_haste",
+  "shard_of_healing",
+  "shard_of_hunger",
+  "shard_of_luck",
+  "shard_of_night",
+  "shard_of_strength",
+  "shard_of_swiftness",
+  "shard_of_the_feather",
+  "shard_of_the_tides",
+  "shard_of_vigor",
+  "shard_of_vitality"
+ ]
+}

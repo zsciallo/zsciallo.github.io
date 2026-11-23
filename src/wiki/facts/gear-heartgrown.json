@@ -1,0 +1,79 @@
+{
+ "id": "gear-heartgrown",
+ "title": "Heartgrown armour and the Branch of Heartwood",
+ "source": "chromatic-dungeons:tools/hw_gear.py",
+ "ref": "f69980b",
+ "columns": [
+  "Piece",
+  "Set",
+  "Enchants",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Heartgrown Sculkhollow Mask",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Implants I",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Sculkhollow Shell",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Arrow Deflect I",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Sculkhollow Greaves",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Swift Sneak II",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Sculkhollow Soles",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Jelly Legs I",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Rotroot Crown",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III, Implants I",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Rotroot Bark-plate",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III, Angelic I",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Rotroot Rootguards",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III",
+   "Heartwood"
+  ],
+  [
+   "Heartgrown Rotroot Taproots",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III, Springs I",
+   "Heartwood"
+  ],
+  [
+   "Branch of Heartwood",
+   "None",
+   "Sharpness V, Unbreaking III, Looting IV, Ambit I, Devour I",
+   "Heartwood"
+  ]
+ ],
+ "icons": [
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "wooden_sword"
+ ]
+}

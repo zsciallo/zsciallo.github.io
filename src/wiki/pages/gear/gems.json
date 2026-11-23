@@ -1,0 +1,61 @@
+{
+  "title": "Amethyst Gems",
+  "half": "gear",
+  "live": true,
+  "icon": "amethyst_cluster",
+  "image": {"src": "/wiki/icons/amethyst_cluster.png", "alt": "An amethyst cluster, the Gems button in /craft"},
+  "needs_owner_check": "Written for mc-server 63529705. Prod deploy 20261123-014534 (Chromabithia and gems) recorded a failure at the rank import after the server started: confirm gems are fully live before this page ships.",
+  "summary": "**Amethyst Gems** go into armour sockets for more skill XP and a chance of extra drops. They are a count on your account, not an item.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Armour upgrade"],
+    ["Menu", "`/craft`, Gems"],
+    ["Tiers", "Rough, Flawed, Fine, Flawless, Perfect"],
+    ["Skills", "Mining, Farming, Fishing, Foraging, Delving"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Gems drop from mob kills in the [Heartwood](/wiki/smp/dungeons/) camps. Harder areas drop higher tiers:"},
+      {"ul": [
+        "Easy areas: Rough.",
+        "Medium areas: up to Flawed.",
+        "Hard areas: up to Fine.",
+        "Very Hard areas: all five tiers."
+      ]},
+      {"p": "A Perfect drop is announced in chat."},
+      {"p": "A gem is not an item. Unsocketed gems are a count on your account, so you cannot trade or drop them, and you keep them when you die. Open `/craft` and click Gems to see how many of each tier you have."}
+    ]},
+    {"h": "Tiers", "blocks": [
+      {"p": "80 gems of one tier combine into one of the next, with the combine buttons on the Gems page. Each socketed gem adds its tier's bonus to the skill you pick for it."},
+      {"facts": "gear-gem-tiers"}
+    ]},
+    {"h": "Socketing", "blocks": [
+      {"p": "On the Gems page, click Socket gems. Put in a piece of armour, pick a tier, then pick one of the five skills for the gem. Socketing is free. Gems fit Chromatic, Living Prism, zone set and Heartgrown armour."},
+      {"facts": "gear-gem-sockets"},
+      {"p": "The same bench removes a gem (it goes back to your account), changes its skill, or opens a locked socket, for Prism Shards:"},
+      {"facts": "gear-gem-fees"}
+    ]},
+    {"h": "Skills", "blocks": [
+      {"ul": [
+        "**Mining**: mcMMO Mining XP, and a chance of an extra drop from natural ores. Not ancient debris, and not with Silk Touch.",
+        "**Farming**: mcMMO Herbalism XP, and a chance of an extra crop from fully grown wheat, carrots, potatoes, beetroot, nether wart, cocoa and sweet berries.",
+        "**Fishing**: mcMMO Fishing XP, and a chance of a second fish, at most once every 15 seconds. Never treasure or junk.",
+        "**Foraging**: mcMMO Woodcutting and Excavation XP. No extra drops.",
+        "**Delving**: in Heartwood, more dungeon XP and Prism Shards from kills, and a chance of an extra item drop."
+      ]},
+      {"p": "Gems set to the same skill add up."}
+    ]},
+    {"h": "Ownership", "blocks": [
+      {"p": "A gem works only for the player who socketed it, and only while they wear the armour. Traded armour keeps its gems, but they do nothing for the new owner, who can only Clear the socket. Clear destroys the gem."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Remove your gems before you salvage a piece. The Salvage bench refuses a piece with gems in it.",
+        "Before you trade or sell armour, remove your gems so they go back to your account.",
+        "A shattered piece keeps its gems. Repair it with `/craft repair`."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["gear/chromatic", "gear/living-prism", "gear/heartwood-sets", "smp/dungeons", "smp/crafting"]
+}

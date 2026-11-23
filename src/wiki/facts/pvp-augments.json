@@ -1,0 +1,543 @@
+{
+ "id": "pvp-augments",
+ "title": "Arena augments",
+ "source": "mc-kit:plugins/ChromaticArena/augments.yml",
+ "ref": "2661261",
+ "columns": [
+  "Augment",
+  "Rarity",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Iron Fist",
+   "Silver",
+   "Strength I for the match."
+  ],
+  [
+   "Steel Fist",
+   "Prismatic",
+   "Strength II for the match."
+  ],
+  [
+   "Long Arms",
+   "Gold",
+   "+10% attack damage."
+  ],
+  [
+   "Quick Hands",
+   "Silver",
+   "Haste I: faster swings."
+  ],
+  [
+   "Hamstring",
+   "Gold",
+   "Chance to slow whoever you hit for 3 s."
+  ],
+  [
+   "Rot Touch",
+   "Prismatic",
+   "Chance to wither whoever you hit for 4 s."
+  ],
+  [
+   "Hunter's Bow",
+   "Silver",
+   "A bow and 16 arrows every round."
+  ],
+  [
+   "Fleet Foot",
+   "Silver",
+   "Speed I for the match."
+  ],
+  [
+   "Wind Runner",
+   "Prismatic",
+   "Speed II for the match."
+  ],
+  [
+   "Spring Heels",
+   "Silver",
+   "Jump Boost I."
+  ],
+  [
+   "Blink",
+   "Gold",
+   "Two ender pearls every round."
+  ],
+  [
+   "Venom Tips",
+   "Gold",
+   "Chance to poison whoever you hit for 3 s."
+  ],
+  [
+   "Slow Mend",
+   "Silver",
+   "Regeneration I for the match."
+  ],
+  [
+   "Second Wind",
+   "Silver",
+   "Heal 4 hearts at the start of every round."
+  ],
+  [
+   "Blood Price",
+   "Gold",
+   "Heal 3 hearts on every kill."
+  ],
+  [
+   "Golden Harvest",
+   "Gold",
+   "Two golden apples every round."
+  ],
+  [
+   "Thick Skin",
+   "Silver",
+   "Absorption I for the match."
+  ],
+  [
+   "Full Belly",
+   "Silver",
+   "Never hungry."
+  ],
+  [
+   "Phoenix Blood",
+   "Prismatic",
+   "Regeneration I and 4 hearts every round."
+  ],
+  [
+   "Stone Skin",
+   "Gold",
+   "Resistance I for the match."
+  ],
+  [
+   "Big Heart",
+   "Silver",
+   "+2 max hearts."
+  ],
+  [
+   "Giant Heart",
+   "Prismatic",
+   "+5 max hearts."
+  ],
+  [
+   "Ember Guard",
+   "Silver",
+   "Fire Resistance."
+  ],
+  [
+   "Heavy Boots",
+   "Silver",
+   "+30% knockback resistance."
+  ],
+  [
+   "Shieldwall",
+   "Gold",
+   "A shield every round."
+  ],
+  [
+   "Flash Powder",
+   "Silver",
+   "Chance to blind whoever you hit for 2 s."
+  ],
+  [
+   "Sap Strength",
+   "Gold",
+   "Chance to weaken whoever you hit for 4 s."
+  ],
+  [
+   "Smoke Bomb",
+   "Silver",
+   "Three wind charges every round."
+  ],
+  [
+   "Cold Shoulder",
+   "Silver",
+   "Sixteen snowballs every round."
+  ],
+  [
+   "Dizzy Spell",
+   "Prismatic",
+   "Chance to nauseate whoever you hit for 5 s."
+  ],
+  [
+   "Rabbit's Luck",
+   "Silver",
+   "Luck I, and a feather every round (for the look)."
+  ],
+  [
+   "Compound Interest",
+   "Silver",
+   "+10% of your banked gold at every round's income."
+  ],
+  [
+   "Old Money",
+   "Prismatic",
+   "+15% of your banked gold and +50 gold every round."
+  ],
+  [
+   "Bounty Hunter",
+   "Silver",
+   "+15 gold for every kill."
+  ],
+  [
+   "Haggler",
+   "Gold",
+   "Everything in the shop costs 15% less."
+  ],
+  [
+   "Stipend",
+   "Silver",
+   "+40 gold every round."
+  ],
+  [
+   "Leech",
+   "Gold",
+   "Heal 15% of the damage you deal."
+  ],
+  [
+   "Blood Pact",
+   "Prismatic",
+   "Heal 30% of the damage you deal."
+  ],
+  [
+   "Executioner",
+   "Gold",
+   "+25% damage to anyone under 30% health."
+  ],
+  [
+   "Ambush",
+   "Silver",
+   "Your first hit each round deals +30% damage."
+  ],
+  [
+   "Assassin",
+   "Gold",
+   "Your first hit each round deals +60% damage."
+  ],
+  [
+   "Bramble Coat",
+   "Silver",
+   "15% of the damage you take goes back at the attacker."
+  ],
+  [
+   "Iron Maiden",
+   "Gold",
+   "30% of the damage you take goes back at the attacker."
+  ],
+  [
+   "Guardian",
+   "Silver",
+   "+1 armour toughness."
+  ],
+  [
+   "Deep Quiver",
+   "Silver",
+   "Archers only: 24 more arrows every round."
+  ],
+  [
+   "Pinning Shots",
+   "Gold",
+   "Archers only: a chance to slow whoever you hit."
+  ],
+  [
+   "Hunter's Mark",
+   "Silver",
+   "Archers only: whoever you hit glows for 5 s."
+  ],
+  [
+   "Riposte",
+   "Gold",
+   "Swordsmen only: +15% attack speed."
+  ],
+  [
+   "Cleaver",
+   "Gold",
+   "Axemen only: +1 attack damage."
+  ],
+  [
+   "Wide Swing",
+   "Silver",
+   "Sweeping hits deal half your damage."
+  ],
+  [
+   "Heavy Blow",
+   "Gold",
+   "Your hits knock further back."
+  ],
+  [
+   "Hand Crossbow",
+   "Silver",
+   "A crossbow and 8 arrows every round."
+  ],
+  [
+   "Tracer Rounds",
+   "Silver",
+   "8 spectral arrows every round."
+  ],
+  [
+   "Honey Pot",
+   "Silver",
+   "Two honey bottles every round."
+  ],
+  [
+   "Feast",
+   "Silver",
+   "Heal 2 hearts on every kill."
+  ],
+  [
+   "Iron Will",
+   "Gold",
+   "Heal 6 hearts at the start of every round."
+  ],
+  [
+   "Plated",
+   "Silver",
+   "+2 armour."
+  ],
+  [
+   "Anchor",
+   "Gold",
+   "+60% knockback resistance."
+  ],
+  [
+   "Web Trap",
+   "Gold",
+   "Two cobwebs every round."
+  ],
+  [
+   "Updraft",
+   "Prismatic",
+   "Chance to lift whoever you hit for 1.5 s."
+  ],
+  [
+   "Eclipse",
+   "Gold",
+   "Chance to darken whoever you hit for 3 s."
+  ],
+  [
+   "Egg Toss",
+   "Silver",
+   "Sixteen eggs every round."
+  ],
+  [
+   "Headhunter",
+   "Gold",
+   "+30 gold for every kill."
+  ],
+  [
+   "Side Hustle",
+   "Silver",
+   "+5% of your banked gold and +5 gold a kill."
+  ],
+  [
+   "Reaper",
+   "Prismatic",
+   "+50% damage to anyone under 30% health."
+  ],
+  [
+   "Bloodhound",
+   "Silver",
+   "Chance to starve whoever you hit for 5 s."
+  ],
+  [
+   "Bastion Wall",
+   "Prismatic",
+   "+4 armour and +1 armour toughness."
+  ],
+  [
+   "Last Stand",
+   "Silver",
+   "+1 max heart and 2 hearts every round."
+  ],
+  [
+   "Hooked",
+   "Gold",
+   "Fishers only: a chance to slow whoever you hit."
+  ],
+  [
+   "Catch of the Day",
+   "Silver",
+   "Fishers only: heal 4 hearts on every kill."
+  ],
+  [
+   "Tidal Grip",
+   "Gold",
+   "Tridents only: +1 attack damage."
+  ],
+  [
+   "Spare Spear",
+   "Prismatic",
+   "Tridents only: a second trident every round."
+  ],
+  [
+   "Volley",
+   "Gold",
+   "Crossbowmen only: three bolts a shot (Multishot)."
+  ],
+  [
+   "Firework Bolts",
+   "Gold",
+   "Crossbowmen only: four rockets every round that burst on hit."
+  ],
+  [
+   "Sturdy",
+   "Silver",
+   "+5 max hearts, but 15% less damage dealt."
+  ],
+  [
+   "Blood Money",
+   "Gold",
+   "+250 gold now, but 1 less max heart for the match."
+  ],
+  [
+   "Draw Your Sword",
+   "Silver",
+   "Ranged classes only: a diamond sword every round."
+  ],
+  [
+   "Guillotine",
+   "Prismatic",
+   "A hit that leaves an enemy under 10% health finishes them."
+  ],
+  [
+   "Heavy Hitter",
+   "Gold",
+   "+2% damage for every max heart above 10."
+  ],
+  [
+   "Gambler",
+   "Silver",
+   "Every hit on an enemy pays 0 to 4 gold."
+  ],
+  [
+   "Shield Breaker",
+   "Silver",
+   "Your melee hits knock a raised shield down for 5 s."
+  ],
+  [
+   "Sharpened",
+   "Gold",
+   "Critical hits give a stack (10 a round, kept all match). +0.5% damage per stack."
+  ],
+  [
+   "Hardened",
+   "Gold",
+   "Hits taken give a stack (10 a round, kept all match). 0.5% less damage taken per stack, at most 50%."
+  ],
+  [
+   "Iron Heart",
+   "Gold",
+   "Both alive 2 s after your hit: +1/4 max heart for the match. Once per enemy each round."
+  ],
+  [
+   "Contract Killer",
+   "Gold",
+   "Each round one enemy is your contract: +10% damage on them, +50 gold when you take them out."
+  ],
+  [
+   "Valor",
+   "Silver",
+   "Every augment offered to you from now on is one tier higher. Prismatic stays prismatic."
+  ],
+  [
+   "Stats!",
+   "Gold",
+   "Two free stat anvils at the next shop, one pick of three each."
+  ],
+  [
+   "Stat Quest",
+   "Prismatic",
+   "Own 10 stat anvils and every one of them counts double for the match."
+  ]
+ ],
+ "icons": [
+  "iron_sword",
+  "diamond_sword",
+  "stick",
+  "golden_pickaxe",
+  "iron_hoe",
+  "wither_rose",
+  "bow",
+  "feather",
+  "elytra",
+  "rabbit_foot",
+  "ender_pearl",
+  "spider_eye",
+  "ghast_tear",
+  "glistering_melon_slice",
+  "redstone",
+  "golden_apple",
+  "honey_bottle",
+  "cooked_beef",
+  "blaze_powder",
+  "shield",
+  "red_dye",
+  "nether_star",
+  "magma_cream",
+  "iron_boots",
+  "netherite_scrap",
+  "glowstone_dust",
+  "fermented_spider_eye",
+  "gunpowder",
+  "snowball",
+  "pufferfish",
+  "emerald",
+  "gold_nugget",
+  "gold_block",
+  "name_tag",
+  "emerald",
+  "gold_ingot",
+  "redstone",
+  "redstone_block",
+  "iron_axe",
+  "tripwire_hook",
+  "netherite_sword",
+  "sweet_berries",
+  "cactus",
+  "shield",
+  "arrow",
+  "cobweb",
+  "spyglass",
+  "golden_sword",
+  "golden_axe",
+  "iron_sword",
+  "mace",
+  "crossbow",
+  "spectral_arrow",
+  "honey_bottle",
+  "cake",
+  "totem_of_undying",
+  "iron_chestplate",
+  "anvil",
+  "cobweb",
+  "phantom_membrane",
+  "black_dye",
+  "egg",
+  "skeleton_skull",
+  "gold_nugget",
+  "netherite_hoe",
+  "rotten_flesh",
+  "netherite_chestplate",
+  "golden_carrot",
+  "tropical_fish",
+  "cod",
+  "heart_of_the_sea",
+  "prismarine_shard",
+  "firework_star",
+  "firework_rocket",
+  "iron_block",
+  "redstone_block",
+  "diamond_sword",
+  "netherite_axe",
+  "mace",
+  "rabbit_foot",
+  "shield",
+  "flint",
+  "iron_ingot",
+  "iron_block",
+  "paper",
+  "golden_sword",
+  "anvil",
+  "experience_bottle"
+ ]
+}

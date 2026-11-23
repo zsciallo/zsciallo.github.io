@@ -1,0 +1,268 @@
+{
+ "id": "gear-heartwood-pieces",
+ "title": "Heartwood zone set pieces",
+ "source": "chromatic-dungeons:tools/hw_gear.py",
+ "ref": "f69980b",
+ "columns": [
+  "Piece",
+  "Set",
+  "Enchants",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Sporewarden Cap",
+   "Sporewarden Set",
+   "Protection II, Unbreaking II, Glowing I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sporewarden Mantle",
+   "Sporewarden Set",
+   "Protection II, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sporewarden Greaves",
+   "Sporewarden Set",
+   "Protection II, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sporewarden Treads",
+   "Sporewarden Set",
+   "Protection II, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Kilnforged Helm",
+   "Kilnforged Set",
+   "Protection II, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Kilnforged Cuirass",
+   "Kilnforged Set",
+   "Protection II, Unbreaking II, Molten I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Kilnforged Tassets",
+   "Kilnforged Set",
+   "Protection II, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Kilnforged Sabatons",
+   "Kilnforged Set",
+   "Protection II, Unbreaking II, Fire Protection I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bogstrider Hood",
+   "Bogstrider Set",
+   "Protection III, Unbreaking II, Respiration II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bogstrider Jerkin",
+   "Bogstrider Set",
+   "Protection III, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bogstrider Waders",
+   "Bogstrider Set",
+   "Protection III, Unbreaking II, Extinguish I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bogstrider Striders",
+   "Bogstrider Set",
+   "Protection III, Unbreaking II, Depth Strider II, Springs I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Waxguard Visor",
+   "Waxguard Set",
+   "Protection III, Unbreaking II, Glowing I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Waxguard Comb-plate",
+   "Waxguard Set",
+   "Protection III, Unbreaking II, Molten I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Waxguard Leggings",
+   "Waxguard Set",
+   "Protection III, Unbreaking II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Waxguard Boots",
+   "Waxguard Set",
+   "Protection III, Unbreaking II, Feather Falling II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Palewatch Cowl",
+   "Palewatch Set",
+   "Protection III, Unbreaking III, Implants I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Palewatch Hauberk",
+   "Palewatch Set",
+   "Protection III, Unbreaking III",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Palewatch Legguards",
+   "Palewatch Set",
+   "Protection III, Unbreaking III",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Palewatch Stalkers",
+   "Palewatch Set",
+   "Protection III, Unbreaking III, Feather Falling III, Aegis I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Geodeplate Crown",
+   "Geodeplate Set",
+   "Protection III, Unbreaking III",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Geodeplate Carapace",
+   "Geodeplate Set",
+   "Protection III, Unbreaking III, Obsidianshield I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Geodeplate Faulds",
+   "Geodeplate Set",
+   "Protection III, Unbreaking III, Blast Protection II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Geodeplate Spurs",
+   "Geodeplate Set",
+   "Protection III, Unbreaking III, Springs I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bloomshroud Circlet",
+   "Bloomshroud Set",
+   "Protection III, Unbreaking III, Implants I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bloomshroud Vest",
+   "Bloomshroud Set",
+   "Protection III, Unbreaking III",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bloomshroud Trousers",
+   "Bloomshroud Set",
+   "Protection III, Unbreaking III",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Bloomshroud Slippers",
+   "Bloomshroud Set",
+   "Protection III, Unbreaking III, Jelly Legs I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sculkhollow Mask",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Implants I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sculkhollow Shell",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Arrow Deflect I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sculkhollow Greaves",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Swift Sneak II",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Sculkhollow Soles",
+   "Sculkhollow Set",
+   "Protection IV, Unbreaking III, Jelly Legs I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Rotroot Crown",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III, Implants I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Rotroot Bark-plate",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III, Angelic I",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Rotroot Rootguards",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III",
+   "Crafting, Heartwood"
+  ],
+  [
+   "Rotroot Taproots",
+   "Rotroot Set",
+   "Protection IV, Unbreaking III, Springs I",
+   "Crafting, Heartwood"
+  ]
+ ],
+ "icons": [
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots",
+  "leather_helmet",
+  "leather_chestplate",
+  "leather_leggings",
+  "leather_boots"
+ ]
+}

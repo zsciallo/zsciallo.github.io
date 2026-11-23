@@ -1,0 +1,93 @@
+{
+ "id": "enchants-tools",
+ "title": "Tool enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Experience",
+   "4",
+   "Pickaxes, Shovels, Axes",
+   "Chance to get more experience from ores."
+  ],
+  [
+   "Hasten",
+   "3",
+   "Pickaxes, Shovels, Axes",
+   "Chance to gain Haste after breaking blocks."
+  ],
+  [
+   "Rebreather",
+   "2",
+   "Pickaxes",
+   "Chance to regain air when mining under water."
+  ],
+  [
+   "Reforged",
+   "10",
+   "Axes, Swords, Pickaxes, Shovels",
+   "Protects weapons and tools durability, items will be take longer to break."
+  ],
+  [
+   "Replenish",
+   "3",
+   "Pickaxes",
+   "Chance to restore food while mining."
+  ],
+  [
+   "Smelting",
+   "3",
+   "Pickaxes, Shovels",
+   "Chance to smelt mined blocks."
+  ],
+  [
+   "Telepathy",
+   "1",
+   "Tools",
+   "Automatically places blocks broken by tools in your inventory."
+  ],
+  [
+   "Timber",
+   "3",
+   "Axes",
+   "Chance to break a tree in one hit"
+  ],
+  [
+   "Trench",
+   "9",
+   "Pickaxes, Shovels",
+   "Chance to break in 3x3 area."
+  ],
+  [
+   "Tunnel",
+   "9",
+   "Pickaxes, Shovels",
+   "Chance to dig tunnels and staircases in the direction you're facing."
+  ],
+  [
+   "Vein Miner",
+   "3",
+   "Pickaxes",
+   "Mine entire vein of ores"
+  ]
+ ],
+ "icons": [
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book"
+ ]
+}

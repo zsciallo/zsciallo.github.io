@@ -1,0 +1,24 @@
+{
+ "id": "gear-gem-fees",
+ "title": "Gem fees",
+ "source": "mc-server:plugins/ChromaticCrafting/gems.yml",
+ "ref": "63529705",
+ "columns": [
+  "Action",
+  "Cost"
+ ],
+ "rows": [
+  [
+   "Remove a gem",
+   "500 Prism x tier"
+  ],
+  [
+   "Change a gem's skill",
+   "1,000 Prism x tier"
+  ],
+  [
+   "Unlock a socket",
+   "10,000 Prism"
+  ]
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "id": "enchants-hoes",
+ "title": "Hoe enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Carrot Planter",
+   "3",
+   "Hoes",
+   "Plant carrots in a 3x3 area by shift+right-clicking."
+  ],
+  [
+   "Harvest",
+   "9",
+   "Hoes",
+   "Chance to harvest in 3x3 area."
+  ],
+  [
+   "Planter",
+   "3",
+   "Hoes",
+   "Plant seeds in a 3x3 area by shift+right-clicking."
+  ],
+  [
+   "Potato Planter",
+   "3",
+   "Hoes",
+   "Plant potatoes in a 3x3 area by shift+right-clicking."
+  ],
+  [
+   "Replanter",
+   "1",
+   "Hoes",
+   "Replants crops when you break them."
+  ]
+ ],
+ "icons": [
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book"
+ ]
+}

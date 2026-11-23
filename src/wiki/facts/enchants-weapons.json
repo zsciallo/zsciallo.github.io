@@ -1,0 +1,289 @@
+{
+ "id": "enchants-weapons",
+ "title": "Weapon enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Abiding",
+   "1",
+   "Swords, Bows",
+   "Weapons with this enchant become unbreakable"
+  ],
+  [
+   "Allure",
+   "3",
+   "Swords",
+   "Your attack pulls mobs towards you."
+  ],
+  [
+   "Ambit",
+   "7",
+   "Swords, Axes",
+   "Damages mobs within a radius that increases with the level of enchant."
+  ],
+  [
+   "Barbarian",
+   "4",
+   "Axes",
+   "Chance to inflicts more axe damage."
+  ],
+  [
+   "Beastslayer",
+   "4",
+   "Swords, Axes",
+   "Increases damage dealt to Hostile Mobs."
+  ],
+  [
+   "Berserk",
+   "5",
+   "Swords, Axes",
+   "Chance of strength and mining fatigue."
+  ],
+  [
+   "Blacksmith",
+   "5",
+   "Axes",
+   "Repair your weapon in exchange for dealing less damage."
+  ],
+  [
+   "Bleed",
+   "6",
+   "Axes",
+   "Makes the mob you hit bleed."
+  ],
+  [
+   "Block",
+   "3",
+   "Swords",
+   "A chance to negate an attack and deal up to 4 damage back."
+  ],
+  [
+   "Bone Crusher",
+   "3",
+   "Swords, Axes",
+   "Increases damage dealt to Skeletons."
+  ],
+  [
+   "Critical",
+   "3",
+   "Swords",
+   "Increase damage done with critical hit."
+  ],
+  [
+   "Death Punch",
+   "5",
+   "Swords, Axes",
+   "Increases damage dealt to Zombies."
+  ],
+  [
+   "Decapitation",
+   "3",
+   "Swords, Axes",
+   "Chance to have opponents head drop on death."
+  ],
+  [
+   "Devour",
+   "3",
+   "Swords, Axes",
+   "Chance to restore food while killing mobs."
+  ],
+  [
+   "Double Strike",
+   "4",
+   "Swords",
+   "A chance to strike twice."
+  ],
+  [
+   "Ender Slayer",
+   "5",
+   "Swords, Axes",
+   "Increases damage dealt to Enderman and Ender dragons."
+  ],
+  [
+   "Epicness",
+   "3",
+   "Swords",
+   "Gives particles and sound effects."
+  ],
+  [
+   "Executioner",
+   "5",
+   "Swords, Axes",
+   "Deals more damage to mobs below 30% health."
+  ],
+  [
+   "Featherweight",
+   "3",
+   "Swords, Axes",
+   "Chance to get a burst of haste."
+  ],
+  [
+   "Forcefield",
+   "5",
+   "Swords",
+   "Chance to push away the mob you hit."
+  ],
+  [
+   "Fortune's Favour",
+   "5",
+   "Swords",
+   "More Luck on rare dungeon drops."
+  ],
+  [
+   "Ice Aspect",
+   "3",
+   "Swords",
+   "A chance of causing the slowness effect on the mob you hit."
+  ],
+  [
+   "Immolate",
+   "3",
+   "Swords, Axes",
+   "Increases damage dealt to Spiders."
+  ],
+  [
+   "Immolation",
+   "3",
+   "Swords",
+   "Set all mobs in radius on fire."
+  ],
+  [
+   "Infernal",
+   "3",
+   "Swords, Axes",
+   "Explosive fire effect."
+  ],
+  [
+   "Inquisitive",
+   "4",
+   "Swords",
+   "Chance to increase EXP drops from mobs."
+  ],
+  [
+   "Launch",
+   "3",
+   "Swords",
+   "Launch yourself by right-clicking."
+  ],
+  [
+   "Lifesteal",
+   "5",
+   "Swords",
+   "A chance to steal health when attacking."
+  ],
+  [
+   "Nether Slayer",
+   "5",
+   "Swords, Axes",
+   "Increases damage dealt to nether mobs."
+  ],
+  [
+   "Paralyze",
+   "4",
+   "Swords, Axes",
+   "Gives lightning effect and a chance for slowness and slow swinging."
+  ],
+  [
+   "Permafrost",
+   "5",
+   "Swords",
+   "Chance to slow and bleed the mob you hit."
+  ],
+  [
+   "Poison",
+   "3",
+   "Swords, Axes",
+   "A chance of giving poison effect."
+  ],
+  [
+   "Prospector",
+   "3",
+   "Swords",
+   "Extra Prism from dungeon kills."
+  ],
+  [
+   "Ravenous",
+   "4",
+   "Swords, Axes",
+   "Chance to regain hunger while fighting."
+  ],
+  [
+   "Rebound",
+   "3",
+   "Axes, Swords",
+   "Gain some health back after kills."
+  ],
+  [
+   "Slayer",
+   "4",
+   "Swords, Axes",
+   "Increases damage dealt to Passive Mobs."
+  ],
+  [
+   "Strike",
+   "3",
+   "Tridents, Bows, Crossbows, Swords",
+   "Chance to strike lightning at the mob you hit."
+  ],
+  [
+   "Suspend",
+   "3",
+   "Swords",
+   "Chance to cause no knockback to mobs."
+  ],
+  [
+   "Thunderlord",
+   "3",
+   "Axes, Swords",
+   "Strike monsters with lightning every 3 consecutive hits."
+  ]
+ ],
+ "icons": [
+  "bow",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "enchanted_book",
+  "trident",
+  "enchanted_book",
+  "enchanted_book"
+ ]
+}

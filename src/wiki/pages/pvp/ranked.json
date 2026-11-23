@@ -1,0 +1,59 @@
+{
+  "title": "Ranked",
+  "half": "pvp",
+  "live": true,
+  "icon": "diamond",
+  "summary": "**Ranked** is ChromaPVP's rated duel ladder. Each kit has its own rating and tier for the season, and Java and Bedrock players share one ladder.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Competitive ladder"],
+    ["Kits", "Sword, Axe, Mace"],
+    ["Format", "Best of 3"],
+    ["Unlocks at", "Arena Level 2"],
+    ["Placement", "2 games per kit"],
+    ["Command", "`/leaderboard`"]
+  ],
+  "sections": [
+    {"h": "Getting started", "blocks": [
+      {"p": "Queue with `/queue` plus the kit and `ranked` (for example `/queue sword ranked`) or from the Play screen (`/play`). Ranked unlocks at Arena Level 2, which you reach with one win or three losses."},
+      {"p": "Your first 2 ranked games on a kit each season are placement games. Until you finish them, that kit shows your placement count (such as **Placing 1/2**) instead of a tier. After the second game you are placed and see your tier."}
+    ]},
+    {"h": "Divisions", "blocks": [
+      {"p": "There are seven tiers, from Tin up to Chroma. Every tier except Chroma splits into three divisions, from III at the bottom to I at the top."},
+      {"facts": "pvp-divisions"},
+      {"p": "Everyone starts a season on the line between Bronze and Silver. Even placements leave you in low Silver, and a bad start drops you into Bronze. Everything above Silver has to be earned."},
+      {"p": "The top 10 placed players on each kit wear **Chroma Elite**."}
+    ]},
+    {"h": "How rating moves", "blocks": [
+      {"ul": [
+        "A win raises your rating and a loss lowers it. Beating a higher-rated player gains more than beating a lower one.",
+        "Rating moves most in your first games, when the system knows little about you. It settles as you play more.",
+        "If you skip a kit for 7 days or more, your next games on it move your rating more than usual.",
+        "Each kit has its own rating, so a Mace main can start fresh on Sword.",
+        "You can play the same opponent on the same kit three times a day for rating. After that, your games against them are unrated, and the game says so before it starts."
+      ]},
+      {"p": "Your chat tag shows your best tier and division from the kits you have placed on this season. Hover it to see which kit and rating it comes from."}
+    ]},
+    {"h": "Seasons", "blocks": [
+      {"p": "Ranked seasons line up with the Battle Pass season. When a new season begins, ratings start fresh and everyone plays placements again. Each season keeps its own leaderboard."}
+    ]},
+    {"h": "Leaderboards", "blocks": [
+      {"p": "`/leaderboard` opens the season's leaderboards, and `/leaderboard sword` (or any kit name) opens one kit. The screen also shows your own position. The same boards are on the [PVP page](/pvp/) of this site."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Warm up on the training dummies with `/practice` before a ranked session.",
+        "Anyone can watch a ranked game from its first second with `/spec`, so expect an audience in high tiers.",
+        "Placements decide where you start, so play them when you are warmed up."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-16", "text": "Ranked matches can now be watched from the start."},
+    {"date": "2026-11-14", "text": "The tab list now shows your title and ranked tier next to your name."},
+    {"date": "2026-11-13", "text": "Ranked placement now takes 2 games."},
+    {"date": "2026-11-10", "text": "Ranked opened with best of 3 matches, divisions, ranked mace and top-ten boards in the hub."}
+  ],
+  "related": ["pvp/duels", "pvp/kits", "pvp/tournaments"],
+  "needs_owner_check": "Leaderboard on the site: faq.json says the PVP page has them; not rechecked against the live site. The tier tag is described from config.yml chat comments (best of placed kits, hover for kit and rating)."
+}

@@ -333,11 +333,12 @@ export async function waitReady(url, ms) {
   return false;
 }
 
-export async function launchChrome(chrome, profile) {
+/** `gpu`: the GPU flags (run 20261121-dungeon-map: the dungeon check swaps in software GL or no 3D APIs). */
+export async function launchChrome(chrome, profile, gpu = ['--disable-gpu']) {
   const proc = spawn(
     chrome,
     [
-      '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', '--no-default-browser-check', '--mute-audio',
+      '--headless=new', ...gpu, '--hide-scrollbars', '--no-first-run', '--no-default-browser-check', '--mute-audio',
       '--force-color-profile=srgb', '--disable-lcd-text', '--disable-extensions', '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--remote-debugging-port=0',
       `--user-data-dir=${profile}`, 'about:blank',

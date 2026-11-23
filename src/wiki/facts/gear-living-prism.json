@@ -1,0 +1,121 @@
+{
+ "id": "gear-living-prism",
+ "title": "Living Prism gear",
+ "source": "mc-server:plugins/AdvancedEnchantments/armorSets",
+ "ref": "63529705",
+ "columns": [
+  "Piece",
+  "Enchants",
+  "Bonus",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Living Prism Helmet",
+   "Protection V, Unbreaking III, Mending I, Respiration III, Aqua Affinity I",
+   "Set bonus: Strength I; Living Bark, Absorption II for 8s on a hit taken below 30% health (90s cooldown, counted separately for player and mob hits.) (Requires all 4 Living Prism pieces.)",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Chestplate",
+   "Protection V, Unbreaking III, Mending I",
+   "Set bonus: Strength I; Living Bark, Absorption II for 8s on a hit taken below 30% health (90s cooldown, counted separately for player and mob hits.) (Requires all 4 Living Prism pieces.)",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Leggings",
+   "Protection V, Unbreaking III, Mending I, Swift Sneak III",
+   "Set bonus: Strength I; Living Bark, Absorption II for 8s on a hit taken below 30% health (90s cooldown, counted separately for player and mob hits.) (Requires all 4 Living Prism pieces.)",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Boots",
+   "Protection V, Unbreaking III, Mending I, Feather Falling IV, Depth Strider III",
+   "Set bonus: Strength I; Living Bark, Absorption II for 8s on a hit taken below 30% health (90s cooldown, counted separately for player and mob hits.) (Requires all 4 Living Prism pieces.)",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Angler",
+   "Luck of the Sea IV, Lure III, Unbreaking III, Mending I, Prismcatch I",
+   "Lands a double catch every 15 seconds",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Axe",
+   "Efficiency VI, Fortune IV, Unbreaking III, Mending I, Prismfell I",
+   "None",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Bow",
+   "Power VII, Punch II, Flame I, Infinity I, Unbreaking III, Mending I, Heatseeker I",
+   "Marks what you hit and strikes it again",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Crossbow",
+   "Quick Charge V, Piercing V, Multishot I, Unbreaking III, Mending I, Prismstorm I",
+   "Instant reload, every bolt that lands strikes again",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Harvester",
+   "Efficiency VI, Fortune IV, Unbreaking III, Mending I, Prismreap I",
+   "Harvests a 3x3 of grown crops and replants them",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Mace",
+   "Density VI, Breach V, Wind Burst III, Fire Aspect II, Unbreaking III, Mending I, Prismquake I",
+   "Every strike shatters the ground around your target",
+   "Living Prism Crate"
+  ],
+  [
+   "Living Prism Pickaxe",
+   "Efficiency VI, Fortune IV, Unbreaking III, Mending I, Prismbreaker I",
+   "None",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Shovel",
+   "Efficiency VI, Fortune IV, Unbreaking III, Mending I, Prismbreaker I",
+   "None",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Spear",
+   "Sharpness VII, Lunge III, Knockback II, Looting IV, Unbreaking III, Mending I, Prismdrain I",
+   "Every thrust drinks a little life",
+   "Living Prism Crate"
+  ],
+  [
+   "Living Prism Sword",
+   "Sharpness VIII, Looting V, Fire Aspect II, Unbreaking III, Mending I, Trophy Hunter I",
+   "Takes the head of every player you kill",
+   "Crafting, Living Prism Crate"
+  ],
+  [
+   "Living Prism Wings",
+   "Protection IV, Unbreaking III, Mending I",
+   "None",
+   "Living Prism Crate"
+  ]
+ ],
+ "icons": [
+  "living_prism_helmet",
+  "living_prism_chestplate",
+  "living_prism_leggings",
+  "living_prism_boots",
+  "living_prism_angler",
+  "living_prism_axe",
+  "living_prism_bow",
+  "living_prism_crossbow",
+  "living_prism_harvester",
+  "living_prism_mace",
+  "living_prism_pickaxe",
+  "living_prism_shovel",
+  "living_prism_spear",
+  "living_prism_sword",
+  "living_prism_wings"
+ ]
+}

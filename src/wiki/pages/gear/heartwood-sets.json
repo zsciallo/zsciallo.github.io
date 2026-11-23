@@ -1,0 +1,46 @@
+{
+  "title": "Heartwood Zone Sets",
+  "half": "gear",
+  "live": true,
+  "icon": "leather_chestplate",
+  "image": {"src": "/wiki/icons/leather_chestplate.png", "alt": "Zone set armour is dyed and trimmed leather armour"},
+  "summary": "**Heartwood Zone Sets** are armour sets, one per Heartwood area, whose set bonus works only in the Heartwood world. Rare Heartgrown pieces have netherite stats.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Gear"],
+    ["Made at", "`/craft`, Zone Sets"],
+    ["Found in", "[Heartwood](/wiki/smp/dungeons/)"],
+    ["Bonus works in", "Heartwood only"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Each Heartwood area has its own set. Build a piece in the Zone Sets section of `/craft` from that area's zone item and Prismatic Resin, or find it in that area's camp crates in [Heartwood](/wiki/smp/dungeons/)."},
+      {"ul": [
+        "{{icon:prismatic_resin}} Zone items drop from an area's mobs and its contracts.",
+        "{{icon:leather_chestplate}} Every piece says which set it belongs to and where it is found."
+      ]}
+    ]},
+    {"h": "Sets", "blocks": [
+      {"p": "Wear all four pieces of one set for its bonus. The bonus does nothing outside the Heartwood world."},
+      {"facts": "gear-heartwood-sets"}
+    ]},
+    {"h": "Pieces", "blocks": [
+      {"facts": "gear-heartwood-pieces"}
+    ]},
+    {"h": "Heartgrown and the Branch", "blocks": [
+      {"p": "Heartgrown pieces are rare versions of the Sculkhollow and Rotroot sets, found only in the Hollow Below and the Heartwood Core. They have netherite stats where the zone sets have diamond stats, and they count toward their base set's bonus, so you can mix them with normal pieces."},
+      {"p": "The Branch of Heartwood is a sword that also drops in Heartwood. Its lore says it was broken from the Rotroot Heart."},
+      {"facts": "gear-heartgrown"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Zone set and Heartgrown armour take Amethyst Gems. See [Amethyst Gems](/wiki/gear/gems/).",
+        "The Sporewarden set is the recommended gear for the Medium areas."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-08", "text": "Added zone armour sets for all 9 Heartwood zones, the Heartgrown set and the Branch of Heartwood."}
+  ],
+  "related": ["smp/dungeons", "gear/gems", "smp/crafting", "gear/chromatic"]
+}

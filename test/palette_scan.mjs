@@ -151,6 +151,8 @@ export const ALLOW = [
   { file: 'src/components/market/chart.js', context: /^(price|flat): '#/, reason: 'chart series hues (keep list: chart series)' },
   { file: 'src/components/market/CandleChart.jsx', context: /id: 'boll'/, reason: 'BOLL indicator series hue (keep list: chart series)' },
   { file: 'src/market.css', context: /^\.legend-candle--flat \{ color \}$/, reason: 'legend swatch of the flat-candle series (keep list: chart series; same hue as SERIES.flat)' },
+  // Run 20261121-dungeon-map U3 (orchestrator S3): the Glowberry Canopy area's hue on the dungeon map.
+  { file: 'src/data/dungeonMap.js', context: /n: 'Glowberry Canopy', .*c: '#E77FC2'/, reason: 'Glowberry Canopy map area hue (data, like the chart series hues)' },
 ];
 
 /** Problems: hits outside ALLOW, and ALLOW entries that match nothing (stale). */

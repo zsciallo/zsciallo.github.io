@@ -2939,7 +2939,7 @@ footer {
   order: 4;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .sound-toggle {
     margin-left: auto;
   }
@@ -4695,7 +4695,7 @@ html.js.fonts-ready .site-nav-inner {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .nav-toggle {
     display: flex;
   }
@@ -4780,12 +4780,22 @@ html:not(.js) .nav-toggle {
   display: none;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
+  /* The wrapped rows grow the bar rather than spill above it. */
+  html:not(.js) .site-nav-inner {
+    height: auto;
+    min-height: var(--nav-h);
+  }
+
   html:not(.js) .site-nav-links {
     position: static;
     display: flex;
     flex-direction: row;
     gap: 1.1rem;
+    /* Six labels don't fit one phone row: wrap to a second instead of scrolling sideways. */
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 0;
     padding: 0;
     background: none;
     border-bottom: 0;
@@ -5864,6 +5874,20 @@ html[data-keypromo="off"] .store-promo--key {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 1.1rem;
   text-align: left;
+}
+
+.dungeon-preview {
+  display: block;
+  max-width: 560px;
+  margin: 2.5rem auto 1.25rem;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.dungeon-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .fact {

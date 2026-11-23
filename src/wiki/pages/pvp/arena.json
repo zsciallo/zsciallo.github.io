@@ -1,0 +1,94 @@
+{
+  "title": "Arena",
+  "half": "pvp",
+  "live": true,
+  "icon": "anvil",
+  "summary": "**Arena** (the Prismatic Arena) is ChromaPVP's round-based team mode: one shrinking ring, augment picks and a gold shop between rounds.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Game mode"],
+    ["Players", "2 to 6"],
+    ["Formats", "1v1 up to 2v2v2"],
+    ["Queue", "`/play` or Quickplay"],
+    ["Maps", "Prism Ring, Abbey Cloister, Sunken Temple"]
+  ],
+  "sections": [
+    {"h": "Joining", "blocks": [
+      {"p": "Every team fights in one shrinking ring each round, and between rounds you pick augments and spend gold in a shop. The last team with health left wins."},
+      {"p": "Pick the Arena on the Play screen (`/play`), or use Quickplay, which can also put you in an Arena match. There is one Arena queue, and the format depends on how many players are waiting:"},
+      {"ul": [
+        "2 players: 1v1",
+        "3 players: 1v1v1",
+        "4 players: 2v2",
+        "5 players: five players, every one for themselves",
+        "6 players: 2v2v2"
+      ]},
+      {"p": "Once two players are in, the lobby waits 30 seconds, plus 10 seconds for each new player, up to 60 seconds in total. At six players it starts at once. A [party](/wiki/pvp/parties/) of two stays one team in 2v2 and 2v2v2, and fights apart in the other formats."}
+    ]},
+    {"h": "Classes", "blocks": [
+      {"p": "During the 15 second lobby countdown you pick a class. If you do not pick one, you play Swordsman. The classes are Swordsman, Archer, Axeman, Fisher, Trident, Crossbowman, Alchemist, Bomber, Bulwark and Trickster."},
+      {"ul": [
+        "**Bravery** picks a random class for you and locks it for the match. In return you get a free stat anvil pick.",
+        "**Crowd Favourite** marks the class you have played least. Pick it and the crowd gives you a free stat."
+      ]}
+    ]},
+    {"h": "Rounds", "blocks": [
+      {"p": "Every round goes the same way:"},
+      {"ul": [
+        "**Augment pick** (20 seconds): choose one of three augments. Augments last for the whole match and stack.",
+        "{{icon:gold_ingot}} **Shop** (20 seconds): spend gold. The shop closes early once everyone still in is ready.",
+        "**Prep** (5 seconds), then the fight (up to 90 seconds)."
+      ]},
+      {"p": "The ring starts closing 15 seconds into the fight and reaches its smallest size at 60 seconds. Standing outside it costs 3 health every second. Healing also gets weaker as the ring closes, down to 40% less at its smallest."},
+      {"p": "Each team starts with 100 team health. The last team standing wins the round. The others lose team health by finishing order, and the loss grows each round. When a team runs out of health it is out. If you are knocked out mid-round, you spectate until the round ends."}
+    ]},
+    {"h": "Gold and the shop", "blocks": [
+      {"p": "You start the match with 100 gold. Each round pays 100 more to every player still in, plus a bonus for your team's finish, and each kill pays 8. In the shop you can buy:"},
+      {"ul": [
+        "{{icon:netherite_sword}} Weapon upgrades, from wood up to netherite (the Bomber upgrades its TNT instead).",
+        "{{icon:diamond_chestplate}} Armour upgrades, from chainmail to iron to diamond.",
+        "{{icon:enchanted_book}} Enchantment levels for your weapon or Protection, up to level 3.",
+        "{{icon:golden_apple}} One-round items: arrows, golden apples, a shield (lasts two rounds), splash healing and ender pearls.",
+        "{{icon:anvil}} Stat anvils."
+      ]},
+      {"facts": "pvp-shop"}
+    ]},
+    {"h": "Stat anvils", "blocks": [
+      {"p": "A stat anvil offers three random stats, and you keep the one you pick for the rest of the match. The same stat twice stacks. Each anvil costs more than the one before, and there is a limit per match; the shop table above has the prices and the stat list. If the shop closes before you choose, you get the first stat on offer."}
+    ]},
+    {"h": "Augments", "blocks": [
+      {"p": "Augments come in three rarities: silver, gold and prismatic. You get one pick every round, and you have **one reroll per match**, not per round, so save it for a bad offer."},
+      {"facts": "pvp-augments"}
+    ]},
+    {"h": "Modifiers", "blocks": [
+      {"p": "From round 2 on, a round can roll a modifier that changes the rules for everyone in it. Its name and what it does show on screen when the round starts."},
+      {"facts": "pvp-modifiers"}
+    ]},
+    {"h": "Rewards", "blocks": [
+      {"p": "Arena matches pay Prism Coins by final placement (180, 120, 75 and 30 for the first four places) and 5 Prism Coins for every enemy you knock out. During Double Prism Coins in [FFA](/wiki/pvp/ffa/) both are doubled."},
+      {"p": "Vengeance works here too: if players from two or more enemy teams take three quarters of your health within 10 seconds, you get a short burst of extra damage and golden hearts."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Every round is all teams at once, so waiting for two teams to weaken each other is a real tactic.",
+        "Stay inside the ring after the 15 second mark. The damage adds up fast, and healing gets weaker at the same time.",
+        "Economy augments pay off over a long match. Take them early or not at all."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-17", "text": "The Prismatic Arena now changes map every round."},
+    {"date": "2026-11-16", "text": "Added the Bulwark and Trickster classes."},
+    {"date": "2026-11-16", "text": "Added new augments, including Iron Heart, Contract, Valor and Stat Quest."},
+    {"date": "2026-11-16", "text": "Added the Glass Cannon, Fog of War and Vampire Night round modifiers."},
+    {"date": "2026-11-16", "text": "Added two maps, Abbey Cloister and Sunken Temple, and maps now rotate."},
+    {"date": "2026-11-14", "text": "The Spare Spear trident now has Loyalty III."},
+    {"date": "2026-11-13", "text": "The Bomber now buys 4 TNT for 60 gold, and its TNT hits twice as hard."},
+    {"date": "2026-11-12", "text": "The Bomber now has 4 tiers, axes deal 1 less damage, and the Crossbowman's second upgrade gives Quick Charge II."},
+    {"date": "2026-11-11", "text": "The Prismatic Arena now has one queue for 2 to 6 players, and the match format follows how many join."},
+    {"date": "2026-11-11", "text": "Added the Alchemist and Bomber classes."},
+    {"date": "2026-11-10", "text": "The Prismatic Arena opened with classes, gold, a shop between rounds, augments, stat anvils, round modifiers, Bravery, one reroll a match and 2v2v2 matches."}
+  ],
+  "related": ["pvp/duels", "pvp/parties", "pvp/prism-coins", "pvp/ffa"],
+  "needs_owner_check": "The pvp-shop table (Arena gold shop) is placed here instead of on pvp/prism-coins, where the brief put it: facts.py titles it 'Arena shop' and its prices are gold. Placement Prism Coins read as 1st to 4th place from tokens.arcade-placement [180, 120, 75, 30]. Party of 3 or 4 in the Arena: the config only describes a party of two; not covered. The team health loss amounts (base 20, +5 a round, cap 40, factors) are summarised as 'grows each round' rather than listed."
+}

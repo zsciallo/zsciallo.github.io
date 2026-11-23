@@ -30,10 +30,29 @@ const DISCORD = JSON.parse(readFileSync(join(ROOT, 'src', 'config.json'), 'utf-8
 // below can plant one defect by replacing an exact string.
 // U4: the nav on every page is HOME PVP STORE AUCTIONS FAQ, and every footer
 // links /pvp/ (the U3 navs had HOME STORE AUCTIONS and HOME STORE; the U3 cases
-// still find their strings). Owner ruling 2026-11-10: no BETA marker in the nav
+// still find their strings). Run 20261121-dungeon-map U3 (owner 2026-11-21): SMP replaces AUCTIONS
+// in the nav, and SMP is the current link on /smp/, /auctions/ and /dungeon/ (SMP_NAV). Owner ruling 2026-11-10: no BETA marker in the nav
 // (the earlier fixture had a [data-beta] span in the PVP link).
-const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png" width="30" height="30"><span>CHROMABIT</span></a><ul><li><a href="/">HOME</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/faq/">FAQ</a></li></ul></header>';
-const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/store/">STORE</a><a href="/auctions/">AUCTIONS</a><a href="/faq/">FAQ</a></header>';
+// Run 20261123-nav (owner 2026-11-23): the nav is STORE SMP PVP WIKI AUCTIONS MAP (HOME on the logo, FAQ in the
+// footer); /store/ lights STORE, /auctions/ AUCTIONS, /dungeon/ MAP, and /, /faq/, /privacy/ light nothing.
+const NAV = '<header class="site-nav"><a href="/" class="site-nav-brand"><img alt="Chromabit" src="/logo.png" width="30" height="30"><span>CHROMABIT</span></a><ul><li><a href="/store/">STORE</a></li><li><a href="/smp/">SMP</a></li><li><a href="/pvp/">PVP</a></li><li><a href="/wiki/">WIKI</a></li><li><a href="/auctions/">AUCTIONS</a></li><li><a href="/dungeon/">MAP</a></li></ul></header>';
+const NAV_PLAIN = '<header class="site-nav"><a href="/" class="site-nav-brand">CHROMABIT</a><a href="/store/">STORE</a><a href="/smp/">SMP</a><a href="/pvp/">PVP</a><a href="/wiki/">WIKI</a><a href="/auctions/">AUCTIONS</a><a href="/dungeon/">MAP</a></header>';
+const SMP_CURRENT = '<a href="/smp/" aria-current="page" class="active">';
+const SMP_NAV = NAV.replace('<a href="/smp/">', SMP_CURRENT);
+const current = (href) => NAV.replace(`<a href="${href}">`, `<a href="${href}" aria-current="page" class="active">`);
+const STORE_NAV = current('/store/');
+const AUCTIONS_NAV = current('/auctions/');
+const MAP_NAV = current('/dungeon/');
+// Run 20261122-wiki U1 (owner 2026-11-22): WIKI joins the nav between SMP and FAQ and is the current link on every
+// wiki route. The checker reads the wiki pages from test/fixtures/wiki (CHECK_SITE_WIKI, set in runOn): one live page
+// (/wiki/smp/sample/) and one with "live": false that must stay out of every list.
+const WIKI_NAV = NAV.replace('<a href="/wiki/">', '<a href="/wiki/" aria-current="page" class="active">');
+const WIKI_FIXTURES = join(ROOT, 'test', 'fixtures', 'wiki');
+const WIKI = [
+  ['/wiki/', 'Wiki | Chromabit', 'Wiki', 'The Chromabit player wiki in the self-test: how the systems work, with each page and its change log.'],
+  ['/wiki/changes/', 'Wiki Changes | Chromabit', 'Changes', 'Every recorded change on the self-test wiki, newest first, with the date, the page and the change.'],
+  ['/wiki/smp/sample/', 'Sample Page | Chromabit Wiki', 'Sample Page', 'Sample Page is a test fixture: a live wiki page whose facts block names a table that has no file.'],
+];
 // U8: every <img> has width and height (the hero logo is above the first screen, so not lazy).
 const HERO_LOGO = '<img class="logo" src="/server-icon.png" alt="Chromabit logo" width="64" height="64">';
 const HERO_HEAD =
@@ -66,16 +85,24 @@ const SMP_CARD =
   '<div class="mode-live" data-live="movers"></div>' +
   '<a class="mode-enter" href="/smp/">EXPLORE THE SMP</a><button type="button" class="smp-copy" data-copy-ip>COPY IP</button>' +
   '</article>';
-const FOOTER = '<footer><nav class="footer-nav"><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>Welcome &copy; 2026 Chromabit LLC</footer>';
+// Run 20261121-dungeon-map U3: the footer's AUCTIONS link (the built footer has it) is what shows the /auctions/
+// breadcrumb name once the nav says SMP.
+// Run 20261123-nav: the footer keeps HOME and FAQ (wayHome in nav-links / player-nav), as the built footer does.
+const FOOTER = '<footer><nav class="footer-nav"><a href="/">HOME</a><a href="/faq/">FAQ</a><a href="/auctions/">AUCTIONS</a><a href="/pvp/">PVP</a><a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>Welcome &copy; 2026 Chromabit LLC</footer>';
 const HOME_BODY = `${NAV}<main><section class="page-hero container">${HERO_HEAD}${JOIN_BOX}</section>${CLAIM}<section class="modes">${PVP_CARD}${SMP_CARD}</section></main>${FOOTER}`;
 
+const SMP_TAPE = '<section class="tape" aria-label="Today&#39;s biggest market moves"><h2 class="tape-title">TODAY’S TOP MOVERS</h2></section>';
+// Run 20261121-dungeon-map U3: the linked dungeon preview and its button.
+const SMP_PREVIEW_IMG = '<img src="/dungeon/preview.jpg" alt="The Heartwood dungeon island, drawn block by block" width="1200" height="1164" loading="lazy" decoding="async">';
+const SMP_DUNGEON_LINKS = `<a class="dungeon-preview" href="/dungeon/">${SMP_PREVIEW_IMG}</a><a class="arcade-btn" href="/dungeon/">EXPLORE THE DUNGEONS</a>`;
 const SMP_BODY =
-  `${NAV_PLAIN}<main>` +
+  `${NAV_PLAIN.replace('<a href="/smp/">', SMP_CURRENT)}<main>` +
   '<section class="page-hero"><h1 class="hero-title">MINE IT. PRICE IT. <span class="accent">TRADE IT.</span></h1><p class="hero-sub">Chromabit SMP is allowed here</p>' +
   '<button type="button" class="smp-copy" data-copy-ip>COPY IP</button></section>' +
-  '<section class="tape" aria-label="Today&#39;s biggest market moves"><h2 class="tape-title">TODAY’S TOP MOVERS</h2></section>' +
+  SMP_TAPE +
   '<section class="dungeon" data-section="dungeon"><h2>SEASON 4: <span>HEARTWOOD</span></h2><ul>' +
-  '<li data-fact>Four zones under one tree</li><li data-fact>Bosses with phases</li><li data-fact>Zone armour sets</li></ul></section>' +
+  '<li data-fact>Four zones under one tree</li><li data-fact>Bosses with phases</li><li data-fact>Zone armour sets</li></ul>' +
+  `${SMP_DUNGEON_LINKS}</section>` +
   '<a class="auctions-link" href="/auctions/">OPEN THE AUCTION HOUSE</a>' +
   `</main>${FOOTER}`;
 // U4-copy: the privacy page's "Other services" section names mc-heads.net.
@@ -243,7 +270,8 @@ const PLAYER_MAST =
   `<p class="profile-best" data-profile-best hidden></p>${PLAYER_BACK}</section>`;
 const PLAYER_BODY = `${PVP_NAV}<main>${PLAYER_MAST}${PLAYER_STATE}</main>${FOOTER}`;
 // U8: the sitemap lists exactly the seven indexable pages, each with a lastmod (was / and /pvp/ only, no lastmod).
-const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/'];
+// Run 20261121-dungeon-map U2: /dungeon/ is the eighth indexable page.
+const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/', ...WIKI.map(([r]) => r)];
 const sitemapLine = (route) => `  <url><loc>https://chromabit.us${route}</loc><lastmod>2026-11-10</lastmod></url>\n`;
 const SITEMAP =
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
@@ -274,6 +302,10 @@ Join at play.chromabit.us. Bedrock uses the same address with port 19132. Java w
 - [Store](https://chromabit.us/store/): ranks and crate keys.
 - [Auctions](https://chromabit.us/auctions/): live market data.
 - [Privacy](https://chromabit.us/privacy/): how data is handled.
+- [Heartwood map](https://chromabit.us/dungeon/): the dungeon block by block.
+- [Wiki](https://chromabit.us/wiki/)
+- [Wiki changes](https://chromabit.us/wiki/changes/)
+- [Sample Page](https://chromabit.us/wiki/smp/sample/)
 `;
 
 /** U4: give a page the site nav and footer (around #app, so the U2 cases keep their exact #app strings). */
@@ -375,7 +407,12 @@ const DESC = {
   store: 'The official Chromabit store. Buy ranks, crate keys and more; every purchase directly helps Chromabit.',
   auctions: 'Live auction house data for the Chromabit SMP: price history, floors, volume and listings for each item.',
   privacy: 'How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments and your choices.',
+  dungeon: 'Interactive block map of the Heartwood dungeon: areas, bosses, camps, crates and waypoints, with a cutaway to look inside.',
 };
+// Run 20261121-dungeon-map U2: /dungeon/ as spec-U2 describes its server render.
+const DUNGEON_TITLE = 'Heartwood Dungeon Map | Chromabit';
+const DUNGEON_PREVIEW = '<img data-map-preview src="/dungeon/preview.jpg" alt="The Heartwood island" width="1200" height="1164" loading="lazy" decoding="async">';
+const DUNGEON_MAIN = `<main><p class="section-eyebrow">SEASON 4 DUNGEON</p><h1>HEARTWOOD MAP</h1><div class="map-box" data-map-box>${DUNGEON_PREVIEW}</div></main>`;
 const subHead = (route, title, desc) => u8Head(route, { description: desc, ogDescription: desc, twitterTitle: title, twitterDescription: desc });
 
 function headFor(title, extra = '') {
@@ -409,6 +446,20 @@ function faqSite(editFaq = () => {}, ld = null) {
 }
 const faqItem = (groups, q) => groups.flatMap((g) => g.items).find((it) => it.q === q);
 
+/** Run 20261122-wiki U1: a wiki route; below /wiki/ its breadcrumb has three levels (Home > Wiki > page). */
+function wikiPage(route, title, name, desc) {
+  const items = [['Home', '/'], ...(route === '/wiki/' ? [] : [['Wiki', '/wiki/']]), [name, route]].map(([n, r], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: `https://chromabit.us${r}` }));
+  const ld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', '@id': `https://chromabit.us${route}#webpage`, url: `https://chromabit.us${route}`, isPartOf: { '@id': SITE_ID }, publisher: { '@id': ORG_ID } },
+      { '@type': 'BreadcrumbList', itemListElement: items },
+    ],
+  });
+  return framed(htmlPage(headFor(title, `${subHead(route, title, desc)}
+  ${ldTag(ld)}`), `<main><h1>${name}</h1></main>`), WIKI_NAV);
+}
+
 /** A dist/ that should pass every check. */
 function goodSite() {
   return {
@@ -429,8 +480,8 @@ function goodSite() {
     'smp/index.html': htmlPage(headFor('Economy SMP | Chromabit', `${subHead('/smp/', 'Economy SMP | Chromabit', DESC.smp)}\n  ${ldTag(ldSub('/smp/', 'Economy SMP'))}`), SMP_BODY),
     'faq/index.html': faqPage(goodFaq(), LD_FAQ),
     // U8: each framed page also gets an <h1> (one per page), outside the U2 cases' exact strings.
-    'store/index.html': framed(htmlPage(headFor('Store | Chromabit', `${subHead('/store/', 'Store | Chromabit', DESC.store)}\n  ${ldTag(ldSub('/store/', 'Store'))}`), '<main><h1>STORE</h1>Every purchase directly supports Chromabit.</main>')),
-    'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP', `${subHead('/auctions/', 'Auction House | Chromabit SMP', DESC.auctions)}\n  ${ldTag(ldSub('/auctions/', 'Auctions'))}`), '<main><h1>Auction House</h1>Chromabit SMP market</main>')),
+    'store/index.html': framed(htmlPage(headFor('Store | Chromabit', `${subHead('/store/', 'Store | Chromabit', DESC.store)}\n  ${ldTag(ldSub('/store/', 'Store'))}`), '<main><h1>STORE</h1>Every purchase directly supports Chromabit.</main>'), STORE_NAV),
+    'auctions/index.html': framed(htmlPage(headFor('Auction House | Chromabit SMP', `${subHead('/auctions/', 'Auction House | Chromabit SMP', DESC.auctions)}\n  ${ldTag(ldSub('/auctions/', 'Auctions'))}`), '<main><h1>Auction House</h1>Chromabit SMP market</main>'), AUCTIONS_NAV),
     'privacy/index.html': framed(htmlPage(headFor('Privacy Policy | Chromabit', `${subHead('/privacy/', 'Privacy Policy | Chromabit', DESC.privacy)}\n  ${ldTag(ldSub('/privacy/', 'Privacy'))}`), `<main>Privacy</main><h1>PRIVACY POLICY</h1>${PRIVACY_DATE}${PRIVACY_OTHER}`)),
     'pvp/index.html': htmlPage(
       headFor(
@@ -441,6 +492,9 @@ function goodSite() {
       PVP_BODY,
     ),
     'pvp/player/index.html': htmlPage(headFor(PLAYER_TITLE, `${PLAYER_ROBOTS}\n  ${PVP_CANON}\n  ${REFERRER_META}`), PLAYER_BODY),
+    'dungeon/index.html': framed(htmlPage(headFor(DUNGEON_TITLE, `${subHead('/dungeon/', DUNGEON_TITLE, DESC.dungeon)}
+  ${ldTag(ldSub('/dungeon/', 'Heartwood'))}`), DUNGEON_MAIN), MAP_NAV),
+    ...Object.fromEntries(WIKI.map(([route, title, name, desc]) => [`${route.slice(1)}index.html`, wikiPage(route, title, name, desc)])),
     'sitemap.xml': SITEMAP,
     'og-preview.png': png(1200, 630),
     // U8: the hero logo (preloaded on /, the Organization logo), robots.txt and llms.txt.
@@ -486,6 +540,7 @@ function png(width, height) {
 const tmpRoot = mkdtempSync(join(tmpdir(), 'check-site-'));
 let n = 0;
 // U8: the checker's snapshot() writes the two frozen-baseline fixtures (titles/descriptions, visible text).
+process.env.CHECK_SITE_WIKI = WIKI_FIXTURES; // the in-process checker reads the same wiki list as the child runs
 const { snapshot } = await import(pathToFileURL(CHECKER).href);
 
 function writeDist(files) {
@@ -514,7 +569,7 @@ function runOn(files, base = files) {
   const snap = snapshot(baseDist, 'self-test');
   writeFileSync(join(fixtures, 'seo-head-base.json'), JSON.stringify(snap.heads));
   writeFileSync(join(fixtures, 'visible-text-base.json'), JSON.stringify(snap.text));
-  const r = spawnSync(process.execPath, [CHECKER, dist], { encoding: 'utf-8', env: { ...process.env, CHECK_SITE_FIXTURES: fixtures } });
+  const r = spawnSync(process.execPath, [CHECKER, dist], { encoding: 'utf-8', env: { ...process.env, CHECK_SITE_FIXTURES: fixtures, CHECK_SITE_WIKI: WIKI_FIXTURES } });
   return { code: r.status, out: r.stdout + r.stderr, lines: r.stdout.trim().split(/\r?\n/) };
 }
 
@@ -647,6 +702,8 @@ try {
       // U8 round 3 (U8 review r1 F1, F2b)
       'seo-logo',
       'time-datetime',
+      // run 20261121-dungeon-map U2
+      'dungeon-page',
     ])
       check(`check ${want} is listed`, names.includes(want), `names: ${names.join(', ')}`);
   }
@@ -1011,7 +1068,8 @@ ${r.out}`,
   expectFail('U3-AC7 two facts', mutate(S, '<li data-fact>Zone armour sets</li>', '<li>Zone armour sets</li>'), 'smp-page', '/smp/ dungeon block has 2 [data-fact], want at least 3');
   expectFail(
     'U3-AC7 a fact outside the dungeon block',
-    mutate(S, '<li data-fact>Zone armour sets</li></ul></section>', '</ul></section><ul><li data-fact>Zone armour sets</li></ul>'),
+    // Run 20261121-dungeon-map U3: the dungeon links now close the block, so the fact moves past them.
+    mutate(S, `<li data-fact>Zone armour sets</li></ul>${SMP_DUNGEON_LINKS}</section>`, `</ul>${SMP_DUNGEON_LINKS}</section><ul><li data-fact>Zone armour sets</li></ul>`),
     'smp-page',
     '/smp/ dungeon block has 2 [data-fact]',
   );
@@ -1047,16 +1105,35 @@ ${r.out}`,
       `/smp/ still has "${gone}"`,
     );
   }
-  // Since U4 an extra nav link also breaks the exact nav list, so nav-links fails with smp-page here (both, and only both).
-  expectFails(
-    'U3-AC7 /smp/ in the home nav',
-    mutate(H, '<li><a href="/auctions/">AUCTIONS</a></li>', '<li><a href="/smp/">SMP</a></li><li><a href="/auctions/">AUCTIONS</a></li>'),
-    { 'smp-page': '/ nav links to /smp/', 'nav-links': '/ nav links are' },
-  );
-  expectFails('U3-AC7 /smp/ in the smp nav', mutate(S, '<a href="/faq/">FAQ</a></header>', '<a href="/faq/">FAQ</a><a href="/smp/">SMP</a></header>'), {
-    'smp-page': '/smp/ nav links to /smp/',
+  // Run 20261121-dungeon-map U3 (owner 2026-11-21) mirrors the two cases above it ("/smp/ in the home nav",
+  // "/smp/ in the smp nav", from the 2026-11-09 ruling that /smp/ is not in the nav): now /auctions/ must not be in
+  // any nav and /smp/ must be. Any nav change also breaks the exact nav list, so nav-links fails with smp-page (both, and only both).
+  // Run 20261123-nav (owner 2026-11-23): AUCTIONS and MAP are in the nav now, so "no /auctions/ in any nav" is gone.
+  // What it protected (the auction house reachable from /smp/) stays: the page's own buttons, outside the nav.
+  expectFails('nav: /smp/ auction button only in the nav', edit(mutate(S, '<a class="auctions-link" href="/auctions/">OPEN THE AUCTION HOUSE</a>', ''), S, '<a href="/wiki/">WIKI</a><a href="/auctions/">AUCTIONS</a>', '<a href="/wiki/">WIKI</a><a href="/auctions/">OPEN THE AUCTION HOUSE</a>'), { 'smp-page': '/smp/ has no <a href="/auctions/"> "OPEN THE AUCTION HOUSE"', 'nav-links': '/smp/ nav links are' });
+  expectFails('nav: /smp/ dungeon button only in the nav', edit(mutate(S, SMP_DUNGEON_LINKS, ''), S, '<a href="/dungeon/">MAP</a>', `<a href="/dungeon/">${SMP_PREVIEW_IMG}EXPLORE THE DUNGEONS</a>`), { 'smp-page': '/smp/ has no <a href="/dungeon/"> "EXPLORE THE DUNGEONS"', 'nav-links': '/smp/ nav links are' });
+  expectFails('U3dm /smp/ missing from the smp nav', mutate(S, `${SMP_CURRENT}SMP</a>`, ''), {
+    'smp-page': '/smp/ nav has no link to /smp/',
     'nav-links': '/smp/ nav links are',
   });
+  expectFails('U3dm SMP missing from the /dungeon/ nav', mutate('dungeon/index.html', '<li><a href="/smp/">SMP</a></li>', ''), {
+    'smp-page': '/dungeon/ nav has no link to /smp/',
+    'nav-links': '/dungeon/ nav links are',
+  });
+  // Run 20261121-dungeon-map U3: the dungeon preview and button (AC3), the ticker above the auction button (AC4).
+  expectFail('U3dm dungeon button label', mutate(S, '>EXPLORE THE DUNGEONS<', '>EXPLORE<'), 'smp-page', '/smp/ has no <a href="/dungeon/"> "EXPLORE THE DUNGEONS"');
+  expectFail('U3dm dungeon button href', mutate(S, 'href="/dungeon/">EXPLORE', 'href="/dungeon">EXPLORE'), 'smp-page', '/smp/ has no <a href="/dungeon/"> "EXPLORE THE DUNGEONS"');
+  expectFail('U3dm preview not linked', mutate(S, `<a class="dungeon-preview" href="/dungeon/">${SMP_PREVIEW_IMG}</a>`, `<figure class="dungeon-preview">${SMP_PREVIEW_IMG}</figure>`), 'smp-page', '/smp/ has no <img src="/dungeon/preview.jpg"> inside an <a href="/dungeon/">');
+  // An empty link also has no accessible name, so a11y-names fails with smp-page (both, and only both).
+  expectFails('U3dm preview missing', mutate(S, SMP_PREVIEW_IMG, ''), { 'smp-page': '/smp/ has no <img src="/dungeon/preview.jpg"> inside', 'a11y-names': '/smp/ <a class="dungeon-preview" href="/dungeon/"> has no accessible name' });
+  expectFail('U3dm preview is another picture', mutate(S, 'src="/dungeon/preview.jpg"', 'src="/og-preview.png"'), 'smp-page', '/smp/ has no <img src="/dungeon/preview.jpg"> inside');
+  expectFails('U3dm preview without alt', mutate(S, 'alt="The Heartwood dungeon island, drawn block by block"', 'alt=" "'), { 'smp-page': '/smp/ dungeon preview <img> has no alt text', 'a11y-names': '/smp/ <a class="dungeon-preview" href="/dungeon/"> has no accessible name' });
+  expectFail(
+    'U3dm ticker after the auction button',
+    edit(mutate(S, SMP_TAPE, ''), S, '>OPEN THE AUCTION HOUSE</a>', `>OPEN THE AUCTION HOUSE</a>${SMP_TAPE}`),
+    'smp-page',
+    '/smp/ .tape does not come before the "OPEN THE AUCTION HOUSE" link',
+  );
   expectFail(
     'U3-AC7 home footer lost the /smp/ link',
     mutate(H, '<a href="/smp/">ECONOMY SMP</a><a href="/store/">STORE</a></nav>', '<a href="/store/">STORE</a></nav>'),
@@ -1327,33 +1404,51 @@ ${r.out}`);
 
   // U4-AC8 nav-links
   expectFail('U4-AC8 PVP link missing on /store/', mutate('store/index.html', '<li><a href="/pvp/">PVP</a></li>', ''), 'nav-links', '/store/ nav links are');
+  // Run 20261123-nav: order and labels are STORE SMP PVP WIKI AUCTIONS MAP (was HOME PVP STORE SMP WIKI FAQ).
   expectFail(
-    'U4-AC8 PVP after STORE on /faq/',
-    mutate('faq/index.html', '<li><a href="/pvp/">PVP</a></li><li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE</a></li><li><a href="/pvp/">PVP</a></li>'),
+    'nav: PVP before SMP on /faq/ (order)',
+    mutate('faq/index.html', '<li><a href="/smp/">SMP</a></li><li><a href="/pvp/">PVP</a></li>', '<li><a href="/pvp/">PVP</a></li><li><a href="/smp/">SMP</a></li>'),
     'nav-links',
-    '/faq/ nav links are [["/","HOME"],["/store/","STORE"],["/pvp/","PVP"]',
+    '/faq/ nav links are [["/store/","STORE"],["/pvp/","PVP"],["/smp/","SMP"]',
   );
-  expectFail('U4-AC8 PVP label on /', mutate(H, '<a href="/pvp/">PVP</a>', '<a href="/pvp/">RANKED</a>'), 'nav-links', '/ nav links are [["/","HOME"],["/pvp/","RANKED"]');
+  expectFail('U4-AC8 PVP label on /', mutate(H, '<a href="/pvp/">PVP</a>', '<a href="/pvp/">RANKED</a>'), 'nav-links', '/ nav links are [["/store/","STORE"],["/smp/","SMP"],["/pvp/","RANKED"]');
   expectFail('U4-AC8 PVP href without slash on /privacy/', mutate('privacy/index.html', '<li><a href="/pvp/">PVP', '<li><a href="/pvp">PVP'), 'nav-links', '/privacy/ nav links are');
-  expectFail('U4-AC8 FAQ missing from the nav on /smp/', mutate(S, '<a href="/faq/">FAQ</a></header>', '</header>'), 'nav-links', '/smp/ nav links are');
+  expectFail('nav: MAP missing from the nav on /smp/', mutate(S, '<a href="/dungeon/">MAP</a></header>', '</header>'), 'nav-links', '/smp/ nav links are');
+  expectFail('nav: HOME back in the nav on /store/', mutate('store/index.html', '<ul><li>', '<ul><li><a href="/">HOME</a></li><li>'), 'nav-links', '/store/ nav links are [["/","HOME"]');
+  expectFail('nav: FAQ back in the nav on /privacy/', mutate('privacy/index.html', '</ul></header>', '<li><a href="/faq/">FAQ</a></li></ul></header>'), 'nav-links', '/privacy/ nav links are');
+  expectFail('nav: MAP labelled DUNGEON on /', mutate(H, '<a href="/dungeon/">MAP</a>', '<a href="/dungeon/">DUNGEON</a>'), 'nav-links', '/ nav links are');
   // Owner ruling 2026-11-10 (supersedes Amendment 2's BETA in the nav): no [data-beta] and no .beta-tag in any nav.
   expectFail('U4-owner [data-beta] in the PVP nav link on /auctions/', mutate('auctions/index.html', '<a href="/pvp/">PVP</a></li>', '<a href="/pvp/">PVP <span class="nav-beta" data-beta>BETA</span></a></li>'), 'nav-links', '/auctions/ nav has 1 BETA marker(s)');
   expectFail('U4-owner .beta-tag in the PVP nav link on /faq/', mutate('faq/index.html', '<a href="/pvp/">PVP</a></li>', '<a href="/pvp/">PVP <span class="beta-tag">BETA</span></a></li>'), 'nav-links', '/faq/ nav has 1 BETA marker(s)');
   expectFail('U4-owner [data-beta] on /pvp/ (nav-links only; the eyebrow tag stays)', mutate(P, '<a href="/pvp/" aria-current="page" class="active">PVP</a>', '<a href="/pvp/" aria-current="page" class="active">PVP<span data-beta>BETA</span></a>'), 'nav-links', '/pvp/ nav has 1 BETA marker(s)');
-  expectFail('U4-owner BETA on STORE on /store/', mutate('store/index.html', '<li><a href="/store/">STORE</a></li>', '<li><a href="/store/">STORE<span data-beta>BETA</span></a></li>'), 'nav-links', '/store/ nav has 1 BETA marker(s)');
+  expectFail('U4-owner BETA on STORE on /store/', mutate('store/index.html', '<li><a href="/store/" aria-current="page" class="active">STORE</a></li>', '<li><a href="/store/" aria-current="page" class="active">STORE<span data-beta>BETA</span></a></li>'), 'nav-links', '/store/ nav has 1 BETA marker(s)');
   expectFail('U4-owner marker outside a link but inside the header on /privacy/', mutate('privacy/index.html', '</ul></header>', '</ul><span class="beta-tag">BETA</span></header>'), 'nav-links', '/privacy/ nav has 1 BETA marker(s)');
   expectFail('U4-owner marker in a footer <nav> on /store/', mutate('store/index.html', '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/pvp/">PVP</a><span data-beta>BETA</span><a href="/smp/">'), 'nav-links', '/store/ nav has 1 BETA marker(s)');
-  expectFail('U4-owner PVP nav text not exactly PVP on /smp/', mutate(S, '<a href="/pvp/">PVP</a><a href="/store/">', '<a href="/pvp/">PVP BETA</a><a href="/store/">'), 'nav-links', '/smp/ nav links are [["/","HOME"],["/pvp/","PVP BETA"]');
+  expectFail('U4-owner PVP nav text not exactly PVP on /smp/', mutate(S, '<a href="/pvp/">PVP</a><a href="/wiki/">', '<a href="/pvp/">PVP BETA</a><a href="/wiki/">'), 'nav-links', '/smp/ nav links are [["/store/","STORE"],["/smp/","SMP"],["/pvp/","PVP BETA"]');
   expectFail('U4-AC8 PVP not active on /pvp/', mutate(P, '<a href="/pvp/" aria-current="page" class="active">', '<a href="/pvp/">'), 'nav-links', '/pvp/ nav aria-current="page" links are [], want ["/pvp/"]');
-  expectFail('U4-AC8 HOME active on /pvp/', mutate(P, '<li><a href="/">HOME</a></li>', '<li><a href="/" aria-current="page">HOME</a></li>'), 'nav-links', '/pvp/ nav aria-current="page" links are ["/","/pvp/"]');
-  expectFail('U4-AC8 PVP active on /faq/', mutate('faq/index.html', '<li><a href="/pvp/">', '<li><a href="/pvp/" aria-current="page">'), 'nav-links', '/faq/ nav marks PVP as the current page');
+  expectFail('U4-AC8 STORE active too on /pvp/', mutate(P, '<li><a href="/store/">STORE</a></li>', '<li><a href="/store/" aria-current="page">STORE</a></li>'), 'nav-links', '/pvp/ nav aria-current="page" links are ["/store/","/pvp/"]');
+  // Run 20261123-nav N-T4 (was: SMP current on /smp/, /auctions/, /dungeon/; at most one elsewhere, a current FAQ on
+  // /faq/ allowed): exactly the one NAV_CURRENT link per route, none on /, /faq/ and /privacy/.
+  expectFail('U3dm SMP not current on /smp/', mutate(S, SMP_CURRENT, '<a href="/smp/">'), 'nav-links', '/smp/ nav aria-current="page" links are [], want ["/smp/"]');
+  expectFail('nav: SMP current on /auctions/ (the old rule)', edit(mutate('auctions/index.html', '<a href="/auctions/" aria-current="page" class="active">', '<a href="/auctions/">'), 'auctions/index.html', '<a href="/smp/">', SMP_CURRENT), 'nav-links', '/auctions/ nav aria-current="page" links are ["/smp/"], want ["/auctions/"]');
+  expectFail('nav: SMP current on /dungeon/ (the old rule)', edit(mutate('dungeon/index.html', '<a href="/dungeon/" aria-current="page" class="active">', '<a href="/dungeon/">'), 'dungeon/index.html', '<a href="/smp/">', SMP_CURRENT), 'nav-links', '/dungeon/ nav aria-current="page" links are ["/smp/"], want ["/dungeon/"]');
+  expectFail('nav: STORE current too on /dungeon/', mutate('dungeon/index.html', '<li><a href="/store/">STORE</a>', '<li><a href="/store/" aria-current="page">STORE</a>'), 'nav-links', '/dungeon/ nav aria-current="page" links are ["/store/","/dungeon/"], want ["/dungeon/"]');
+  expectFail('nav: STORE not current on /store/', mutate('store/index.html', '<a href="/store/" aria-current="page" class="active">STORE</a>', '<a href="/store/">STORE</a>'), 'nav-links', '/store/ nav aria-current="page" links are [], want ["/store/"]');
+  expectFail('U4-AC8 PVP active on /faq/', mutate('faq/index.html', '<li><a href="/pvp/">', '<li><a href="/pvp/" aria-current="page">'), 'nav-links', '/faq/ nav aria-current="page" links are ["/pvp/"], want []');
+  expectFail('nav: SMP current on / (home lights nothing)', mutate(H, '<a href="/smp/">SMP</a></li>', '<a href="/smp/" aria-current="page">SMP</a></li>'), 'nav-links', '/ nav aria-current="page" links are ["/smp/"], want []');
+  // Run 20261123-nav N-T1: HOME and FAQ left the bar, so the logo must link home and the footer must keep both.
+  expectFail('nav: logo not linking home on /faq/', mutate('faq/index.html', '<a href="/" class="site-nav-brand">', '<a href="/pvp/" class="site-nav-brand">'), 'nav-links', '/faq/ nav brand links ["/pvp/"], want one link to "/"');
+  expectFail('nav: footer lost FAQ on /store/', mutate('store/index.html', '<a href="/faq/">FAQ</a>', ''), 'nav-links', '/store/ footer has no <a href="/faq/"> FAQ');
+  // The footer HOME is now the only visible "Home", so the breadcrumb name check fails with it (both, and only both).
+  expectFails('nav: footer lost HOME on /dungeon/', mutate('dungeon/index.html', '<a href="/">HOME</a><a href="/faq/">', '<a href="/faq/">'), { 'nav-links': '/dungeon/ footer has no <a href="/"> HOME', 'seo-jsonld-visible-facts': 'ListItem name "Home"' });
   {
-    const r = runOn(mutate('faq/index.html', '<li><a href="/faq/">FAQ</a></li>', '<li><a href="/faq/" aria-current="page" class="active">FAQ</a></li>'));
-    check('U4-AC8 FAQ active on /faq/ is fine', r.code === 0, `exit ${r.code}:\n${r.out}`);
+    const r = runOn(goodSite());
+    check('nav: the good site passes with nothing current on / and /faq/', r.code === 0, `exit ${r.code}:\n${r.out}`);
   }
   expectFail('U4-AC8 footer lost PVP on /privacy/', mutate('privacy/index.html', '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/smp/">'), 'nav-links', '/privacy/ footer has 0 links to /pvp/, want 1');
   expectFail('U4-AC8 footer PVP label on /pvp/', mutate(P, '<a href="/pvp/">PVP</a><a href="/smp/">', '<a href="/pvp/">RANKED</a><a href="/smp/">'), 'nav-links', '/pvp/ footer /pvp/ link label is "RANKED"');
-  expectFail('U4-AC8 no footer on /store/', mutate('store/index.html', FOOTER, ''), 'nav-links', '/store/ has no <footer>');
+  // Run 20261123-nav: with HOME off the bar, the footer holds the page's only visible "Home" (breadcrumb name).
+  expectFails('U4-AC8 no footer on /store/', mutate('store/index.html', FOOTER, ''), { 'nav-links': '/store/ has no <footer>', 'seo-jsonld-visible-facts': 'ListItem name "Home"' });
 
   // U4-AC9 sitemap-pvp
   expectFail('U4-AC9 sitemap missing', { ...goodSite(), 'sitemap.xml': null }, 'sitemap-pvp', 'dist/sitemap.xml missing');
@@ -1656,7 +1751,8 @@ ${r.out}`);
 
   // U7 player-nav
   expectFail('U7 profile nav: PVP not current', plMut(PVP_NAV, NAV), 'player-nav', '/pvp/player/ nav aria-current="page" links are [], want ["/pvp/"]');
-  expectFail('U7 profile nav: HOME current too', plMut('<a href="/">HOME</a>', '<a href="/" aria-current="page">HOME</a>'), 'player-nav', 'links are ["/","/pvp/"]');
+  expectFail('U7 profile nav: STORE current too', plMut('<a href="/store/">STORE</a>', '<a href="/store/" aria-current="page">STORE</a>'), 'player-nav', 'links are ["/store/","/pvp/"]');
+  expectFail('nav: profile footer lost FAQ', plMut('<a href="/faq/">FAQ</a>', ''), 'player-nav', '/pvp/player/ footer has no <a href="/faq/"> FAQ');
   expectFail('U7 profile nav: STORE missing', plMut('<li><a href="/store/">STORE</a></li>', ''), 'player-nav', '/pvp/player/ nav links are');
   expectFail('U7 profile nav: BETA marker', plMut('aria-current="page" class="active">PVP</a>', 'aria-current="page" class="active">PVP <span data-beta>BETA</span></a>'), 'player-nav', 'BETA marker');
   expectFails('U7 profile nav: .beta-tag in the nav', plMut('aria-current="page" class="active">PVP</a>', 'aria-current="page" class="active">PVP</a><span class="beta-tag">BETA</span>'), {
@@ -2196,6 +2292,44 @@ ${r.out}`);
     const fails = r.lines.filter((l) => l.startsWith('FAIL '));
     check('U8r3 time: the <time> wrapper adds no visible text (visible-text-unchanged passes against the plain-date base)', r.code === 0 && fails.length === 0, `exit ${r.code}:\n${r.out}`);
   }
+
+  // Run 20261121-dungeon-map U2: dungeon-page, and /dungeon/ in the shared route lists.
+  const DG = 'dungeon/index.html';
+  expectFail('U2-AC1 dungeon: wrong h1', mutate(DG, '<h1>HEARTWOOD MAP</h1>', '<h1>HEARTWOOD</h1>'), 'dungeon-page', '/dungeon/ <h1> text is "HEARTWOOD", want "HEARTWOOD MAP"');
+  expectFail('U2-AC1 dungeon: no eyebrow', mutate(DG, '>SEASON 4 DUNGEON<', '>SEASON 4<'), 'dungeon-page', 'no visible element with the text "SEASON 4 DUNGEON"');
+  expectFail('U2-AC1 dungeon: no map box', mutate(DG, ' data-map-box', ''), 'dungeon-page', '/dungeon/ has 0 [data-map-box], want 1');
+  expectFail('U2-AC1 dungeon: no preview in the map box', mutate(DG, ' data-map-preview', ''), 'dungeon-page', 'has no <img data-map-preview src="/dungeon/preview.jpg">');
+  {
+    // The nav is the first <header>; nav-links owns the exact list, so it fails too (both, and only both).
+    const site = goodSite();
+    site[DG] = site[DG].replace(MAP_NAV, ''); // MAP_NAV since run 20261123-nav (SMP_NAV since 20261121-dungeon-map U3, was NAV)
+    expectFails('U2-AC1 dungeon: no nav', site, { 'dungeon-page': '/dungeon/ has no nav <header>', 'nav-links': '/dungeon/ has no nav <header>' });
+  }
+  {
+    const r = runOn({ ...goodSite(), [DG]: null });
+    const line = r.lines.find((l) => l.startsWith('FAIL pages-prerendered:'));
+    check('U2-AC1 dungeon: a missing /dungeon/ fails pages-prerendered and dungeon-page', r.code === 1 && !!line && line.includes('/dungeon/ missing') && r.lines.some((l) => l.startsWith('FAIL dungeon-page:') && l.includes('/dungeon/ missing')), `exit ${r.code}:\n${r.out}`);
+  }
+  {
+    // An empty #app fails every check that reads the page body, so only require pages-prerendered to say so.
+    const r = runOn(mutate(DG, `<div id="app">${DUNGEON_MAIN}</div>`, '<div id="app"></div>'));
+    const line = r.lines.find((l) => l.startsWith('FAIL pages-prerendered:'));
+    check('U2-AC1 dungeon: not prerendered', r.code === 1 && !!line && line.includes('/dungeon/ <div id="app"> is empty'), `exit ${r.code}:
+${r.out}`);
+  }
+  expectFail('U2-AC8 dungeon: wrong title', mutate(DG, `<title>${DUNGEON_TITLE}</title>`, '<title>Heartwood Map | Chromabit</title>'), 'subpage-titles', '/dungeon/');
+  expectFail('U2 dungeon: "Chromabit SMP" on /dungeon/', mutate(DG, '</main>', '<p>Chromabit SMP</p></main>'), 'smp-name-allowlist', 'dungeon/index.html contains "Chromabit SMP"');
+  expectFail('U2-AC8 dungeon: not in the sitemap', mutate('sitemap.xml', sitemapLine('/dungeon/'), ''), 'seo-sitemap', 'lacks ["https://chromabit.us/dungeon/"]');
+
+  // Run 20261122-wiki U1: the wiki routes (from test/fixtures/wiki through CHECK_SITE_WIKI).
+  const WA = 'wiki/smp/sample/index.html';
+  expectFail('wiki: WIKI missing from the nav on /store/', mutate('store/index.html', '<li><a href="/wiki/">WIKI</a></li>', ''), 'nav-links', '/store/ nav links are');
+  expectFail('wiki: an article marks SMP current, not WIKI', edit(mutate(WA, '<a href="/wiki/" aria-current="page" class="active">', '<a href="/wiki/">'), WA, '<a href="/smp/">', SMP_CURRENT), 'nav-links', '/wiki/smp/sample/ nav aria-current="page" links are ["/smp/"], want ["/wiki/"]');
+  expectFails('wiki: a missing article', { ...goodSite(), [WA]: null }, { 'pages-prerendered': '/wiki/smp/sample/ missing', 'site-name-author': '/wiki/smp/sample/ missing', 'subpage-titles': '/wiki/smp/sample/ missing', 'smp-name-allowlist': '/wiki/smp/sample/ missing', 'og-preview-image': '/wiki/smp/sample/ missing', 'ld-json-parses': '/wiki/smp/sample/ missing', 'nav-links': '/wiki/smp/sample/ missing', 'internal-links': '/wiki/smp/sample/ missing', 'seo-head': '/wiki/smp/sample/ missing', 'seo-jsonld': '/wiki/smp/sample/ missing', 'seo-jsonld-visible-facts': '/wiki/smp/sample/ missing', 'seo-llms': 'missing from dist', 'a11y-headings': '/wiki/smp/sample/ missing', 'a11y-landmarks': '/wiki/smp/sample/ missing', 'a11y-names': '/wiki/smp/sample/ missing', 'img-attrs': '/wiki/smp/sample/ missing', 'perf-hints': '/wiki/smp/sample/ missing', 'pvp-referrer': '/wiki/smp/sample/ missing', 'seo-logo': '/wiki/smp/sample/ missing', 'time-datetime': '/wiki/smp/sample/ missing' });
+  expectFail('wiki: an article with a two-level breadcrumb', mutate(WA, '{"@type":"ListItem","position":2,"name":"Wiki","item":"https://chromabit.us/wiki/"},{"@type":"ListItem","position":3,', '{"@type":"ListItem","position":2,'), 'seo-jsonld', '/wiki/smp/sample/ BreadcrumbList is');
+  expectFail('wiki: the unpublished page in the sitemap', mutate('sitemap.xml', '</urlset>', `${sitemapLine('/wiki/smp/unpublished/')}</urlset>`), 'seo-sitemap', 'lists ["https://chromabit.us/wiki/smp/unpublished/"], which are not indexable pages');
+  expectFail('wiki: an article not in the sitemap', mutate('sitemap.xml', sitemapLine('/wiki/smp/sample/'), ''), 'seo-sitemap', 'lacks ["https://chromabit.us/wiki/smp/sample/"]');
+  expectFail('wiki: wrong article title', mutate(WA, '<title>Sample Page | Chromabit Wiki</title>', '<title>Sample Page | Chromabit</title>'), 'subpage-titles', '/wiki/smp/sample/ title is');
 } finally {
   rmSync(tmpRoot, { recursive: true, force: true });
 }

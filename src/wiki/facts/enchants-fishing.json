@@ -1,0 +1,72 @@
+{
+ "id": "enchants-fishing",
+ "title": "Fishing rod enchants",
+ "source": "mc-server:plugins/AdvancedEnchantments/enchantments.yml",
+ "ref": "63529705",
+ "columns": [
+  "Enchant",
+  "Max level",
+  "Applies to",
+  "What it does"
+ ],
+ "rows": [
+  [
+   "Auto Reel",
+   "4",
+   "Fishing rods",
+   "Automatically reels in the fishing rod when it gets a bite."
+  ],
+  [
+   "Bait",
+   "3",
+   "Fishing rods",
+   "Chance to receive double fishing drops."
+  ],
+  [
+   "Fire Hook",
+   "3",
+   "Fishing rods",
+   "The hook is on fire."
+  ],
+  [
+   "Hook",
+   "3",
+   "Fishing rods",
+   "Get more exp from fishing."
+  ],
+  [
+   "Lucky",
+   "3",
+   "Fishing rods",
+   "Chance to increase luck while fishing."
+  ],
+  [
+   "Poisoned Hook",
+   "3",
+   "Fishing rods",
+   "Poisons the hook."
+  ],
+  [
+   "Sharpness Hook",
+   "9",
+   "Fishing rods",
+   "Deal damage with the hook."
+  ],
+  [
+   "Snap",
+   "3",
+   "Fishing rods",
+   "Pull hit entity towards you."
+  ]
+ ],
+ "icons": [
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod",
+  "fishing_rod"
+ ]
+}

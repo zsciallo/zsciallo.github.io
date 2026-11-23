@@ -22,6 +22,7 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { WIKI_DIR, wikiPages } from '../src/wiki/index.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = resolve(process.argv[2] ?? join(ROOT, 'dist'));
@@ -32,6 +33,17 @@ export const NETWORK = 'Chromabit Network';
 export const OG_IMAGE_URL = 'https://chromabit.us/og-preview.png';
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
 
+/**
+ * Run 20261122-wiki U1: the wiki routes and their titles, from the one page list (src/wiki/index.js).
+ * CHECK_SITE_WIKI points it at another pages directory (the self-test's fake site).
+ */
+export const WIKI_TITLES = {
+  '/wiki/': 'Wiki | Chromabit',
+  '/wiki/changes/': 'Wiki Changes | Chromabit',
+  ...Object.fromEntries(wikiPages(process.env.CHECK_SITE_WIKI ?? WIKI_DIR).map((p) => [p.route, `${p.title} | Chromabit Wiki`])),
+};
+const isWiki = (route) => route in WIKI_TITLES;
+
 /** Route -> built file, relative to dist/. */
 export const PAGES = {
   '/': 'index.html',
@@ -40,6 +52,10 @@ export const PAGES = {
   '/store/': 'store/index.html',
   '/auctions/': 'auctions/index.html',
   '/privacy/': 'privacy/index.html',
+  // Run 20261121-dungeon-map U2 (owner approved the page 2026-11-21): held to every PAGES check.
+  '/dungeon/': 'dungeon/index.html',
+  // Run 20261122-wiki U1 (owner 2026-11-22: the site gains /wiki/ routes): every wiki route, held to every PAGES check.
+  ...Object.fromEntries(Object.keys(WIKI_TITLES).map((r) => [r, `${r.slice(1)}index.html`])),
 };
 
 /**
@@ -72,6 +88,8 @@ export const SUBPAGE_TITLES = {
   '/privacy/': 'Privacy Policy | Chromabit',
   '/auctions/': 'Auction House | Chromabit SMP',
   '/smp/': 'Economy SMP | Chromabit',
+  '/dungeon/': 'Heartwood Dungeon Map | Chromabit',
+  ...WIKI_TITLES,
 };
 
 /** The only pages whose built HTML may contain the exact string `Chromabit SMP`. */
@@ -576,6 +594,10 @@ export const SMP_PAGE = {
   tickerClass: 'tape',
   auctionsHref: '/auctions/',
   auctionsLabel: 'OPEN THE AUCTION HOUSE',
+  // Run 20261121-dungeon-map U3 (owner 2026-11-21): the page links the dungeon map with a preview picture.
+  dungeonHref: '/dungeon/',
+  dungeonLabel: 'EXPLORE THE DUNGEONS',
+  dungeonPreview: '/dungeon/preview.jpg',
   removed: ['Player Economy', 'Store Credit Prizes', 'Grief Prevention', 'Community Events'],
 };
 
@@ -806,7 +828,7 @@ function homeRemoved(dist) {
   );
 }
 
-/** AC7 (U3): the short /smp/ page, and how it is reached (footer, not nav). */
+/** AC7 (U3): the short /smp/ page, and how it is reached (nav and footer; since run 20261121-dungeon-map U3 the nav, not /auctions/). */
 function smpPage(dist) {
   const problems = eachPage(
     ['/smp/'],
@@ -829,8 +851,18 @@ function smpPage(dist) {
         if (empty) problems.push(`/smp/ dungeon block has ${empty} empty [data-fact]`);
       }
       if (!findAll(root, hasClass(SMP_PAGE.tickerClass)).length) problems.push(`/smp/ has no market ticker (.${SMP_PAGE.tickerClass})`);
-      const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel);
+      // Run 20261123-nav: the nav now links /auctions/ and /dungeon/ too; the page's own buttons are outside it.
+      const outNav = (el) => !siteNav(p) || !inside(el, siteNav(p));
+      const auctions = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.auctionsHref && textOf(el) === SMP_PAGE.auctionsLabel && outNav(el));
       if (!auctions.length) problems.push(`/smp/ has no <a href="${SMP_PAGE.auctionsHref}"> ${q(SMP_PAGE.auctionsLabel)}`);
+      // Run 20261121-dungeon-map U3: the ticker is the auction preview, so it comes before the auction button.
+      else if (!hasClass(SMP_PAGE.tickerClass)(findAll(root, (el) => hasClass(SMP_PAGE.tickerClass)(el) || el === auctions[0])[0]))
+        problems.push(`/smp/ .${SMP_PAGE.tickerClass} does not come before the ${q(SMP_PAGE.auctionsLabel)} link`);
+      const toDungeon = findAll(root, (el) => el.tag === 'a' && el.attrs.href === SMP_PAGE.dungeonHref && outNav(el));
+      if (!toDungeon.some((a) => textOf(a) === SMP_PAGE.dungeonLabel)) problems.push(`/smp/ has no <a href="${SMP_PAGE.dungeonHref}"> ${q(SMP_PAGE.dungeonLabel)}`);
+      const pics = toDungeon.flatMap((a) => findAll(a, (el) => el.tag === 'img' && el.attrs.src === SMP_PAGE.dungeonPreview));
+      if (!pics.length) problems.push(`/smp/ has no <img src="${SMP_PAGE.dungeonPreview}"> inside an <a href="${SMP_PAGE.dungeonHref}">`);
+      else if (!pics.some((i) => (i.attrs.alt ?? '').trim())) problems.push(`/smp/ dungeon preview <img> has no alt text`);
       problems.push(...copyButtonIn(root, '/smp/', null)[0]);
       const betas = findAll(root, hasClass('beta-tag')).length;
       if (betas) problems.push(`/smp/ has ${betas} .beta-tag, want 0`);
@@ -844,12 +876,14 @@ function smpPage(dist) {
     },
     dist,
   );
-  // Not in the nav on any page; the home footer links to it.
-  for (const route of Object.keys(PAGES)) {
+  // Run 20261121-dungeon-map U3: /smp/ is in the nav on every page. Run 20261123-nav (owner 2026-11-23): AUCTIONS
+  // and MAP joined the nav, so the old "no /auctions/ in the nav" rule is gone; the /smp/ page keeps its own two
+  // buttons (checked above, outside the nav).
+  for (const route of ALL_ROUTES) {
     const p = page(route, dist);
-    const nav = p && navOf(p);
-    if (nav && findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length)
-      problems.push(`${route} nav links to /smp/ (the SMP page is not in the nav)`);
+    const nav = p && siteNav(p);
+    if (!nav) continue;
+    if (!findAll(nav, (el) => el.tag === 'a' && el.attrs.href === '/smp/').length) problems.push(`${route} nav has no link to /smp/`);
   }
   const home = page('/', dist);
   if (home) {
@@ -979,12 +1013,15 @@ export const PVP = {
 };
 
 /** The nav on every page: [href, label] in order. */
+// Run 20261123-nav (owner 2026-11-23: "remove home and faq and it should go Store -> smp -> pvp -> wiki ->
+// auctions -> map"). Was HOME PVP STORE SMP WIKI FAQ (2026-11-21/22). Home stays on the logo, FAQ in the footer.
 export const NAV_LINKS = [
-  ['/', 'HOME'],
-  ['/pvp/', 'PVP'],
   ['/store/', 'STORE'],
+  ['/smp/', 'SMP'],
+  ['/pvp/', 'PVP'],
+  ['/wiki/', 'WIKI'],
   ['/auctions/', 'AUCTIONS'],
-  ['/faq/', 'FAQ'],
+  ['/dungeon/', 'MAP'],
 ];
 export const SITEMAP_PVP = 'https://chromabit.us/pvp/';
 
@@ -1223,7 +1260,22 @@ function pvpJoin(dist) {
   });
 }
 
-/** U4-AC8: on every page the nav is HOME PVP STORE AUCTIONS FAQ, no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
+/** Run 20261123-nav: route -> its one current nav link (wiki routes: WIKI). Every other route has none. */
+export const NAV_CURRENT = { '/store/': '/store/', '/smp/': '/smp/', '/pvp/': '/pvp/', '/auctions/': '/auctions/', '/dungeon/': '/dungeon/' };
+
+/** Run 20261123-nav N-T1: the logo links home and the footer keeps HOME and FAQ (they left the top bar). */
+function wayHome(p) {
+  const r = p.route;
+  const problems = [];
+  const brand = findAll(siteNav(p) ?? dom(p), hasClass('site-nav-brand'));
+  if (brand.length !== 1 || brand[0].attrs.href !== '/') problems.push(`${r} nav brand links ${q(brand.map((b) => b.attrs.href))}, want one link to "/"`);
+  const footer = siteFooter(p);
+  for (const [href, label] of [['/', 'HOME'], ['/faq/', 'FAQ']])
+    if (!footer || !findAll(footer, (el) => el.tag === 'a' && el.attrs.href === href && textOf(el) === label).length) problems.push(`${r} footer has no <a href="${href}"> ${label}`);
+  return problems;
+}
+
+/** U4-AC8: on every page the nav is NAV_LINKS (run 20261123-nav: STORE SMP PVP WIKI AUCTIONS MAP), exactly the NAV_CURRENT link current (none on /, /faq/, legal pages), no BETA marker in any nav (owner ruling 2026-11-10), PVP active only on /pvp/; footer links PVP. */
 function navLinks(dist) {
   return eachPage(
     ALL_ROUTES,
@@ -1242,13 +1294,12 @@ function navLinks(dist) {
         const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
         if (marks.length)
           problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0 (first: <${marks[0].tag}> ${q(textOf(marks[0]))})`);
-        if (r === PVP.route) {
-          if (active.join(',') !== '/pvp/') problems.push(`/pvp/ nav aria-current="page" links are ${q(active)}, want ["/pvp/"]`);
-        } else {
-          if (active.includes('/pvp/')) problems.push(`${r} nav marks PVP as the current page`);
-          if (active.length > 1) problems.push(`${r} nav has ${active.length} aria-current="page" links`);
-        }
+        // Run 20261123-nav N-T4 (was: SMP current on /smp/, /auctions/, /dungeon/; at most one elsewhere): exactly one
+        // current link on NAV_CURRENT routes and wiki routes (WIKI), none anywhere else.
+        const want = isWiki(r) ? ['/wiki/'] : NAV_CURRENT[r] ? [NAV_CURRENT[r]] : [];
+        if (q(active) !== q(want)) problems.push(`${r} nav aria-current="page" links are ${q(active)}, want ${q(want)}`);
       }
+      problems.push(...wayHome(p));
       const footer = siteFooter(p);
       if (!footer) problems.push(`${r} has no <footer>`);
       else {
@@ -1718,7 +1769,7 @@ function playerNotInSitemap(dist) {
   return hits.length ? [`dist/sitemap.xml lists the profile page: ${q(hits)}`] : [];
 }
 
-/** U7-A/D: /pvp/player/ nav is HOME PVP STORE AUCTIONS FAQ with PVP the only current link, no BETA marker in any nav, footer links PVP. */
+/** U7-A/D: /pvp/player/ nav is NAV_LINKS (run 20261123-nav: STORE SMP PVP WIKI AUCTIONS MAP; logo home, HOME and FAQ in the footer) with PVP the only current link, no BETA marker in any nav, footer links PVP. */
 function playerNav(dist) {
   return onPlayer(dist, (p) => {
     const problems = [];
@@ -1735,6 +1786,7 @@ function playerNav(dist) {
       const marks = navs.flatMap((n) => findAll(n, isBetaMarker));
       if (marks.length) problems.push(`${r} nav has ${marks.length} BETA marker(s) ([data-beta] or .beta-tag), want 0`);
     }
+    problems.push(...wayHome(p));
     const footer = siteFooter(p);
     if (!footer) problems.push(`${r} has no <footer>`);
     else {
@@ -1818,7 +1870,7 @@ function pvpSearchShell(dist) {
 //                            test/fixtures/visible-text-base.json
 // (pixel identity is test/visual_check.mjs).
 //
-// Scope: "indexable" = INDEXABLE below (seven routes). /pvp/player/ is not
+// Scope: "indexable" = INDEXABLE below (seven routes; eight with /dungeon/ since run 20261121-dungeon-map). /pvp/player/ is not
 // indexable (noindex, canonical /pvp/, not in the sitemap: player-shell and
 // player-not-in-sitemap keep asserting that); the semantics and hint checks
 // cover it too (SEMANTIC_ROUTES).
@@ -1848,7 +1900,9 @@ function pvpSearchShell(dist) {
 //   the search block, the hero logo      pvp-search-shell, home-hero
 
 export const SITE = 'https://chromabit.us';
-export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/'];
+// Run 20261121-dungeon-map U2: /dungeon/ is indexable (spec-U2 "SEO entry"), so it is in the sitemap and every check below.
+// Run 20261122-wiki U1: every wiki route is indexable too (in the sitemap and every check below).
+export const INDEXABLE = ['/', '/pvp/', '/smp/', '/faq/', '/store/', '/auctions/', '/privacy/', '/dungeon/', ...Object.keys(WIKI_TITLES)];
 export const SEMANTIC_ROUTES = [...INDEXABLE, '/pvp/player/'];
 const FIXTURE_DIR = process.env.CHECK_SITE_FIXTURES ? resolve(process.env.CHECK_SITE_FIXTURES) : join(ROOT, 'test', 'fixtures');
 
@@ -1997,7 +2051,9 @@ export const visibleText = (p) => blockText(app(p));
 export function snapshot(dist = DIST, capturedFrom = 'unknown') {
   const heads = {};
   const text = {};
-  for (const route of SEMANTIC_ROUTES) {
+  // Run 20261122-wiki U1: wiki routes are content that changes with every page edit, so they stay out of
+  // the frozen baselines; test/wiki_check.mjs and the checks above hold them instead.
+  for (const route of SEMANTIC_ROUTES.filter((r) => !isWiki(r))) {
     const p = page(route, dist);
     if (!p) continue;
     const descs = metaValues(p, 'description');
@@ -2244,6 +2300,8 @@ function siteProblems(n, where) {
   return problems;
 }
 
+const wantLevel = (r) => (isWiki(r) && r !== '/wiki/' ? 3 : 2);
+
 /** U8-J: structured data on every indexable page. */
 function seoJsonLd(dist) {
   const problems = [];
@@ -2329,7 +2387,8 @@ function seoJsonLd(dist) {
       else {
         const items = [].concat(crumbs[0].itemListElement ?? []);
         const got = items.map((it) => [it?.position, ldUrl(it?.item), typeof it?.name === 'string' ? !!it.name.trim() : typeof it?.item?.name === 'string' && !!it.item.name.trim()]);
-        const wantCrumbs = [[1, `${SITE}/`, true], [2, `${SITE}${r}`, true]];
+        // Run 20261122-wiki U1: a page under /wiki/ has three levels, Home > Wiki > the page.
+        const wantCrumbs = [[1, `${SITE}/`, true], ...(isWiki(r) && r !== '/wiki/' ? [[2, `${SITE}/wiki/`, true]] : []), [wantLevel(r), `${SITE}${r}`, true]];
         if (q(got) !== q(wantCrumbs)) problems.push(`${r} BreadcrumbList is ${q(got)} ([position, item, named]), want ${q(wantCrumbs)}`);
       }
     }
@@ -2454,7 +2513,7 @@ export function xmlProblems(text) {
   return problems;
 }
 
-/** U8-C: dist/sitemap.xml is valid XML listing exactly the seven indexable URLs, each with a YYYY-MM-DD lastmod. */
+/** U8-C: dist/sitemap.xml is valid XML listing exactly the INDEXABLE URLs (eight since run 20261121-dungeon-map), each with a YYYY-MM-DD lastmod. */
 function seoSitemap(dist) {
   const file = join(dist, 'sitemap.xml');
   if (!existsSync(file)) return []; // sitemap-pvp's failure
@@ -3247,7 +3306,40 @@ export const CHECKS = [
   // U8 round 3: review r1 F1 and F2b
   ['seo-logo', seoLogo],
   ['time-datetime', timeDatetime],
+  // Run 20261121-dungeon-map U2
+  ['dungeon-page', dungeonPage],
 ];
+
+// ------------------------------------------- run 20261121-dungeon-map U2 --
+// /dungeon/: the Heartwood block map. Hooks (the contract with the implementer):
+// [data-map-box] the map box; inside it <img data-map-preview src="/dungeon/preview.jpg">,
+// shown until the first WebGL frame (so the server render has it). The rendered half
+// (WebGL, slider, search, deep links, fallback, 400 px) is test/dungeon_browser_check.mjs.
+
+export const DUNGEON = { route: '/dungeon/', eyebrow: 'SEASON 4 DUNGEON', h1: 'HEARTWOOD MAP', preview: '/dungeon/preview.jpg' };
+
+/** U2-AC1: /dungeon/ is server-rendered with the nav, the eyebrow, one <h1> HEARTWOOD MAP and the map box holding the preview picture. */
+function dungeonPage(dist) {
+  return eachPage(
+    [DUNGEON.route],
+    (p) => {
+      const problems = [];
+      const r = DUNGEON.route;
+      if (!siteNav(p)) problems.push(`${r} has no nav <header>`);
+      const root = app(p);
+      const h1s = findAll(root, isTag('h1'));
+      if (h1s.length !== 1) problems.push(`${r} has ${h1s.length} <h1>, want 1`);
+      else if (textOf(h1s[0]) !== DUNGEON.h1) problems.push(`${r} <h1> text is ${q(textOf(h1s[0]))}, want ${q(DUNGEON.h1)}`);
+      if (!withText(root, DUNGEON.eyebrow).filter((el) => !hiddenUp(el)).length) problems.push(`${r} has no visible element with the text ${q(DUNGEON.eyebrow)}`);
+      const boxes = findAll(root, hasAttr('data-map-box'));
+      if (boxes.length !== 1) problems.push(`${r} has ${boxes.length} [data-map-box], want 1`);
+      else if (!findAll(boxes[0], (el) => el.tag === 'img' && 'data-map-preview' in el.attrs && el.attrs.src === DUNGEON.preview).length)
+        problems.push(`${r} [data-map-box] has no <img data-map-preview src=${q(DUNGEON.preview)}>`);
+      return problems;
+    },
+    dist,
+  );
+}
 
 // -------------------------------------------------------------------- main --
 

@@ -1,0 +1,96 @@
+{
+  "title": "FFA",
+  "half": "pvp",
+  "live": true,
+  "icon": "iron_sword",
+  "summary": "**FFA** is the free-for-all pit under the ChromaPVP spawn. Anyone can drop in at any time, and everything you carry drops where you die.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Game mode"],
+    ["Join", "`/ffa` or `/play ffa`"],
+    ["Shop", "Supplies (`/ffa shop`)"],
+    ["Starting gear", "Iron, kept for good"],
+    ["Per kill", "5 Prism Coins"]
+  ],
+  "sections": [
+    {"h": "Joining", "blocks": [
+      {"p": "The spawn platform is a safe zone with no PvP. To fight, walk off the edge of the drop or type `/ffa`. Falling into the pit never hurts, and the pit has no fall damage at all."},
+      {"p": "To get back up, step on a return pad or type `/leave`. Leaving takes five seconds, and you need to hold still while it counts down. You also stay in combat for 15 seconds after a hit. While tagged you can still use `/msg`, `/r`, `/stats` and `/queue`."}
+    ]},
+    {"h": "What you lose", "blocks": [
+      {"p": "Whatever you carry in the pit drops on the spot when you die, and anyone can pick it up for two minutes. Three things never drop:"},
+      {"ul": [
+        "Your free iron set and its upgrades (see below).",
+        "{{icon:ender_chest}} Your **stash**, the ender chest on the platform. Page 1 is free with 27 slots. You can buy four more pages on the Supplies screen for 1,500, 3,000, 6,000 and 12,000 Prism Coins, in that order.",
+        "Prism Coins you have already earned."
+      ]}
+    ]},
+    {"h": "The gear ladder", "blocks": [
+      {"p": "Every time you spawn you get a free set: an iron chestplate, leggings and boots, an iron sword and eight bread. It has no helmet, so your hat cosmetic shows until you put a real helmet on. The free sword hits for 7, one more than a normal iron sword."},
+      {"p": "You can upgrade the set with Prism Coins on the Supplies screen. The steps go in a fixed order, and each one is yours for good:"},
+      {"ul": [
+        "{{icon:iron_sword}} 1: Sword Sharpness 1, 25",
+        "{{icon:iron_chestplate}} 2: Chestplate Protection 1, 50",
+        "{{icon:iron_leggings}} 3: Leggings Protection 1, 125",
+        "{{icon:iron_boots}} 4: Boots Protection 1, 300",
+        "{{icon:iron_sword}} 5: Sword Sharpness 2, 700",
+        "{{icon:iron_chestplate}} 6: Chestplate Protection 2, 1,500",
+        "{{icon:iron_leggings}} 7: Leggings Protection 2, 3,500",
+        "{{icon:iron_boots}} 8: Boots Protection 2, 8,000"
+      ]},
+      {"p": "The whole track costs 14,200 Prism Coins."}
+    ]},
+    {"h": "Free items each day", "blocks": [
+      {"p": "**Life roll.** Each drop into the pit gives you one random item, up to three times per UTC day. The items are a golden apple, two ender pearls, four wind charges, a bow with eight arrows, a splash potion of Healing, a Swiftness potion, a Fire Resistance potion, a shield, two cobwebs or eight golden carrots."},
+      {"p": "**Starter kits.** Players from level 1 to level 10 also get one free random kit from the Supplies list as they enter the pit, up to three a UTC day. Starter kits never include armour or Coin Charms."},
+      {"p": "Both are normal loot: you can throw them, stash them, and lose them when you die. If your inventory is full you get nothing, and that drop does not count toward the three."}
+    ]},
+    {"h": "Supplies and Coin Charms", "blocks": [
+      {"p": "The Supplies screen (the Supplies NPC on the platform, or `/ffa shop`) sells kits for Prism Coins in four tabs: Kits, Legendary, Clout and Utility. A bought kit goes into your inventory and drops if you die. See [Kits](/wiki/pvp/kits/) for the full list."},
+      {"p": "Coin Charms are Utility items that add Prism Coins to every FFA kill you get while you carry one:"},
+      {"ul": [
+        "{{icon:copper_ingot}} Copper Coin Charm: +5%",
+        "{{icon:iron_ingot}} Silver Coin Charm: +10%",
+        "{{icon:gold_ingot}} Gold Coin Charm: +15%",
+        "{{icon:amethyst_shard}} Prism Coin Charm: +20%"
+      ]},
+      {"p": "Only the best charm you carry counts. Two charms do not stack, a charm in your stash does nothing, and you lose it on death like any other item."}
+    ]},
+    {"h": "Earning", "blocks": [
+      {"p": "Each kill pays 5 Prism Coins. Every fifth kill in a streak pays 5 more. Streaks of 5, 10 and 15 are announced to the whole pit."},
+      {"p": "Killing the same player over and over stops paying: within 10 minutes, only your first three kills of one player pay Prism Coins. Later kills still count for your streak and stats."}
+    ]},
+    {"h": "Events", "blocks": [
+      {"p": "A new event starts every 10 minutes. A boss bar counts down to the next one, and chat calls it at 5 minutes, 1 minute and 10 seconds. The events run in this order:"},
+      {"ul": [
+        "{{icon:sunflower}} **Double Prism Coins** (5 minutes): FFA kills, duels and the Arena pay double.",
+        "{{icon:slime_ball}} **Golden Loot Slime** (3 minutes): a gold slime runs around the court by the landing pool. Damage you deal it pays Prism Coins, up to 150 per player, and the player who kills it gets 50 more.",
+        "**Kill Frenzy** (5 minutes): streak bonuses are doubled.",
+        "{{icon:golden_apple}} **Supply Rain** (3 minutes): every minute, a wave of golden apples, pearls, wind charges and arrows falls into the pit."
+      ]}
+    ]},
+    {"h": "Vengeance", "blocks": [
+      {"p": "If two or more players take three quarters of your health within 10 seconds, you get **Vengeance**: for 5 seconds you deal 10% more damage and get 4 golden hearts. It can trigger once every 30 seconds."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Stash your best loot before you drop back in. Nothing in the stash can be lost.",
+        "Your free set is iron, so a kit with diamond armour is worth more than it looks.",
+        "You can queue for a duel or Quickplay from the pit. When a match is found you are pulled straight into it."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-17", "text": "Each drop into the FFA pit can now give one small bonus item, up to 3 a day."},
+    {"date": "2026-11-17", "text": "Starter kits now drop on death so anyone can pick them up, and you get 3 a day."},
+    {"date": "2026-11-17", "text": "The free starting scrap sword now deals 7 damage."},
+    {"date": "2026-11-16", "text": "Added FFA starter kits for new players."},
+    {"date": "2026-11-14", "text": "Maces left FFA, and the Gale Striker kit now uses a Thunderclap diamond axe."},
+    {"date": "2026-11-13", "text": "Added four Coin Charms that raise the Prism Coins you earn from FFA kills."},
+    {"date": "2026-11-12", "text": "FFA upgrades now follow one 8-step track in a fixed order."},
+    {"date": "2026-11-10", "text": "The FFA pit moved into the new Fallen Empire spawn, with launch pads into the pit."},
+    {"date": "2026-11-10", "text": "FFA opened in the hub with an iron start, an upgrade ladder up to the Clout tier, the Gambler's Blade, Vengeance and FFA events."}
+  ],
+  "related": ["pvp/kits", "pvp/prism-coins", "pvp/crates", "pvp/parties"],
+  "needs_owner_check": "Hats in FFA: ffa-kits.yml says an equipped hat shows until a real helmet goes on, while cosmetics.yml says hats are worn in the lobby only; the page follows ffa-kits.yml. Leaving the pit: messages.yml says both 'nothing stops it' (comment) and 'Hold still, you're leaving the pit' (leave-anchor); written as 'hold still'. Starter kit 'level' read as Arena Level 1-10. Supply Rain wave contents come from the config comment (gapples, pearls, wind charges, arrows). The site's /pvp/ copy mentions eight zones and extracting; neither is in the config, so neither is on the page."
+}

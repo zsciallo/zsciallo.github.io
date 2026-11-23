@@ -1,0 +1,39 @@
+{
+ "id": "gear-prisms",
+ "title": "Apex prisms",
+ "source": "mc-server:plugins/ChromaticCrafting/recipes/apex.yml",
+ "ref": "63529705",
+ "columns": [
+  "Item",
+  "Made from",
+  "Obtained"
+ ],
+ "rows": [
+  [
+   "Warmonger's Prism",
+   "Shard of Strength, Shard of Vigor, Shard of Vitality, Shard of Embers, Shard of Swiftness, Cluster of Wrath, Netherite Block x8, Nether Star x4",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Architect's Prism",
+   "Shard of Haste, Shard of the Feather, Shard of Swiftness, Shard of Hunger, Shard of Night, Cluster of Industry, Netherite Block x6, Nether Star x2",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Wayfarer's Prism",
+   "Shard of Night, Shard of the Tides, Shard of the Feather, Shard of Luck, Shard of Healing, Cluster of the Descent, Netherite Block x6, Dragon Breath x16",
+   "Crafting, Shard Crate"
+  ],
+  [
+   "Magnate's Prism",
+   "Shard of Luck, Shard of Hunger, Shard of Healing, Shard of Haste, Shard of Vitality, Cluster of the Depths, Netherite Block x12, Nether Star x8, Totem of Undying x4",
+   "Crafting, Shard Crate"
+  ]
+ ],
+ "icons": [
+  "warmongers_prism",
+  "architects_prism",
+  "wayfarers_prism",
+  "magnates_prism"
+ ]
+}

@@ -1,0 +1,69 @@
+{
+  "title": "Claims",
+  "half": "smp",
+  "live": true,
+  "icon": "golden_shovel",
+  "needs_owner_check": "Claim block income per Explorer rank (100 an hour, rising to 300 at Orichalcum) comes from the UltraRanks rank-up messages, not from GriefPrevention's own per-rank setting, which was not read (LuckPerms is off limits). /permissiontrust is left out because ChromaticHelp does not list it and the command whitelist was not checked.",
+  "summary": "**Claims** protect your land on the SMP: inside one, nobody can break your blocks, open your chests or hurt you.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Protection"],
+    ["Tool", "Golden shovel"],
+    ["Commands", "`/claim`, `/trust`, `/claimslist`"],
+    ["Starting blocks", "100"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Only players you trust can build in your claim. Anything outside a claim is fair game."},
+      {"p": "Take the claim kit with `/kit claim` for a golden shovel. Right-click a block at one corner of your base, then the opposite corner. The claim covers everything between them, from bedrock to sky. You can also stand in a corner and run `/claim`. `/claimbook` gives you the full guide."},
+      {"ul": [
+        "Your first chest claims a small area around it automatically.",
+        "A claim must be at least 5 blocks wide and 100 blocks in area.",
+        "Each claimed block of ground costs one claim block."
+      ]}
+    ]},
+    {"h": "Claim blocks", "blocks": [
+      {"ul": [
+        "You start with 100 claim blocks and earn more every hour you play, up to 80,000 earned this way.",
+        "Higher Explorer ranks earn them faster. See [Ranks and Kits](/wiki/smp/ranks-and-kits/).",
+        "Claim blocks cannot be bought in game. The [store](/store/) sells bonus claim blocks.",
+        "`/abandonclaim` deletes the claim you stand in and gives all its blocks back. Your build is unprotected after that.",
+        "`/claimslist` shows every claim you own and how many blocks you have left.",
+        "Claims never expire."
+      ]}
+    ]},
+    {"h": "Trust", "blocks": [
+      {"ul": [
+        "`/trust` and a name: they can build and open your chests. Only trust people you know.",
+        "`/containertrust`: chests and furnaces only.",
+        "`/accesstrust`: doors, buttons and levers only. Nothing else.",
+        "`/untrust` takes access away. `/trustlist` shows who has it in the claim you stand in.",
+        "`/subdivideclaim` splits a claim into rooms, so you can trust someone in one part only."
+      ]}
+    ]},
+    {"h": "What claims protect", "blocks": [
+      {"ul": [
+        "Blocks, chests, doors, trapdoors, fence gates, buttons and levers.",
+        "{{icon:lead}} Your animals, including horses, donkeys and llamas.",
+        "Players: PvP is on everywhere on the SMP, but nobody can hurt you inside a claim.",
+        "Explosions do no damage, and fire does not spread or burn.",
+        "Strangers cannot ender pearl into your claim or set a home there."
+      ]},
+      {"p": "Vote Fly works only in claims you own or have build trust in. See [Vote Fly](/wiki/smp/vote-fly/)."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Claim before you build anything worth keeping. Anything left in unclaimed land is fair game.",
+        "Breaking into a claimed base is griefing and breaks the rules.",
+        "{{icon:spawner}} Place your spawners inside your claim so nobody can take them."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-10-30", "text": "Claims no longer expire."},
+    {"date": "2026-10-25", "text": "Doors inside claims are now locked to players without trust."},
+    {"date": "2026-10-22", "text": "You can now claim land in the Nether and the End."},
+    {"date": "2026-10-04", "text": "Claims now expire after 40 days without logging in."}
+  ],
+  "related": ["smp/vote-fly", "smp/ranks-and-kits", "smp/spawners-and-hoppers", "smp/keep-on-death"]
+}

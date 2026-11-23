@@ -21,7 +21,7 @@ export function SmpPage() {
 
   return (
     <MotionRoot>
-      <NavBar />
+      <NavBar current="smp" />
       <main>
         <section class="page-hero container smp-hero" aria-label="Chromabit SMP">
           <p class="section-eyebrow">CHROMABIT SMP · SURVIVAL ECONOMY</p>
@@ -43,6 +43,11 @@ export function SmpPage() {
                 </div>
               ))}
             </div>
+            <a class="dungeon-preview" href="/dungeon/">
+              <img src="/dungeon/preview.jpg" alt="The Heartwood dungeon island, drawn block by block"
+                width="1200" height="1164" loading="lazy" decoding="async" />
+            </a>
+            <ArcadeButton href="/dungeon/" variant="primary">EXPLORE THE DUNGEONS</ArcadeButton>
           </div>
 
           <MarketTicker />

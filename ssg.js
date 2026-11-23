@@ -1,10 +1,11 @@
 import { createServer } from 'vite';
 import render from 'preact-render-to-string';
 import { execFileSync } from 'child_process';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { h } from 'preact';
-import { indexablePages, llmsTxt, robotsTxt, sitemapXml } from './src/data/seo.js';
+import { headFor, indexablePages, llmsTxt, robotsTxt, sitemapXml } from './src/data/seo.js';
+import { factIds, wikiFacts, wikiPages } from './src/wiki/index.js';
 
 // The auctions page fetches these at runtime, so a build with them missing
 // succeeds and then shows an empty market on the deployed site. Fail here
@@ -27,6 +28,7 @@ const pages = [
   { module: '/src/pages/PrivacyPage.jsx', export: 'PrivacyPage', dist: 'dist/privacy/index.html' },
   { module: '/src/pages/VotePage.jsx', export: 'VotePage', dist: 'dist/vote/index.html' },
   { module: '/src/pages/AuctionsPage.jsx', export: 'AuctionsPage', dist: 'dist/auctions/index.html' },
+  { module: '/src/pages/DungeonPage.jsx', export: 'DungeonPage', dist: 'dist/dungeon/index.html' },
 ];
 
 const server = await createServer({
@@ -42,6 +44,29 @@ for (const { module, export: exportName, dist } of pages) {
   const html = readFileSync(file, 'utf-8');
   writeFileSync(file, html.replace('<div id="app"></div>', `<div id="app">${markup}</div>`));
   console.log(`[ssg] ${dist}`);
+}
+
+// The wiki: every route is written from the one built shell (dist/wiki/index.html), with its own
+// head from src/data/seo.js swapped in for the shell's /wiki/ head.
+{
+  const { WikiArticle, WikiChanges, WikiHome } = await server.ssrLoadModule('/src/pages/WikiPage.jsx');
+  const ctx = { faq: JSON.parse(readFileSync(resolve('src/data/faq.json'), 'utf-8')), config: JSON.parse(readFileSync(resolve('src/config.json'), 'utf-8')) };
+  const shell = readFileSync(resolve('dist/wiki/index.html'), 'utf-8');
+  const base = headFor('/wiki/', ctx);
+  if (!shell.includes(base)) throw new Error('[ssg] dist/wiki/index.html does not hold the /wiki/ head');
+  const wiki = wikiPages();
+  const routes = [
+    ['/wiki/', h(WikiHome, { pages: wiki })],
+    ['/wiki/changes/', h(WikiChanges, { pages: wiki })],
+    ...wiki.map((page) => [page.route, h(WikiArticle, { page, pages: wiki, facts: Object.fromEntries(factIds(page).map((id) => [id, wikiFacts(id)])) })]),
+  ];
+  for (const [route, vnode] of routes) {
+    const file = resolve(`dist${route}index.html`);
+    mkdirSync(dirname(file), { recursive: true });
+    // Functions as replacements, so a `$` in page text is never read as a replace pattern.
+    writeFileSync(file, shell.replace(base, () => headFor(route, ctx)).replace('<div id="app"></div>', () => `<div id="app">${render(vnode)}</div>`));
+  }
+  console.log(`[ssg] ${routes.length} wiki pages`);
 }
 
 await server.close();

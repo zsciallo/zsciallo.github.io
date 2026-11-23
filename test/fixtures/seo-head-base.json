@@ -1,5 +1,5 @@
 {
-  "capturedFrom": "ec68cca-jointweak",
+  "capturedFrom": "orch/20261122-wiki U1 (WIKI in nav and footer)",
   "note": "Titles always frozen; a description is frozen unless \"released\" says why it may change.",
   "pages": {
     "/": {
@@ -36,6 +36,11 @@
     "/privacy/": {
       "title": "Privacy Policy | Chromabit",
       "description": "How Chromabit collects and handles data on chromabit.us: analytics, cookies, payments, and your choices.",
+      "descriptionFrozen": true
+    },
+    "/dungeon/": {
+      "title": "Heartwood Dungeon Map | Chromabit",
+      "description": "Interactive block map of the Heartwood dungeon: areas, bosses, camps, crates and waypoints, with a cutaway to look inside.",
       "descriptionFrozen": true
     },
     "/pvp/player/": {

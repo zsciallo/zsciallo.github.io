@@ -16,6 +16,7 @@
 // No em dashes anywhere in here: these strings reach people.
 
 import { PVP_MODES } from './pvpModes.js';
+import { wikiPages } from '../wiki/index.js';
 
 export const SITE = 'https://chromabit.us';
 export const NETWORK = 'Chromabit Network';
@@ -32,6 +33,8 @@ const OG_IMAGE = {
 // An exact 8x nearest-neighbour upscale of the 64x64 server icon (tools/make_logo.py):
 // Google ignores Organization logos under 112x112. Only the structured data uses it.
 const LOGO = { url: `${SITE}/logo-512.png`, width: 512, height: 512 };
+
+const WIKI_SOURCES = ['wiki/index.html', 'src/wiki.jsx', 'src/pages/WikiPage.jsx', 'src/wiki.css'];
 
 /**
  * Every page, in sitemap order. `indexable: false` keeps a page out of the
@@ -125,6 +128,46 @@ export const PAGES = [
     sources: ['privacy/index.html', 'src/privacy.jsx', 'src/pages/PrivacyPage.jsx'],
   },
   {
+    route: '/dungeon/',
+    entry: 'dungeon/index.html',
+    title: 'Heartwood Dungeon Map | Chromabit',
+    description:
+      'Interactive block map of the Heartwood dungeon: areas, bosses, camps, crates and waypoints, with a cutaway to look inside.',
+    keywords: 'Heartwood dungeon map, Minecraft dungeon map, Economy SMP dungeon, Chromabit',
+    crumb: 'Heartwood Map',
+    pageName: 'Heartwood Map',
+    sources: ['dungeon/index.html', 'src/dungeon.jsx', 'src/pages/DungeonPage.jsx', 'src/dungeon.css', 'src/data/dungeonMap.js', 'src/lib/dungeonMap', 'public/dungeon'],
+  },
+  // Run 20261122-wiki: the wiki home, its change log and one entry per published page (src/wiki/index.js).
+  // ssg.js writes them all from the one wiki/index.html shell. `parent` adds the middle breadcrumb.
+  {
+    route: '/wiki/',
+    entry: 'wiki/index.html',
+    title: 'Wiki | Chromabit',
+    description: 'The Chromabit player wiki: how the Economy SMP and ChromaPVP systems, custom gear, perks and commands work, and what changed in them.',
+    crumb: 'Wiki',
+    pageName: 'Wiki',
+    sources: [...WIKI_SOURCES, 'src/wiki/pages'],
+  },
+  {
+    route: '/wiki/changes/',
+    parent: '/wiki/',
+    title: 'Wiki Changes | Chromabit',
+    description: 'Every recorded change on the Chromabit wiki, newest first: the date, the page and what changed in the game.',
+    crumb: 'Changes',
+    pageName: 'Wiki changes',
+    sources: [...WIKI_SOURCES, 'src/wiki/pages'],
+  },
+  ...wikiPages().map((p) => ({
+    route: p.route,
+    parent: '/wiki/',
+    title: `${p.title} | Chromabit Wiki`,
+    description: plainAnswer(p.summary),
+    crumb: p.title,
+    pageName: p.title,
+    sources: [...WIKI_SOURCES, `src/wiki/pages/${p.half}/${p.slug}.json`, 'src/wiki/facts'],
+  })),
+  {
     route: '/vote/',
     entry: 'vote/index.html',
     // Not linked from anywhere: players reach it by typing the address. Kept out of search and the sitemap.
@@ -189,10 +232,8 @@ function breadcrumbNode(page) {
   return {
     '@type': 'BreadcrumbList',
     '@id': `${abs(page.route)}#breadcrumb`,
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
-      { '@type': 'ListItem', position: 2, name: page.crumb, item: abs(page.route) },
-    ],
+    itemListElement: [{ name: 'Home', route: '/' }, ...(page.parent ? [{ name: pageFor(page.parent).crumb, route: page.parent }] : []), { name: page.crumb, route: page.route }]
+      .map(({ name, route }, i) => ({ '@type': 'ListItem', position: i + 1, name, item: abs(route) })),
   };
 }
 
@@ -212,9 +253,10 @@ function webPageNode(page, type = 'WebPage') {
   return node;
 }
 
-/** faq.json's markdown-lite as plain text: **b** and `c` lose their marks, [text](href) keeps the text. */
+/** faq.json's markdown-lite as plain text: **b** and `c` lose their marks, [text](href) keeps the text, a wiki {{icon:x}} goes. */
 export function plainAnswer(text) {
   return text
+    .replace(/\{\{icon:[^}]*\}\}\s*/g, '')
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -352,7 +394,8 @@ export function robotsTxt() {
  * holds the allowlist.
  */
 export function llmsTxt() {
-  const links = indexablePages().map((p) => `- [${p.title}](${abs(p.route)}): ${p.description}`);
+  // Wiki pages are linked by title only: their summaries can hold numbers llms.txt does not vouch for.
+  const links = indexablePages().map((p) => (p.parent ? `- [${p.title}](${abs(p.route)})` : `- [${p.title}](${abs(p.route)}): ${p.description}`));
   return [
     `# ${NETWORK}`,
     '',

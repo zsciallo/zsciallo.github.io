@@ -1,0 +1,78 @@
+{
+  "title": "Crates and Cosmetics",
+  "half": "pvp",
+  "live": true,
+  "icon": "ender_chest",
+  "summary": "**Crates and Cosmetics** covers ChromaPVP's crates, which you open with Prism Coins, and the cosmetics that change how you look.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Cosmetics"],
+    ["Crates", "Spectrum, Mythic, Arsenal"],
+    ["Commands", "`/crates`, `/cosmetics`"],
+    ["Currency", "Prism Coins"],
+    ["Where", "Lobby only"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Cosmetics change how you look in the lobby and in fights. They never change how a fight plays."},
+      {"p": "Open crates with `/crates`, or click a crate block in the lobby. Crates only open in the lobby, not in a match or in FFA. Each crate costs Prism Coins:"},
+      {"ul": [
+        "{{icon:chest}} **Spectrum Crate**, 1,500 Prism Coins: common and rare cosmetics.",
+        "{{icon:ender_chest}} **Mythic Crate**, 6,000 Prism Coins: rare and epic cosmetics, plus mythic items you can only get from this crate.",
+        "{{icon:trapped_chest}} **Arsenal Crate**, 1,250 Prism Coins: one FFA kit."
+      ]},
+      {"p": "Buy cosmetics directly in `/cosmetics`. A preview puts you at the showcase stand in the lobby, where a mannequin wears the item for a few seconds."}
+    ]},
+    {"h": "The Arsenal Crate", "blocks": [
+      {"p": "The Arsenal Crate holds every FFA kit from the Supplies screen once, Coin Charms included. Its tiers follow the Supplies tabs:"},
+      {"ul": [
+        "Common: Kits and Utility items priced 800 or less",
+        "Rare: Kits and Utility items over 800",
+        "Epic: the Legendary tab",
+        "Mythic: the Clout tab"
+      ]},
+      {"facts": "pvp-arsenal-crate"},
+      {"p": "The kit goes into your FFA inventory, or into your stash if that is full. If neither has room you get 70% of the kit's price back in Prism Coins. Like any FFA kit, it drops when you die in the pit."},
+      {"p": "To improve your free FFA gear for good, use the upgrade track on the Supplies screen instead. Its eight steps never drop. See [FFA](/wiki/pvp/ffa/)."}
+    ]},
+    {"h": "x2 Duel", "blocks": [
+      {"p": "Any crate can be opened as an **x2 Duel**. You and the server each pull an item from the crate. If yours is worth more you keep both, and if theirs is worth more you get nothing. Ties pull again."}
+    ]},
+    {"h": "Duplicates and sets", "blocks": [
+      {"p": "Pulling a cosmetic you already own refunds half its value in Prism Coins."},
+      {"ul": [
+        "**Neon Set:** own all ten rares of the Spectrum Crate to get the Neon Glow trail.",
+        "**Mythic Path Set:** own all six mythic items of the Mythic Crate to get the Mythic Regalia armour look."
+      ]},
+      {"p": "Set rewards cannot drop from a crate. Your progress on each set shows on the crate tiles in `/crates`."}
+    ]},
+    {"h": "Cosmetic types", "blocks": [
+      {"p": "Cosmetics come in four rarities: common, rare, epic and mythic. The types are:"},
+      {"ul": [
+        "{{icon:firework_rocket}} **Kill effects:** particles, a firework or lightning where your opponent falls.",
+        "**Victory effects:** a sound, particles and a pose when you win.",
+        "**Death messages:** the chat line when you take someone out.",
+        "{{icon:arrow}} **Projectile trails:** particles behind your arrows, snowballs and other projectiles.",
+        "{{icon:blaze_powder}} **Trails:** particles at your feet as you move, in the lobby, queues and FFA only.",
+        "{{icon:sentry_armor_trim_smithing_template}} **Armour looks:** a trim stamped on every armour piece a kit gives you.",
+        "{{icon:name_tag}} **Titles:** a short tag shown with your name.",
+        "{{icon:leather_helmet}} **Hats:** worn in the lobby only.",
+        "{{icon:glowstone_dust}} **Auras:** a ring that turns around you after you stand still for 5 seconds."
+      ]},
+      {"p": "Most cosmetics are sold for Prism Coins. Some come only from crates, and the Champion title only from winning a [tournament](/wiki/pvp/tournaments/)."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Preview a cosmetic on the showcase stand before you buy it.",
+        "An x2 Duel can double a pull or lose it, so open normally when you want something certain."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-12", "text": "Added the Arsenal Crate, which holds FFA kits."},
+    {"date": "2026-11-12", "text": "The Prism Crate is now the Spectrum Crate."},
+    {"date": "2026-11-10", "text": "Crates opened in the lobby, with `/crates`, collection sets, crate-only cosmetics and a pull history screen."}
+  ],
+  "related": ["pvp/prism-coins", "pvp/ffa", "pvp/kits", "pvp/tournaments"],
+  "needs_owner_check": "Mythic Crate: on origin/main with its own crate block, but the brief named only Spectrum and Arsenal; confirm it is live. Store-only cosmetics (store: true in cosmetics.yml) are not mentioned because the store listing was not checked."
+}

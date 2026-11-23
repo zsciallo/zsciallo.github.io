@@ -1,0 +1,189 @@
+{
+ "id": "battlepass-free",
+ "title": "Battle Pass: free track",
+ "source": "mc-server:plugins/BattlePass/passes/free.yml",
+ "ref": "63529705",
+ "columns": [
+  "Tier",
+  "Reward"
+ ],
+ "rows": [
+  [
+   "1",
+   "Spawner Key"
+  ],
+  [
+   "2",
+   "Zombie Spawner"
+  ],
+  [
+   "3",
+   "Trim Pack - Rib + Spire"
+  ],
+  [
+   "4",
+   "12x Prismatic Resin"
+  ],
+  [
+   "5",
+   "Chroma Key"
+  ],
+  [
+   "6",
+   "Skeleton Spawner"
+  ],
+  [
+   "8",
+   "Spawner Key"
+  ],
+  [
+   "9",
+   "Spider Spawner"
+  ],
+  [
+   "10",
+   "2x Spawner Key, 500 Prism Shards"
+  ],
+  [
+   "12",
+   "Trim Pack - Eye + Vex"
+  ],
+  [
+   "13",
+   "Shard Key"
+  ],
+  [
+   "14",
+   "Random Elite Book"
+  ],
+  [
+   "15",
+   "3x Living Prism"
+  ],
+  [
+   "16",
+   "Cave Spider Spawner"
+  ],
+  [
+   "18",
+   "2x Shard Key"
+  ],
+  [
+   "20",
+   "Creeper Spawner, Spawner Key"
+  ],
+  [
+   "22",
+   "Drowned Spawner"
+  ],
+  [
+   "24",
+   "1,000 Prism Shards"
+  ],
+  [
+   "25",
+   "Living Prism Key, $250,000"
+  ],
+  [
+   "26",
+   "1,000 Prism Shards"
+  ],
+  [
+   "28",
+   "2x White Scroll"
+  ],
+  [
+   "30",
+   "Slime Spawner, 2x Spawner Key"
+  ],
+  [
+   "32",
+   "Trim Pack - Shaper + Silence"
+  ],
+  [
+   "34",
+   "MobTrak"
+  ],
+  [
+   "35",
+   "2x Shard Key"
+  ],
+  [
+   "36",
+   "Zombie Horde"
+  ],
+  [
+   "38",
+   "3x Spawner Key"
+  ],
+  [
+   "40",
+   "Witch Spawner, 2x Chroma Key"
+  ],
+  [
+   "42",
+   "Trim Pack - Raiser + Host"
+  ],
+  [
+   "44",
+   "Bone Yard"
+  ],
+  [
+   "45",
+   "Random Ultimate Book"
+  ],
+  [
+   "46",
+   "Magma Cube Spawner"
+  ],
+  [
+   "48",
+   "Trim Pack - Ward + Wayfinder"
+  ],
+  [
+   "49",
+   "3x Spawner Key"
+  ],
+  [
+   "50",
+   "Living Prism Key, 6x Living Prism, 3x Shard Key, Season Finale"
+  ]
+ ],
+ "icons": [
+  "tripwire_hook",
+  null,
+  "rib_armor_trim_smithing_template",
+  null,
+  "tripwire_hook",
+  null,
+  "tripwire_hook",
+  null,
+  "tripwire_hook",
+  "eye_armor_trim_smithing_template",
+  "heart_of_the_sea",
+  null,
+  null,
+  null,
+  "heart_of_the_sea",
+  "tripwire_hook",
+  null,
+  null,
+  "ominous_trial_key",
+  null,
+  null,
+  "tripwire_hook",
+  "shaper_armor_trim_smithing_template",
+  null,
+  "heart_of_the_sea",
+  null,
+  "tripwire_hook",
+  "tripwire_hook",
+  "raiser_armor_trim_smithing_template",
+  null,
+  null,
+  null,
+  "ward_armor_trim_smithing_template",
+  "tripwire_hook",
+  "ominous_trial_key"
+ ]
+}

@@ -1,0 +1,48 @@
+{
+  "title": "Parties",
+  "half": "pvp",
+  "live": true,
+  "icon": "goat_horn",
+  "summary": "**Parties** let you group up with friends on ChromaPVP and queue team modes together. A party holds up to four players.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Social"],
+    ["Command", "`/party`"],
+    ["Size", "Up to 4"],
+    ["Invite lasts", "60 seconds"]
+  ],
+  "sections": [
+    {"h": "Commands", "blocks": [
+      {"ul": [
+        "`/party` opens your party screen.",
+        "`/party invite` and a player's name invites them. Inviting someone starts a party if you are not in one.",
+        "`/party accept [name]` and `/party deny [name]` answer an invite. You can also click **[Accept]** or **[Deny]** in chat.",
+        "`/party list` shows who is in your party.",
+        "`/party leave` leaves the party.",
+        "`/party kick` and a name removes a member (leader only).",
+        "`/party disband` ends the party (leader only)."
+      ]},
+      {"p": "An invite runs out after 60 seconds. You can only be in one party at a time."}
+    ]},
+    {"h": "Queueing together", "blocks": [
+      {"p": "Only the party leader can queue the party. When the leader queues, every member is moved into the match once it is found."},
+      {"ul": [
+        "In the [Arena](/wiki/pvp/arena/), a party of two plays as one team in 2v2 and 2v2v2. In the other formats its players fight apart.",
+        "A mode refuses a party bigger than its teams.",
+        "If any member cannot queue right now, or is on another kit server, the party does not queue.",
+        "Any change to the party (someone joins, leaves or is kicked) takes the party out of the queue. Queue again when you are ready."
+      ]}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Make sure everyone is in the lobby or in FFA, not in a match, before the leader queues.",
+        "Clicking the invite link in chat is faster than typing `/party accept`."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-10", "text": "Added parties: up to 4 players with `/party`."}
+  ],
+  "related": ["pvp/arena", "pvp/duels", "pvp/ffa"],
+  "needs_owner_check": "What a party changes in FFA is not in the config (no friendly-fire or nametag setting), so FFA is not covered. Green party nametags (Release Q, TAB placeholder) are not in the ChromaticArena config; left out. Parties of 3 or 4 in the Arena are not described by the config."
+}

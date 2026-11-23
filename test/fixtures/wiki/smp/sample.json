@@ -1,0 +1,10 @@
+{
+  "title": "Sample Page",
+  "half": "smp",
+  "live": true,
+  "summary": "**Sample Page** is a test fixture: a live wiki page whose facts block names a table that has no file.",
+  "infobox": [["Server", "SMP"]],
+  "sections": [{"h": "Mechanics", "blocks": [{"p": "A fixture."}, {"facts": "no-such-facts-table"}]}],
+  "history": [{"date": "2026-11-01", "text": "Older change."}, {"date": "2026-11-05", "text": "Newer change."}],
+  "related": []
+}

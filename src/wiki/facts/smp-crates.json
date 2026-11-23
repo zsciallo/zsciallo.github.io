@@ -1,0 +1,51 @@
+{
+ "id": "smp-crates",
+ "title": "Crates",
+ "source": "mc-server:plugins/ExcellentCrates/objects/crate",
+ "ref": "63529705",
+ "columns": [
+  "Crate",
+  "Key",
+  "Can contain"
+ ],
+ "rows": [
+  [
+   "Chroma Crate",
+   "Chroma Key",
+   "Chromatic Sword, Chromatic Mace, Chromatic Spear, Chromatic Bow, Chromatic Crossbow, Chromatic Helmet, Chromatic Chestplate, Chromatic Leggings, Chromatic Boots, Chromatic Elytra, $2,000,000, Elytra, Chroma Key x3, Chromatic Pickaxe, Chromatic Axe, Chromatic Shovel, Chromatic Harvester, Chromatic Angler, $1,500,000, Chroma Key x2, Corrupted Helmet, Corrupted Chestplate, Corrupted Leggings, Corrupted Boots, Corrupted Blade, Corrupted Elytra, $1,250,000, Chroma Key, Corrupted Pickaxe, Corrupted Axe, Corrupted Shovel, $1,000,000, Random Legendary Book, Netherite Ingot x2, $750,000, Random Ultimate Book, Random Elite Book, $500,000, Heavy Core, 1,000 Claim Blocks, 3,000 Claim Blocks, 1,500 Prism Shards, 2,000 Prism Shards, Armour trims (Sentry, Dune, Coast, Wild, Ward, Eye, Vex, Tide, Snout, Rib, Spire, Wayfinder, Shaper, Silence, Raiser, Host, Flow, Bolt)"
+  ],
+  [
+   "Living Prism Crate",
+   "Living Prism Key",
+   "Living Prism Helmet, Living Prism Chestplate, Living Prism Leggings, Living Prism Boots, Living Prism Sword, Living Prism Pickaxe, Living Prism Axe, Living Prism Shovel, Living Prism Harvester, Living Prism Angler, Living Prism Bow, Living Prism Crossbow, Living Prism Spear, Living Prism Mace, Living Prism Wings, 4x Prismatic Resin, 12x Prismatic Resin, 3x Living Prism, 6x Living Prism, 2,000 Prism Shards, 5,000 Prism Shards, Heartwood Bundle, Random Elite Book, Random Ultimate Book, Random Legendary Book, Common Spawner, Mid Spawner, Rare Spawner, Top Spawner, 1x Sell Chest, $500,000, $1,000,000, $2,000,000, $5,000,000, 1x Chroma Key, 2x Chroma Key, 1x Living Prism Key"
+  ],
+  [
+   "Reward Crate",
+   "Reward Key",
+   "Chroma Key x3, Chroma Key x2, Chroma Key, Shard of Haste, Shard of Embers, Shard of Night, Shard of Hunger, Random Legendary Book, Random Ultimate Book, Random Elite Book, Random Unique Book, Random Simple Book, $500,000, Spawner Key x2, Shard Key x2, 1,250 Prism Shards, Spawner Key, Shard Key, $250,000, 750 Prism Shards, BlockTrak Creator, StatTrak Creator, MobTrak Creator, FishTrak Creator"
+  ],
+  [
+   "Shard Crate",
+   "Shard Key",
+   "Warmonger's Prism, Architect's Prism, Wayfarer's Prism, Magnate's Prism, Cluster of Wrath, Cluster of Cinders, Cluster of Renewal, Cluster of Industry, Cluster of the Descent, Cluster of the Depths, Shard of Strength, Shard of Vitality, Shard of Vigor, Shard of Healing, Shard of Hunger, Shard of Haste, Shard of Swiftness, Shard of the Tides, Shard of Embers, Shard of Night, Shard of the Feather, Shard of Luck, 2,000 Prism Shards, Shard Key, 1,500 Prism Shards, BlockTrak Creator, StatTrak Creator, MobTrak Creator, FishTrak Creator"
+  ],
+  [
+   "Spawner Crate",
+   "Crate Key",
+   "Spawner Key x5, Spawner Key x3, Spawner Key x2, Spawner Key, Warden Spawner, Shulker Spawner, Iron Golem Spawner, Evoker Spawner, Wither Skeleton Spawner, Witch Spawner, Ghast Spawner, Creeper Spawner, Breeze Spawner, Blaze Spawner, Enderman Spawner, Slime Spawner, Magma Cube Spawner, 1,500 Prism Shards, 2,000 Prism Shards, Piglin Spawner"
+  ],
+  [
+   "Vote Crate",
+   "Vote Key",
+   "Spawner Crate Key, Chroma Key, KOTH Starter, Elytra, Netherite Scrap x2, $100,000, Netherite Scrap Big x4, Diamond Kit, Voter Helmet, Voter Chestplate, Voter Leggings, Voter Boots, Smithing Template, Diamond x12, Chicken Spawner, Skeleton Spawner, Creeper Spawner, Blaze Spawner, Enderman Spawner, Enchanted Golden Apple x4, Golden Carrot x32, 200 Claim Blocks, Iron Block x8, Gold Ingot x16, Shard Key, Shard of Night, Shard of Hunger, Shard of Luck, 250 Prism Shards, 500 Prism Shards"
+  ]
+ ],
+ "icons": [
+  "tripwire_hook",
+  "ominous_trial_key",
+  "nether_star",
+  "heart_of_the_sea",
+  "tripwire_hook",
+  "tripwire_hook"
+ ]
+}

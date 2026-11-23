@@ -1,0 +1,61 @@
+{
+  "title": "Battle Pass",
+  "half": "smp",
+  "live": true,
+  "icon": "writable_book",
+  "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running (the merge changed one premium reward, Telepathy IV to Telepathy). Season dates are from settings.yml and the week files (Season 4 Heartwood, 05/11 to 09/12/2026); the page goes stale when Season 5 starts. The +25% progress booster in settings.yml is left out because who gets it was not confirmed.",
+  "summary": "**Battle Pass** is the SMP's seasonal reward track. Daily and weekly quests earn points, and points unlock tiers with a reward to claim.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Seasonal"],
+    ["Command", "`/bp`"],
+    ["Tiers", "50"],
+    ["Season", "Season 4: Heartwood"],
+    ["Premium", "Chroma Pass"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "The current season is Season 4, Heartwood."},
+      {"p": "Everyone has the Free Pass. Open it with `/bp` (also `/battlepass` or `/pass`), and see your quests with `/quests`. The premium track, the **Chroma Pass**, is sold on [the store](/store/) and lasts for one season."}
+    ]},
+    {"h": "Tiers and quests", "blocks": [
+      {"ul": [
+        "Each tier takes 60 points, so all 50 tiers take 3,000.",
+        "Rewards are not given automatically. Click a reached tier in `/bp` to claim it.",
+        "**Daily quests**: 7 at a time (3 easy, 2 medium, 1 hard and 1 random), worth 8, 12 or 18 points. They reset every day at 12:00 (Oslo time).",
+        "**Weekly quests**: a new week opens every 7 days. Older weeks stay open, so you can catch up. Quests 9 and 10 of each week are for Chroma Pass holders only.",
+        "Points past tier 50 turn into money: $25 a point on the Free Pass, $75 on the Chroma Pass."
+      ]},
+      {"p": "Season 4 has five themed weeks:"},
+      {"ul": [
+        "Week 1, Overgrowth.",
+        "Week 2, Root and Resin.",
+        "Week 3, Into the Heartwood: the Easy dungeon areas.",
+        "Week 4, The Deep Roots: the Medium and Hard areas.",
+        "Week 5, Heart of the Tree: the boss at the core."
+      ]}
+    ]},
+    {"h": "Free rewards", "blocks": [
+      {"p": "The free track has a reward on 35 of the 50 tiers, including Living Prism Keys, Living Prism, Prismatic Resin, Chroma Keys, Shard Keys and Prism Shards."},
+      {"facts": "battlepass-free"}
+    ]},
+    {"h": "Premium rewards", "blocks": [
+      {"p": "The Chroma Pass claims both tracks and adds a reward on every tier. Tier 50 is Heart of the Tree: 3 Living Prism Keys, 12 Living Prism, 40 Prismatic Resin and a StatTrak."},
+      {"facts": "battlepass-premium"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "{{icon:tripwire_hook}} Living Prism Keys open the [Living Prism Crate](/wiki/smp/crates/).",
+        "Weeks 3 to 5 send you into [Heartwood](/wiki/smp/dungeons/), so gear up before then.",
+        "A new season resets the pass, and a Chroma Pass does not carry over."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-11-06", "text": "Battle Pass Season 4 Heartwood started, with Living Prism rewards and Heartwood quests."},
+    {"date": "2026-11-02", "text": "Discord Server Boosters now get the premium battle pass and a pink prefix."},
+    {"date": "2026-10-29", "text": "The Shard of Embers replaced the Scroll of Binding at tier 43, and the Scroll of Binding was removed from every reward."},
+    {"date": "2026-09-30", "text": "Battle Pass Season 3 Octoberbit started, with Halloween Keys and Halloween rewards."}
+  ],
+  "related": ["smp/crates", "smp/dungeons", "smp/voting", "smp/daily-streak"]
+}

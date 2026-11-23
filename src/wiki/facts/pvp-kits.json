@@ -1,0 +1,33 @@
+{
+ "id": "pvp-kits",
+ "title": "Kits",
+ "source": "mc-kit:plugins/ChromaticArena/kits",
+ "ref": "2661261",
+ "columns": [
+  "Kit",
+  "Modes",
+  "Loadout"
+ ],
+ "rows": [
+  [
+   "Axe",
+   "Unranked, Ranked, FFA, Arcade",
+   "Diamond Axe, Diamond Sword, Crossbow, Bow, Arrow x6, Shield, Diamond armour"
+  ],
+  [
+   "Mace",
+   "Unranked, Ranked",
+   "Mace (Density V, Wind Burst II, Unbreaking III), Wind Charge x64, Ender Pearl x16, Golden Apple x8, Cooked Beef x16, Diamond Sword (Sharpness III), Diamond Axe, Totem of Undying x2, Splash Potion of Strength II x2, Splash Potion of Swiftness II x2, Shield, Elytra, Netherite Helmet (Protection III, Unbreaking III), Netherite Chestplate (Protection III, Unbreaking III), Netherite Leggings (Protection III, Unbreaking III), Netherite Boots (Protection III, Unbreaking III, Feather Falling IV)"
+  ],
+  [
+   "Sword",
+   "Unranked, Ranked, FFA",
+   "Diamond Sword (Sharpness IV, Unbreaking III), Diamond armour (Protection IV, Unbreaking III)"
+  ]
+ ],
+ "icons": [
+  "diamond_axe",
+  "mace",
+  "diamond_sword"
+ ]
+}

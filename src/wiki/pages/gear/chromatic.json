@@ -1,0 +1,46 @@
+{
+  "title": "Chromatic Gear",
+  "half": "gear",
+  "live": true,
+  "icon": "chromatic_chestplate",
+  "image": {"src": "/wiki/icons/chromatic_chestplate.png", "alt": "A Chromatic Chestplate"},
+  "summary": "**Chromatic Gear** is the SMP's custom armour, tools and weapons. Build it at `/craft` or win it from the Chroma Crate, and keep it when you die.",
+  "infobox": [
+    ["Server", "SMP"],
+    ["Type", "Gear"],
+    ["Made at", "`/craft`"],
+    ["Crate", "Chroma Crate"],
+    ["Kept on death", "Yes"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"p": "Build a piece at the Chromatic bench with `/craft`, or win it from the [Chroma Crate](/wiki/smp/crates/). The mace, spear and elytra have no recipe and only come from the crate. Recipe costs are on [Crafting and Upgrades](/wiki/smp/crafting/)."},
+      {"ul": [
+        "{{icon:chromatic_chestplate}} Armour: helmet, chestplate, leggings and boots. Wear all four for the set bonus.",
+        "{{icon:chromatic_sword}} Weapons: sword, spear, mace, bow and crossbow.",
+        "{{icon:chromatic_pickaxe}} Tools: pickaxe, axe, shovel, harvester and angler.",
+        "{{icon:elytra}} The Chromatic Elytra."
+      ]}
+    ]},
+    {"h": "Pieces", "blocks": [
+      {"p": "A new piece comes with these enchants. The bonus is the ability its lore describes."},
+      {"facts": "gear-chromatic"}
+    ]},
+    {"h": "Keeping and repairing", "blocks": [
+      {"p": "Chromatic gear stays with you when you die (see [Keep-on-Death Gear](/wiki/smp/keep-on-death/)). When its durability runs out it does not break. It turns into a Shattered item that keeps its enchants, upgrades, prefix and StatTrak, and `/craft repair` brings it back."},
+      {"p": "The armour has gem sockets: see [Amethyst Gems](/wiki/gear/gems/)."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Upgrade enchants past their starting level at the Upgrade bench in `/craft`.",
+        "A Chromatic piece is what you upgrade into its [Living Prism](/wiki/gear/living-prism/) twin. Its upgrades, Awakening, prefix and enchants carry over, except Thorns.",
+        "Salvaging a piece you no longer need gives Prism Shards back."
+      ]}
+    ]}
+  ],
+  "history": [
+    {"date": "2026-10-08", "text": "Chromatic and Halloween gear no longer breaks: at 0 durability it turns Shattered and keeps its enchants until you repair it with `/craft repair`."},
+    {"date": "2026-09-30", "text": "Added the Chromatic Harvester, which reaps and replants a 3x3 of crops, and the Chromatic Angler, which lands a double catch every 15 seconds."}
+  ],
+  "related": ["gear/living-prism", "gear/gems", "smp/crafting", "smp/crates", "smp/keep-on-death"]
+}
