@@ -1,0 +1,51 @@
+{
+  "title": "Tournaments",
+  "half": "pvp",
+  "live": true,
+  "summary": "**Tournaments** are double elimination duel brackets on ChromaPVP. Each game is played on a random kit, and the winner earns the Champion title.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Event"],
+    ["Format", "Double elimination"],
+    ["Join", "`/tournament join`"],
+    ["Players", "2 to 64"],
+    ["Winner", "Champion title"]
+  ],
+  "sections": [
+    {"h": "Joining", "blocks": [
+      {"p": "Staff open tournaments. When one opens, chat announces it and a boss bar on every kit server counts down to the signup close. Signups stay open for 15 minutes, with reminders at 10 minutes, 5 minutes, 1 minute and 30 seconds."},
+      {"p": "Type `/tournament join` or click the link in chat. You can join from the hub or from FFA, and you can keep fighting in FFA until the tournament starts. `/tournament leave` before signups close costs nothing. `/tournament` opens the bracket."},
+      {"p": "A tournament needs at least 2 players when signups close, or it is cancelled. It takes up to 64."}
+    ]},
+    {"h": "Format", "blocks": [
+      {"ul": [
+        "Seeding is random.",
+        "Every series is best of three. The grand final is best of five.",
+        "Every game is a single round on a random unranked kit.",
+        "Losing once drops you to the losers bracket. Losing twice puts you out.",
+        "If the player from the losers bracket wins the grand final, a second set decides the title."
+      ]},
+      {"p": "Tournament games pay no Prism Coins or XP and do not change your rating."},
+      {"p": "Matches are called as players free up. If you are offline when yours is called, you have 60 seconds to come back, or you forfeit. If both players are offline, both are disqualified."}
+    ]},
+    {"h": "Rewards", "blocks": [
+      {"ul": [
+        "1st place: 1,000 Prism Coins and the **Champion** title.",
+        "2nd place: 500 Prism Coins.",
+        "3rd place: 250 Prism Coins."
+      ]},
+      {"p": "The Champion title cannot be bought. It shows locked in everyone's Titles tab in `/cosmetics` until they win it. The leaderboards also track tournament wins."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Practise every duel kit. You do not choose the kit, and it changes every game.",
+        "After signups close, `/tournament leave` withdraws you and forfeits every match you have left. It asks you to confirm first.",
+        "`/leave` during a tournament game forfeits the whole series, not only that game.",
+        "Click a live match in the `/tournament` bracket to spectate it."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["pvp/duels", "pvp/kits", "pvp/ranked", "pvp/crates"],
+  "needs_owner_check": "Prize amounts (1,000 / 500 / 250 Prism Coins) come from config.yml tournament.rewards and match the site's /pvp/ copy; the spec's deny list names 'tournament prize config', so confirm the amounts may appear. The minimum signup count for prizes to be paid (reward-min-entrants 3) is left out on purpose."
+}

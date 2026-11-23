@@ -1,0 +1,70 @@
+{
+  "title": "Duels and Maps",
+  "half": "pvp",
+  "live": true,
+  "summary": "**Duels and Maps** covers ChromaPVP's 1v1 duels: how the queues pair you, how rounds and timers work, and the arenas you fight on.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Game mode"],
+    ["Format", "1v1"],
+    ["Queue", "`/play` or `/queue`"],
+    ["Ranked", "Best of 3"],
+    ["Unranked", "One round"],
+    ["Maps", "15"]
+  ],
+  "sections": [
+    {"h": "Queues", "blocks": [
+      {"p": "Open the Play screen with `/play` and pick a kit, or type the kit after `/queue`: `/queue sword` for unranked, `/queue sword ranked` for ranked. `/queue leave` takes you out of the queue. There is no command to challenge a player directly: every duel comes from the queue."},
+      {"ul": [
+        "**Unranked** pairs whoever has waited longest, whatever their rating.",
+        "**Ranked** pairs players close in rating and widens the search the longer you wait. It also avoids giving you the same opponent twice in five minutes unless you have both waited a little. Ranked needs Arena Level 2: one win or three losses gets you there. See [Ranked](/wiki/pvp/ranked/).",
+        "**Quickplay**, the centre tile of the Play screen, puts you in the first match that opens: any unranked kit or the [Arena](/wiki/pvp/arena/)."
+      ]},
+      {"p": "You can queue from the FFA pit. When the match is found you are pulled into it, even in combat."}
+    ]},
+    {"h": "Rounds and timers", "blocks": [
+      {"ul": [
+        "Each round starts after a 5 second countdown.",
+        "A round lasts up to 5 minutes. If time runs out, the round is a draw.",
+        "Ranked duels are best of three. Between rounds, both players are put back in their seats, given fresh kits and frozen for 3 seconds.",
+        "Unranked duels are a single round."
+      ]},
+      {"p": "Each duel pays Prism Coins and XP, win or lose. Your first win of the day pays a bonus. See [Prism Coins](/wiki/pvp/prism-coins/)."}
+    ]},
+    {"h": "Rematches and spectating", "blocks": [
+      {"p": "After a duel both players get a **[Rematch]** button for 30 seconds. If you both click it, or type `/rematch`, the same kit starts again, unranked."},
+      {"p": "`/spec` lists live duels to watch, and `/spec` with a player's name watches their match. `/spec leave` stops watching."}
+    ]},
+    {"h": "Maps", "blocks": [
+      {"p": "Every duel is played on one of 15 arenas, picked at random for each match. Each map has an invisible wall around the fighting area, so nobody can climb, pearl or fall out."},
+      {"ul": [
+        "Aquatic",
+        "Arabic",
+        "Cyberpunk",
+        "Desert",
+        "Greek",
+        "Magic",
+        "Medieval",
+        "Mine",
+        "Modern",
+        "Mushroom",
+        "Mythic",
+        "Oriental",
+        "Pirate",
+        "Tropical Ruins",
+        "Winter"
+      ]},
+      {"p": "A pearl thrown out of the arena comes back to your hand."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Save your hotbar in the kit editor before your first ranked game. See [Kits](/wiki/pvp/kits/).",
+        "`/leave` in a live match forfeits it.",
+        "Mace duels add slime block jump pads to the arena floor. Use them to get height for a smash."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["pvp/kits", "pvp/ranked", "pvp/tournaments", "pvp/arena"],
+  "needs_owner_check": "Map names are the arena file ids title-cased (arenas/*.yml has no display name for duel maps); confirm the names players see. Queue lockouts for dodging or leaving are left out on purpose (penalties section)."
+}

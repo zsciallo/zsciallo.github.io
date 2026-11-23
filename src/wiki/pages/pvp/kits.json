@@ -1,0 +1,48 @@
+{
+  "title": "Kits",
+  "half": "pvp",
+  "live": true,
+  "summary": "**Kits** are the fixed loadouts you fight with in ChromaPVP duels. Every player gets the same items, so a duel comes down to skill and your own hotbar layout.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Loadouts"],
+    ["Duel kits", "Sword, Axe, Mace"],
+    ["Commands", "`/kit`, `/practice`"],
+    ["Layout slots", "3 free per kit"]
+  ],
+  "sections": [
+    {"h": "Duel kits", "blocks": [
+      {"p": "Duels use three kits: **Sword**, **Axe** and **Mace**. Each one can be played ranked or unranked. You pick the kit when you queue, from the Play screen (`/play`) or with `/queue` and the kit name, such as `/queue mace`."},
+      {"facts": "pvp-kits"},
+      {"ul": [
+        "**Sword** is diamond gear with a Sharpness sword and nothing else. Hunger and natural regeneration are off, so hits decide the fight.",
+        "**Axe** is plain diamond: an axe, a sword, a crossbow, a bow, arrows and a shield. Nothing is enchanted and there is no food. The axe disables shields.",
+        "**Mace** is netherite with a Wind Burst mace, wind charges, ender pearls, totems and splash potions. Fall damage is on. Mace duels also get jump pads on the arena floor."
+      ]},
+      {"p": "A fourth kit, **Chaos**, is listed as coming soon and cannot be queued yet."}
+    ]},
+    {"h": "Layouts and the kit editor", "blocks": [
+      {"p": "You can move every item of a kit to the slot you want and save it as a layout. Each kit has three free layout slots, so you can keep a few setups and switch between them."},
+      {"ul": [
+        "`/kit` shows your kits. Click one to see its layouts.",
+        "`/kit edit` with a kit and a slot (for example `/kit edit sword 2`) opens the editor. Arrange your inventory, then click **Save**.",
+        "`/kit slot` with a kit and a number (for example `/kit slot sword 2`) picks which saved layout that kit uses."
+      ]},
+      {"p": "The editor only opens in the lobby, not while you queue, fight or stand in the FFA pit."}
+    ]},
+    {"h": "FFA kits", "blocks": [
+      {"p": "The [FFA](/wiki/pvp/ffa/) pit has its own kits. You buy them once with Prism Coins on the **Supplies** screen, and you lose them when you die. They come in four tabs: Kits, Legendary, Clout and Utility. The strongest armour any of them carries is Protection 3."},
+      {"facts": "pvp-ffa-kits"}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Use `/practice` and a kit name (`/practice axe`) in the lobby to arm a kit and hit the training dummies. Practice items cannot be thrown or stashed, and `/leave` puts the kit away.",
+        "Set your layout before you queue ranked. The default hotbar is rarely the one people end up with.",
+        "In Axe duels, a raised shield does not save you for long: one axe hit disables it."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["pvp/duels", "pvp/ranked", "pvp/ffa", "pvp/crates"],
+  "needs_owner_check": "Layout slots: config loadout.free-slots is 3 with a cap of 12; whether ranks or PVP Membership raise it on the live server is not confirmed, so only the 3 free slots are stated. Chaos is marked soon: true in kits/chaos.yml; written as coming soon."
+}

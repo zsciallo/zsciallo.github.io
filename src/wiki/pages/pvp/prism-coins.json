@@ -1,0 +1,48 @@
+{
+  "title": "Prism Coins",
+  "half": "pvp",
+  "live": true,
+  "summary": "**Prism Coins** (⛃) are ChromaPVP's currency. You earn them by playing and spend them on FFA kits and upgrades, stash pages, cosmetics and crates.",
+  "infobox": [
+    ["Server", "ChromaPVP"],
+    ["Type", "Currency"],
+    ["Symbol", "⛃"],
+    ["Spend on", "Supplies, `/cosmetics`, crates"],
+    ["Store", "`/buy`"]
+  ],
+  "sections": [
+    {"h": "Obtaining", "blocks": [
+      {"ul": [
+        "**Duels:** an unranked win pays 15 and a loss 5. A ranked win pays 30 and a loss 10.",
+        "**First win of the day:** 25 extra.",
+        "**FFA:** 5 a kill, plus 5 more on every fifth kill of a streak. Coin Charms add to each kill. See [FFA](/wiki/pvp/ffa/).",
+        "**Arena:** 180, 120, 75 or 30 for your final placement, and 5 for each enemy you knock out. See [Arena](/wiki/pvp/arena/).",
+        "**Parkour:** your first finish of the spawn parkour each day pays 25.",
+        "**FFA events:** Double Prism Coins doubles kills, duels and the Arena while it runs. The Golden Loot Slime pays for the damage you deal it.",
+        "**Tournaments:** the top three places pay Prism Coins. See [Tournaments](/wiki/pvp/tournaments/)."
+      ]},
+      {"p": "Every reward shows in chat as it lands, for example **+⛃ 15 Prism Coins**."}
+    ]},
+    {"h": "Spending", "blocks": [
+      {"ul": [
+        "**Supplies** (the Supplies NPC on the FFA platform, or `/ffa shop`): FFA kits, the eight-step gear upgrade track and extra stash pages.",
+        "**Cosmetics** (`/cosmetics`): kill effects, trails, hats, titles and more. See [Crates and Cosmetics](/wiki/pvp/crates/).",
+        "**Crates** (`/crates`): the Spectrum, Mythic and Arsenal Crates."
+      ]},
+      {"p": "On the Supplies screen you click twice to buy, so one stray click spends nothing. If a purchase fails, no Prism Coins are taken."}
+    ]},
+    {"h": "PVP Membership", "blocks": [
+      {"p": "PVP Membership adds 5% to the Prism Coins you earn by playing, rounded down. The reward line in chat shows the bonus as **(Member +N)**. The bonus does not apply to tournament prizes. Members also get a purple name."}
+    ]},
+    {"h": "Tips", "blocks": [
+      {"ul": [
+        "Ranked pays twice what unranked does, win or lose.",
+        "Plan around the FFA event timer. Double Prism Coins comes around once in every four events.",
+        "Kills on the same player stop paying after three in 10 minutes, so move on to new targets."
+      ]}
+    ]}
+  ],
+  "history": [],
+  "related": ["pvp/ffa", "pvp/crates", "pvp/arena", "pvp/duels"],
+  "needs_owner_check": "PVP Membership: config membership.token-bonus-percent 5 and the purple name are on origin/main, but the store package was still owed (run 20261117-ffa-liferoll U6) and it is not on the site's store pages; confirm it can be bought before this section ships, and say where it is sold. Buying Prism Coins on the store: ffa-kits.yml says they are sold there, but it is not confirmed live, so the page only points at `/buy`. The pvp-shop facts table is the Arena gold shop (facts.py: 'Arena shop'), so it sits on pvp/arena, not here; no Prism Coin price table exists among the fixed ids. First win of the day: config says first-win-of-day 25 with no mode split; the design doc says per mode."
+}
