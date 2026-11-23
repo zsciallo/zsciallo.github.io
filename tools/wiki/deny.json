@@ -42,6 +42,14 @@
     "**/playerdata/**",
     "**/userdata/**",
     "**/streaks.yml",
-    "**/banks.yml"
+    "**/banks.yml",
+    "**/*Seal*/**",
+    "**/house-fill.yml",
+    "**/nudges.yml",
+    "**/database.yml",
+    "**/*.database.yml",
+    "**/ChromaticAuctionHouse/config.yml",
+    "**/ChromaBound/config.yml",
+    "**/ChromaticCrafting/config.yml"
   ]
 }

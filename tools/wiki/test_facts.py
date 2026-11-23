@@ -33,19 +33,61 @@ _, n = facts.build_augments({"pool": [{"name": "Hook", "rarity": "gold",
                                        "lore": ["<gray>Archers only: 40% chance", "<gray>to slow."], "effects": []}]})
 assert _ == [["Hook", "Gold", "Archers only: a chance to slow."]] and n == 1
 
-# Rewards with weights, chances and rarity come out as names only.
-CRATE = {"Name": "<gradient:#F2CCFF:#7B2FBE>Test Crate</gradient>",
-         "CostOptions": {"key": {"Entries": {"0": {"Type": "key", "Key": "test_key", "Amount": 1}}}},
-         "Rewards": {"List": {
-             "gem": {"Name": "&bGem", "Weight": 12.5, "Rarity": "mythic", "Chance": 4},
-             "wings": {"Type": "ITEM", "Weight": 6.0, "PreviewData": {"Data": {"Value": '{count:1,id:"minecraft:elytra"}'}}},
-             "blade": {"Type": "ITEM", "Weight": 3.0, "PreviewData": {"Data": {"Value":
-                       '{components:{"minecraft:custom_name":{text:"",extra:[{text:"Big ",color:"#fff"},{text:"Blade"}]},'
-                       '"minecraft:lore":[{text:"nope"}]},count:1,id:"minecraft:netherite_sword"}'}}},
-             "trim": {"Type": "ITEM", "PreviewData": {"Data": {"Value": '{count:1,id:"minecraft:rib_armor_trim_smithing_template"}'}}}}}}
-rows = facts.build_smp_crates({"test_crate.yml": CRATE}, {"test_key": {"Name": "Test Key"}})
-assert rows == [["Test Crate", "Test Key", "Gem, Elytra, Big Blade, Armour trims (Rib)"]], rows
-assert not any(s in json.dumps(rows) for s in ("12.5", "mythic", "6.0", "nope"))
+# Small-caps letters fold to plain ones.
+assert facts.clean("<#3498DB>ᴡᴀʀᴅᴇɴ ꜱᴘᴀᴡɴᴇʀ") == "Warden Spawner"
+
+# ExcellentCrates 7: rewards with weights and rarity come out as names only; an unplaced crate is left out.
+def crate(name, key, rewards, placed=True):
+    return {"display": {"name": name}, "blocks": {"positions": {"spawn": ["1,2,3,0.0,0.0"]} if placed else {}},
+            "key_requirements": {"enabled": True, "keys": {key: {"amount": 1}}},
+            "rewards": {"required_rewards": 1, "reward_list": {r: {"reward_id": r} for r in rewards}}}
+def reward(name, value="", item=False):
+    return {"base": {"weight": 12.5}, "Rarity": {"enabled": True, "rarity_id": "mythic"},
+            "preview": {"name": name, "use_item_data": item, "icon": {"Data": {"Value": value}}}}
+CRATES = {"test_crate.yml": crate("<gradient:#F2CCFF:#7B2FBE>Test Crate</gradient>", "test_key", ["gem", "ingot", "blade", "rib"]),
+          "old_crate.yml": crate("Old Crate", "test_key", ["gem"], placed=False)}
+REWARDS = {"test_crate": {
+    "gem": reward("&bGem"),
+    "ingot": reward("Netherite Ingot X2", '{count:2,id:"minecraft:netherite_ingot"}', item=True),
+    "blade": reward("Blade X1", '{components:{"minecraft:custom_name":{text:"",extra:[{text:"Big ",color:"#fff"},'
+                    '{text:"Blade"}]},"minecraft:lore":[{text:"nope"}]},count:1,id:"minecraft:netherite_sword"}', item=True),
+    "rib": reward("Trim Rib", '{count:1,id:"minecraft:rib_armor_trim_smithing_template"}', item=True)},
+    "old_crate": {"gem": reward("Gem")}}
+KEYS = {"test_key": {"display": {"name": "Test Key"}}}
+rows = facts.build_smp_crates(CRATES, REWARDS, KEYS)
+assert rows == [["Test Crate", "Test Key", "Gem, Netherite Ingot x2, Big Blade, Armour trims (Rib)"]], rows
+assert not any(s in json.dumps(rows) for s in ("12.5", "mythic", "nope", "Old Crate"))
+
+# Essentials kits: one-time and command-only kits are left out, rank kits show the rank, keys and Prism are named.
+KITS = {"kits": {"starter": {"delay": -1, "items": ["stonesword 1"]},
+                 "commandsbook": {"delay": 30, "items": ["/chelp item {USERNAME}"]},
+                 "tools": {"delay": 600, "items": ["stonesword 1", "diamond_sword 1 sharpness:2", "bread 32",
+                                                   "golden_shovel 1 name:&6Claim_Shovel lore:Right-click"]},
+                 "vipplus": {"delay": 86400, "items": ["/cratekey give {USERNAME} test_key 2", "/prism give {USERNAME} 500"]}}}
+assert facts.build_smp_kits(KITS, KEYS) == [
+    ["Tools", "/kit tools", "10 min", "Stone Sword, Diamond Sword (Sharpness II), Bread x32, Claim Shovel (Golden Shovel)"],
+    ["VIP+", "/kit vipplus", "1 d", "Test Key x2, 500 Prism Shards"]], facts.build_smp_kits(KITS, KEYS)
+
+# A denied path is never read, and a table whose plugin has no jar at the ref is refused.
+smp = facts.Repo(facts.SMP_REPO, facts.REFS["smp"], json.loads(facts.DENY.read_text(encoding="utf-8"))["paths"])
+for denied in ("plugins/ChromaticSeal/config.yml", "plugins/ChromaticAuctionHouse/house-fill.yml",
+               "plugins/ChromaticAuctionHouse/nudges.yml", "plugins/GrimAC/database.yml",
+               "plugins/ChromaticCrafting/config.yml", "plugins/ChromaBound/config.yml",
+               "plugins/ChromaticAuctionHouse/config.yml", "plugins/LuckPerms/config.yml"):
+    try:
+        smp.yaml(denied)
+    except facts.ShapeError as e:
+        assert "deny list" in str(e), e
+    else:
+        raise AssertionError(f"{denied} was read")
+smp.check("plugins/Essentials/kits.yml")
+try:
+    smp.need_jar("PlayerKits2")
+except facts.ShapeError as e:
+    assert "not installed" in str(e)
+else:
+    raise AssertionError("PlayerKits2 has no jar but passed")
+
 arsenal = facts.build_arsenal({"rarities": ["COMMON", "RARE"], "crates": {"arsenal": {"pity": {"within": 10}, "pool": [
     {"reward": "kit:a", "rarity": "RARE", "weight": 3}, {"reward": "kit:b", "rarity": "COMMON", "weight": 72}]}}},
     {"kits": {"a": {"name": "Alpha"}, "b": {"name": "<gold>Beta"}}})
@@ -59,8 +101,8 @@ assert facts.guard({"id": "t", "rows": [["Chance to strike twice.", "Featherweig
 
 # An unexpected config shape raises, naming the file and key.
 for bad, call in [
-    ("kits/x.yml: key 'cooldown'", lambda: facts.build_smp_kits({"x.yml": {"items": {"1": {"id": "STONE"}},
-                                                                            "display": {"default": {"name": "X"}}}})),
+    ("kits.x: key 'delay'", lambda: facts.build_smp_kits({"kits": {"x": {"items": ["stone 1"]}}}, {})),
+    ("crate/x.yml: key 'blocks'", lambda: facts.build_smp_crates({"x.yml": {"display": {"name": "X"}}}, {}, {})),
     ("unknown item GOLDEN_STAR", lambda: facts.build_enchants({"e": {**SAMPLE_ENCHANTS["aim"], "applies": ["GOLDEN_STAR"]}},
                                                              UPGRADES)),
     ("free.yml: key 'tiers'", lambda: facts.build_pass({"tier": {}}, {}, "free.yml")),

@@ -10,7 +10,7 @@
       {"ul": [
         "Random enchant books (Simple, Unique, Elite, Ultimate and Legendary) come from crates and the Battle Pass. Drag a book onto an item in your inventory to apply it.",
         "A book can fail. A failed book is used up, but the item is never lost.",
-        "Chromatic gear comes with its Prism enchants already on it, and Halloween Crate gear with its own. The Upgrade bench does not sell those."
+        "Chromatic gear comes with its Prism enchants already on it. Halloween gear has its own, from the retired Halloween Crate. The Upgrade bench does not sell those."
       ]}
     ]},
     {"h": "Mechanics", "blocks": [
@@ -32,11 +32,11 @@
       {"facts": "enchants-chromatic"}
     ]},
     {"h": "Halloween gear", "blocks": [
-      {"p": "These come on the gear from the Halloween Crate."},
+      {"p": "These are on Halloween gear, which came from the Halloween Crate. The crate is retired. Pieces players already own keep their enchants."},
       {"facts": "enchants-halloween"}
     ]}
   ],
   "history": [],
   "related": ["smp/crafting", "smp/crates", "smp/battle-pass"],
-  "needs_owner_check": "Written from mc-server origin/main 63529705, which holds the Chromabithia merge (1a958347, 2026-11-22). That merge changed the enchant ladders, the Upgrade bench caps (Max level column) and turned book combining off (before it, combining was on). Confirm the live SMP runs this config before publishing. Also confirm the Halloween Crate and its gear are still live."
+  "needs_owner_check": "Written from mc-server origin/main 63529705, which holds the Chromabithia merge (1a958347, 2026-11-22). That merge changed the enchant ladders, the Upgrade bench caps (Max level column) and turned book combining off (before it, combining was on). Confirm the live SMP runs this config before publishing."
 }

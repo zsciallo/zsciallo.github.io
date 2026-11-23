@@ -1,28 +1,62 @@
 {
  "id": "smp-kits",
  "title": "Kits",
- "source": "mc-server:plugins/PlayerKits2/kits",
+ "source": "mc-server:plugins/Essentials/kits.yml",
  "ref": "63529705",
  "columns": [
   "Kit",
+  "Command",
   "Cooldown",
   "Contents"
  ],
  "rows": [
   [
-   "Diamond Kit",
-   "12 h",
-   "Diamond Axe, Diamond Pickaxe, Super Sword (Diamond Sword, Fire Aspect V)"
+   "Daily",
+   "/kit daily",
+   "1 d",
+   "Iron Helmet, Iron Chestplate, Iron Leggings, Iron Boots, Iron Sword, Iron Pickaxe, Iron Axe, Iron Shovel, Cooked Beef x16"
   ],
   [
-   "Food Kit",
-   "1 h",
-   "Cooked Beef x5, Cooked Chicken x5"
+   "Diamond",
+   "/kit diamond",
+   "1 d",
+   "Diamond Helmet (Protection I), Diamond Chestplate (Protection I), Diamond Leggings (Protection I), Diamond Boots (Protection I), Diamond Sword (Sharpness II), Diamond Pickaxe (Efficiency II)"
   ],
   [
-   "Iron Kit",
-   "3 h",
-   "Iron Axe, Iron Pickaxe, Iron Sword"
+   "Claim",
+   "/kit claim",
+   "1 min",
+   "Claim Shovel (Golden Shovel)"
+  ],
+  [
+   "Tools",
+   "/kit tools",
+   "10 min",
+   "Stone Sword, Stone Shovel, Stone Pickaxe, Stone Axe"
+  ],
+  [
+   "VIP",
+   "/kit vip",
+   "1 d",
+   "Shard Key, 200 Prism Shards"
+  ],
+  [
+   "VIP+",
+   "/kit vipplus",
+   "1 d",
+   "Crate Key, 500 Prism Shards"
+  ],
+  [
+   "MVP",
+   "/kit mvp",
+   "1 d",
+   "Chroma Key, 750 Prism Shards"
+  ],
+  [
+   "MVP+",
+   "/kit mvpplus",
+   "1 d",
+   "Chroma Key, Shard Key, 1,000 Prism Shards"
   ]
  ]
 }

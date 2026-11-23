@@ -47,8 +47,16 @@ def need(d, key, where, typ=None):
     return d[key]
 
 
+SMALL_CAPS = str.maketrans("ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡʏᴢ", "abcdefghijklmnopqrstuvwyz")
+
+
 def clean(text):
-    return " ".join(COLOUR.sub("", str(text)).replace("\\n", " ").split())
+    """Colour codes and tags off; small-caps letters folded to plain ones, each folded word capitalised."""
+    text = COLOUR.sub("", str(text)).replace("\\n", " ")
+    folded = text.translate(SMALL_CAPS)
+    if folded != text:
+        text = " ".join(f.capitalize() if f != o else f for f, o in zip(folded.split(), text.split()))
+    return " ".join(text.split())
 
 
 def no_chance(text, removed):
@@ -72,10 +80,8 @@ def roman(n):
 
 
 def enchant_list(enchants, where):
-    if isinstance(enchants, list):  # PlayerKits2: ["FIRE_ASPECT;5"]
-        enchants = dict(e.split(";", 1) for e in enchants)
     if not isinstance(enchants, dict):
-        raise ShapeError(f"{where}: enchants is not a map or list")
+        raise ShapeError(f"{where}: enchants is not a map")
     return [f"{name(k)} {roman(int(v))}" for k, v in enchants.items()]
 
 
@@ -189,75 +195,113 @@ def build_enchants(ench, upgrades):
 
 
 def duration(seconds):
-    if seconds % 86400 == 0:
-        return f"{seconds // 86400} d"
-    if seconds % 3600 == 0:
-        return f"{seconds // 3600} h"
-    return f"{seconds // 60} min"
+    if seconds == 0:
+        return "None"
+    for unit, size in (("d", 86400), ("h", 3600), ("min", 60), ("s", 1)):
+        if seconds % size == 0:
+            return f"{seconds // size} {unit}"
 
 
-def build_smp_kits(kits):
+RANK_KIT = re.compile(r"^(vip|mvp)(plus)?$")
+TOOL_ALIAS = re.compile(r"^(wood|wooden|stone|iron|gold|golden|diamond|netherite)(sword|shovel|pickaxe|axe|hoe)$")
+CRATEKEY = re.compile(r"^/cratekey give \{USERNAME\} (\w+) (\d+)$")
+PRISM = re.compile(r"^/prism give \{USERNAME\} (\d+)$")
+
+
+def build_smp_kits(kits, keys):
+    """Essentials kits.yml -> rows. One-time kits (delay < 0) and kits that only run other commands are left out."""
     rows = []
-    for file, k in sorted(kits.items()):
-        where = f"PlayerKits2/kits/{file}"
-        items = [{"material": need(it, "id", f"{where}:items", str), "amount": it.get("amount", 1),
-                  "name": it.get("name"), "enchants": it.get("enchants") or {}}
-                 for it in need(k, "items", where, dict).values()]
-        title = clean(need(need(need(k, "display", where, dict), "default", f"{where}:display", dict),
-                           "name", f"{where}:display.default", str))
-        rows.append([title, duration(need(k, "cooldown", where, int)), loadout({"items": items}, where)])
+    for kid, k in need(kits, "kits", "Essentials/kits.yml", dict).items():
+        where = f"Essentials/kits.yml:kits.{kid}"
+        delay = need(k, "delay", where, int)
+        if delay < 0:
+            continue
+        contents = []
+        for line in need(k, "items", where, list):
+            line = str(line).strip()
+            if line.startswith("/"):
+                m, p = CRATEKEY.match(line), PRISM.match(line)
+                if m:
+                    if m.group(1) not in keys:
+                        raise ShapeError(f"{where}: key '{m.group(1)}' has no objects/key/{m.group(1)}.yml")
+                    n = int(m.group(2))
+                    contents.append(clean(keys[m.group(1)]["display"]["name"]) + (f" x{n}" if n > 1 else ""))
+                elif p:
+                    contents.append(f"{int(p.group(1)):,} Prism Shards")
+                continue  # other commands (books, messages) are not items
+            tokens = line.split()
+            alias = TOOL_ALIAS.match(tokens[0].lower())
+            item = {"material": f"{alias.group(1)}_{alias.group(2)}" if alias else tokens[0], "enchants": {}}
+            for t in tokens[1:]:
+                if t.isdigit():
+                    item["amount"] = int(t)
+                elif t.startswith("name:"):
+                    item["name"] = t[5:].replace("_", " ")
+                elif ":" in t and not t.startswith("lore:"):
+                    ench, _, lvl = t.partition(":")
+                    item["enchants"][ench] = int(lvl)
+            contents.append(item_text(item, where))
+        if not contents:
+            continue
+        rank = RANK_KIT.match(kid)
+        title = (rank.group(1).upper() + ("+" if rank.group(2) else "")) if rank else name(kid)
+        rows.append([title, f"/kit {kid}", duration(delay), ", ".join(counted(contents))])
     return rows
 
 
 SNBT_TEXT = re.compile(r"""text:(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)')""")
-TRIM = " Armor Trim Smithing Template"
+TRIM = re.compile(r"^Trim (\w+)$|^(\w+) Armor Trim Smithing Template$")
 
 
-def snbt_name(value, where):
-    """An ITEM reward without a Name: the preview item's custom name, else its item id."""
+def snbt_custom_name(value):
+    """The custom name inside an SNBT item, or None."""
     at = value.find('"minecraft:custom_name":')
-    if at >= 0:
-        depth, i = 0, at + len('"minecraft:custom_name":')
-        for j in range(i, len(value)):
-            depth += {"{": 1, "[": 1, "}": -1, "]": -1}.get(value[j], 0)
-            if depth == 0 and value[j] in "}],":
-                break
-        text = "".join(a or b for a, b in SNBT_TEXT.findall(value[i:j + 1]))
-        if text.strip():
-            return text
-    m = re.search(r'id:"([a-z0-9_:]+)"', value)
-    if not m:
-        raise ShapeError(f"{where}: no Name and no item id in PreviewData")
-    count = re.search(r"count:(\d+)", value)
-    return name(m.group(1)) + (f" x{count.group(1)}" if count and int(count.group(1)) > 1 else "")
+    if at < 0:
+        return None
+    depth, i = 0, at + len('"minecraft:custom_name":')
+    for j in range(i, len(value)):
+        depth += {"{": 1, "[": 1, "}": -1, "]": -1}.get(value[j], 0)
+        if depth == 0 and value[j] in "}],":
+            break
+    return "".join(a or b for a, b in SNBT_TEXT.findall(value[i:j + 1])).strip() or None
 
 
 def reward_name(r, where):
-    if "Name" in r:
-        return clean(need(r, "Name", where, str))
-    value = need(need(need(r, "PreviewData", where, dict), "Data", f"{where}.PreviewData", dict), "Value",
-                 f"{where}.PreviewData.Data", str)
-    return clean(snbt_name(value, where))
+    """ExcellentCrates 7: the preview name; when the preview shows the item itself, its custom name if it has one."""
+    preview = need(r, "preview", where, dict)
+    if preview.get("use_item_data"):
+        custom = snbt_custom_name(str(((preview.get("icon") or {}).get("Data") or {}).get("Value", "")))
+        if custom:
+            return clean(custom)
+    return re.sub(r" X(\d+)$", r" x\1", clean(need(preview, "name", f"{where}.preview", str)))
 
 
-def build_smp_crates(crates, keys):
+def build_smp_crates(crates, rewards, keys):
+    """ExcellentCrates 7 objects/ layout. A crate with no placed block cannot be opened and is left out."""
     rows = []
     for file, c in crates.items():
-        where = f"ExcellentCrates/crates/{file}"
+        cid, where = file[:-4], f"ExcellentCrates/objects/crate/{file}"
+        positions = need(need(c, "blocks", where, dict), "positions", f"{where}:blocks", dict)
+        if not any(positions.values()):
+            continue
         key_names = []
-        for opt, o in need(c, "CostOptions", where, dict).items():
-            for entry in need(o, "Entries", f"{where}:CostOptions.{opt}", dict).values():
-                kid = need(entry, "Key", f"{where}:CostOptions.{opt}.Entries", str)
-                if kid not in keys:
-                    raise ShapeError(f"{where}: key '{kid}' has no keys/{kid}.yml")
-                key_names.append(clean(need(keys[kid], "Name", f"keys/{kid}.yml", str)))
-        rewards = need(need(c, "Rewards", where, dict), "List", f"{where}:Rewards", dict)
-        names = [reward_name(r, f"{where}:Rewards.List.{rid}") for rid, r in rewards.items()]
+        for kid in need(need(c, "key_requirements", where, dict), "keys", f"{where}:key_requirements", dict):
+            if kid not in keys:
+                raise ShapeError(f"{where}: key '{kid}' has no objects/key/{kid}.yml")
+            key_names.append(clean(need(need(keys[kid], "display", f"key/{kid}.yml", dict), "name",
+                                        f"key/{kid}.yml:display", str)))
+        names = []
+        for rid, ref in need(need(c, "rewards", where, dict), "reward_list", f"{where}:rewards", dict).items():
+            reward_id = need(ref, "reward_id", f"{where}:rewards.reward_list.{rid}", str)
+            if reward_id not in rewards.get(cid, {}):
+                raise ShapeError(f"{where}: reward '{reward_id}' has no objects/reward/{cid}/{reward_id}.yml")
+            names.append(reward_name(rewards[cid][reward_id], f"reward/{cid}/{reward_id}.yml"))
         if not names:
-            raise ShapeError(f"{where}: Rewards.List is empty")
-        trims = [n[:-len(TRIM)] for n in names if n.endswith(TRIM)]
-        names = [n for n in names if not n.endswith(TRIM)] + ([f"Armour trims ({', '.join(trims)})"] if trims else [])
-        rows.append([clean(need(c, "Name", where, str)), ", ".join(key_names), ", ".join(dict.fromkeys(names))])
+            raise ShapeError(f"{where}: rewards.reward_list is empty")
+        trims = [m.group(1) or m.group(2) for m in map(TRIM.match, names) if m]
+        names = [n for n in names if not TRIM.match(n)] + ([f"Armour trims ({', '.join(trims)})"] if trims else [])
+        title = clean(need(need(c, "display", where, dict), "name", f"{where}:display", str))
+        rows.append([title, ", ".join(key_names), ", ".join(dict.fromkeys(names))])
     return sorted(rows)
 
 
@@ -394,6 +438,13 @@ class Repo:
             raise ShapeError(f"{path}: top level is not a map")
         return data
 
+    def need_jar(self, *prefixes):
+        """The plugin must be installed at the ref (its jar in plugins/), or the table is not built."""
+        jars = (self.git("ls-tree", "--name-only", f"{self.sha}:plugins") or "").splitlines()
+        for prefix in prefixes:
+            if not any(j.startswith(prefix) and j.endswith(".jar") for j in jars):
+                raise ShapeError(f"no plugins/{prefix}*.jar at {self.sha}: the plugin is not installed, its configs are not live")
+
     def folder(self, folder, suffix=".yml"):
         self.check(folder + "/")
         out = self.git("ls-tree", "--name-only", f"{self.sha}:{folder}", ok=True)
@@ -403,33 +454,40 @@ class Repo:
 
 
 def tables(smp, kit):
-    """Yield (id, title, repo, source, thunk -> (columns, rows, removed))."""
+    """Yield (id, title, repo, source, jars that must be installed, thunk -> (columns, rows, removed))."""
     ae, arena = "plugins/AdvancedEnchantments", "plugins/ChromaticArena"
 
-    yield "enchants", "", smp, f"{ae}/enchantments.yml", lambda: build_enchants(
-        smp.yaml(f"{ae}/enchantments.yml"), smp.yaml("plugins/ChromaticCrafting/upgrades.yml"))
-    yield ("smp-kits", "Kits", smp, "plugins/PlayerKits2/kits", lambda: (["Kit", "Cooldown", "Contents"],
-           build_smp_kits(smp.folder("plugins/PlayerKits2/kits")), 0))
-    yield ("smp-crates", "Crates", smp, "plugins/ExcellentCrates/crates", lambda: (["Crate", "Key", "Can contain"],
-           build_smp_crates(smp.folder("plugins/ExcellentCrates/crates"),
-                            {f[:-4]: v for f, v in smp.folder("plugins/ExcellentCrates/keys").items()}), 0))
+    ec = "plugins/ExcellentCrates/objects"
+    keys = lambda: {f[:-4]: v for f, v in smp.folder(f"{ec}/key").items()}
+    yield ("enchants", "", smp, f"{ae}/enchantments.yml", ("AdvancedEnchantments-", "ChromaticCrafting"),
+           lambda: build_enchants(smp.yaml(f"{ae}/enchantments.yml"), smp.yaml("plugins/ChromaticCrafting/upgrades.yml")))
+    yield ("smp-kits", "Kits", smp, "plugins/Essentials/kits.yml", ("EssentialsX-",), lambda: (
+           ["Kit", "Command", "Cooldown", "Contents"], build_smp_kits(smp.yaml("plugins/Essentials/kits.yml"), keys()), 0))
+
+    def crates():
+        found = smp.folder(f"{ec}/crate")
+        rewards = {f[:-4]: {r[:-4]: v for r, v in smp.folder(f"{ec}/reward/{f[:-4]}").items()} for f in found}
+        return ["Crate", "Key", "Can contain"], build_smp_crates(found, rewards, keys()), 0
+    # 7.x reads objects/; the crates/ and keys/ folders beside it are 6.x leftovers.
+    yield "smp-crates", "Crates", smp, f"{ec}/crate", ("ExcellentCrates-7.",), crates
     for track, title in (("free", "Battle Pass: free track"), ("premium", "Battle Pass: Chroma track")):
         path = f"plugins/BattlePass/passes/{track}.yml"
-        yield (f"battlepass-{track}", title, smp, path, lambda path=path: (["Tier", "Reward"],
+        yield (f"battlepass-{track}", title, smp, path, ("BattlePass-",), lambda path=path: (["Tier", "Reward"],
                build_pass(smp.yaml(path), smp.yaml("plugins/BattlePass/rewards.yml"), path), 0))
-    yield ("pvp-kits", "Kits", kit, f"{arena}/kits", lambda: (["Kit", "Modes", "Loadout"],
+    ca = ("ChromaticArena.jar",)
+    yield ("pvp-kits", "Kits", kit, f"{arena}/kits", ca, lambda: (["Kit", "Modes", "Loadout"],
            build_pvp_kits(kit.folder(f"{arena}/kits")), 0))
-    yield ("pvp-ffa-kits", "FFA kits", kit, f"{arena}/ffa-kits.yml", lambda: (["Kit", "Tab", "Loadout", "Cost"],
+    yield ("pvp-ffa-kits", "FFA kits", kit, f"{arena}/ffa-kits.yml", ca, lambda: (["Kit", "Tab", "Loadout", "Cost"],
            build_ffa_kits(kit.yaml(f"{arena}/ffa-kits.yml")), 0))
-    yield ("pvp-modifiers", "Arena modifiers", kit, f"{arena}/modifiers.yml", lambda: (["Modifier", "What it does"],
+    yield ("pvp-modifiers", "Arena modifiers", kit, f"{arena}/modifiers.yml", ca, lambda: (["Modifier", "What it does"],
            build_modifiers(kit.yaml(f"{arena}/modifiers.yml")), 0))
-    yield ("pvp-augments", "Arena augments", kit, f"{arena}/augments.yml", lambda: (["Augment", "Rarity", "What it does"],
+    yield ("pvp-augments", "Arena augments", kit, f"{arena}/augments.yml", ca, lambda: (["Augment", "Rarity", "What it does"],
            *build_augments(kit.yaml(f"{arena}/augments.yml"))))
-    yield ("pvp-divisions", "Ranked tiers", kit, f"{arena}/seasons.yml", lambda: (["Tier", "Rating", "Divisions"],
+    yield ("pvp-divisions", "Ranked tiers", kit, f"{arena}/seasons.yml", ca, lambda: (["Tier", "Rating", "Divisions"],
            build_divisions(kit.yaml(f"{arena}/seasons.yml")), 0))
-    yield ("pvp-shop", "Arena shop", kit, f"{arena}/shop.yml", lambda: (["Item", "Price"],
+    yield ("pvp-shop", "Arena shop", kit, f"{arena}/shop.yml", ca, lambda: (["Item", "Price"],
            build_shop(kit.yaml(f"{arena}/shop.yml")), 0))
-    yield ("pvp-arsenal-crate", "Arsenal Crate", kit, "plugins/ChromaticLoot/crates.yml", lambda: (["Tier", "Contents"],
+    yield ("pvp-arsenal-crate", "Arsenal Crate", kit, "plugins/ChromaticLoot/crates.yml", ca + ("ChromaticLoot.jar",), lambda: (["Tier", "Contents"],
            build_arsenal(kit.yaml("plugins/ChromaticLoot/crates.yml"), kit.yaml(f"{arena}/ffa-kits.yml")), 0))
 
 
@@ -450,7 +508,8 @@ def run(smp_ref, kit_ref, out_dir):
     smp, kit = Repo(SMP_REPO, smp_ref, paths), Repo(KIT_REPO, kit_ref, paths)
     names = {id(smp): "mc-server", id(kit): "mc-kit"}
     out, skipped, removed, notes = [], [], {}, []
-    for tid, title, repo, source, thunk in tables(smp, kit):
+    for tid, title, repo, source, jars, thunk in tables(smp, kit):
+        repo.need_jar(*jars)
         try:
             res = thunk()
         except FileNotFoundError as e:
