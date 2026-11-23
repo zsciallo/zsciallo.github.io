@@ -1,6 +1,7 @@
 node_modules/
 dist/
 tools/__pycache__/
+__pycache__/
 
 # Checked out by the deploy workflow to fall back on, never committed.
 .last-deploy/
