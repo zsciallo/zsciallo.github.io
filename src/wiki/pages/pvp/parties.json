@@ -2,6 +2,7 @@
   "title": "Parties",
   "half": "pvp",
   "live": true,
+  "icon": "goat_horn",
   "summary": "**Parties** let you group up with friends on ChromaPVP and queue team modes together. A party holds up to four players.",
   "infobox": [
     ["Server", "ChromaPVP"],

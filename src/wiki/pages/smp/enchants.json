@@ -2,15 +2,16 @@
   "title": "Custom Enchants",
   "half": "smp",
   "live": true,
+  "icon": "enchanted_book",
   "summary": "**Custom Enchants** are enchantments the SMP adds on top of the vanilla ones: 141 of them, for weapons, armour, tools, hoes, fishing rods and two gear sets.",
   "infobox": [["Server", "SMP"], ["Type", "System"], ["Enchants", "141"], ["Command", "`/craft`"]],
   "sections": [
     {"h": "Obtaining", "blocks": [
       {"p": "Most custom enchants are bought at the **Upgrade** bench in `/craft`. Put in a piece of gear, pick an enchant and buy its next level with Prism Shards and money. The bench sells each enchant up to the max level in the tables below."},
       {"ul": [
-        "Random enchant books (Simple, Unique, Elite, Ultimate and Legendary) come from crates and the Battle Pass. Drag a book onto an item in your inventory to apply it.",
+        "{{icon:enchanted_book}} Random enchant books (Simple, Unique, Elite, Ultimate and Legendary) come from crates and the Battle Pass. Drag a book onto an item in your inventory to apply it.",
         "A book can fail. A failed book is used up, but the item is never lost.",
-        "Chromatic gear comes with its Prism enchants already on it. Halloween gear has its own, from the retired Halloween Crate. The Upgrade bench does not sell those."
+        "{{icon:chromatic_chestplate}} Chromatic gear comes with its Prism enchants already on it. Halloween gear has its own, from the retired Halloween Crate. The Upgrade bench does not sell those."
       ]}
     ]},
     {"h": "Mechanics", "blocks": [
@@ -18,7 +19,7 @@
         "An item starts with 9 custom enchant slots.",
         "Books do not combine. Two books of the same enchant, or a book on an item that already has it, will not raise the level. Levels come from the Upgrade bench and Awakening.",
         "**Awakening** in `/craft` destroys one random upgrade on the item and pushes another one or two levels past its cap. You do not choose which.",
-        "The **Disenchant** bench in `/craft` takes one enchant of your choice off an item for 200 Prism Shards. The enchant is destroyed and nothing is refunded. Thorns and vanilla curses cannot come off."
+        "{{icon:grindstone}} The **Disenchant** bench in `/craft` takes one enchant of your choice off an item for 200 Prism Shards. The enchant is destroyed and nothing is refunded. Thorns and vanilla curses cannot come off."
       ]}
     ]},
     {"h": "Weapons", "blocks": [{"facts": "enchants-weapons"}]},

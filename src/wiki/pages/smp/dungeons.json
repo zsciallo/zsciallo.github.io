@@ -2,6 +2,8 @@
   "title": "Dungeons",
   "half": "smp",
   "live": true,
+  "icon": "mossy_cobblestone",
+  "image": {"src": "/dungeon/preview.jpg", "alt": "The Heartwood dungeon island, drawn block by block"},
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running. Also unconfirmed: how the Chromabithia level and XP are described to players (this page only says kills and contracts feed it); whether /warp dungeon charges the same $20,000 as a camp warp.",
   "summary": "**Dungeons** on the SMP are camps of custom mobs inside Heartwood, a giant underground tree in the dungeon world.",
   "infobox": [
@@ -17,10 +19,10 @@
       {"p": "Clear a camp to open its crate, collect area keys and zone items, take on the mini bosses, and finish at the Rotroot Heart in the core."},
       {"p": "Type `/dungeon` to open the status screen. It shows every camp, its respawn timer, your keys, and four area tiles to warp to:"},
       {"ul": [
-        "**Easy**: free. Recommended gear: iron armour.",
-        "**Medium**: $10,000. Recommended: Sporewarden or diamond armour.",
-        "**Hard**: $20,000. Recommended: Chromatic armour.",
-        "**Very Hard**: $40,000. Recommended: Living Prism armour."
+        "{{icon:iron_chestplate}} **Easy**: free. Recommended gear: iron armour.",
+        "{{icon:diamond_chestplate}} **Medium**: $10,000. Recommended: Sporewarden or diamond armour.",
+        "{{icon:chromatic_chestplate}} **Hard**: $20,000. Recommended: Chromatic armour.",
+        "{{icon:living_prism_chestplate}} **Very Hard**: $40,000. Recommended: Living Prism armour."
       ]},
       {"p": "`/warp heartwood` and `/warp dungeon` take you to the Easy entrance. A warp has a 5 second warm-up: moving, taking damage or dealing damage cancels it. `/dungeon leave` takes you back to spawn. Plan your route on [the dungeon map](/dungeon/)."},
       {"p": "New to Heartwood? `/dungeon tutorial` walks you through eight steps in Mossgate Landing: kill mobs, craft a Sporewarden piece, beat the mini boss, open a camp crate, upgrade at `/craft` and finish a contract. It pays 250 Prism Shards and 8 Prismatic Resin. `/dungeon tutorial skip` skips it."}
@@ -56,7 +58,7 @@
         "A camp's crate unlocks when the camp is cleared, or when its boss dies on a boss camp. It can then be opened 3 times before the camp respawns.",
         "Each opening uses one key and gives 5 to 7 different items.",
         "Anything that does not fit in your inventory waits in `/dungeon claim`.",
-        "Crates hold things like Prismatic Resin, the area's zone armour pieces, spawners, diamonds, resource blocks, Bottles o' Enchanting, golden and enchanted golden apples, random enchant books, a Mending book, StatTrak trackers, ancient debris, money and Prism Shards. The harder crates add Living Prism, and the Core Crate can give an elytra."
+        "{{icon:chest}} Crates hold things like Prismatic Resin, the area's zone armour pieces, spawners, diamonds, resource blocks, Bottles o' Enchanting, golden and enchanted golden apples, random enchant books, a Mending book, StatTrak trackers, ancient debris, money and Prism Shards. The harder crates add Living Prism, and the Core Crate can give an elytra."
       ]}
     ]},
     {"h": "Bosses", "blocks": [
@@ -76,7 +78,7 @@
     {"h": "Contracts", "blocks": [
       {"p": "A contract summons a private mini boss just for you. Start one with `/dungeon contract` at a dungeon waypoint or inside an area."},
       {"ul": [
-        "Pay Prismatic Resin: 4, 8, 16 or 32 for tiers I to IV (Easy tier I costs 1).",
+        "{{icon:prismatic_resin}} Pay Prismatic Resin: 4, 8, 16 or 32 for tiers I to IV (Easy tier I costs 1).",
         "Kill 20, 30, 40 or 50 of the zone's mobs. Only your own kills count.",
         "Your mini boss then spawns where you stand, with more health at higher tiers. Only you and up to 3 helpers can fight it. Add a helper with `/dungeon contract invite` and their name before the boss spawns.",
         "You have 10 minutes to kill it. If it survives, the contract fails with no refund. `/dungeon contract cancel` returns your Resin, but only before the boss spawns.",

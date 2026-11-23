@@ -2,6 +2,7 @@
   "title": "Voting",
   "half": "smp",
   "live": true,
+  "icon": "paper",
   "needs_owner_check": "Player text disagrees with the config in two places: site faq.json says every site is every 24 hours and a vote party fires every twenty votes, and ChromaticHelp answers.yml says each vote gives money. VotingPlugin at mc-server 63529705 has minecraftservers.org every 8 hours, a 60-vote party and no money per vote; this page follows the config. 'Miss one day in seven' reads AllowMissedAmount 1 / AllowMissedPeriod 7.",
   "summary": "**Voting** for Chromabit on server lists earns a Vote Key and 2 minutes of Vote Fly for every vote.",
   "infobox": [
@@ -25,12 +26,12 @@
     ]},
     {"h": "Rewards", "blocks": [
       {"ul": [
-        "**Every vote**: 1 Vote Key and 2 minutes of [Vote Fly](/wiki/smp/vote-fly/).",
-        "**First vote ever**: a Shard Key.",
-        "**All 5 sites in one day**: a bonus Vote Key.",
-        "**Vote party**: when the server reaches 60 votes in a day, everyone online gets a Vote Key. The count starts over each day.",
-        "**Streaks**: vote at least once a day. Day 3 gives a bonus Vote Key, day 7 a Shard Key and day 14 a Chroma Key. You can miss one day in seven without losing the streak.",
-        "**Top voters**: at the end of each month, 1st place gets 2 Chroma Keys, 2nd a Chroma Key and 3rd a Shard Key."
+        "{{icon:tripwire_hook}} **Every vote**: 1 Vote Key and 2 minutes of [Vote Fly](/wiki/smp/vote-fly/).",
+        "{{icon:tripwire_hook}} **First vote ever**: a Shard Key.",
+        "{{icon:tripwire_hook}} **All 5 sites in one day**: a bonus Vote Key.",
+        "{{icon:tripwire_hook}} **Vote party**: when the server reaches 60 votes in a day, everyone online gets a Vote Key. The count starts over each day.",
+        "{{icon:tripwire_hook}} **Streaks**: vote at least once a day. Day 3 gives a bonus Vote Key, day 7 a Shard Key and day 14 a Chroma Key. You can miss one day in seven without losing the streak.",
+        "{{icon:tripwire_hook}} **Top voters**: at the end of each month, 1st place gets 2 Chroma Keys, 2nd a Chroma Key and 3rd a Shard Key."
       ]},
       {"p": "Vote Keys open the Vote Crate at spawn, which also has its own milestones. See [Crates and Keys](/wiki/smp/crates/)."}
     ]},

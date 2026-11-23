@@ -5,6 +5,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { imageSize } from '../../tools/vite-image-sizes.js';
 
 export const WIKI_DIR = fileURLToPath(new URL('./pages/', import.meta.url));
 export const FACTS_DIR = fileURLToPath(new URL('./facts/', import.meta.url));
@@ -39,4 +40,32 @@ export function wikiChanges(pages) {
   return pages
     .flatMap((page) => (page.history ?? []).map((row) => ({ ...row, page })))
     .sort((a, b) => b.date.localeCompare(a.date) || a.page.title.localeCompare(b.page.title));
+}
+
+// ------------------------------------------------------------------ pictures --
+// Every picture is vendored under public/ (tools/wiki/fetch_wiki_icons.py fills public/wiki/icons/).
+// A picture whose file is missing resolves to null and renders nothing.
+
+export const PUBLIC_DIR = fileURLToPath(new URL('../../public/', import.meta.url));
+export const MATERIAL = /^[a-z0-9_]+$/;
+const SITE_PATH = /^\/(?!\/)[a-z0-9_./-]+\.(png|jpe?g|webp|gif)$/i;
+
+/** A site picture: { src, width, height } read from the file under public/, or null when it is not there. */
+export function picture(src) {
+  if (typeof src !== 'string' || !SITE_PATH.test(src) || src.includes('..')) return null;
+  const file = join(PUBLIC_DIR, src);
+  if (!existsSync(file)) return null;
+  const size = imageSize(readFileSync(file));
+  return size ? { src, width: size[0], height: size[1] } : null;
+}
+
+/** The sprite for an icon name: a material (public/wiki/icons/<material>.png) or a site path; null when there is none. */
+export const iconPicture = (name) => picture(MATERIAL.test(name ?? '') ? `/wiki/icons/${name}.png` : name);
+
+/** How many custom enchants the enchant tables list (src/wiki/facts/enchants-*.json rows). */
+export function enchantCount(dir = FACTS_DIR) {
+  if (!existsSync(dir)) return 0;
+  return readdirSync(dir)
+    .filter((f) => /^enchants-.+\.json$/.test(f))
+    .reduce((n, f) => n + (JSON.parse(readFileSync(join(dir, f), 'utf-8')).rows?.length ?? 0), 0);
 }

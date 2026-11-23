@@ -2,6 +2,7 @@
   "title": "Ranked",
   "half": "pvp",
   "live": true,
+  "icon": "diamond",
   "summary": "**Ranked** is ChromaPVP's rated duel ladder. Each kit has its own rating and tier for the season, and Java and Bedrock players share one ladder.",
   "infobox": [
     ["Server", "ChromaPVP"],

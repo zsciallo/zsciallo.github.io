@@ -2,6 +2,7 @@
   "title": "FFA",
   "half": "pvp",
   "live": true,
+  "icon": "iron_sword",
   "summary": "**FFA** is the free-for-all pit under the ChromaPVP spawn. Anyone can drop in at any time, and everything you carry drops where you die.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -20,7 +21,7 @@
       {"p": "Whatever you carry in the pit drops on the spot when you die, and anyone can pick it up for two minutes. Three things never drop:"},
       {"ul": [
         "Your free iron set and its upgrades (see below).",
-        "Your **stash**, the ender chest on the platform. Page 1 is free with 27 slots. You can buy four more pages on the Supplies screen for 1,500, 3,000, 6,000 and 12,000 Prism Coins, in that order.",
+        "{{icon:ender_chest}} Your **stash**, the ender chest on the platform. Page 1 is free with 27 slots. You can buy four more pages on the Supplies screen for 1,500, 3,000, 6,000 and 12,000 Prism Coins, in that order.",
         "Prism Coins you have already earned."
       ]}
     ]},
@@ -28,14 +29,14 @@
       {"p": "Every time you spawn you get a free set: an iron chestplate, leggings and boots, an iron sword and eight bread. It has no helmet, so your hat cosmetic shows until you put a real helmet on. The free sword hits for 7, one more than a normal iron sword."},
       {"p": "You can upgrade the set with Prism Coins on the Supplies screen. The steps go in a fixed order, and each one is yours for good:"},
       {"ul": [
-        "1: Sword Sharpness 1, 25",
-        "2: Chestplate Protection 1, 50",
-        "3: Leggings Protection 1, 125",
-        "4: Boots Protection 1, 300",
-        "5: Sword Sharpness 2, 700",
-        "6: Chestplate Protection 2, 1,500",
-        "7: Leggings Protection 2, 3,500",
-        "8: Boots Protection 2, 8,000"
+        "{{icon:iron_sword}} 1: Sword Sharpness 1, 25",
+        "{{icon:iron_chestplate}} 2: Chestplate Protection 1, 50",
+        "{{icon:iron_leggings}} 3: Leggings Protection 1, 125",
+        "{{icon:iron_boots}} 4: Boots Protection 1, 300",
+        "{{icon:iron_sword}} 5: Sword Sharpness 2, 700",
+        "{{icon:iron_chestplate}} 6: Chestplate Protection 2, 1,500",
+        "{{icon:iron_leggings}} 7: Leggings Protection 2, 3,500",
+        "{{icon:iron_boots}} 8: Boots Protection 2, 8,000"
       ]},
       {"p": "The whole track costs 14,200 Prism Coins."}
     ]},
@@ -48,10 +49,10 @@
       {"p": "The Supplies screen (the Supplies NPC on the platform, or `/ffa shop`) sells kits for Prism Coins in four tabs: Kits, Legendary, Clout and Utility. A bought kit goes into your inventory and drops if you die. See [Kits](/wiki/pvp/kits/) for the full list."},
       {"p": "Coin Charms are Utility items that add Prism Coins to every FFA kill you get while you carry one:"},
       {"ul": [
-        "Copper Coin Charm: +5%",
-        "Silver Coin Charm: +10%",
-        "Gold Coin Charm: +15%",
-        "Prism Coin Charm: +20%"
+        "{{icon:copper_ingot}} Copper Coin Charm: +5%",
+        "{{icon:iron_ingot}} Silver Coin Charm: +10%",
+        "{{icon:gold_ingot}} Gold Coin Charm: +15%",
+        "{{icon:amethyst_shard}} Prism Coin Charm: +20%"
       ]},
       {"p": "Only the best charm you carry counts. Two charms do not stack, a charm in your stash does nothing, and you lose it on death like any other item."}
     ]},
@@ -62,10 +63,10 @@
     {"h": "Events", "blocks": [
       {"p": "A new event starts every 10 minutes. A boss bar counts down to the next one, and chat calls it at 5 minutes, 1 minute and 10 seconds. The events run in this order:"},
       {"ul": [
-        "**Double Prism Coins** (5 minutes): FFA kills, duels and the Arena pay double.",
-        "**Golden Loot Slime** (3 minutes): a gold slime runs around the court by the landing pool. Damage you deal it pays Prism Coins, up to 150 per player, and the player who kills it gets 50 more.",
+        "{{icon:sunflower}} **Double Prism Coins** (5 minutes): FFA kills, duels and the Arena pay double.",
+        "{{icon:slime_ball}} **Golden Loot Slime** (3 minutes): a gold slime runs around the court by the landing pool. Damage you deal it pays Prism Coins, up to 150 per player, and the player who kills it gets 50 more.",
         "**Kill Frenzy** (5 minutes): streak bonuses are doubled.",
-        "**Supply Rain** (3 minutes): every minute, a wave of golden apples, pearls, wind charges and arrows falls into the pit."
+        "{{icon:golden_apple}} **Supply Rain** (3 minutes): every minute, a wave of golden apples, pearls, wind charges and arrows falls into the pit."
       ]}
     ]},
     {"h": "Vengeance", "blocks": [

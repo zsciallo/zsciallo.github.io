@@ -2,6 +2,7 @@
   "title": "Ranks and Kits",
   "half": "smp",
   "live": true,
+  "icon": "name_tag",
   "needs_owner_check": "rank perks written from the ranks file at origin/main; the prod rank import in deploy 20261123-014534 was recorded as failed",
   "summary": "**Ranks and Kits**: Explorer ranks are earned in game with /rankup, store ranks add perks and a daily rank kit, and kits are free gear on a timer.",
   "infobox": [
@@ -97,15 +98,15 @@
         },
         {
           "ul": [
-            "**Starter Kit**: stone tools, chainmail and leather armour, a Claim Shovel, a Claim Finder stick, a bed, 32 bread, a Chroma Key and a Shard Key, plus 30 minutes of Resistance, Saturation and Regeneration. Given once, on your first join.",
-            "**Claim Kit**: a Claim Shovel to mark out land. Every minute.",
-            "**Tools Kit**: a stone sword, shovel, pickaxe and axe. Every 10 minutes.",
-            "**Daily Kit**: a full set of iron armour and iron tools, plus 16 steak. Every 24 hours.",
-            "**Diamond Kit**: diamond armour with Protection I, a Sharpness II sword and an Efficiency II pickaxe. Every 24 hours, with VIP and up.",
-            "**VIP Kit**: a Shard Key and 200 Prism Shards. Every 24 hours, with VIP and up.",
-    "**VIP+ Kit**: a Spawner Key and 500 Prism Shards. Every 24 hours, with VIP+ and up.",
-    "**MVP Kit**: a Chroma Key and 750 Prism Shards. Every 24 hours, with MVP and up.",
-    "**MVP+ Kit**: a Chroma Key, a Shard Key and 1,000 Prism Shards. Every 24 hours, with MVP+."
+            "{{icon:stone_pickaxe}} **Starter Kit**: stone tools, chainmail and leather armour, a Claim Shovel, a Claim Finder stick, a bed, 32 bread, a Chroma Key and a Shard Key, plus 30 minutes of Resistance, Saturation and Regeneration. Given once, on your first join.",
+            "{{icon:golden_shovel}} **Claim Kit**: a Claim Shovel to mark out land. Every minute.",
+            "{{icon:stone_pickaxe}} **Tools Kit**: a stone sword, shovel, pickaxe and axe. Every 10 minutes.",
+            "{{icon:iron_chestplate}} **Daily Kit**: a full set of iron armour and iron tools, plus 16 steak. Every 24 hours.",
+            "{{icon:diamond_chestplate}} **Diamond Kit**: diamond armour with Protection I, a Sharpness II sword and an Efficiency II pickaxe. Every 24 hours, with VIP and up.",
+            "{{icon:tripwire_hook}} **VIP Kit**: a Shard Key and 200 Prism Shards. Every 24 hours, with VIP and up.",
+    "{{icon:tripwire_hook}} **VIP+ Kit**: a Spawner Key and 500 Prism Shards. Every 24 hours, with VIP+ and up.",
+    "{{icon:tripwire_hook}} **MVP Kit**: a Chroma Key and 750 Prism Shards. Every 24 hours, with MVP and up.",
+    "{{icon:tripwire_hook}} **MVP+ Kit**: a Chroma Key, a Shard Key and 1,000 Prism Shards. Every 24 hours, with MVP+."
           ]
         },
         {

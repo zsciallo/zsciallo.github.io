@@ -2,6 +2,7 @@
   "title": "Tournaments",
   "half": "pvp",
   "live": true,
+  "icon": "totem_of_undying",
   "summary": "**Tournaments** are double elimination duel brackets on ChromaPVP. Each game is played on a random kit, and the winner earns the Champion title.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -30,9 +31,9 @@
     ]},
     {"h": "Rewards", "blocks": [
       {"ul": [
-        "1st place: 1,000 Prism Coins and the **Champion** title.",
-        "2nd place: 500 Prism Coins.",
-        "3rd place: 250 Prism Coins."
+        "{{icon:sunflower}} 1st place: 1,000 Prism Coins and the **Champion** title.",
+        "{{icon:sunflower}} 2nd place: 500 Prism Coins.",
+        "{{icon:sunflower}} 3rd place: 250 Prism Coins."
       ]},
       {"p": "The Champion title cannot be bought. It shows locked in everyone's Titles tab in `/cosmetics` until they win it. The leaderboards also track tournament wins."}
     ]},

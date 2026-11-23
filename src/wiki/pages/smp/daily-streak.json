@@ -2,6 +2,7 @@
   "title": "Daily Streak",
   "half": "smp",
   "live": true,
+  "icon": "clock",
   "needs_owner_check": "ChromaticDaily (/daily) is on mc-server origin/main; confirm it is live on the SMP.",
   "summary": "**Daily Streak** is a reward for every day you log in. Claim it with `/daily`. The rewards get better for 7 days in a row, then stay at the top.",
   "infobox": [
@@ -14,13 +15,13 @@
   "sections": [
     {"h": "Rewards", "blocks": [
       {"ul": [
-        "Day 1: 1 Vote Key",
-        "Day 2: 1 Reward Key",
-        "Day 3: 1 Reward Key and 10 minutes of [vote fly](/wiki/smp/vote-fly/) time",
-        "Day 4: 1 Shard Key",
-        "Day 5: 1 Shard Key",
-        "Day 6: 1 Spawner Key",
-        "Day 7: 1 Chroma Key, then again every day your streak lasts"
+        "{{icon:tripwire_hook}} Day 1: 1 Vote Key",
+        "{{icon:tripwire_hook}} Day 2: 1 Reward Key",
+        "{{icon:tripwire_hook}} Day 3: 1 Reward Key and 10 minutes of [vote fly](/wiki/smp/vote-fly/) time",
+        "{{icon:tripwire_hook}} Day 4: 1 Shard Key",
+        "{{icon:tripwire_hook}} Day 5: 1 Shard Key",
+        "{{icon:tripwire_hook}} Day 6: 1 Spawner Key",
+        "{{icon:tripwire_hook}} Day 7: 1 Chroma Key, then again every day your streak lasts"
       ]}
     ]},
     {"h": "Mechanics", "blocks": [

@@ -2,6 +2,8 @@
   "title": "Keep-on-Death Gear",
   "half": "smp",
   "live": true,
+  "icon": "recovery_compass",
+  "image": {"src": "/store/icons/living_prism/living_prism_chestplate.png", "alt": "A Living Prism Chestplate"},
   "needs_owner_check": "The killer's 80% share of the death fee is written as a game rule from ChromaBound config.yml (killer-payout: 80); confirm it is fine to show on the wiki.",
   "summary": "**Keep-on-Death Gear** is the SMP rule that Chromatic, Halloween and Living Prism gear stays with you when you die.",
   "infobox": [
@@ -16,9 +18,9 @@
       {"p": "Everything else drops as normal, and every death costs a small share of your balance."},
       {"p": "When you die, these items are taken out of your drops and handed back when you respawn:"},
       {"ul": [
-        "Every Chromatic item: weapons, tools and armour.",
-        "The Halloween set.",
-        "Living Prism gear: armour, sword, bow, crossbow, tools, spear, mace and wings.",
+        "{{icon:chromatic_chestplate}} Every Chromatic item: weapons, tools and armour.",
+        "{{icon:widow_chestplate}} The Halloween set.",
+        "{{icon:living_prism_chestplate}} Living Prism gear: armour, sword, bow, crossbow, tools, spear, mace and wings.",
         "Shattered gear (a broken Chromatic, Halloween or Living Prism item waiting for repair)."
       ]},
       {"p": "Bound gear says **It seems bound to you** in its lore. Living Prism and Prismatic Resin materials are not gear, and they drop. So do old Chromatic armour pieces made before the switch to the current items."}

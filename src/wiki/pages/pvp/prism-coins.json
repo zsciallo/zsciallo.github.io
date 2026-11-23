@@ -2,6 +2,7 @@
   "title": "Prism Coins",
   "half": "pvp",
   "live": true,
+  "icon": "sunflower",
   "summary": "**Prism Coins** (⛃) are ChromaPVP's currency. You earn them by playing and spend them on FFA kits and upgrades, stash pages, cosmetics and crates.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -19,15 +20,15 @@
         "**Arena:** 180, 120, 75 or 30 for your final placement, and 5 for each enemy you knock out. See [Arena](/wiki/pvp/arena/).",
         "**Parkour:** your first finish of the spawn parkour each day pays 25.",
         "**FFA events:** Double Prism Coins doubles kills, duels and the Arena while it runs. The Golden Loot Slime pays for the damage you deal it.",
-        "**Tournaments:** the top three places pay Prism Coins. See [Tournaments](/wiki/pvp/tournaments/)."
+        "{{icon:totem_of_undying}} **Tournaments:** the top three places pay Prism Coins. See [Tournaments](/wiki/pvp/tournaments/)."
       ]},
       {"p": "Every reward shows in chat as it lands, for example **+⛃ 15 Prism Coins**."}
     ]},
     {"h": "Spending", "blocks": [
       {"ul": [
         "**Supplies** (the Supplies NPC on the FFA platform, or `/ffa shop`): FFA kits, the eight-step gear upgrade track and extra stash pages.",
-        "**Cosmetics** (`/cosmetics`): kill effects, trails, hats, titles and more. See [Crates and Cosmetics](/wiki/pvp/crates/).",
-        "**Crates** (`/crates`): the Spectrum, Mythic and Arsenal Crates."
+        "{{icon:firework_rocket}} **Cosmetics** (`/cosmetics`): kill effects, trails, hats, titles and more. See [Crates and Cosmetics](/wiki/pvp/crates/).",
+        "{{icon:chest}} **Crates** (`/crates`): the Spectrum, Mythic and Arsenal Crates."
       ]},
       {"p": "On the Supplies screen you click twice to buy, so one stray click spends nothing. If a purchase fails, no Prism Coins are taken."}
     ]},

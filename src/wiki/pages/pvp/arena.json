@@ -2,6 +2,7 @@
   "title": "Arena",
   "half": "pvp",
   "live": true,
+  "icon": "anvil",
   "summary": "**Arena** (the Prismatic Arena) is ChromaPVP's round-based team mode: one shrinking ring, augment picks and a gold shop between rounds.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -35,7 +36,7 @@
       {"p": "Every round goes the same way:"},
       {"ul": [
         "**Augment pick** (20 seconds): choose one of three augments. Augments last for the whole match and stack.",
-        "**Shop** (20 seconds): spend gold. The shop closes early once everyone still in is ready.",
+        "{{icon:gold_ingot}} **Shop** (20 seconds): spend gold. The shop closes early once everyone still in is ready.",
         "**Prep** (5 seconds), then the fight (up to 90 seconds)."
       ]},
       {"p": "The ring starts closing 15 seconds into the fight and reaches its smallest size at 60 seconds. Standing outside it costs 3 health every second. Healing also gets weaker as the ring closes, down to 40% less at its smallest."},
@@ -44,11 +45,11 @@
     {"h": "Gold and the shop", "blocks": [
       {"p": "You start the match with 100 gold. Each round pays 100 more to every player still in, plus a bonus for your team's finish, and each kill pays 8. In the shop you can buy:"},
       {"ul": [
-        "Weapon upgrades, from wood up to netherite (the Bomber upgrades its TNT instead).",
-        "Armour upgrades, from chainmail to iron to diamond.",
-        "Enchantment levels for your weapon or Protection, up to level 3.",
-        "One-round items: arrows, golden apples, a shield (lasts two rounds), splash healing and ender pearls.",
-        "Stat anvils."
+        "{{icon:netherite_sword}} Weapon upgrades, from wood up to netherite (the Bomber upgrades its TNT instead).",
+        "{{icon:diamond_chestplate}} Armour upgrades, from chainmail to iron to diamond.",
+        "{{icon:enchanted_book}} Enchantment levels for your weapon or Protection, up to level 3.",
+        "{{icon:golden_apple}} One-round items: arrows, golden apples, a shield (lasts two rounds), splash healing and ender pearls.",
+        "{{icon:anvil}} Stat anvils."
       ]},
       {"facts": "pvp-shop"}
     ]},

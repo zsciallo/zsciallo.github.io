@@ -253,9 +253,10 @@ function webPageNode(page, type = 'WebPage') {
   return node;
 }
 
-/** faq.json's markdown-lite as plain text: **b** and `c` lose their marks, [text](href) keeps the text. */
+/** faq.json's markdown-lite as plain text: **b** and `c` lose their marks, [text](href) keeps the text, a wiki {{icon:x}} goes. */
 export function plainAnswer(text) {
   return text
+    .replace(/\{\{icon:[^}]*\}\}\s*/g, '')
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')

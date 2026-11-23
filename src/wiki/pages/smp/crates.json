@@ -2,6 +2,8 @@
   "title": "Crates and Keys",
   "half": "smp",
   "live": true,
+  "icon": "chest",
+  "image": {"src": "/store/icons/shards/shard_of_strength.png", "alt": "A Shard of Strength, one of the 12 shards"},
   "needs_owner_check": "Written for mc-server 63529705 from the ExcellentCrates 7.x layout (objects/crate, objects/key, objects/reward). Halloween Crate retired (positions: {}), so 6 openable crates. Spawner type count left to the smp-crates table (lore says 13, reward list 14). Prod deploy 20261123-014534 was still running.",
   "summary": "**Crates and Keys** are the six reward crates at spawn. Each opens with its own key, and each pays milestone rewards after a set number of openings.",
   "infobox": [
@@ -15,12 +17,12 @@
     {"h": "Obtaining", "blocks": [
       {"p": "Go to the crates at spawn and right-click a crate to open it with its key. The hologram over each crate shows how many keys you have. Keys are kept on your account, not in your inventory."},
       {"ul": [
-        "**Chroma Crate** (Chroma Key): the full Chromatic and Corrupted gear sets, elytras included, and cash from $500,000 to $2,000,000. Keys come from the store, the Starter Kit, the [daily streak](/wiki/smp/daily-streak/), a 14 day [vote](/wiki/smp/voting/) streak, the monthly top voter awards, the Adamantine rank, the MVP and MVP+ kits, the Reward Crate and milestones.",
-        "**Shard Crate** (Shard Key): all 12 shards, plus trackers. Keys come from the store, the Starter Kit, your first vote ever, a 7 day vote streak, 3rd place among monthly top voters, the daily streak, 2nd and 3rd place at KOTH, the VIP and MVP+ kits, the Reward Crate and milestones.",
-        "**Spawner Crate** (Crate Key, also called the Spawner Key): every key is a spawner haul. Keys come from the store, the daily streak, the Emerald and Adamantine ranks, the VIP+ kit, the Reward Crate and the Vote Crate milestones.",
-        "**Reward Crate** (Reward Key): every crate key except the Vote Key, shards, enchant books (Simple to Legendary) and trackers. Keys come from winning KOTH, envoys and the daily streak.",
-        "**Vote Crate** (Vote Key): one key for every vote, plus bonus keys. See [Voting](/wiki/smp/voting/).",
-        "**Living Prism Crate** (Living Prism Key): the full Living Prism line of armour, tools and weapons, and cash from $500,000 to $5,000,000. The Living Prism Spear, Mace and Wings drop only here. Keys come from the [Battle Pass](/wiki/smp/battle-pass/), the store and the crate's own milestone."
+        "{{icon:chromatic_chestplate}} **Chroma Crate** (Chroma Key): the full Chromatic and Corrupted gear sets, elytras included, and cash from $500,000 to $2,000,000. Keys come from the store, the Starter Kit, the [daily streak](/wiki/smp/daily-streak/), a 14 day [vote](/wiki/smp/voting/) streak, the monthly top voter awards, the Adamantine rank, the MVP and MVP+ kits, the Reward Crate and milestones.",
+        "{{icon:shard_of_vigor}} **Shard Crate** (Shard Key): all 12 shards, plus trackers. Keys come from the store, the Starter Kit, your first vote ever, a 7 day vote streak, 3rd place among monthly top voters, the daily streak, 2nd and 3rd place at KOTH, the VIP and MVP+ kits, the Reward Crate and milestones.",
+        "{{icon:spawner}} **Spawner Crate** (Crate Key, also called the Spawner Key): every key is a spawner haul. Keys come from the store, the daily streak, the Emerald and Adamantine ranks, the VIP+ kit, the Reward Crate and the Vote Crate milestones.",
+        "{{icon:enchanted_book}} **Reward Crate** (Reward Key): every crate key except the Vote Key, shards, enchant books (Simple to Legendary) and trackers. Keys come from winning KOTH, envoys and the daily streak.",
+        "{{icon:paper}} **Vote Crate** (Vote Key): one key for every vote, plus bonus keys. See [Voting](/wiki/smp/voting/).",
+        "{{icon:living_prism}} **Living Prism Crate** (Living Prism Key): the full Living Prism line of armour, tools and weapons, and cash from $500,000 to $5,000,000. The Living Prism Spear, Mace and Wings drop only here. Keys come from the [Battle Pass](/wiki/smp/battle-pass/), the store and the crate's own milestone."
       ]},
       {"p": "The Halloween Crate is retired and can no longer be opened. Halloween gear that players already own still works."}
     ]},
@@ -31,12 +33,12 @@
     {"h": "Milestones", "blocks": [
       {"p": "Every opening counts toward that crate's milestones. Most ladders start over once you reach the last step; the Vote Crate's pays each step only once."},
       {"ul": [
-        "**Chroma Crate**: 1,500 Prism Shards at 3, 2,000 Prism Shards and a Chroma Key at 5, $1,250,000 at 12, 2 Chroma Keys at 20, a Chromatic Sword at 30, $2,000,000 at 40, a Chromatic Mace at 50.",
-        "**Shard Crate**: 1,500 Prism Shards at 3, 2,000 at 5, a Shard Key at 10, 1,500 Prism Shards at 43, 2,000 at 45, a Shard Key at 50, a Shard of Strength at 80.",
-        "**Spawner Crate**: 1,500 Prism Shards at 3, 2,000 at 5, a Spawner Key at 50, a Warden spawner at 100.",
-        "**Reward Crate**: 750 Prism Shards at 3, 1,250 at 5, a Chroma Key at 15.",
-        "**Living Prism Crate**: a Living Prism Key every 8 openings.",
-        "**Vote Crate** (once each): a Spawner Crate Key at 2, a Shard Key at 3, a Vote Chestplate at 10, an Elytra at 20, a Chroma Key at 30, a Shard Key at 50."
+        "{{icon:chromatic_chestplate}} **Chroma Crate**: 1,500 Prism Shards at 3, 2,000 Prism Shards and a Chroma Key at 5, $1,250,000 at 12, 2 Chroma Keys at 20, a Chromatic Sword at 30, $2,000,000 at 40, a Chromatic Mace at 50.",
+        "{{icon:shard_of_vigor}} **Shard Crate**: 1,500 Prism Shards at 3, 2,000 at 5, a Shard Key at 10, 1,500 Prism Shards at 43, 2,000 at 45, a Shard Key at 50, a Shard of Strength at 80.",
+        "{{icon:spawner}} **Spawner Crate**: 1,500 Prism Shards at 3, 2,000 at 5, a Spawner Key at 50, a Warden spawner at 100.",
+        "{{icon:enchanted_book}} **Reward Crate**: 750 Prism Shards at 3, 1,250 at 5, a Chroma Key at 15.",
+        "{{icon:living_prism}} **Living Prism Crate**: a Living Prism Key every 8 openings.",
+        "{{icon:paper}} **Vote Crate** (once each): a Spawner Crate Key at 2, a Shard Key at 3, a Vote Chestplate at 10, an Elytra at 20, a Chroma Key at 30, a Shard Key at 50."
       ]}
     ]},
     {"h": "Tips", "blocks": [

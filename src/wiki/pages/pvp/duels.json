@@ -2,6 +2,7 @@
   "title": "Duels and Maps",
   "half": "pvp",
   "live": true,
+  "icon": "diamond_sword",
   "summary": "**Duels and Maps** covers ChromaPVP's 1v1 duels: how the queues pair you, how rounds and timers work, and the arenas you fight on.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -60,7 +61,7 @@
       {"ul": [
         "Save your hotbar in the kit editor before your first ranked game. See [Kits](/wiki/pvp/kits/).",
         "`/leave` in a live match forfeits it.",
-        "Mace duels add slime block jump pads to the arena floor. Use them to get height for a smash."
+        "{{icon:slime_block}} Mace duels add slime block jump pads to the arena floor. Use them to get height for a smash."
       ]}
     ]}
   ],

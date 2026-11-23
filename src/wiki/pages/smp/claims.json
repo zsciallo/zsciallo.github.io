@@ -2,6 +2,7 @@
   "title": "Claims",
   "half": "smp",
   "live": true,
+  "icon": "golden_shovel",
   "needs_owner_check": "Claim block income per Explorer rank (100 an hour, rising to 300 at Orichalcum) comes from the UltraRanks rank-up messages, not from GriefPrevention's own per-rank setting, which was not read (LuckPerms is off limits). /permissiontrust is left out because ChromaticHelp does not list it and the command whitelist was not checked.",
   "summary": "**Claims** protect your land on the SMP: inside one, nobody can break your blocks, open your chests or hurt you.",
   "infobox": [
@@ -43,7 +44,7 @@
     {"h": "What claims protect", "blocks": [
       {"ul": [
         "Blocks, chests, doors, trapdoors, fence gates, buttons and levers.",
-        "Your animals, including horses, donkeys and llamas.",
+        "{{icon:lead}} Your animals, including horses, donkeys and llamas.",
         "Players: PvP is on everywhere on the SMP, but nobody can hurt you inside a claim.",
         "Explosions do no damage, and fire does not spread or burn.",
         "Strangers cannot ender pearl into your claim or set a home there."
@@ -54,7 +55,7 @@
       {"ul": [
         "Claim before you build anything worth keeping. Anything left in unclaimed land is fair game.",
         "Breaking into a claimed base is griefing and breaks the rules.",
-        "Place your spawners inside your claim so nobody can take them."
+        "{{icon:spawner}} Place your spawners inside your claim so nobody can take them."
       ]}
     ]}
   ],

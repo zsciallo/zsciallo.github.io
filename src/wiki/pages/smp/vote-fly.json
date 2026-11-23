@@ -2,6 +2,7 @@
   "title": "Vote Fly",
   "half": "smp",
   "live": true,
+  "icon": "elytra",
   "needs_owner_check": "Claim-only vote fly (fly bank 2.1.0, mc-server origin/main) is assumed live on the SMP.",
   "summary": "**Vote Fly** is flight time you earn by voting. Each vote banks 2 minutes of `/fly`, and the bank only counts down while you are in the air.",
   "infobox": [

@@ -2,6 +2,7 @@
   "title": "Spawners and Hoppers",
   "half": "smp",
   "live": true,
+  "icon": "spawner",
   "needs_owner_check": "ChromaticHelp says a spawner cycles every 5 seconds; SmartSpawner config.yml at 63529705 says 20s, which this page follows. ChromaticHelp also describes four separate hopper upgrades; hoppers.yml has one combined 7-level ladder, which this page follows. Auto-sell chest timer and upgrade prices are left out (AutoSellChests config not read, and the help text gives both 10 and 5 minutes). How chunk hoppers are obtained (no crafting recipe) is not confirmed. The default hopper limit for players without a store rank is not known.",
   "summary": "**Spawners and Hoppers** are the SMP's money farm: stacking spawners that store drops and XP, and hoppers that move the drops to a chest.",
   "infobox": [
@@ -16,9 +17,9 @@
       {"p": "Spawners here store their drops and XP instead of spawning mobs, and they stack. Upgradeable Hoppers pull those drops out and send them to a chest, ideally an auto-sell chest that pays you while you are offline."},
       {"p": "Spawners come from:"},
       {"ul": [
-        "Mining any spawner you find, for example in a dungeon or mineshaft. You need a stone pickaxe or better, but not Silk Touch, and the spawner goes straight into your inventory.",
+        "{{icon:spawner}} Mining any spawner you find, for example in a dungeon or mineshaft. You need a stone pickaxe or better, but not Silk Touch, and the spawner goes straight into your inventory.",
         "Ranking up: most Explorer ranks give spawners. See [Ranks and Kits](/wiki/smp/ranks-and-kits/).",
-        "The Spawner Crate. See [Crates and Keys](/wiki/smp/crates/).",
+        "{{icon:chest}} The Spawner Crate. See [Crates and Keys](/wiki/smp/crates/).",
         "Heartwood mobs and dungeon crates. See [Dungeons](/wiki/smp/dungeons/).",
         "Crafting at `/craft` with Blank Spawners. See [Crafting and Upgrades](/wiki/smp/crafting/).",
         "Other players on `/ah` or through a buy order, and the server market. See [Auction House and Market](/wiki/smp/auction-house/)."
@@ -39,13 +40,13 @@
       {"p": "Craft one in a crafting table: iron, empty, iron on the top row, iron, chest, iron in the middle and empty, iron, empty at the bottom. Place it under a spawner and it pulls 5 stacks out every 3 seconds. Right-click the hopper to open its menu and link it to the chest you want it to fill."},
       {"p": "The same menu sells upgrades for money. Each level raises everything at once:"},
       {"ul": [
-        "Level 1 (free): 1 block suction radius, moves 8 items at a time, 1 link up to 100 blocks away.",
-        "Level 2 ($14,000): radius 3, 16 items, 2 links up to 200 blocks.",
-        "Level 3 ($40,000): radius 4, 24 items, 3 links up to 400 blocks.",
-        "Level 4 ($105,000): radius 5, 32 items, 4 links at any distance.",
-        "Level 5 ($75,000): 48 items.",
-        "Level 6 ($200,000): 64 items.",
-        "Level 7 ($600,000): 128 items."
+        "{{icon:hopper}} Level 1 (free): 1 block suction radius, moves 8 items at a time, 1 link up to 100 blocks away.",
+        "{{icon:hopper}} Level 2 ($14,000): radius 3, 16 items, 2 links up to 200 blocks.",
+        "{{icon:hopper}} Level 3 ($40,000): radius 4, 24 items, 3 links up to 400 blocks.",
+        "{{icon:hopper}} Level 4 ($105,000): radius 5, 32 items, 4 links at any distance.",
+        "{{icon:hopper}} Level 5 ($75,000): 48 items.",
+        "{{icon:hopper}} Level 6 ($200,000): 64 items.",
+        "{{icon:hopper}} Level 7 ($600,000): 128 items."
       ]},
       {"p": "**Chunk hoppers** pull loose items in across whole chunks instead of a block radius. They have their own 6 levels, up to a 4 chunk radius and 128 items at a time."},
       {"p": "Store ranks raise how many upgradeable hoppers you can have: 150 with VIP, 175 with VIP+, 200 with MVP and 250 with MVP+."}
@@ -53,7 +54,7 @@
     {"h": "Selling the drops", "blocks": [
       {"p": "Spawners do not sell anything themselves. Link a hopper to an **auto-sell chest**, which sells what is inside on a timer and pays your balance, even while you are logged off. Its timer and a sale multiplier can be upgraded by right-clicking the chest."},
       {"ul": [
-        "You can place 2 auto-sell chests, 5 with VIP, 10 with VIP+ and 15 with MVP.",
+        "{{icon:chest}} You can place 2 auto-sell chests, 5 with VIP, 10 with VIP+ and 15 with MVP.",
         "The Prismatic rank gives one, and the [store](/store/) sells them."
       ]},
       {"p": "Or sell by hand with `/sell`, or list the drops on `/ah`."}

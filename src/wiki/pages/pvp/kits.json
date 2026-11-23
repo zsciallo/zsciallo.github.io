@@ -2,6 +2,7 @@
   "title": "Kits",
   "half": "pvp",
   "live": true,
+  "icon": "iron_chestplate",
   "summary": "**Kits** are the fixed loadouts you fight with in ChromaPVP duels. Every player gets the same items, so a duel comes down to skill and your own hotbar layout.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -15,9 +16,9 @@
       {"p": "Duels use three kits: **Sword**, **Axe** and **Mace**. Each one can be played ranked or unranked. You pick the kit when you queue, from the Play screen (`/play`) or with `/queue` and the kit name, such as `/queue mace`."},
       {"facts": "pvp-kits"},
       {"ul": [
-        "**Sword** is diamond gear with a Sharpness sword and nothing else. Hunger and natural regeneration are off, so hits decide the fight.",
-        "**Axe** is plain diamond: an axe, a sword, a crossbow, a bow, arrows and a shield. Nothing is enchanted and there is no food. The axe disables shields.",
-        "**Mace** is netherite with a Wind Burst mace, wind charges, ender pearls, totems and splash potions. Fall damage is on. Mace duels also get jump pads on the arena floor."
+        "{{icon:diamond_sword}} **Sword** is diamond gear with a Sharpness sword and nothing else. Hunger and natural regeneration are off, so hits decide the fight.",
+        "{{icon:diamond_axe}} **Axe** is plain diamond: an axe, a sword, a crossbow, a bow, arrows and a shield. Nothing is enchanted and there is no food. The axe disables shields.",
+        "{{icon:mace}} **Mace** is netherite with a Wind Burst mace, wind charges, ender pearls, totems and splash potions. Fall damage is on. Mace duels also get jump pads on the arena floor."
       ]},
       {"p": "A fourth kit, **Chaos**, is listed as coming soon and cannot be queued yet."}
     ]},

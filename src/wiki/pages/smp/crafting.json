@@ -2,6 +2,8 @@
   "title": "Crafting and Upgrades",
   "half": "smp",
   "live": true,
+  "icon": "crafting_table",
+  "image": {"src": "/store/icons/chromatic/chromatic_chestplate.png", "alt": "A Chromatic Chestplate"},
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running. Also unconfirmed: whether the Cluster and Apex Prism recipes show at /craft on live (they load only when the clusters content pack is present); how players earn Chromabithia XP for the Upgrade bench level gate (contracts give it; kills assumed).",
   "summary": "**Crafting and Upgrades** happen at the Chromatic bench, /craft, which builds gear and upgrades, re-rolls and repairs it. Most of it costs Prism Shards.",
   "infobox": [
@@ -17,7 +19,7 @@
       {"p": "Open the bench with `/craft`. Each recipe lists exactly what it needs, and the craft button only appears once you have all of it. `/prism` shows your Prism Shard balance."},
       {"p": "Prism Shards come from:"},
       {"ul": [
-        "Salvaging Chromatic gear, Living Prism gear, shards and spawners at the Salvage bench.",
+        "{{icon:grindstone}} Salvaging Chromatic gear, Living Prism gear, shards and spawners at the Salvage bench.",
         "The [Battle Pass](/wiki/smp/battle-pass/) and crate milestones (see [Crates and Keys](/wiki/smp/crates/)).",
         "Dungeon crates and contracts in [Heartwood](/wiki/smp/dungeons/).",
         "Rank kits (see [Ranks and Kits](/wiki/smp/ranks-and-kits/))."
@@ -27,13 +29,13 @@
     {"h": "Recipes", "blocks": [
       {"p": "The bench has five sections: Gear, Zone Sets, Spawners, Shards and Consumables. Vanilla ingredients must be plain: an item with a custom name, lore or enchants is not accepted."},
       {"ul": [
-        "**Chromatic gear**: sword, bow, crossbow, pickaxe, axe, shovel, harvester, angler, helmet, chestplate, leggings and boots. Each costs 150,000 to 262,500 Prism Shards and $1,000,000, plus diamonds, a netherite ingot, amethyst and echo shards, netherite blocks, a Nether Star, dragon's breath, a netherite upgrade template and 32 each of three Heartwood zone items. Wearing all four armour pieces gives Strength I.",
-        "**Living Prism gear** upgrades a Chromatic piece into its Living Prism twin. The Chromatic piece is used up, and its upgrades, Awakening, prefix and enchants carry over, except Thorns. Each costs 300,000 to 525,000 Prism Shards and $2,500,000, plus Living Prism, Prismatic Resin, two Nether Stars and a larger stack of zone items. The spear, mace and wings only come from the Living Prism Crate.",
-        "**Zone Sets**: one armour set per Heartwood area, made from that area's zone item and 4 Prismatic Resin a piece. Their set bonus only works in Heartwood.",
-        "**Spawners**: 24 mob types. Every recipe needs Blank Spawners (1 for common mobs, up to 3 for the rarest), materials and Prism Shards. You get a Blank Spawner by salvaging a spawner. It cannot be placed.",
-        "**Shards**: the twelve off-hand shards, 7,000 to 30,000 Prism Shards and $100,000 each. Hold one in your off hand for its effect.",
-        "**Clusters** fuse two shards into one off-hand item (Cluster of Wrath, Cinders, Renewal, Industry, the Descent and the Depths). **Apex Prisms** (Warmonger's, Architect's, Wayfarer's and Magnate's Prism) are the top tier.",
-        "**Consumables**: 32 Bottles o' Enchanting for $25,000 and 50 Prism Shards, or an Enchanted Golden Apple for $100,000, 200 Prism Shards, 8 gold blocks, a golden apple and a Nether Star."
+        "{{icon:chromatic_chestplate}} **Chromatic gear**: sword, bow, crossbow, pickaxe, axe, shovel, harvester, angler, helmet, chestplate, leggings and boots. Each costs 150,000 to 262,500 Prism Shards and $1,000,000, plus diamonds, a netherite ingot, amethyst and echo shards, netherite blocks, a Nether Star, dragon's breath, a netherite upgrade template and 32 each of three Heartwood zone items. Wearing all four armour pieces gives Strength I.",
+        "{{icon:living_prism_chestplate}} **Living Prism gear** upgrades a Chromatic piece into its Living Prism twin. The Chromatic piece is used up, and its upgrades, Awakening, prefix and enchants carry over, except Thorns. Each costs 300,000 to 525,000 Prism Shards and $2,500,000, plus Living Prism, Prismatic Resin, two Nether Stars and a larger stack of zone items. The spear, mace and wings only come from the Living Prism Crate.",
+        "{{icon:prismatic_resin}} **Zone Sets**: one armour set per Heartwood area, made from that area's zone item and 4 Prismatic Resin a piece. Their set bonus only works in Heartwood.",
+        "{{icon:spawner}} **Spawners**: 24 mob types. Every recipe needs Blank Spawners (1 for common mobs, up to 3 for the rarest), materials and Prism Shards. You get a Blank Spawner by salvaging a spawner. It cannot be placed.",
+        "{{icon:shard_of_strength}} **Shards**: the twelve off-hand shards, 7,000 to 30,000 Prism Shards and $100,000 each. Hold one in your off hand for its effect.",
+        "{{icon:cluster_strength_vigor}} **Clusters** fuse two shards into one off-hand item (Cluster of Wrath, Cinders, Renewal, Industry, the Descent and the Depths). **Apex Prisms** (Warmonger's, Architect's, Wayfarer's and Magnate's Prism) are the top tier.",
+        "{{icon:experience_bottle}} **Consumables**: 32 Bottles o' Enchanting for $25,000 and 50 Prism Shards, or an Enchanted Golden Apple for $100,000, 200 Prism Shards, 8 gold blocks, a golden apple and a Nether Star."
       ]},
       {"p": "The zone sets and their areas: Sporewarden (Mossgate Landing), Kilnforged (The Ochre Warrens), Bogstrider (Mirewood Roots), Waxguard (The Resin Hive), Palewatch (The Pale Drip), Geodeplate (The Sulfur Geode), Bloomshroud (Glowberry Canopy), Sculkhollow (The Hollow Below) and Rotroot (Heartwood Core)."}
     ]},

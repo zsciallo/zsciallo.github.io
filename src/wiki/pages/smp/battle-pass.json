@@ -2,6 +2,7 @@
   "title": "Battle Pass",
   "half": "smp",
   "live": true,
+  "icon": "writable_book",
   "needs_owner_check": "Written for mc-server 63529705; prod deploy 20261123-014534 was still running (the merge changed one premium reward, Telepathy IV to Telepathy). Season dates are from settings.yml and the week files (Season 4 Heartwood, 05/11 to 09/12/2026); the page goes stale when Season 5 starts. The +25% progress booster in settings.yml is left out because who gets it was not confirmed.",
   "summary": "**Battle Pass** is the SMP's seasonal reward track. Daily and weekly quests earn points, and points unlock tiers with a reward to claim.",
   "infobox": [
@@ -44,7 +45,7 @@
     ]},
     {"h": "Tips", "blocks": [
       {"ul": [
-        "Living Prism Keys open the [Living Prism Crate](/wiki/smp/crates/).",
+        "{{icon:tripwire_hook}} Living Prism Keys open the [Living Prism Crate](/wiki/smp/crates/).",
         "Weeks 3 to 5 send you into [Heartwood](/wiki/smp/dungeons/), so gear up before then.",
         "A new season resets the pass, and a Chroma Pass does not carry over."
       ]}

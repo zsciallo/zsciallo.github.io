@@ -2,6 +2,7 @@
   "title": "Crates and Cosmetics",
   "half": "pvp",
   "live": true,
+  "icon": "ender_chest",
   "summary": "**Crates and Cosmetics** covers ChromaPVP's crates, which you open with Prism Coins, and the cosmetics that change how you look.",
   "infobox": [
     ["Server", "ChromaPVP"],
@@ -16,9 +17,9 @@
       {"p": "Cosmetics change how you look in the lobby and in fights. They never change how a fight plays."},
       {"p": "Open crates with `/crates`, or click a crate block in the lobby. Crates only open in the lobby, not in a match or in FFA. Each crate costs Prism Coins:"},
       {"ul": [
-        "**Spectrum Crate**, 1,500 Prism Coins: common and rare cosmetics.",
-        "**Mythic Crate**, 6,000 Prism Coins: rare and epic cosmetics, plus mythic items you can only get from this crate.",
-        "**Arsenal Crate**, 1,250 Prism Coins: one FFA kit."
+        "{{icon:chest}} **Spectrum Crate**, 1,500 Prism Coins: common and rare cosmetics.",
+        "{{icon:ender_chest}} **Mythic Crate**, 6,000 Prism Coins: rare and epic cosmetics, plus mythic items you can only get from this crate.",
+        "{{icon:trapped_chest}} **Arsenal Crate**, 1,250 Prism Coins: one FFA kit."
       ]},
       {"p": "Buy cosmetics directly in `/cosmetics`. A preview puts you at the showcase stand in the lobby, where a mannequin wears the item for a few seconds."}
     ]},
@@ -48,15 +49,15 @@
     {"h": "Cosmetic types", "blocks": [
       {"p": "Cosmetics come in four rarities: common, rare, epic and mythic. The types are:"},
       {"ul": [
-        "**Kill effects:** particles, a firework or lightning where your opponent falls.",
+        "{{icon:firework_rocket}} **Kill effects:** particles, a firework or lightning where your opponent falls.",
         "**Victory effects:** a sound, particles and a pose when you win.",
         "**Death messages:** the chat line when you take someone out.",
-        "**Projectile trails:** particles behind your arrows, snowballs and other projectiles.",
-        "**Trails:** particles at your feet as you move, in the lobby, queues and FFA only.",
-        "**Armour looks:** a trim stamped on every armour piece a kit gives you.",
-        "**Titles:** a short tag shown with your name.",
-        "**Hats:** worn in the lobby only.",
-        "**Auras:** a ring that turns around you after you stand still for 5 seconds."
+        "{{icon:arrow}} **Projectile trails:** particles behind your arrows, snowballs and other projectiles.",
+        "{{icon:blaze_powder}} **Trails:** particles at your feet as you move, in the lobby, queues and FFA only.",
+        "{{icon:sentry_armor_trim_smithing_template}} **Armour looks:** a trim stamped on every armour piece a kit gives you.",
+        "{{icon:name_tag}} **Titles:** a short tag shown with your name.",
+        "{{icon:leather_helmet}} **Hats:** worn in the lobby only.",
+        "{{icon:glowstone_dust}} **Auras:** a ring that turns around you after you stand still for 5 seconds."
       ]},
       {"p": "Most cosmetics are sold for Prism Coins. Some come only from crates, and the Champion title only from winning a [tournament](/wiki/pvp/tournaments/)."}
     ]},
