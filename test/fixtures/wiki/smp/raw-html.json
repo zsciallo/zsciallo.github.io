@@ -4,7 +4,7 @@
   "summary": "**Raw HTML Page** holds <script>alert(1)</script> and <b>bold</b> tags — they must reach the page as text.",
   "infobox": [["Server", "<b>SMP</b>"]],
   "sections": [
-    {"h": "Mechanics", "blocks": [{"p": "<script>alert(2)</script>"}, {"ul": ["<img src=x onerror=alert(3)>"]}, {"p": "[click](javascript:alert(4))"}]}
+    {"h": "Mechanics", "blocks": [{"p": "<script>alert(2)</script>"}, {"ul": ["<img src=x onerror=alert(3)>"]}, {"p": "[click](javascript:alert(4))"}, {"p": "[js-link](javascript:alert(5)) [data-link](data:text/html,x) [http-link](http://example.com/) [proto-link](//evil.example/) [wiki-link](/wiki/smp/sample/) [ext-link](https://chromabit.us/)"}]}
   ],
   "history": [{"date": "2026-11-02", "text": "<b>raw</b> change"}],
   "related": []

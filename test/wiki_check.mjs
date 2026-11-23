@@ -217,6 +217,13 @@ check('summary-length', pages.flatMap((p) => {
       ...['<script>alert(1)</script>', '<script>alert(2)</script>', '<img src=x onerror=alert(3)>', '<b>SMP</b>', '<b>raw</b> change'].filter((s) => !text.includes(s)).map((s) => `${q(s)} is not shown as text`),
       ...(textOf(findAll(doc, (el) => el.tag === 'h1')[0] ?? doc) === 'Raw <b>HTML</b> Page' ? [] : ['the h1 is not the raw title as text']),
     ]);
+    // F9: rich() links only site paths, anchors and https; other schemes show their label as text.
+    const links = findAll(findAll(doc, (el) => el.tag === 'main')[0] ?? doc, (el) => el.tag === 'a').map((a) => [textOf(a), a.attrs.href ?? '']);
+    check('render-link-schemes', [
+      ...links.filter(([, href]) => /^(javascript:|data:|http:|\/\/)/i.test(href)).map(([t, href]) => `${q(t)} links ${q(href)}`),
+      ...[['wiki-link', '/wiki/smp/sample/'], ['ext-link', 'https://chromabit.us/']].filter((want) => !links.some((l) => q(l) === q(want))).map(([t, href]) => `${q(t)} does not render as a link to ${href}`),
+      ...['js-link', 'data-link', 'http-link', 'proto-link'].filter((t) => !text.includes(t)).map((t) => `${q(t)} label is not shown as text`),
+    ]);
     const article = parseHtml(render(h(WikiArticle, { page: fx[0], pages: fx, facts: {} })));
     const changes = parseHtml(render(h(WikiChanges, { pages: fx })));
     check('render-history-newest-first', [
