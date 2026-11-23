@@ -17,8 +17,8 @@
       {"p": "Build a piece at the Chromatic bench with `/craft`, or win it from the [Chroma Crate](/wiki/smp/crates/). The mace, spear and elytra have no recipe and only come from the crate. Recipe costs are on [Crafting and Upgrades](/wiki/smp/crafting/)."},
       {"ul": [
         "{{icon:chromatic_chestplate}} Armour: helmet, chestplate, leggings and boots. Wear all four for the set bonus.",
-        "{{icon:netherite_sword}} Weapons: sword, spear, mace, bow and crossbow.",
-        "{{icon:netherite_pickaxe}} Tools: pickaxe, axe, shovel, harvester and angler.",
+        "{{icon:chromatic_sword}} Weapons: sword, spear, mace, bow and crossbow.",
+        "{{icon:chromatic_pickaxe}} Tools: pickaxe, axe, shovel, harvester and angler.",
         "{{icon:elytra}} The Chromatic Elytra."
       ]}
     ]},

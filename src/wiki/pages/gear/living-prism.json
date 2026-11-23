@@ -18,9 +18,9 @@
       {"p": "The [Living Prism Crate](/wiki/smp/crates/) gives every piece. Its keys come from the [Battle Pass](/wiki/smp/battle-pass/), the store and the crate's own milestone. The spear, mace and wings only come from this crate."},
       {"ul": [
         "{{icon:living_prism_chestplate}} Armour: helmet, chestplate, leggings and boots, with Living Bark when you wear all four.",
-        "{{icon:netherite_sword}} Weapons: sword, spear, mace, bow and crossbow.",
-        "{{icon:netherite_pickaxe}} Tools: pickaxe, axe, shovel, harvester and angler.",
-        "{{icon:elytra}} Living Prism Wings."
+        "{{icon:living_prism_sword}} Weapons: sword, spear, mace, bow and crossbow.",
+        "{{icon:living_prism_pickaxe}} Tools: pickaxe, axe, shovel, harvester and angler.",
+        "{{icon:living_prism_wings}} Living Prism Wings."
       ]}
     ]},
     {"h": "Pieces", "blocks": [

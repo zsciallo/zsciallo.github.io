@@ -102,20 +102,20 @@
   ]
  ],
  "icons": [
-  "netherite_helmet",
+  "living_prism_helmet",
   "living_prism_chestplate",
   "living_prism_leggings",
   "living_prism_boots",
-  "fishing_rod",
-  "netherite_axe",
-  "bow",
-  "crossbow",
-  "netherite_hoe",
-  "mace",
-  "netherite_pickaxe",
-  "netherite_shovel",
-  "netherite_spear",
-  "netherite_sword",
-  "elytra"
+  "living_prism_angler",
+  "living_prism_axe",
+  "living_prism_bow",
+  "living_prism_crossbow",
+  "living_prism_harvester",
+  "living_prism_mace",
+  "living_prism_pickaxe",
+  "living_prism_shovel",
+  "living_prism_spear",
+  "living_prism_sword",
+  "living_prism_wings"
  ]
 }

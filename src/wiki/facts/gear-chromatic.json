@@ -102,20 +102,20 @@
   ]
  ],
  "icons": [
-  "netherite_helmet",
+  "chromatic_helmet",
   "chromatic_chestplate",
   "chromatic_leggings",
   "chromatic_boots",
-  "fishing_rod",
-  "netherite_axe",
-  "bow",
-  "crossbow",
+  "chromatic_angler",
+  "chromatic_axe",
+  "chromatic_bow",
+  "chromatic_crossbow",
   "elytra",
-  "netherite_hoe",
-  "mace",
-  "netherite_pickaxe",
-  "netherite_shovel",
-  "netherite_spear",
-  "netherite_sword"
+  "chromatic_harvester",
+  "chromatic_mace",
+  "chromatic_pickaxe",
+  "chromatic_shovel",
+  "chromatic_spear",
+  "chromatic_sword"
  ]
 }

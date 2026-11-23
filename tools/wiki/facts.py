@@ -23,6 +23,7 @@ REFS = {"smp": "origin/main", "kit": "origin/main", "dungeons": "main"}
 SITE = pathlib.Path(__file__).resolve().parents[2]
 OUT = SITE / "src/wiki/facts"
 DENY = pathlib.Path(__file__).with_name("deny.json")
+RENDERED = pathlib.Path(__file__).with_name("rendered_icons.json")  # item id -> model, written by render_models.py
 # The spec's lists, used until U1's deny.json exists.
 SPEC_TERMS = [r"\bodds\b", r"\bweight", r"\bpity\b", r"drop rate", r"\d+(\.\d+)?\s?%\s?chance", r"/caa\b",
               r"/chelp\b", r"/lp\b", r"/grant\b", r"\bpermission node", r"chromatic\.[a-z]+\.[a-z]+", r"\bgrim\b",
@@ -846,8 +847,11 @@ def gear_tables(smp, dun):
             ia = {ns: smp.yaml(f"plugins/ItemsAdder/contents/{ns}/configs/{ns}.yml")
                   for ns in ("chromatic", "living_prism", "halloween", "shards", "clusters")}
             ia_items = {f"{ns}:{iid}": it for ns, d in ia.items() for iid, it in need(d, "items", f"ItemsAdder {ns}.yml", dict).items()}
-            # A flat item texture is the item's picture; a 3D model's texture is a UV sheet, so those show the material.
-            ia_icons = {k: (k.split(":")[1] if ((it.get("resource") or {}).get("texture") or (it.get("graphics") or {}).get("texture"))
+            # A flat item texture is the item's picture; a 3D model is drawn by render_models.py (listed in RENDERED);
+            # anything else shows its vanilla material.
+            rendered = json.loads(RENDERED.read_text(encoding="utf-8")) if RENDERED.exists() else {}
+            ia_icons = {k: (k.split(":")[1] if ((it.get("resource") or {}).get("texture") or (it.get("graphics") or {}).get("texture")
+                                                or k.split(":")[1] in rendered)
                             else icon((it.get("resource") or {}).get("material") or it.get("material"))) for k, it in ia_items.items()}
             recipes = {f: smp.yaml(f"{rec}/{f}.yml") for f in ("gear", "zone_sets", "shards", "clusters", "apex")}
             crates = smp.folder(f"{ec}/crate")

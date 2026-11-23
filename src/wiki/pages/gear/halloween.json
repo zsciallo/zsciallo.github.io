@@ -18,9 +18,9 @@
       {"p": "Halloween gear can no longer be obtained. It came from the Halloween Crate, which is retired. Gear that players already own still works, and it keeps its enchants and abilities."},
       {"ul": [
         "{{icon:widow_chestplate}} The Widow set: the Witch Hat, Widow's Carapace, Widow's Legwraps and Widow's Creepers.",
-        "{{icon:netherite_sword}} Weapons such as The Count's Fang, Trick or Stab and The Last Harvest.",
-        "{{icon:netherite_pickaxe}} Tools such as Grave Robber, Grave Digger and Grim Harvester.",
-        "{{icon:shield}} Coffin Lid, a shield."
+        "{{icon:counts_fang}} Weapons such as The Count's Fang, Trick or Stab and The Last Harvest.",
+        "{{icon:grave_robber}} Tools such as Grave Robber, Grave Digger and Grim Harvester.",
+        "{{icon:coffin_lid}} Coffin Lid, a shield."
       ]}
     ]},
     {"h": "Pieces", "blocks": [
