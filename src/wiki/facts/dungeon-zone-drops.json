@@ -1,0 +1,99 @@
+{
+ "id": "dungeon-zone-drops",
+ "title": "Drops by area",
+ "source": "mc-server:plugins/ChromaticDungeons/loot.yml",
+ "ref": "63529705",
+ "columns": [
+  "Area",
+  "Mini boss",
+  "Zone item",
+  "Armour set",
+  "Crate and key",
+  "Boss items"
+ ],
+ "rows": [
+  [
+   "Mossgate Landing (Easy)",
+   "Old Mossback",
+   "Sporecap Tuft",
+   "Sporewarden Set",
+   "Mossgate Crate (Mossgate Key)",
+   "Mossback Shell, Old Mossback Trophy"
+  ],
+  [
+   "The Ochre Warrens (Easy)",
+   "The Kilnmother",
+   "Kiln Shard",
+   "Kilnforged Set",
+   "Ochre Cache (Ochre Key)",
+   "The Kilnmother Trophy"
+  ],
+  [
+   "Mirewood Roots (Medium)",
+   "Bogmaw",
+   "Bog Pearl",
+   "Bogstrider Set",
+   "Mirewood Crate (Mirewood Key)",
+   "Rot Village Bell, Bogmaw Trophy"
+  ],
+  [
+   "The Resin Hive (Medium)",
+   "The Hive Matron",
+   "Royal Wax",
+   "Waxguard Set",
+   "Hive Crate (Hive Key)",
+   "Royal Jelly, Waxed Lantern, The Hive Matron Trophy"
+  ],
+  [
+   "The Pale Drip (Hard)",
+   "The Pale Matron",
+   "Pale Teardrop",
+   "Palewatch Set",
+   "Pale Crate (Pale Key)",
+   "Pale Teardrop Charm, The Pale Matron Trophy"
+  ],
+  [
+   "The Sulfur Geode (Hard)",
+   "The Geode Tyrant",
+   "Geode Heartstone",
+   "Geodeplate Set",
+   "Geode Crate (Geode Key)",
+   "Geode Sling, Choir Fork, The Geode Tyrant Trophy"
+  ],
+  [
+   "Glowberry Canopy (Hard)",
+   "The Glowmother",
+   "Glowbloom",
+   "Bloomshroud Set",
+   "Glowberry Crate (Glowberry Key)",
+   "Glowbloom Staff, The Glowmother Trophy"
+  ],
+  [
+   "The Hollow Below (Very Hard)",
+   "The Listener",
+   "Hollow Echo",
+   "Sculkhollow Set",
+   "Hollow Crate (Hollow Key)",
+   "Listener's Ear, The Listener Trophy"
+  ],
+  [
+   "Heartwood Core (Very Hard)",
+   "The Rotroot Heart",
+   "Rotroot Heartseed",
+   "Rotroot Set",
+   "Core Crate (Core Key)",
+   "The Rotroot Heart Trophy"
+  ]
+ ],
+ "icons": [
+  "brown_mushroom",
+  "brick",
+  "slime_ball",
+  "honeycomb",
+  "ghast_tear",
+  "amethyst_shard",
+  "glow_berries",
+  "disc_fragment_5",
+  "pitcher_pod"
+ ]
+}

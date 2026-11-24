@@ -58,7 +58,7 @@
         "A camp's crate unlocks when the camp is cleared, or when its boss dies on a boss camp. It can then be opened 3 times before the camp respawns.",
         "Each opening uses one key and gives 5 to 7 different items.",
         "Anything that does not fit in your inventory waits in `/dungeon claim`.",
-        "{{icon:chest}} Crates hold things like Prismatic Resin, the area's zone armour pieces, spawners, diamonds, resource blocks, Bottles o' Enchanting, golden and enchanted golden apples, random enchant books, a Mending book, StatTrak trackers, ancient debris, money and Prism Shards. The harder crates add Living Prism, and the Core Crate can give an elytra."
+        "{{icon:chest}} Crates hold things like Prismatic Resin, the area's zone armour pieces, spawners, diamonds, resource blocks, Bottles o' Enchanting, golden and enchanted golden apples, random enchant books, a Mending book, StatTrak trackers, ancient debris, money and Prism Shards. The harder crates add Living Prism, and the Hollow Crate and Core Crate can give an elytra."
       ]}
     ]},
     {"h": "Bosses", "blocks": [
@@ -85,6 +85,28 @@
         "Rewards: the zone's item, Prism Shards, Chromabithia XP, the boss's own loot and a contract level. Finishing a tier unlocks the next one in that difficulty.",
         "You must do enough of the damage to be paid."
       ]}
+    ]},
+    {"h": "Drops by zone", "blocks": [
+      {"p": "Loot is rolled per player: everyone who helped with a kill gets their own drops. Each area has its own zone item, armour set, crate and boss items."},
+      {"facts": "dungeon-zone-drops"}
+    ]},
+    {"h": "Boss items", "blocks": [
+      {"p": "Rare drops from the mini bosses. They only work in the dungeon, and they cannot be placed or used in crafting."},
+      {"facts": "dungeon-boss-items"}
+    ]},
+    {"h": "Trophies", "blocks": [
+      {"p": "Every boss can drop its trophy, a head to keep. Trophies are for show and cannot be placed."},
+      {"facts": "dungeon-trophies"}
+    ]},
+    {"h": "Materials", "blocks": [
+      {"p": "Zone items and Prismatic Resin are crafting materials at `/craft`; the table shows what each one builds. See [Crafting](/wiki/smp/crafting/) and [Heartwood Zone Sets](/wiki/gear/heartwood-sets/)."},
+      {"facts": "dungeon-materials"}
+    ]},
+    {"h": "Rotroot Heart", "blocks": [
+      {"p": "The final boss can drop Rotroot set pieces, the Branch of Heartwood, its trophy, Rotroot Heartseed, the Core Key, Living Prism, Prismatic Resin, spawners and Elite and Unique enchant books."}
+    ]},
+    {"h": "Rare gear", "blocks": [
+      {"p": "Heartgrown armour comes only from the Hollow Crate and the Core Crate. The Branch of Heartwood comes from those two crates and the Rotroot Heart. Stats are on [Heartgrown and the Branch](/wiki/gear/heartwood-sets/#heartgrown-and-the-branch)."}
     ]},
     {"h": "Tips", "blocks": [
       {"ul": [

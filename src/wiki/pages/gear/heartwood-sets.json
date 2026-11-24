@@ -16,7 +16,7 @@
     {"h": "Obtaining", "blocks": [
       {"p": "Each Heartwood area has its own set. Build a piece in the Zone Sets section of `/craft` from that area's zone item and Prismatic Resin, or find it in that area's camp crates in [Heartwood](/wiki/smp/dungeons/)."},
       {"ul": [
-        "{{icon:prismatic_resin}} Zone items drop from an area's mobs and its contracts.",
+        "{{icon:brown_mushroom}}{{icon:brick}}{{icon:slime_ball}} Zone items, such as Sporecap Tuft, Kiln Shard and Bog Pearl, drop from an area's mobs and its contracts. All nine are listed under [Materials](/wiki/smp/dungeons/#materials).",
         "{{icon:leather_chestplate}} Every piece says which set it belongs to and where it is found."
       ]}
     ]},

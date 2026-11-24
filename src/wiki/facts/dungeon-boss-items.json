@@ -1,0 +1,69 @@
+{
+ "id": "dungeon-boss-items",
+ "title": "Boss items",
+ "source": "chromatic-dungeons:src/dev/zsciallo/chromaticdungeons/item/special/SpecialItems.java",
+ "ref": "b3e2175",
+ "columns": [
+  "Item",
+  "What it does",
+  "Dropped by"
+ ],
+ "rows": [
+  [
+   "Mossback Shell",
+   "Hold it and sneak: mobs cannot knock you back. Dungeon only.",
+   "Old Mossback"
+  ],
+  [
+   "Rot Village Bell",
+   "Right click: mobs within 12 blocks glow for 10s. 1 min cooldown. Dungeon only.",
+   "Bogmaw"
+  ],
+  [
+   "Royal Jelly",
+   "Drink: Regeneration I for 20s. 5 min cooldown. Dungeon only.",
+   "The Hive Matron"
+  ],
+  [
+   "Waxed Lantern",
+   "Off hand: Night Vision in the dungeon. Dungeon only.",
+   "The Hive Matron"
+  ],
+  [
+   "Pale Teardrop Charm",
+   "Carry it: +10 Luck in the dungeon. Dungeon only.",
+   "The Pale Matron"
+  ],
+  [
+   "Geode Sling",
+   "Right click: throws a shard that hits a mob for 4 damage. 2 s cooldown. Dungeon only.",
+   "The Geode Tyrant"
+  ],
+  [
+   "Choir Fork",
+   "Right click: slows nearby mobs for 3s. 45 s cooldown. Dungeon only.",
+   "The Geode Tyrant"
+  ],
+  [
+   "Glowbloom Staff",
+   "Right click: lights the ground around you for 30s. 1 min cooldown. Dungeon only.",
+   "The Glowmother"
+  ],
+  [
+   "Listener's Ear",
+   "Hold it: points to the nearest living boss. Dungeon only.",
+   "The Listener"
+  ]
+ ],
+ "icons": [
+  "turtle_scute",
+  "bell",
+  "honey_bottle",
+  "lantern",
+  "ghast_tear",
+  "amethyst_shard",
+  "prismarine_shard",
+  "blaze_rod",
+  "echo_shard"
+ ]
+}
