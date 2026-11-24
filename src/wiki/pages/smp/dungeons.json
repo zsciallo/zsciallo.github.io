@@ -63,6 +63,7 @@
     ]},
     {"h": "Bosses", "blocks": [
       {"p": "Every mini boss changes at two thirds and one third of its health, usually by hiding behind wardens or crystals you have to break first. With three or more players most of their attacks hit more often or at more targets."},
+      {"p": "While a boss cannot be hurt, three shields circle it. Kill the guards it called (wardens, drones, crystals or Stalkers) and the shields drop. The Rotroot Heart is shielded below two thirds of its health for as long as a Root Node is alive near it."},
       {"ul": [
         "**Old Mossback**: a Ground Slam ring, then a knock-up. Hides behind a Moss Ward; break her Moss Wardens.",
         "**The Kilnmother**: Kiln Breath, a fire cone in front of her. Pulls Burrowing Husks out of the walls and hides behind Kiln Wardens.",
@@ -96,6 +97,7 @@
     ]}
   ],
   "history": [
+    {"date": "2026-11-24", "text": "A boss that cannot be hurt now has three shields circling it until its guards are dead."},
     {"date": "2026-11-23", "text": "Added the Chromabithia level, which rises with dungeon kills and contracts and unlocks higher Upgrade bench levels."},
     {"date": "2026-11-23", "text": "Added four dungeon waypoints on the `/dungeon` screen, one per difficulty: Easy is free, the harder ones cost money, and dying in an area respawns you at its waypoint."},
     {"date": "2026-11-23", "text": "Added contracts, which let you pay Prismatic Resin to summon a private mini boss that only you and up to 3 helpers can fight."},
