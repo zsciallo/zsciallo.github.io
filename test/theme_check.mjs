@@ -256,7 +256,7 @@ export const ROUTES = [
   { path: '/store/', ready: '.pkg-card', file: 'store/index.html' },
   { path: '/auctions/', ready: '.market-row', file: 'auctions/index.html' },
   { path: '/faq/', ready: '.faq-item', file: 'faq/index.html' },
-  { path: '/smp/', ready: '.fact', file: 'smp/index.html' },
+  { path: '/smp/', ready: '[data-section="dungeon"]', file: 'smp/index.html' }, // .fact until run 20261123-smp-page removed the fact cards
   { path: '/privacy/', ready: 'main', file: 'privacy/index.html' },
 ];
 export const WIDTHS = [400, 1280];

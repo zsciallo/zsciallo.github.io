@@ -212,7 +212,7 @@ export const STATES = [
   { id: 'profile', path: '/pvp/player/?name=sample_01', ready: '.pvp-kit' },
   { id: 'profile-missing', path: '/pvp/player/?name=nobody_here', ready: '.pvp-profile-state' },
   { id: 'profile-noname', path: '/pvp/player/', ready: '.pvp-profile-state' },
-  { id: 'smp', path: '/smp/', ready: '.fact' },
+  { id: 'smp', path: '/smp/', ready: '[data-section="dungeon"]' }, // .fact until run 20261123-smp-page
   { id: 'faq-open', path: '/faq/', ready: '.faq-item', setup: [click('.faq-question'), waitFor('.faq-item[data-open]')] },
   { id: 'store', path: '/store/', ready: '.pkg-card' },
   { id: 'store-crate', path: '/store/', ready: '.pkg-card', setup: [clickText('.pkg-card', 'Chroma Key'), waitFor('.pkg-modal')] },
@@ -285,7 +285,8 @@ export const CARDS = [
   // Server offline (round 3): the status / countdown card on the FAQ.
   { sel: '.card.info-card', kind: 'card', states: ['faq-offline', 'faq-launching'], note: 'the server-offline / LAUNCHING IN status card' },
   // /smp/
-  { sel: '.card.fact:not(.pvp-fact)', kind: 'card', states: ['smp'], note: 'SMP fact tiles' },
+  // Run 20261123-smp-page: the SMP fact tiles are gone (owner 2026-11-23); the Heartwood panel is the page's card.
+  { sel: '.card.dungeon', kind: 'card', states: ['smp'], note: 'the Heartwood panel' },
   { sel: '.tape', kind: 'card', states: ['smp'], note: 'the market ticker tape' },
   // /pvp/
   { sel: '.card.pvp-fact', kind: 'card', states: ['pvp'], note: 'PVP fact tiles' },

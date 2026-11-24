@@ -94,7 +94,7 @@ export const PAGES = [
   ['pvp', '/pvp/', { ready: '.pvp-table [data-row]' }],
   ['pvp-player', '/pvp/player/', { ready: '.pvp-profile-state' }],
   ['pvp-player-sample_01', '/pvp/player/?name=sample_01', { ready: '.pvp-kit' }],
-  ['smp', '/smp/', { ready: '.fact' }],
+  ['smp', '/smp/', { ready: '[data-section="dungeon"]' }], // .fact until run 20261123-smp-page
   ['faq', '/faq/', { ready: '.faq-item' }],
   ['faq-open', '/faq/', { ready: '.faq-item', setup: [click('.faq-question'), waitFor('.faq-item[data-open]')] }],
   ['store', '/store/', { ready: '.pkg-card' }],
