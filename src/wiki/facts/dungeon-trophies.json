@@ -1,0 +1,59 @@
+{
+ "id": "dungeon-trophies",
+ "title": "Trophies",
+ "source": "chromatic-dungeons:src/dev/zsciallo/chromaticdungeons/item/special/SpecialItems.java",
+ "ref": "b3e2175",
+ "columns": [
+  "Trophy",
+  "Boss"
+ ],
+ "rows": [
+  [
+   "Old Mossback Trophy",
+   "Old Mossback"
+  ],
+  [
+   "The Kilnmother Trophy",
+   "The Kilnmother"
+  ],
+  [
+   "Bogmaw Trophy",
+   "Bogmaw"
+  ],
+  [
+   "The Hive Matron Trophy",
+   "The Hive Matron"
+  ],
+  [
+   "The Pale Matron Trophy",
+   "The Pale Matron"
+  ],
+  [
+   "The Geode Tyrant Trophy",
+   "The Geode Tyrant"
+  ],
+  [
+   "The Glowmother Trophy",
+   "The Glowmother"
+  ],
+  [
+   "The Listener Trophy",
+   "The Listener"
+  ],
+  [
+   "The Rotroot Heart Trophy",
+   "The Rotroot Heart"
+  ]
+ ],
+ "icons": [
+  "zombie_head",
+  "zombie_head",
+  "zombie_head",
+  "zombie_head",
+  "zombie_head",
+  "zombie_head",
+  "zombie_head",
+  "zombie_head",
+  "zombie_head"
+ ]
+}

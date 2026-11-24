@@ -1,6 +1,6 @@
 """Generate the wiki fact tables (src/wiki/facts/<id>.json) from the game configs, read-only through git.
 
-Usage: python tools/wiki/facts.py [--smp-ref REF] [--kit-ref REF] [--out DIR]
+Usage: python tools/wiki/facts.py [--smp-ref REF] [--kit-ref REF] [--dun-ref REF] [--out DIR]
 Configs are read only with `git show <sha>:<path>` (never the working tree, never a deny-list path). Odds, weights,
 chances and pity never reach a cell: those keys are never read, a "15% chance" in a description loses its number, and a
 final guard aborts on any cell that still matches the deny list. Gear tables (gear-*) print the item lore as it is,
@@ -903,6 +903,195 @@ def gear_tables(smp, dun):
            ["Action", "Cost"], build_gem_fees(smp.yaml(gems)), 0))
     yield ("gear-trackers", "Trackers", smp, f"{ae}/config.yml", jars, lambda: (
            ["Tracker", "Counts", "Obtained"], build_trackers(smp.yaml(f"{ae}/config.yml"), ctx()["sources"]), 0))
+    yield from dungeon_tables(smp, dun, ctx)
+
+
+# ---------------------------------------------------------------- Heartwood drops (ChromaticDungeons)
+# Names, lore and which loot table hangs on which mob or crate, nothing else: weights, rolls, amounts, key-drop chances,
+# crate guarantee and bonus tiers, Luck, pity and the damage share are never read.
+
+SPECIAL_KIND = re.compile(r'^\s*([A-Z_]+)\(Material\.([A-Z0-9_]+), "([^"]*)", "([^"]*)"\)[,;]', re.M)
+DIFFICULTIES = ["EASY", "MEDIUM", "HARD", "VERY_HARD"]
+TROPHY_ICON = "zombie_head"  # every trophy shows the zombie head, the skinned ones too (no renders of those)
+GEAR_FAMILIES = {"chromatic": "Chromatic gear", "living_prism": "Living Prism gear"}
+
+
+def special_kinds(java):
+    """SpecialItems.java's enum Kind as {id: (material, name, lore)}, read as text and never compiled."""
+    kinds = {k.lower(): (m.lower(), n, lore) for k, m, n, lore in SPECIAL_KIND.findall(java)}
+    if not kinds or '" Trophy"' not in java or '"<dark_gray>Dungeon only."' not in java:
+        raise ShapeError("SpecialItems.java: no Kind entries, trophy name or 'Dungeon only.' line")
+    return kinds
+
+
+def build_hw_drops(d):
+    """The four Heartwood drop tables -> {id: rows}. d holds the parsed files (see dungeon_tables): mobs, loot, areas,
+    camps, crates (by file), keys, config, mythic (mob -> display name), names and icons (item key -> ...), cc_items,
+    recipes (file -> recipes.yml data), hw (hw_gear.py literals), kinds (special_kinds)."""
+    tables = need(d["loot"], "tables", "loot.yml", dict)
+    mobs = {m: v for m, v in d["mobs"].items() if m.startswith("hw_") and isinstance(v, dict)}  # Heartwood ids: hw_<mob>
+    contracts = need(d["config"], "contracts", "ChromaticDungeons/config.yml", dict)
+    zones, resin = need(contracts, "zones", "config.yml:contracts", dict), need(contracts, "resin", "config.yml:contracts", str)
+    cooldowns = (d["config"].get("special") or {}).get("cooldown-seconds") or {}
+    camps = {f[:-4]: c for f, c in d["camps"].items()}
+    crates = {f[:-4]: c for f, c in d["crates"].items()}
+
+    def entries(mob):
+        loot = mobs[mob].get("loot") or []
+        for tid in [loot] if isinstance(loot, str) else loot:
+            if tid not in tables:
+                raise ShapeError(f"mobs.yml:{mob}: loot table '{tid}' is not in loot.yml")
+            yield from need(tables[tid], "entries", f"loot.yml:tables.{tid}", list)
+
+    def display(mob):
+        if mob not in d["mythic"]:
+            raise ShapeError(f"{mob}: no MythicMobs Display in packs/Heartwood/Mobs")
+        return d["mythic"][mob]
+
+    def special(sid):
+        if sid.startswith("head_"):
+            return f"{display(sid[5:])} Trophy"
+        if sid not in d["kinds"]:
+            raise ShapeError(f"loot.yml: special:{sid} is not a SpecialItems Kind")
+        return d["kinds"][sid][1]
+
+    def set_of(snbt):
+        hid = hw_piece_id(snbt_texts(snbt), d["hw"])
+        return next((f"{s} Set" for s in d["hw"]["SETS"] if hid and hid.startswith(f"{s.lower()}_")), None)
+
+    def crate_label(cid):
+        c = crates.get(f"{cid}")
+        if c is None:
+            raise ShapeError(f"camp crate '{cid}' has no ChromaticDungeons/crates/{cid}.yml")
+        return clean(need(c, "display", f"crates/{cid}.yml", str))
+
+    # What each material is used for, from the /craft recipes; a zone item feeds one set, Resin all of them.
+    uses = {resin: ["Contract fee"]}
+    for file, data in d["recipes"].items():
+        for rid, r in need(data, "recipes", file, dict).items():
+            out = need(r, "output", f"{file}:recipes.{rid}", dict)
+            label = (set_of(out["give"]) if out.get("give") else
+                     GEAR_FAMILIES.get(str(out.get("itemsadder", "")).split(":")[0]) or ("Spawners" if out.get("spawner-type") else None))
+            for i in need(r, "inputs", f"{file}:recipes.{rid}", list):
+                if label and label not in uses.setdefault(str(i.get("item")), []):
+                    uses[i["item"]].append(label)
+    zone_items = {i for i, u in uses.items() if i != resin and any(x.endswith(" Set") for x in u)}
+    for u in uses.values():
+        sets = [x for x in u if x.endswith(" Set")]
+        if len(sets) > 1:
+            u[u.index(sets[0])] = "Zone sets"
+            u[:] = [x for x in u if x not in sets]
+
+    # The main areas: every area with a boss camp, easiest first, in the contracts' zone order within a difficulty.
+    areas = []
+    for file, a in d["areas"].items():
+        aid, where = file[:-4], f"areas/{file}"
+        area_camps = [camps[c] for c in need(a, "camps", where, list) if c in camps]
+        bosses = [c["boss"]["mob"] for c in area_camps if (c.get("boss") or {}).get("mob")]
+        if len(bosses) > 1:
+            raise ShapeError(f"{where}: more than one boss camp")
+        if bosses:
+            diff = need(a, "difficulty", where, str)
+            rank = (DIFFICULTIES.index(diff), list(zones).index(aid) if aid in zones else len(zones))
+            crate_ids = list(dict.fromkeys(c["crate"]["id"] for c in area_camps if (c.get("crate") or {}).get("id")))
+            areas.append((rank, aid, a, diff, bosses[0], crate_ids))
+    areas.sort(key=lambda x: x[0])
+
+    zone_rows, zone_keys, boss_items, trophies, boss_mobs = [], [], {}, [], set()
+    for _, aid, a, diff, boss, crate_ids in areas:
+        if boss not in mobs:
+            raise ShapeError(f"areas/{aid}.yml: boss {boss} has no mobs.yml entry")
+        boss_mobs.add(boss)
+        found = list(entries(boss))
+        items = [str(e["item"]) for e in found if "item" in e]
+        zone = [i.split(":", 1)[1] for i in items if i.split(":", 1)[-1] in zone_items]
+        if len(set(zone)) != 1:
+            raise ShapeError(f"{boss}: drops {len(set(zone))} zone items, not one")
+        zone_keys.append(zone[0])
+        sets = dict.fromkeys(filter(None, (set_of(c) for e in found for c in e.get("commands") or [])))
+        specials = list(dict.fromkeys(i[8:] for i in items if i.startswith("special:")))
+        for sid in specials:
+            if sid.startswith("head_"):
+                trophies.append(Row([special(sid), display(boss)], TROPHY_ICON))
+            else:
+                boss_items.setdefault(sid, []).append(display(boss))
+        keys = [need(d["keys"], need(crates.get(c) or {}, "key", f"crates/{c}.yml", str), "keys.yml", dict) for c in crate_ids]
+        zone_rows.append(Row([f"{clean(need(a, 'name', f'areas/{aid}.yml', str))} ({name(diff)})", display(boss),
+                              d["names"].get(zone[0], name(zone[0])), ", ".join(sets) or "None",
+                              ", ".join(f"{crate_label(c)} ({clean(need(k, 'display', 'keys.yml', str))})"
+                                        for c, k in zip(crate_ids, keys)) or "None",
+                              ", ".join(map(special, specials)) or "None"], d["icons"].get(zone[0])))
+
+    item_rows = []
+    for sid, by in boss_items.items():
+        mat, title, lore = d["kinds"][sid]
+        cd = f" {duration(int(cooldowns[sid]))} cooldown." if sid in cooldowns else ""
+        item_rows.append(Row([title, f"{lore}{cd} Dungeon only.", ", ".join(by)], icon(mat)))
+
+    # Where each material drops: regular mobs, bosses, the area crates, contracts.
+    where = {}
+    crate_order = list(dict.fromkeys(c for *_, ids in areas for c in ids))
+    sources = [(m, "Bosses" if m in boss_mobs else "Regular mobs", list(entries(m))) for m in mobs]
+    for c in crate_order:
+        tid = need(crates[c], "loot", f"crates/{c}.yml", str)
+        sources.append((c, crate_label(c), need(tables.get(tid) or {}, "entries", f"loot.yml:tables.{tid}", list)))
+    for _, label, found in sources:
+        for e in found:
+            key = "spawner" if "spawner" in e else str(e.get("item", "")).removeprefix("itemsadder:")
+            if key and not key.startswith(("minecraft:", "special:")):
+                where.setdefault(key, []).append(label)
+    for z in zones.values():
+        where.setdefault(need(z, "item", "config.yml:contracts.zones", str), []).append("Contracts")
+    all_crates = {crate_label(c) for c in crate_order}
+
+    def where_text(key):
+        labels = list(dict.fromkeys(where[key]))
+        if len(all_crates) > 1 and all_crates <= set(labels):
+            i = next(n for n, x in enumerate(labels) if x in all_crates)
+            labels = labels[:i] + ["Every camp crate"] + [x for x in labels[i:] if x not in all_crates]
+        return ", ".join(labels)
+
+    ia = sorted((k for k in where if ":" in k and not k.startswith("cc:") and k not in zone_items), key=lambda k: d["names"].get(k, k))
+    mat_rows = []
+    for key in ia + zone_keys + sorted(k for k in where if k.startswith("cc:")) + (["spawner"] if "spawner" in where else []):
+        if key == "spawner":
+            label, pic = "Spawners", "spawner"
+        elif key.startswith("cc:"):
+            it = need(d["cc_items"], key[3:], "ChromaticCrafting/items.yml:items", dict)
+            label, pic = clean(need(it, "name", f"items.yml:items.{key[3:]}", str)), icon(it.get("material"))
+        else:
+            label, pic = d["names"].get(key, name(key)), d["icons"].get(key)
+        mat_rows.append(Row([label, where_text(key), ", ".join(uses.get(key, [])) or "Place it to farm its mob"], pic))
+    return {"dungeon-zone-drops": zone_rows, "dungeon-boss-items": item_rows, "dungeon-trophies": trophies,
+            "dungeon-materials": mat_rows}
+
+
+def dungeon_tables(smp, dun, ctx):
+    cd, cache = "plugins/ChromaticDungeons", {}
+    java = "src/dev/zsciallo/chromaticdungeons/item/special/SpecialItems.java"
+
+    def drops():
+        if not cache:
+            smp.need_jar("ChromaticDungeons", "MythicMobs")
+            mythic = {m: clean(v["Display"]) for f in smp.folder("plugins/MythicMobs/packs/Heartwood/Mobs").values()
+                      for m, v in f.items() if isinstance(v, dict) and v.get("Display")}
+            cache.update(build_hw_drops({
+                "mobs": smp.yaml(f"{cd}/mobs.yml"), "loot": smp.yaml(f"{cd}/loot.yml"), "areas": smp.folder(f"{cd}/areas"),
+                "camps": smp.folder(f"{cd}/camps"), "crates": smp.folder(f"{cd}/crates"), "keys": smp.yaml(f"{cd}/keys.yml"),
+                "config": smp.yaml(f"{cd}/config.yml"), "mythic": mythic, "names": ctx()["names"], "icons": ctx()["ia_icons"],
+                "cc_items": need(smp.yaml("plugins/ChromaticCrafting/items.yml"), "items", "ChromaticCrafting/items.yml", dict),
+                "recipes": {f: smp.yaml(f"plugins/ChromaticCrafting/recipes/{f}.yml") for f in ("zone_sets", "gear", "spawners")},
+                "hw": ctx()["hw"], "kinds": special_kinds(dun.text(java))}))
+        return cache
+
+    loot = f"{cd}/loot.yml"
+    for tid, title, repo, source, cols in (
+            ("dungeon-zone-drops", "Drops by area", smp, loot,
+             ["Area", "Mini boss", "Zone item", "Armour set", "Crate and key", "Boss items"]),
+            ("dungeon-boss-items", "Boss items", dun, java, ["Item", "What it does", "Dropped by"]),
+            ("dungeon-trophies", "Trophies", dun, java, ["Trophy", "Boss"]),
+            ("dungeon-materials", "Materials", smp, loot, ["Material", "Drops from", "Used for"])):
+        yield tid, title, repo, source, (), lambda tid=tid, cols=cols: (cols, drops()[tid], 0)
 
 
 def guard(t, terms):
@@ -925,12 +1114,12 @@ def with_icons(t):
     return t
 
 
-def run(smp_ref, kit_ref, out_dir):
+def run(smp_ref, kit_ref, out_dir, dun_ref=REFS["dungeons"]):
     deny = json.loads(DENY.read_text(encoding="utf-8")) if DENY.exists() else {}
     terms = [re.compile(t, re.I) for t in deny.get("terms", SPEC_TERMS)]
     paths = deny.get("paths", SPEC_PATHS)
     smp, kit = Repo(SMP_REPO, smp_ref, paths), Repo(KIT_REPO, kit_ref, paths)
-    dun = Repo(DUNGEONS_REPO, REFS["dungeons"], paths)
+    dun = Repo(DUNGEONS_REPO, dun_ref, paths)
     names = {id(smp): "mc-server", id(kit): "mc-kit", id(dun): "chromatic-dungeons"}
     out, skipped, removed, notes = [], [], {}, []
     for tid, title, repo, source, jars, thunk in tables(smp, kit, dun):
@@ -972,11 +1161,12 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--smp-ref", default=REFS["smp"])
     ap.add_argument("--kit-ref", default=REFS["kit"])
+    ap.add_argument("--dun-ref", default=REFS["dungeons"])
     ap.add_argument("--out", type=pathlib.Path, default=OUT)
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     try:
-        out, skipped, removed, notes, blocked = run(a.smp_ref, a.kit_ref, a.out)
+        out, skipped, removed, notes, blocked = run(a.smp_ref, a.kit_ref, a.out, a.dun_ref)
     except ShapeError as e:
         print(f"facts.py: {e}", file=sys.stderr)
         return 1

@@ -21,7 +21,7 @@
     "test:dungeon": "node test/dungeon_data.test.mjs",
     "test:dungeonlib": "node test/dungeon_lib.test.mjs",
     "test:dungeon:browser": "node test/dungeon_browser_check.mjs",
-    "test:wiki": "node test/wiki_check.mjs"
+    "test:wiki": "node test/wiki_check.mjs && python test/wiki_drops_test.py && python tools/wiki/test_facts.py"
   },
   "dependencies": {
     "dompurify": "^3.4.16",

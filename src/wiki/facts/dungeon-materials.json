@@ -1,0 +1,93 @@
+{
+ "id": "dungeon-materials",
+ "title": "Materials",
+ "source": "mc-server:plugins/ChromaticDungeons/loot.yml",
+ "ref": "63529705",
+ "columns": [
+  "Material",
+  "Drops from",
+  "Used for"
+ ],
+ "rows": [
+  [
+   "Living Prism",
+   "Regular mobs, Bosses, Pale Crate, Geode Crate, Glowberry Crate, Hollow Crate, Core Crate",
+   "Living Prism gear"
+  ],
+  [
+   "Prismatic Resin",
+   "Regular mobs, Bosses, Every camp crate",
+   "Contract fee, Zone sets, Living Prism gear"
+  ],
+  [
+   "Sporecap Tuft",
+   "Regular mobs, Bosses, Contracts",
+   "Sporewarden Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Kiln Shard",
+   "Regular mobs, Bosses, Contracts",
+   "Kilnforged Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Bog Pearl",
+   "Regular mobs, Bosses, Contracts",
+   "Bogstrider Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Royal Wax",
+   "Regular mobs, Bosses, Contracts",
+   "Waxguard Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Pale Teardrop",
+   "Regular mobs, Bosses, Contracts",
+   "Palewatch Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Geode Heartstone",
+   "Regular mobs, Bosses, Contracts",
+   "Geodeplate Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Glowbloom",
+   "Regular mobs, Bosses, Contracts",
+   "Bloomshroud Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Hollow Echo",
+   "Regular mobs, Bosses, Contracts",
+   "Sculkhollow Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Rotroot Heartseed",
+   "Regular mobs, Bosses",
+   "Rotroot Set, Chromatic gear, Living Prism gear"
+  ],
+  [
+   "Blank Spawner",
+   "Regular mobs, Bosses",
+   "Spawners"
+  ],
+  [
+   "Spawners",
+   "Regular mobs, Bosses, Every camp crate",
+   "Place it to farm its mob"
+  ]
+ ],
+ "icons": [
+  "living_prism",
+  "prismatic_resin",
+  "brown_mushroom",
+  "brick",
+  "slime_ball",
+  "honeycomb",
+  "ghast_tear",
+  "amethyst_shard",
+  "glow_berries",
+  "disc_fragment_5",
+  "pitcher_pod",
+  "spawner",
+  "spawner"
+ ]
+}
