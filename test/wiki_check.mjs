@@ -364,6 +364,54 @@ check('gear-no-admin-odds-dashes', [
 // G-T6: every related entry names a live page (the renderer drops a dead one silently).
 check('related-resolve', pages.flatMap((p) => (p.related ?? []).filter((r) => !pageOf[`/wiki/${r}/`]).map((r) => `${p.route} related ${q(r)} is not a live page`)));
 
+// D-T4 (run 20261124-dungeon-drops, owner 2026-11-23: "we need content on all the special drops from the dungeon"):
+// the Dungeons page has the six drop sections; every picture in their tables is a built file; every link in them and
+// the heartwood-sets link to Materials open a built page and, with a #fragment, an element with that id; the elytra
+// line names both crates that give one.
+const DROP_SECTIONS = { 'drops-by-zone': 'Drops by zone', 'boss-items': 'Boss items', trophies: 'Trophies', materials: 'Materials', 'rotroot-heart': 'Rotroot Heart', 'rare-gear': 'Rare gear' };
+const DROP_TABLES = ['drops-by-zone', 'boss-items', 'trophies', 'materials'];
+/** A local link that does not open a built page, or whose #fragment is no id on it; null when it resolves. */
+const deadLink = (from, href) => {
+  const [path, frag] = href.split('#');
+  const route = path || from;
+  if (!route.startsWith('/')) return null;
+  const doc = built(route.endsWith('/') ? route : `${route}/`);
+  if (!doc) return `${from} links ${q(href)}, which is not built`;
+  return frag && !findAll(doc, (el) => el.attrs.id === frag).length ? `${from} links ${q(href)}, and ${route} has no id ${q(frag)}` : null;
+};
+{
+  const D = '/wiki/smp/dungeons/';
+  const doc = built(D);
+  const section = (id) => doc && findAll(doc, (el) => el.tag === 'section' && el.attrs['aria-labelledby'] === id)[0];
+  check('dungeon-drops-sections', !doc ? [`${D} has no built file`] : Object.entries(DROP_SECTIONS).flatMap(([id, title]) => {
+    const s = section(id);
+    const h = s && findAll(s, (el) => el.tag === 'h2' && el.attrs.id === id)[0];
+    return !h ? [`${D} has no section ${q(title)} (#${id})`] : textOf(h) === title ? [] : [`${D} #${id} heading is ${q(textOf(h))}, want ${q(title)}`];
+  }));
+  check('dungeon-drops-pictures', !doc ? [`${D} has no built file`] : DROP_TABLES.flatMap((id) => {
+    const rows = section(id) ? findAll(section(id), (el) => el.tag === 'tr' && el.parent?.tag === 'tbody') : [];
+    if (!rows.length) return [`${D} #${id} has no table rows`];
+    return rows.flatMap((tr, i) => {
+      const imgs = findAll(tr, (el) => el.tag === 'img');
+      if (!imgs.length) return [`${D} #${id} row ${i + 1} (${q(blockText(tr).slice(0, 30))}) has no picture`];
+      return imgs.filter((im) => !existsSync(join(DIST, (im.attrs.src ?? '').split('?')[0]))).map((im) => `${D} #${id} row ${i + 1} picture ${q(im.attrs.src)} is not a built file`);
+    });
+  }));
+  check('dungeon-drops-links', [
+    ...(!doc ? [`${D} has no built file`] : Object.keys(DROP_SECTIONS).flatMap((id) => (section(id) ? findAll(section(id), (el) => el.tag === 'a' && el.attrs.href) : []).map((a) => deadLink(D, a.attrs.href)))),
+    ...(() => {
+      const hs = built('/wiki/gear/heartwood-sets/');
+      if (!hs) return ['/wiki/gear/heartwood-sets/ has no built file'];
+      const to = findAll(hs, (el) => el.tag === 'a' && el.attrs.href === `${D}#materials`);
+      return to.length ? to.map((a) => deadLink('/wiki/gear/heartwood-sets/', a.attrs.href)) : [`/wiki/gear/heartwood-sets/ has no link to ${D}#materials`];
+    })(),
+  ].filter(Boolean));
+  check('dungeon-elytra-crates', !doc ? [`${D} has no built file`] : (() => {
+    const lines = findAll(doc, (el) => ['p', 'li', 'td'].includes(el.tag) && /elytra/i.test(blockText(el))).map(blockText);
+    return !lines.length ? [`${D} never mentions an elytra`] : lines.filter((t) => !(t.includes('Hollow Crate') && t.includes('Core Crate'))).map((t) => `${D} elytra line does not name both the Hollow Crate and the Core Crate: ${q(t.slice(0, 120))}`);
+  })());
+}
+
 // ------------------------------------------------------------- real renderer --
 // The fixture pages through src/pages/WikiPage.jsx, loaded the way ssg.js loads it.
 {
