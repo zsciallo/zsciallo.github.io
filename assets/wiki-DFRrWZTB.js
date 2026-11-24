@@ -1,0 +1,1 @@
+import{O as a,R as o,aA as i,b as d,a as l}from"./funnel-DOPZnQ7g.js";a();o(i(l,{children:i(d,{current:"wiki"})}),document.getElementById("wiki-nav"));const t=document.getElementById("wiki-filter");t==null||t.addEventListener("input",()=>{const n=t.value.trim().toLowerCase();for(const e of document.querySelectorAll("[data-wiki-title]"))e.hidden=!e.dataset.wikiTitle.includes(n)});

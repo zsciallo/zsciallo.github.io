@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // The nav bar is the first text painted - hero content is still faded out
+    // at that point - so a webfont swapping in under it reads as a flicker on
+    // every navigation. Reveal it once Teko, Jersey 10 and VT323 have loaded, or after
+    // 1.5s if the font never arrives.
+    (function () {
+      var el = document.documentElement, ready = function () { el.classList.add('fonts-ready'); };
+      el.classList.add('js');
+      // Theme before first paint (src/lib/theme.js takes over): dark unless
+      // the visitor picked light with the nav toggle.
+      var t;
+      try { t = localStorage.getItem('chromabit:theme'); } catch (e) {}
+      el.dataset.theme = t === 'light' ? 'light' : 'dark';
+      if (!document.fonts || !document.fonts.load) return ready();
+      // Deferred to DOMContentLoaded: before the stylesheet is parsed there is
+      // no webfont face to wait on, and the request would resolve instantly.
+      addEventListener('DOMContentLoaded', function () {
+        Promise.all([document.fonts.load('700 1rem Teko'), document.fonts.load('400 1rem "Jersey 10"'), document.fonts.load('400 1rem VT323')]).then(ready, ready);
+      });
+      setTimeout(ready, 1500);
+    })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/server-icon-old-2.png">
+  <title>Daily Streak | Chromabit Wiki</title>
+  <meta name="description" content="Daily Streak is a reward for every day you log in. Claim it with /daily. The rewards get better for 7 days in a row, then stay at the top.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <meta name="author" content="Chromabit Network">
+  <meta name="theme-color" content="#0E0F12">
+  <link rel="canonical" href="https://chromabit.us/wiki/smp/daily-streak/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chromabit Network">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://chromabit.us/wiki/smp/daily-streak/">
+  <meta property="og:title" content="Daily Streak | Chromabit Wiki">
+  <meta property="og:description" content="Daily Streak is a reward for every day you log in. Claim it with /daily. The rewards get better for 7 days in a row, then stay at the top.">
+  <meta property="og:image" content="https://chromabit.us/og-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Chromabit logo above the words CHROMABIT NETWORK, Ranked PVP + Economy SMP for Java + Bedrock, and play.chromabit.us">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Daily Streak | Chromabit Wiki">
+  <meta name="twitter:description" content="Daily Streak is a reward for every day you log in. Claim it with /daily. The rewards get better for 7 days in a row, then stay at the top.">
+  <meta name="twitter:image" content="https://chromabit.us/og-preview.png">
+  <meta name="twitter:image:alt" content="The Chromabit logo above the words CHROMABIT NETWORK, Ranked PVP + Economy SMP for Java + Bedrock, and play.chromabit.us">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://chromabit.us/#organization","name":"Chromabit Network","alternateName":"Chromabit","url":"https://chromabit.us/","logo":{"@type":"ImageObject","url":"https://chromabit.us/logo-512.png","width":512,"height":512},"sameAs":["https://discord.gg/WebRPAgE4e"]},{"@type":"WebSite","@id":"https://chromabit.us/#website","name":"Chromabit Network","alternateName":"Chromabit","url":"https://chromabit.us/","description":"Chromabit is a Minecraft network for Java and Bedrock: ranked kit PVP on one shared ladder, and a survival server with a player-run economy. Join at play.chromabit.us.","inLanguage":"en","publisher":{"@id":"https://chromabit.us/#organization"}},{"@type":"WebPage","@id":"https://chromabit.us/wiki/smp/daily-streak/#webpage","url":"https://chromabit.us/wiki/smp/daily-streak/","name":"Daily Streak","description":"Daily Streak is a reward for every day you log in. Claim it with /daily. The rewards get better for 7 days in a row, then stay at the top.","inLanguage":"en","isPartOf":{"@id":"https://chromabit.us/#website"},"publisher":{"@id":"https://chromabit.us/#organization"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://chromabit.us/og-preview.png","width":1200,"height":630},"breadcrumb":{"@id":"https://chromabit.us/wiki/smp/daily-streak/#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://chromabit.us/wiki/smp/daily-streak/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://chromabit.us/"},{"@type":"ListItem","position":2,"name":"Wiki","item":"https://chromabit.us/wiki/"},{"@type":"ListItem","position":3,"name":"Daily Streak","item":"https://chromabit.us/wiki/smp/daily-streak/"}]}]}</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Teko:wght@700&family=Jersey+10&family=VT323&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/assets/wiki-DFRrWZTB.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/funnel-DOPZnQ7g.js">
+  <link rel="stylesheet" crossorigin href="/assets/funnel-O0cX0kMr.css">
+  <link rel="stylesheet" crossorigin href="/assets/wiki-CgYNhhcd.css">
+</head>
+
+<body>
+  <div id="app"><div id="wiki-nav" class="wiki-nav-slot"><header class="site-nav"><nav aria-label="Primary" class="site-nav-inner"><a href="/" class="site-nav-brand"><img src="/server-icon-old-2.png" alt width="30" height="30"/><span>CHROMABIT</span></a><button type="button" aria-pressed="true" aria-label="Sound on" title="Mute sounds" class="sound-toggle"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M2 7h3l5-4v14l-5-4H2z"></path><rect x="12" y="8" width="2" height="4"></rect><rect x="15" y="5" width="2" height="2"></rect><rect x="17" y="7" width="2" height="6"></rect><rect x="15" y="13" width="2" height="2"></rect></svg></button><button type="button" aria-label="Switch to light theme" class="sound-toggle theme-toggle"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="7" y="2" width="6" height="2"></rect><rect x="5" y="4" width="4" height="2"></rect><rect x="3" y="6" width="4" height="8"></rect><rect x="5" y="14" width="4" height="2"></rect><rect x="7" y="16" width="6" height="2"></rect><rect x="13" y="14" width="3" height="2"></rect><rect x="16" y="12" width="2" height="2"></rect></svg></button><button type="button" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open menu" class="nav-toggle"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><ul id="site-nav-links" class="site-nav-links"><li style="--i:0;"><a href="/store/" tabindex="0">STORE<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:1;"><a href="/smp/" tabindex="0">SMP<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:2;"><a href="/pvp/" tabindex="0">PVP<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:3;"><a href="/wiki/" aria-current="page" tabindex="0" class="active">WIKI<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:4;"><a href="/auctions/" tabindex="0">AUCTIONS<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li><li style="--i:5;"><a href="/dungeon/" tabindex="0">MAP<span aria-hidden="true" style="transform:scaleX(0);" class="nav-bar"></span></a></li></ul></nav></header></div><main class="wiki"><div class="wiki-panel"><nav aria-label="Breadcrumb" class="wiki-crumbs"><ol><li><a href="/">Home</a></li><li><a href="/wiki/">Wiki</a></li><li aria-current="page">Daily Streak</li></ol></nav><h1 class="wiki-h1">Daily Streak</h1><div class="wiki-article"><aside aria-label="Daily Streak at a glance" data-wiki-infobox="true" class="wiki-box wiki-infobox"><p class="wiki-box-title">Daily Streak</p><table><tbody><tr><th scope="row">Server</th><td>SMP</td></tr><tr><th scope="row">Type</th><td>Reward</td></tr><tr><th scope="row">Command</th><td><code>/daily</code></td></tr><tr><th scope="row">Ladder</th><td>7 days</td></tr><tr><th scope="row">New day</th><td>Midnight, New York time</td></tr></tbody></table></aside><p class="wiki-lead"><strong>Daily Streak</strong> is a reward for every day you log in. Claim it with <code>/daily</code>. The rewards get better for 7 days in a row, then stay at the top.</p><nav aria-label="Contents" class="wiki-box wiki-toc"><p class="wiki-toc-title">Contents</p><ol><li><a href="#rewards">Rewards</a></li><li><a href="#mechanics">Mechanics</a></li><li><a href="#tips">Tips</a></li><li><a href="#history">History</a></li></ol></nav><section aria-labelledby="rewards"><h2 id="rewards">Rewards</h2><ul><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 1: 1 Vote Key</li><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 2: 1 Reward Key</li><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 3: 1 Reward Key and 10 minutes of <a href="/wiki/smp/vote-fly/">vote fly</a> time</li><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 4: 1 Shard Key</li><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 5: 1 Shard Key</li><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 6: 1 Spawner Key</li><li><img src="/wiki/icons/tripwire_hook.png" alt width="20" height="20" loading="lazy" decoding="async" class="wiki-sprite"/> Day 7: 1 Chroma Key, then again every day your streak lasts</li></ul></section><section aria-labelledby="mechanics"><h2 id="mechanics">Mechanics</h2><ul><li>You can claim once per calendar day. A new day starts at midnight, New York time.</li><li>Claim the day after your last claim to move one day up. Miss a day and the streak starts over at day 1.</li><li>When you join with today's reward unclaimed, the daily screen opens a few seconds later. Press <strong>Later</strong> to close it; <code>/daily</code> opens it again.</li></ul></section><section aria-labelledby="tips"><h2 id="tips">Tips</h2><ul><li>Keys open the crates at spawn. Right-click a crate with its key.</li><li>Log in for a moment each day to keep the streak, even when you cannot play.</li></ul></section><section aria-labelledby="history"><h2 id="history">History</h2><div class="wiki-scroll"><table class="wiki-table"><thead><tr><th scope="col">Date</th><th scope="col">Change</th></tr></thead><tbody><tr data-wiki-change="2026-10-30"><td class="wiki-nowrap"><time datetime="2026-10-30">2026-10-30</time></td><td>Added daily login rewards on a 7-day streak, with <code>/daily</code>.</td></tr></tbody></table></div></section></div><nav aria-label="SMP pages" class="wiki-box wiki-navbox"><h2 class="wiki-box-title">SMP</h2><table><tbody><tr><th scope="row">Related</th><td><ul class="wiki-inline"><li><a href="/wiki/smp/vote-fly/">Vote Fly</a></li><li><a href="/wiki/smp/voting/">Voting</a></li><li><a href="/wiki/smp/crates/">Crates and Keys</a></li></ul></td></tr><tr><th scope="row">Pages</th><td><ul class="wiki-inline"><li><a href="/wiki/smp/auction-house/">Auction House and Market</a></li><li><a href="/wiki/smp/battle-pass/">Battle Pass</a></li><li><a href="/wiki/smp/claims/">Claims</a></li><li><a href="/wiki/smp/crafting/">Crafting and Upgrades</a></li><li><a href="/wiki/smp/crates/">Crates and Keys</a></li><li><strong>Daily Streak</strong></li><li><a href="/wiki/smp/dungeons/">Dungeons</a></li><li><a href="/wiki/smp/enchants/">Custom Enchants</a></li><li><a href="/wiki/smp/keep-on-death/">Keep-on-Death Gear</a></li><li><a href="/wiki/smp/ranks-and-kits/">Ranks and Kits</a></li><li><a href="/wiki/smp/spawners-and-hoppers/">Spawners and Hoppers</a></li><li><a href="/wiki/smp/vote-fly/">Vote Fly</a></li><li><a href="/wiki/smp/voting/">Voting</a></li></ul></td></tr></tbody></table></nav></div></main><footer><nav aria-label="Footer" class="footer-nav"><a href="/">HOME</a><a href="/pvp/">PVP</a><a href="/smp/">ECONOMY SMP</a><a href="/wiki/">WIKI</a><a href="/faq/">FAQ</a><a href="/auctions/">AUCTIONS</a><a href="/store/">STORE</a><a href="https://discord.gg/WebRPAgE4e" target="_blank" rel="noopener">DISCORD</a><a href="/privacy/">PRIVACY</a></nav>© 2026 Chromabit LLC  ·  play.chromabit.us</footer></div>
+</body>
+
+</html>
